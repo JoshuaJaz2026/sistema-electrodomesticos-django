@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Seguro - Sistema de Electrodomésticos</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { 
+            background-color: #f4f7f6; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+        }
+        .login-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-header { text-align: center; margin-bottom: 30px; }
+        .login-header h2 { color: #2c3e50; font-size: 24px; margin-bottom: 5px; }
+        .login-header p { color: #7f8c8d; font-size: 14px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; color: #34495e; font-weight: bold; margin-bottom: 8px; font-size: 14px; }
+        .form-group input { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #bdc3c7; 
+            border-radius: 6px; 
+            font-size: 16px; 
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus { border-color: #3498db; outline: none; }
+        
+        .btn-submit {
+            width: 100%;
+            background-color: #3498db;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn-submit:hover { background-color: #2980b9; }
+        
+        .error-message {
+            background-color: #ffeaa7;
+            color: #d35400;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="login-header">
+            <h2>Gestión de Inventario</h2>
+            <p>Por favor, inicie sesión para continuar</p>
+        </div>
+
+        {% if form.errors %}
+            <div class="error-message">
+                Usuario o contraseña incorrectos. Por favor, intente de nuevo.
+            </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="id_username">Usuario</label>
+                <input type="text" name="username" autofocus autocapitalize="none" autocomplete="username" maxlength="150" required id="id_username">
+            </div>
+            
+            <div class="form-group">
+                <label for="id_password">Contraseña</label>
+                <input type="password" name="password" autocomplete="current-password" required id="id_password">
+            </div>
+            
+            <button type="submit" class="btn-submit">Ingresar al Sistema</button>
+        </form>
+    </div>
+
+</body>
+</html>
