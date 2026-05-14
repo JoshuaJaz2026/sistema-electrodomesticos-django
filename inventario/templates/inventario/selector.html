@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Acceso - Electrodomésticos</title>
+    
+    <!-- Importar tipografía moderna de Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Importar íconos profesionales de FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { 
+            /* Fondo con un degradado sutil y moderno */
+            background: linear-gradient(135deg, #f0f4f8 0%, #d7e1ec 100%);
+            min-height: 100vh;
+            padding: 50px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .header { text-align: center; margin-bottom: 50px; }
+        .header h1 { color: #1a252f; font-size: 38px; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
+        .header p { color: #5c6a79; font-size: 16px; }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            width: 100%;
+            max-width: 1100px;
+        }
+        
+        .plataforma-card {
+            background-color: white;
+            padding: 40px 20px;
+            border-radius: 16px;
+            text-align: center;
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 18px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            /* Animación suave para el efecto de flotar */
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            border-bottom: 4px solid transparent; /* Línea de color oculta */
+        }
+        
+        .icon-box {
+            font-size: 45px;
+            transition: transform 0.3s ease;
+        }
+
+        /* Efectos al pasar el mouse por encima */
+        .plataforma-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        .plataforma-card:hover .icon-box {
+            transform: scale(1.15); /* El ícono crece un poco */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Sistema de Gestión Multicanal</h1>
+        <p>Seleccione la plataforma a la que desea ingresar</p>
+    </div>
+
+    <div class="grid-container">
+        <!-- Django leerá los colores y los íconos dinámicamente -->
+        {% for plataforma in plataformas %}
+            <a href="{% url 'login' %}?canal={{ plataforma.nombre|urlencode }}" class="plataforma-card" style="border-bottom-color: {{ plataforma.color }};">
+                <div class="icon-box" style="color: {{ plataforma.color }};">
+                    <i class="{{ plataforma.icono }}"></i> 
+                </div>
+                <span>{{ plataforma.nombre }}</span>
+            </a>
+        {% endfor %}
+    </div>
+
+</body>
+</html>

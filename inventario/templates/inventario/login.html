@@ -3,80 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso Seguro - Sistema de Electrodomésticos</title>
+    <!-- El título de la pestaña cambia automáticamente -->
+    <title>Acceso - {{ nombre_canal }}</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        :root {
+            /* AQUÍ ESTÁ LA MAGIA: El color llega desde Python y cambia toda la página */
+            --brand-color: {{ color_principal }};
+            --bg-main: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        
         body { 
-            background-color: #f4f7f6; 
+            background-color: var(--bg-main); 
+            /* El fondo se ilumina sutilmente con el color de la plataforma */
+            background-image: radial-gradient(circle at top, color-mix(in srgb, var(--brand-color) 12%, transparent) 0%, transparent 50%);
             display: flex; 
             justify-content: center; 
             align-items: center; 
             height: 100vh; 
         }
+        
         .login-container {
             background-color: white;
             padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05), 0 20px 48px rgba(0,0,0,0.05);
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
+            /* La línea de arriba cambia de color */
+            border-top: 5px solid var(--brand-color); 
         }
-        .login-header { text-align: center; margin-bottom: 30px; }
-        .login-header h2 { color: #2c3e50; font-size: 24px; margin-bottom: 5px; }
-        .login-header p { color: #7f8c8d; font-size: 14px; }
         
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; color: #34495e; font-weight: bold; margin-bottom: 8px; font-size: 14px; }
+        .login-header { text-align: center; margin-bottom: 30px; }
+        
+        .icon-wrapper {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            background-color: color-mix(in srgb, var(--brand-color) 12%, transparent);
+            color: var(--brand-color);
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+        }
+
+        .login-header h2 { color: var(--text-main); font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+        .login-header p { color: var(--text-muted); font-size: 15px; }
+        
+        .form-group { margin-bottom: 22px; }
+        .form-group label { display: block; color: #334155; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
         .form-group input { 
             width: 100%; 
-            padding: 12px; 
-            border: 1px solid #bdc3c7; 
-            border-radius: 6px; 
-            font-size: 16px; 
-            transition: border-color 0.3s;
+            padding: 12px 16px; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 8px; 
+            font-size: 15px; 
+            transition: all 0.3s;
         }
-        .form-group input:focus { border-color: #3498db; outline: none; }
+        
+        /* El borde al hacer clic en escribir también cambia de color */
+        .form-group input:focus { 
+            border-color: var(--brand-color); 
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-color) 20%, transparent);
+            outline: none; 
+        }
         
         .btn-submit {
             width: 100%;
-            background-color: #3498db;
+            background-color: var(--brand-color);
             color: white;
-            padding: 12px;
+            padding: 14px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        .btn-submit:hover { background-color: #2980b9; }
+        .btn-submit:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px color-mix(in srgb, var(--brand-color) 30%, transparent);
+        }
         
         .error-message {
-            background-color: #ffeaa7;
-            color: #d35400;
-            padding: 10px;
-            border-radius: 5px;
+            background-color: #fee2e2;
+            color: #b91c1c;
+            padding: 12px;
+            border-radius: 8px;
             margin-bottom: 20px;
             font-size: 14px;
             text-align: center;
+            font-weight: 500;
         }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 24px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .back-link:hover { color: var(--brand-color); }
     </style>
 </head>
 <body>
 
     <div class="login-container">
         <div class="login-header">
-            <h2>Gestión de Inventario</h2>
-            <p>Por favor, inicie sesión para continuar</p>
+            <!-- Cargamos el ícono dinámico que mandó Python -->
+            <div class="icon-wrapper">
+                <i class="{{ icono_canal }}"></i>
+            </div>
+            <!-- Cargamos el nombre dinámico -->
+            <h2>Ingreso a {{ nombre_canal }}</h2>
+            <p>Bienvenido. Ingrese sus credenciales de acceso.</p>
         </div>
 
         {% if form.errors %}
             <div class="error-message">
-                Usuario o contraseña incorrectos. Por favor, intente de nuevo.
+                <i class="fas fa-exclamation-circle"></i> Usuario o contraseña incorrectos.
             </div>
         {% endif %}
 
-        <form method="post" action="{% url 'login' %}">
+        <!-- MUY IMPORTANTE: Mandamos el canal en la url al enviar el formulario para no perder el color si hay un error -->
+        <form method="post" action="{% url 'login' %}?canal={{ nombre_canal|urlencode }}">
             {% csrf_token %}
             
             <div class="form-group">
@@ -91,6 +153,11 @@
             
             <button type="submit" class="btn-submit">Ingresar al Sistema</button>
         </form>
+
+        <!-- Botón para regresar si te equivocaste de plataforma -->
+        <a href="{% url 'selector' %}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Volver a plataformas
+        </a>
     </div>
 
 </body>

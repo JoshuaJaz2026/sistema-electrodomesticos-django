@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Principal - Electrodomésticos</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f4f7f6; 
+            padding: 50px; 
+            text-align: center; 
+        }
+        .dashboard-box { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 10px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            display: inline-block; 
+        }
+        h1 { color: #2c3e50; }
+        p { color: #7f8c8d; margin-bottom: 20px; }
+        .btn-logout { 
+            background-color: #e74c3c; 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+        }
+        .btn-logout:hover { background-color: #c0392b; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-box">
+        <!-- Django usa {{ user.username }} para mostrar el nombre del que se logueó -->
+        <h1>¡Bienvenido, {{ user.username }}!</h1>
+        <p>Has ingresado exitosamente al sistema de inventario.</p>
+        
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-logout">Cerrar Sesión</button>
+        </form>
+    </div>
+
+</body>
+</html>

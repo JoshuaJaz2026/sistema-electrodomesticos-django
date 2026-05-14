@@ -6,7 +6,7 @@ gunicorn==21.2.0
 
 -- Manejo de Base de Datos (PostgreSQL en Render) --
 dj-database-url==2.1.0
-psycopg2-binary==2.9.9
+#psycopg2-binary==2.9.9
 
 -- Manejo de Archivos Estáticos --
 whitenoise==6.6.0
