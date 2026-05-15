@@ -6,6 +6,7 @@ urlpatterns = [
     path('', views.selector_plataformas, name='selector'),
     path('login/', views.LoginCamaleonicoView.as_view(), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('loading/', views.pantalla_carga, name='pantalla_carga'),
     path('inicio/', views.inicio, name='inicio'),
     
     # ESTAS SON LAS RUTAS QUE DEBEN COINCIDIR CON TU VIEWS.PY ACTUAL

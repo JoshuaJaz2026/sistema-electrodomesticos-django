@@ -58,6 +58,12 @@ def simulador_costos(request):
     canal = request.session.get('canal_activo', 'Web')
     return render(request, 'inventario/simulador_costos.html', {'canal': canal})
 
+# Agrega esta función en tus vistas
+@login_required
+def pantalla_carga(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'inventario/loading.html', {'canal': canal})
+
 # ---------------------------------------------------------
 # 3. EL CEREBRO: Login Camaleónico
 # ---------------------------------------------------------
@@ -74,6 +80,10 @@ class LoginCamaleonicoView(LoginView):
         "Tik tok": {"color": "#2C3E50", "icono": "fa-tiktok"},
         "Web": {"color": "#3498DB", "icono": "fa-globe"}
     }
+
+    # Dentro de la clase LoginCamaleonicoView
+    def get_success_url(self):
+        return '/loading/' # O el nombre que le des en urls.py
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

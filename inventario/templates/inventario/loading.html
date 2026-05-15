@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargando... - {{ canal }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --color-plataforma: {{ request.session.color_actual|default:"#3498DB" }};
+        }
+        body {
+            margin: 0; padding: 0; height: 100vh; display: flex;
+            justify-content: center; align-items: center;
+            background: #2c3e50; font-family: 'Segoe UI', sans-serif;
+            color: white; overflow: hidden;
+        }
+        .loading-container { text-align: center; width: 300px; }
+        
+        .icon-box {
+            font-size: 4em; color: var(--color-plataforma);
+            margin-bottom: 20px; animation: pulse 1.5s infinite;
+        }
+
+        .progress-bar-bg {
+            background: rgba(255,255,255,0.1); height: 8px;
+            border-radius: 10px; overflow: hidden; margin: 20px 0;
+        }
+        .progress-bar-fill {
+            background: var(--color-plataforma); height: 100%;
+            width: 0%; border-radius: 10px;
+            box-shadow: 0 0 15px var(--color-plataforma);
+            transition: width 0.05s linear;
+        }
+        
+        .status-text { font-size: 0.9em; letter-spacing: 1px; opacity: 0.8; }
+        .percentage { font-size: 1.5em; font-weight: bold; margin-top: 5px; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="loading-container">
+        <div class="icon-box">
+            <i class="{{ request.session.icono_actual|default:'fas fa-globe' }}"></i>
+        </div>
+        <div class="status-text">INICIANDO SISTEMA</div>
+        <div style="font-weight: bold; color: var(--color-plataforma);">{{ canal }}</div>
+        
+        <div class="progress-bar-bg">
+            <div id="bar" class="progress-bar-fill"></div>
+        </div>
+        
+        <div id="percent" class="percentage">0%</div>
+    </div>
+
+    <script>
+        let progress = 0;
+        const bar = document.getElementById('bar');
+        const percentText = document.getElementById('percent');
+
+        const interval = setInterval(() => {
+            progress += Math.floor(Math.random() * 5) + 1; // Carga con velocidad variable
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+                // Pequeña pausa al llegar al 100% para que se vea
+                setTimeout(() => {
+                    window.location.href = "{% url 'inicio' %}";
+                }, 500);
+            }
+            bar.style.width = progress + "%";
+            percentText.innerText = progress + "%";
+        }, 50); // Velocidad de la carga (ajusta a tu gusto)
+    </script>
+</body>
+</html>
