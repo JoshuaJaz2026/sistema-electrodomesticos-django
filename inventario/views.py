@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import LoginView # Importamos la vista oficial de Login
+from django.contrib.auth.views import LoginView
+from .models import Electrodomestico, Plataforma # Asegúrate de tener tus modelos listos
 
 # 1. El Pre-Login (Portal público)
 def selector_plataformas(request):
@@ -16,23 +17,47 @@ def selector_plataformas(request):
     ]
     return render(request, 'inventario/selector.html', {'plataformas': plataformas})
 
-# 2. El Panel Principal (Protegido con contraseña)
+# ---------------------------------------------------------
+# 2. VISTAS DEL SISTEMA (Post-Login)
+# ---------------------------------------------------------
+
 @login_required
 def inicio(request):
-    return render(request, 'inventario/inicio.html')
+    # Recuperamos la plataforma de la sesión para personalizar el inicio
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'inventario/inicio.html', {'canal': canal})
 
+# VENTANA GLOBAL: Inventario (Todos ven lo mismo)
+@login_required
+def inventario_global(request):
+    productos = Electrodomestico.objects.all()
+    return render(request, 'inventario/inventario.html', {'productos': productos})
+
+# VENTANA PRIVADA: Reporte de Ventas (Filtrado por plataforma)
+@login_required
+def reporte_ventas(request):
+    canal = request.session.get('canal_activo')
+    # Aquí filtrarás tus ventas por la plataforma activa
+    # ventas = Venta.objects.filter(plataforma__nombre=canal) 
+    return render(request, 'inventario/reportes.html', {'canal': canal})
+
+# VENTANA PRIVADA: Simulador de Costos (Único por plataforma)
+@login_required
+def simulador_costos(request):
+    canal = request.session.get('canal_activo')
+    return render(request, 'inventario/simulador.html', {'canal': canal})
+
+
+# ---------------------------------------------------------
 # 3. EL CEREBRO: Login Camaleónico
+# ---------------------------------------------------------
 class LoginCamaleonicoView(LoginView):
     template_name = 'inventario/login.html'
     
     def get_context_data(self, **kwargs):
-        # Esta función prepara los datos antes de enviarlos al HTML
         context = super().get_context_data(**kwargs)
-        
-        # Atrapamos el nombre de la plataforma desde la URL (ej: ?canal=Falabella)
         canal = self.request.GET.get('canal', 'Web') 
         
-        # Nuestro diccionario de temas
         estilos = {
             "Mercado Libre": {"color": "#F1C40F", "icono": "fas fa-handshake"},
             "Mercado Libre - Junior": {"color": "#F39C12", "icono": "fas fa-seedling"},
@@ -44,38 +69,28 @@ class LoginCamaleonicoView(LoginView):
             "Web": {"color": "#3498DB", "icono": "fas fa-globe"}
         }
         
-        # Si alguien altera la URL, por seguridad cargamos el estilo "Web" por defecto
         tema_actual = estilos.get(canal, estilos["Web"])
-        
-        # Empaquetamos las variables para mandarlas al HTML
         context['nombre_canal'] = canal
         context['color_principal'] = tema_actual['color']
         context['icono_canal'] = tema_actual['icono']
-        
         return context
 
-    # ------ NUEVO: EL ESCUDO DE SEGURIDAD ACTUALIZADO ------
     def form_valid(self, form):
-        usuario = form.get_user() # Obtenemos al usuario que acaba de poner bien su clave
+        usuario = form.get_user()
         canal_solicitado = self.request.GET.get('canal', 'Web')
 
-        # Regla 1: El dueño (Superusuario) puede entrar a donde quiera para supervisar
-        if usuario.is_superuser:
-            return super().form_valid(form)
-
-        # Regla 2: Revisar si la plataforma solicitada está en la lista permitida del empleado
-        if hasattr(usuario, 'perfil'):
-            # Filtramos en su lista de plataformas para ver si existe la que está solicitando
-            permitido = usuario.perfil.plataformas.filter(nombre=canal_solicitado).exists()
-            
-            if not permitido:
-                # Si no está en su lista, arrojamos un error y no lo dejamos entrar
-                form.add_error(None, f"Acceso denegado: No tienes permisos para ingresar a {canal_solicitado}.")
+        if not usuario.is_superuser:
+            if hasattr(usuario, 'perfil'):
+                permitido = usuario.perfil.plataformas.filter(nombre=canal_solicitado).exists()
+                if not permitido:
+                    form.add_error(None, f"Acceso denegado: Tu usuario no tiene permiso para {canal_solicitado}.")
+                    return self.form_invalid(form)
+            else:
+                form.add_error(None, "Usuario sin perfil asignado.")
                 return self.form_invalid(form)
-        else:
-            # Si es un usuario viejo que no tiene tarjeta asignada
-            form.add_error(None, "Acceso denegado: Comunícate con el administrador para que te asigne una plataforma.")
-            return self.form_invalid(form)
 
-        # Si todo está bien, lo dejamos pasar
+        # GUARDAMOS EL CANAL EN LA SESIÓN: 
+        # Esto permite que las demás ventanas sepan de qué plataforma viene el usuario
+        self.request.session['canal_activo'] = canal_solicitado
+        
         return super().form_valid(form)
