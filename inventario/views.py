@@ -54,7 +54,7 @@ class LoginCamaleonicoView(LoginView):
         
         return context
 
-    # ------ NUEVO: EL ESCUDO DE SEGURIDAD ------
+    # ------ NUEVO: EL ESCUDO DE SEGURIDAD ACTUALIZADO ------
     def form_valid(self, form):
         usuario = form.get_user() # Obtenemos al usuario que acaba de poner bien su clave
         canal_solicitado = self.request.GET.get('canal', 'Web')
@@ -63,11 +63,14 @@ class LoginCamaleonicoView(LoginView):
         if usuario.is_superuser:
             return super().form_valid(form)
 
-        # Regla 2: Revisar la tarjeta de identificación del empleado
+        # Regla 2: Revisar si la plataforma solicitada está en la lista permitida del empleado
         if hasattr(usuario, 'perfil'):
-            if usuario.perfil.plataforma != canal_solicitado:
-                # Si no coincide, arrojamos un error y no lo dejamos entrar
-                form.add_error(None, f"Acceso denegado: Tu usuario solo tiene permisos para ingresar a {usuario.perfil.plataforma}.")
+            # Filtramos en su lista de plataformas para ver si existe la que está solicitando
+            permitido = usuario.perfil.plataformas.filter(nombre=canal_solicitado).exists()
+            
+            if not permitido:
+                # Si no está en su lista, arrojamos un error y no lo dejamos entrar
+                form.add_error(None, f"Acceso denegado: No tienes permisos para ingresar a {canal_solicitado}.")
                 return self.form_invalid(form)
         else:
             # Si es un usuario viejo que no tiene tarjeta asignada
