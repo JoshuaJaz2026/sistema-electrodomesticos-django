@@ -1,10 +1,15 @@
 from django.urls import path
 from . import views
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    # El portal de plataformas será la página principal
     path('', views.selector_plataformas, name='selector'),
+    path('login/', views.LoginCamaleonicoView.as_view(), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('inicio/', views.inicio, name='inicio'),
     
-    # El panel de inicio protegido
-    path('panel/', views.inicio, name='inicio'), 
+    # NUEVAS RUTAS CONECTADAS A VIEWS.PY
+    path('inventario/', views.inventario_global, name='inventario_global'),
+    path('reportes/', views.reporte_ventas, name='reporte_ventas'),
+    path('simulador/', views.simulador_costos, name='simulador_costos'),
 ]

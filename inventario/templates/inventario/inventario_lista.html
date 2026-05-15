@@ -1,0 +1,30 @@
+{% extends 'inventario/inicio.html' %}
+
+{% block content %}
+<div class="card">
+    <h2><i class="fas fa-boxes"></i> Inventario Global de Productos</h2>
+    <hr>
+    <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <thead style="background-color: var(--color-principal); color: white;">
+            <tr>
+                <th>Producto</th>
+                <th>Marca</th>
+                <th>Precio</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in productos %}
+            <tr>
+                <td>{{ p.nombre }}</td>
+                <td>{{ p.marca }}</td>
+                <td>S/ {{ p.precio }}</td>
+                <td>{{ p.stock }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">No hay productos registrados.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

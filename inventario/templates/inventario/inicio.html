@@ -31,6 +31,11 @@
         .container { padding: 30px; }
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         
+        /* Estilos para tablas (para que hereden las subventanas) */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: var(--color-principal); color: white; padding: 12px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #ddd; }
+
         .btn-logout { background: #e74c3c; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-size: 0.9em; }
     </style>
 </head>
@@ -38,11 +43,11 @@
 
     <div class="sidebar">
         <div class="sidebar-header">
-            <i class="fas {{ request.session.icono_actual|default:'fa-globe' }} fa-2x"></i>
+            <i class="{{ request.session.icono_actual|default:'fas fa-globe' }} fa-2x"></i>
             <h3>{{ canal }}</h3>
         </div>
         <nav class="sidebar-menu">
-            <a href="#" class="menu-item"><i class="fas fa-home"></i> Inicio</a>
+            <a href="{% url 'inicio' %}" class="menu-item"><i class="fas fa-home"></i> Inicio</a>
             <a href="{% url 'inventario_global' %}" class="menu-item"><i class="fas fa-boxes"></i> Inventario Global</a>
             
             <hr style="border: 0.5px solid #3e4f5f; margin: 10px 20px;">
@@ -59,10 +64,12 @@
         </header>
 
         <div class="container">
+            {% block content %}
             <div class="card">
                 <h1>Panel de Control: {{ canal }}</h1>
-                <p>Selecciona una opción en el menú lateral para comenzar a trabajar.</p>
+                <p>Bienvenido al sistema. Selecciona una opción en el menú lateral para gestionar tus operaciones de venta e inventario.</p>
             </div>
+            {% endblock %}
         </div>
     </div>
 
