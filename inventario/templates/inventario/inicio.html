@@ -21,9 +21,34 @@
         .menu-item { 
             padding: 12px 25px; display: flex; align-items: center; 
             color: #bdc3c7; text-decoration: none; transition: 0.3s;
+            cursor: pointer;
+            border-left: 4px solid transparent;
         }
         .menu-item:hover { background: #34495e; color: white; border-left: 4px solid var(--color-principal); }
         .menu-item i { margin-right: 15px; width: 20px; text-align: center; }
+
+        /* Estilos Submenú */
+        .submenu {
+            display: none;
+            background: #1e2b37;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .submenu-item {
+            padding: 10px 25px 10px 50px;
+            display: flex;
+            align-items: center;
+            color: #95a5a6;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: 0.3s;
+        }
+        .submenu-item:hover { color: white; background: #2c3e50; }
+        .submenu-item i { margin-right: 10px; font-size: 0.8em; }
+        
+        .rotate { transform: rotate(180deg); }
+        .show { display: block; }
         
         /* Contenido Principal */
         .main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; }
@@ -48,7 +73,24 @@
             <a href="{% url 'inicio' %}" class="menu-item"><i class="fas fa-home"></i> Inicio</a>
             
             <div class="menu-category">Inventarios Globales</div>
-            <a href="{% url 'inv_magazzino' %}" class="menu-item"><i class="fas fa-warehouse"></i> MAGAZZINO</a>
+            
+            <div class="dropdown">
+                <div class="menu-item" onclick="toggleSubmenu()">
+                    <i class="fas fa-warehouse"></i> 
+                    <span>MAGAZZINO</span>
+                    <i class="fas fa-chevron-down" id="arrow" style="margin-left: auto; font-size: 0.7em; transition: 0.3s;"></i>
+                </div>
+                <div class="submenu" id="magazzino-menu">
+                    <a href="{% url 'inv_magazzino' %}" class="submenu-item"><i class="fas fa-list"></i> Ver Todo</a>
+                    <a href="#" class="submenu-item"><i class="fas fa-sign-out-alt"></i> Salidas</a>
+                    <a href="#" class="submenu-item"><i class="fas fa-bolt"></i> Consulta Rápida</a>
+                    <a href="#" class="submenu-item"><i class="fas fa-search"></i> Buscador</a>
+                    <a href="#" class="submenu-item"><i class="fas fa-history"></i> Registros</a>
+                    <a href="#" class="submenu-item"><i class="fas fa-file-invoice-dollar"></i> Costos General</a>
+                    <a href="#" class="submenu-item"><i class="fas fa-sign-in-alt"></i> Ingresos</a>
+                </div>
+            </div>
+
             <a href="{% url 'inv_percheron' %}" class="menu-item"><i class="fas fa-boxes"></i> PERCHERON</a>
             
             <hr style="border: 0.5px solid #3e4f5f; margin: 10px 20px;">
@@ -85,5 +127,19 @@
         </div>
     </div>
 
+    <script>
+        function toggleSubmenu() {
+            const menu = document.getElementById('magazzino-menu');
+            const arrow = document.getElementById('arrow');
+            
+            if (menu.style.display === 'block') {
+                menu.style.display = 'none';
+                arrow.classList.remove('rotate');
+            } else {
+                menu.style.display = 'block';
+                arrow.classList.add('rotate');
+            }
+        }
+    </script>
 </body>
 </html>
