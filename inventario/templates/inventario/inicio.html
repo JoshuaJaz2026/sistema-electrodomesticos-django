@@ -25,7 +25,7 @@
             border-left: 4px solid transparent;
         }
         .menu-item:hover { background: #34495e; color: white; border-left: 4px solid var(--color-principal); }
-        .menu-item i { margin-right: 15px; width: 20px; text-align: center; }
+        .menu-item i:first-child { margin-right: 15px; width: 20px; text-align: center; }
 
         /* Estilos Submenú */
         .submenu {
@@ -45,10 +45,9 @@
             transition: 0.3s;
         }
         .submenu-item:hover { color: white; background: #2c3e50; }
-        .submenu-item i { margin-right: 10px; font-size: 0.8em; }
+        .submenu-item i { margin-right: 10px; font-size: 0.8em; width: 15px; text-align: center; }
         
         .rotate { transform: rotate(180deg); }
-        .show { display: block; }
         
         /* Contenido Principal */
         .main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; }
@@ -75,10 +74,10 @@
             <div class="menu-category">Inventarios Globales</div>
             
             <div class="dropdown">
-                <div class="menu-item" onclick="toggleSubmenu()">
+                <div class="menu-item" onclick="toggleMenu('magazzino-menu', 'arrow-mag')">
                     <i class="fas fa-warehouse"></i> 
                     <span>MAGAZZINO</span>
-                    <i class="fas fa-chevron-down" id="arrow" style="margin-left: auto; font-size: 0.7em; transition: 0.3s;"></i>
+                    <i class="fas fa-chevron-down" id="arrow-mag" style="margin-left: auto; font-size: 0.7em; transition: 0.3s;"></i>
                 </div>
                 <div class="submenu" id="magazzino-menu">
                     <a href="{% url 'inv_magazzino' %}" class="submenu-item"><i class="fas fa-list"></i> Ver Todo</a>
@@ -91,7 +90,22 @@
                 </div>
             </div>
 
-            <a href="{% url 'inv_percheron' %}" class="menu-item"><i class="fas fa-boxes"></i> PERCHERON</a>
+            <div class="dropdown">
+                <div class="menu-item" onclick="toggleMenu('percheron-menu', 'arrow-per')">
+                    <i class="fas fa-boxes"></i> 
+                    <span>PERCHERON</span>
+                    <i class="fas fa-chevron-down" id="arrow-per" style="margin-left: auto; font-size: 0.7em; transition: 0.3s;"></i>
+                </div>
+                <div class="submenu" id="percheron-menu">
+                    <a href="{% url 'inv_percheron' %}" class="submenu-item"><i class="fas fa-list"></i> Ver Todo</a>
+                    <a href="#" class="submenu-item"><i class="fas fa-sign-out-alt"></i> Salidas</a>
+                    <a href="#" class="submenu-item"><i class="fas fa-bolt"></i> Consulta Rápida</a>
+                    <a href="#" class="submenu-item"><i class="fas fa-search"></i> Buscador</a>
+                    <a href="#" class="submenu-item"><i class="fas fa-history"></i> Registros</a>
+                    <a href="#" class="submenu-item"><i class="fas fa-file-invoice-dollar"></i> Costos General</a>
+                    <a href="#" class="submenu-item"><i class="fas fa-sign-in-alt"></i> Ingresos</a>
+                </div>
+            </div>
             
             <hr style="border: 0.5px solid #3e4f5f; margin: 10px 20px;">
             
@@ -115,22 +129,16 @@
             <div class="card">
                 <h1>Bienvenido al Panel de {{ canal }}</h1>
                 <hr>
-                <p>Utiliza el menú lateral para navegar por los inventarios globales o gestionar tus reportes específicos de esta plataforma.</p>
-                <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div style="border: 1px solid #eee; padding: 15px; border-radius: 8px;">
-                        <h4><i class="fas fa-info-circle"></i> Nota</h4>
-                        <p style="font-size: 0.9em; color: #666;">Los inventarios MAGAZZINO y PERCHERON son visibles para todas las plataformas.</p>
-                    </div>
-                </div>
+                <p>Utiliza el menú lateral para gestionar los inventarios o tus operaciones.</p>
             </div>
             {% endblock %}
         </div>
     </div>
 
     <script>
-        function toggleSubmenu() {
-            const menu = document.getElementById('magazzino-menu');
-            const arrow = document.getElementById('arrow');
+        function toggleMenu(menuId, arrowId) {
+            const menu = document.getElementById(menuId);
+            const arrow = document.getElementById(arrowId);
             
             if (menu.style.display === 'block') {
                 menu.style.display = 'none';
