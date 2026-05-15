@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
-from .models import Electrodomestico, Plataforma # Asegúrate de tener tus modelos listos
+from .models import Electrodomestico, Plataforma 
 
 # 1. El Pre-Login (Portal público)
 def selector_plataformas(request):
@@ -23,30 +23,25 @@ def selector_plataformas(request):
 
 @login_required
 def inicio(request):
-    # Recuperamos la plataforma de la sesión para personalizar el inicio
+    # Recuperamos los datos de la sesión para personalizar el Dashboard
     canal = request.session.get('canal_activo', 'Web')
     return render(request, 'inventario/inicio.html', {'canal': canal})
 
-# VENTANA GLOBAL: Inventario (Todos ven lo mismo)
 @login_required
 def inventario_global(request):
     productos = Electrodomestico.objects.all()
-    return render(request, 'inventario/inventario.html', {'productos': productos})
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'inventario/inventario.html', {'productos': productos, 'canal': canal})
 
-# VENTANA PRIVADA: Reporte de Ventas (Filtrado por plataforma)
 @login_required
 def reporte_ventas(request):
-    canal = request.session.get('canal_activo')
-    # Aquí filtrarás tus ventas por la plataforma activa
-    # ventas = Venta.objects.filter(plataforma__nombre=canal) 
+    canal = request.session.get('canal_activo', 'Web')
     return render(request, 'inventario/reportes.html', {'canal': canal})
 
-# VENTANA PRIVADA: Simulador de Costos (Único por plataforma)
 @login_required
 def simulador_costos(request):
-    canal = request.session.get('canal_activo')
+    canal = request.session.get('canal_activo', 'Web')
     return render(request, 'inventario/simulador.html', {'canal': canal})
-
 
 # ---------------------------------------------------------
 # 3. EL CEREBRO: Login Camaleónico
@@ -54,31 +49,34 @@ def simulador_costos(request):
 class LoginCamaleonicoView(LoginView):
     template_name = 'inventario/login.html'
     
+    # Definimos el diccionario de estilos como un atributo de clase para reusarlo
+    estilos = {
+        "Mercado Libre": {"color": "#F1C40F", "icono": "fa-handshake"},
+        "Mercado Libre - Junior": {"color": "#F39C12", "icono": "fa-seedling"},
+        "Creditienda": {"color": "#E74C3C", "icono": "fa-credit-card"},
+        "Falabella": {"color": "#2ECC71", "icono": "fa-store"},
+        "Intercorp": {"color": "#2980B9", "icono": "fa-building"},
+        "Venta Libre": {"color": "#9B59B6", "icono": "fa-tags"},
+        "Tik tok": {"color": "#2C3E50", "icono": "fa-tiktok"},
+        "Web": {"color": "#3498DB", "icono": "fa-globe"}
+    }
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         canal = self.request.GET.get('canal', 'Web') 
         
-        estilos = {
-            "Mercado Libre": {"color": "#F1C40F", "icono": "fas fa-handshake"},
-            "Mercado Libre - Junior": {"color": "#F39C12", "icono": "fas fa-seedling"},
-            "Creditienda": {"color": "#E74C3C", "icono": "fas fa-credit-card"},
-            "Falabella": {"color": "#2ECC71", "icono": "fas fa-store"},
-            "Intercorp": {"color": "#2980B9", "icono": "fas fa-building"},
-            "Venta Libre": {"color": "#9B59B6", "icono": "fas fa-tags"},
-            "Tik tok": {"color": "#2C3E50", "icono": "fab fa-tiktok"},
-            "Web": {"color": "#3498DB", "icono": "fas fa-globe"}
-        }
-        
-        tema_actual = estilos.get(canal, estilos["Web"])
+        # Aplicamos el estilo visual a la pantalla de login (añadiendo 'fas' para el render)
+        tema_actual = self.estilos.get(canal, self.estilos["Web"])
         context['nombre_canal'] = canal
         context['color_principal'] = tema_actual['color']
-        context['icono_canal'] = tema_actual['icono']
+        context['icono_canal'] = f"fas {tema_actual['icono']}" if "tiktok" not in tema_actual['icono'] else f"fab {tema_actual['icono']}"
         return context
 
     def form_valid(self, form):
         usuario = form.get_user()
         canal_solicitado = self.request.GET.get('canal', 'Web')
 
+        # Verificación de permisos
         if not usuario.is_superuser:
             if hasattr(usuario, 'perfil'):
                 permitido = usuario.perfil.plataformas.filter(nombre=canal_solicitado).exists()
@@ -89,8 +87,11 @@ class LoginCamaleonicoView(LoginView):
                 form.add_error(None, "Usuario sin perfil asignado.")
                 return self.form_invalid(form)
 
-        # GUARDAMOS EL CANAL EN LA SESIÓN: 
-        # Esto permite que las demás ventanas sepan de qué plataforma viene el usuario
+        # --- GUARDAMOS EL ADN DE LA PLATAFORMA EN LA SESIÓN ---
+        tema = self.estilos.get(canal_solicitado, self.estilos["Web"])
+        
         self.request.session['canal_activo'] = canal_solicitado
+        self.request.session['color_actual'] = tema['color']
+        self.request.session['icono_actual'] = tema['icono']
         
         return super().form_valid(form)
