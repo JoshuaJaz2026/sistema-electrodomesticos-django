@@ -1,0 +1,29 @@
+[33mb6b51fa[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Instalacion de psycopg2 para la base de datos de Render
+[33m1888cb7[m Instalacion de django-import-export y actualizacion de requirements
+[33m46c09d2[m Activar psycopg2 para la base de datos de producción
+[33made04b4[m Activar psycopg2 para la base de datos de producción
+[33m9b1b3e1[m Activar psycopg2 para la base de datos de producción
+[33m439c194[m Activar psycopg2 para la base de datos de producción
+[33m7e09569[m Activar psycopg2 para la base de datos de producción
+[33m06d4a04[m Activar psycopg2 para la base de datos de producción
+[33m8ce3ce0[m Activar psycopg2 para la base de datos de producción
+[33m5427266[m Activar psycopg2 para la base de datos de producción
+[33m68a59f2[m Activar psycopg2 para la base de datos de producción
+[33mf153f8c[m Activar psycopg2 para la base de datos de producción
+[33m896596f[m Activar psycopg2 para la base de datos de producción
+[33m61625fd[m Activar psycopg2 para la base de datos de producción
+[33m067b671[m Activar psycopg2 para la base de datos de producción
+[33m29c1901[m Activar psycopg2 para la base de datos de producción
+[33mc1d4e02[m Activar psycopg2 para la base de datos de producción
+[33m93601f9[m Activar psycopg2 para la base de datos de producción
+[33m43693f4[m Activar psycopg2 para la base de datos de producción
+[33mbe0b474[m Automatizar creación de superusuario
+[33mbac7c04[m Activar psycopg2 para la base de datos de producción
+[33m1802614[m Agregando seguridad de perfiles
+[33m4da7123[m Agregando estructura oficial de Django y manage.py
+[33m3acb92f[m Agregando estructura oficial de Django y manage.py
+[33md5223c1[m Agregando estructura oficial de Django y manage.py
+[33m0896d64[m Agregando estructura oficial de Django y manage.py
+[33mdbc5c0d[m Descripción breve de los cambios
+[33m6534a57[m first commit
+[33m5307ba3[m Primer commit: Estructura inicial del sistema de electrodomésticos
