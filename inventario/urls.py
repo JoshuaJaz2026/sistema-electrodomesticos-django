@@ -8,10 +8,9 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('inicio/', views.inicio, name='inicio'),
     
-    # NUEVAS RUTAS CONECTADAS A VIEWS.PY
-    path('inventario/', views.inventario_global, name='inventario_global'),
-    path('reportes/', views.reporte_ventas, name='reporte_ventas'),
-    path('simulador/', views.simulador_costos, name='simulador_costos'),
+    # ESTAS SON LAS RUTAS QUE DEBEN COINCIDIR CON TU VIEWS.PY ACTUAL
     path('inventario/magazzino/', views.inventario_magazzino, name='inv_magazzino'),
     path('inventario/percheron/', views.inventario_percheron, name='inv_percheron'),
+    path('reportes/', views.reporte_ventas, name='reporte_ventas'),
+    path('simulador/', views.simulador_costos, name='simulador_costos'),
 ]
