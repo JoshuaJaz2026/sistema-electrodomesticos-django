@@ -26,23 +26,36 @@ def inicio(request):
     canal = request.session.get('canal_activo', 'Web')
     return render(request, 'inventario/inicio.html', {'canal': canal})
 
+# INVENTARIO GLOBAL: MAGAZZINO
 @login_required
-def inventario_global(request):
-    productos = Electrodomestico.objects.all()
+def inventario_magazzino(request):
+    productos = Electrodomestico.objects.all() # Aquí podrías filtrar por almacén luego
     canal = request.session.get('canal_activo', 'Web')
-    # Ajustado al nombre real de tu archivo
-    return render(request, 'inventario/inventario_lista.html', {'productos': productos, 'canal': canal})
+    return render(request, 'inventario/inventario_lista.html', {
+        'productos': productos, 
+        'canal': canal,
+        'nombre_almacen': 'MAGAZZINO'
+    })
+
+# INVENTARIO GLOBAL: PERCHERON
+@login_required
+def inventario_percheron(request):
+    productos = Electrodomestico.objects.all() # Aquí podrías filtrar por almacén luego
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'inventario/inventario_lista.html', {
+        'productos': productos, 
+        'canal': canal,
+        'nombre_almacen': 'PERCHERON'
+    })
 
 @login_required
 def reporte_ventas(request):
     canal = request.session.get('canal_activo', 'Web')
-    # Ajustado al nombre real de tu archivo
     return render(request, 'inventario/reportes_ventas.html', {'canal': canal})
 
 @login_required
 def simulador_costos(request):
     canal = request.session.get('canal_activo', 'Web')
-    # Ajustado al nombre real de tu archivo
     return render(request, 'inventario/simulador_costos.html', {'canal': canal})
 
 # ---------------------------------------------------------
@@ -69,7 +82,6 @@ class LoginCamaleonicoView(LoginView):
         context['nombre_canal'] = canal
         context['color_principal'] = tema_actual['color']
         
-        # Lógica mejorada para iconos FontAwesome
         icon_prefix = "fab" if "tiktok" in tema_actual['icono'] else "fas"
         context['icono_canal'] = f"{icon_prefix} {tema_actual['icono']}"
         return context
@@ -92,7 +104,6 @@ class LoginCamaleonicoView(LoginView):
         self.request.session['canal_activo'] = canal_solicitado
         self.request.session['color_actual'] = tema['color']
         
-        # Ajuste para el prefijo del icono en la sidebar
         icon_prefix = "fab" if "tiktok" in tema['icono'] else "fas"
         self.request.session['icono_actual'] = f"{icon_prefix} {tema['icono']}"
         

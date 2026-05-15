@@ -2,29 +2,68 @@
 
 {% block content %}
 <div class="card">
-    <h2><i class="fas fa-boxes"></i> Inventario Global de Productos</h2>
-    <hr>
-    <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-        <thead style="background-color: var(--color-principal); color: white;">
-            <tr>
-                <th>Producto</th>
-                <th>Marca</th>
-                <th>Precio</th>
-                <th>Stock</th>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h2 style="margin: 0;">
+            <i class="fas fa-warehouse"></i> Inventario: {{ nombre_almacen }}
+        </h2>
+        <span style="background-color: var(--color-principal); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85em; font-weight: bold;">
+            Canal: {{ canal }}
+        </span>
+    </div>
+    <hr style="border: 0.5px solid #eee;">
+
+    <div style="margin: 20px 0; display: flex; gap: 10px;">
+        <input type="text" id="searchInput" placeholder="Buscar por nombre o marca..." 
+               style="padding: 10px; flex: 1; border: 1px solid #ddd; border-radius: 5px; outline: none;">
+        <button style="padding: 10px 20px; background-color: #2c3e50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            <i class="fas fa-search"></i>
+        </button>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; margin-top: 10px; background: white;">
+        <thead>
+            <tr style="background-color: var(--color-principal); color: white;">
+                <th style="padding: 15px; text-align: left; border-radius: 5px 0 0 0;">Producto</th>
+                <th style="padding: 15px; text-align: left;">Marca</th>
+                <th style="padding: 15px; text-align: left;">Precio</th>
+                <th style="padding: 15px; text-align: center; border-radius: 0 5px 0 0;">Stock</th>
             </tr>
         </thead>
         <tbody>
             {% for p in productos %}
-            <tr>
-                <td>{{ p.nombre }}</td>
-                <td>{{ p.marca }}</td>
-                <td>S/ {{ p.precio }}</td>
-                <td>{{ p.stock }}</td>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px;"><strong>{{ p.nombre }}</strong></td>
+                <td style="padding: 12px; color: #666;">{{ p.marca }}</td>
+                <td style="padding: 12px; font-weight: bold;">S/ {{ p.precio }}</td>
+                <td style="padding: 12px; text-align: center;">
+                    {% if p.stock <= 5 %}
+                        <span style="color: #e74c3c; font-weight: bold;">
+                            <i class="fas fa-exclamation-triangle"></i> {{ p.stock }} (Bajo)
+                        </span>
+                    {% else %}
+                        <span style="color: #2c3e50;">{{ p.stock }}</span>
+                    {% endif %}
+                </td>
             </tr>
             {% empty %}
-            <tr><td colspan="4">No hay productos registrados.</td></tr>
+            <tr>
+                <td colspan="4" style="padding: 40px; text-align: center; color: #95a5a6;">
+                    <i class="fas fa-box-open fa-3x" style="display: block; margin-bottom: 10px; opacity: 0.5;"></i>
+                    No hay productos registrados en {{ nombre_almacen }} actualmente.
+                </td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
+<script>
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        let value = this.value.toLowerCase();
+        let rows = document.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
+        });
+    });
+</script>
 {% endblock %}

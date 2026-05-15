@@ -12,30 +12,28 @@
         body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; background: #f4f7f6; }
         
         /* Barra Lateral */
-        .sidebar { width: 260px; background: #2c3e50; color: white; display: flex; flex-direction: column; }
+        .sidebar { width: 260px; background: #2c3e50; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
         .sidebar-header { padding: 20px; text-align: center; background: rgba(0,0,0,0.1); border-bottom: 2px solid var(--color-principal); }
-        .sidebar-menu { flex: 1; padding: 10px 0; }
+        .sidebar-menu { flex: 1; padding: 10px 0; overflow-y: auto; }
+        
+        .menu-category { padding: 15px 25px 5px; font-size: 0.75rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
+        
         .menu-item { 
-            padding: 15px 25px; display: flex; align-items: center; 
+            padding: 12px 25px; display: flex; align-items: center; 
             color: #bdc3c7; text-decoration: none; transition: 0.3s;
         }
         .menu-item:hover { background: #34495e; color: white; border-left: 4px solid var(--color-principal); }
         .menu-item i { margin-right: 15px; width: 20px; text-align: center; }
         
         /* Contenido Principal */
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; }
         header { 
             background: white; padding: 15px 30px; display: flex; 
             justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .container { padding: 30px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .container { padding: 30px; overflow-y: auto; flex: 1; }
+        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         
-        /* Estilos para tablas (para que hereden las subventanas) */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { background: var(--color-principal); color: white; padding: 12px; text-align: left; }
-        td { padding: 10px; border-bottom: 1px solid #ddd; }
-
         .btn-logout { background: #e74c3c; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-size: 0.9em; }
     </style>
 </head>
@@ -44,14 +42,18 @@
     <div class="sidebar">
         <div class="sidebar-header">
             <i class="{{ request.session.icono_actual|default:'fas fa-globe' }} fa-2x"></i>
-            <h3>{{ canal }}</h3>
+            <h3 style="margin-top: 10px;">{{ canal }}</h3>
         </div>
         <nav class="sidebar-menu">
             <a href="{% url 'inicio' %}" class="menu-item"><i class="fas fa-home"></i> Inicio</a>
-            <a href="{% url 'inventario_global' %}" class="menu-item"><i class="fas fa-boxes"></i> Inventario Global</a>
+            
+            <div class="menu-category">Inventarios Globales</div>
+            <a href="{% url 'inv_magazzino' %}" class="menu-item"><i class="fas fa-warehouse"></i> MAGAZZINO</a>
+            <a href="{% url 'inv_percheron' %}" class="menu-item"><i class="fas fa-boxes"></i> PERCHERON</a>
             
             <hr style="border: 0.5px solid #3e4f5f; margin: 10px 20px;">
             
+            <div class="menu-category">Operaciones {{ canal }}</div>
             <a href="{% url 'reporte_ventas' %}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
             <a href="{% url 'simulador_costos' %}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
         </nav>
@@ -59,15 +61,25 @@
 
     <div class="main-content">
         <header>
-            <span>Bienvenido, <strong>{{ user.username }}</strong></span>
-            <a href="{% url 'logout' %}" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Salir</a>
+            <span>Sesión activa en: <strong style="color: var(--color-principal)">{{ canal }}</strong></span>
+            <div>
+                <span style="margin-right: 15px;"><i class="fas fa-user-circle"></i> {{ user.username }}</span>
+                <a href="{% url 'logout' %}" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Salir</a>
+            </div>
         </header>
 
         <div class="container">
             {% block content %}
             <div class="card">
-                <h1>Panel de Control: {{ canal }}</h1>
-                <p>Bienvenido al sistema. Selecciona una opción en el menú lateral para gestionar tus operaciones de venta e inventario.</p>
+                <h1>Bienvenido al Panel de {{ canal }}</h1>
+                <hr>
+                <p>Utiliza el menú lateral para navegar por los inventarios globales o gestionar tus reportes específicos de esta plataforma.</p>
+                <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div style="border: 1px solid #eee; padding: 15px; border-radius: 8px;">
+                        <h4><i class="fas fa-info-circle"></i> Nota</h4>
+                        <p style="font-size: 0.9em; color: #666;">Los inventarios MAGAZZINO y PERCHERON son visibles para todas las plataformas.</p>
+                    </div>
+                </div>
             </div>
             {% endblock %}
         </div>

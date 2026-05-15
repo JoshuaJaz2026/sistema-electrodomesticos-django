@@ -12,4 +12,6 @@ urlpatterns = [
     path('inventario/', views.inventario_global, name='inventario_global'),
     path('reportes/', views.reporte_ventas, name='reporte_ventas'),
     path('simulador/', views.simulador_costos, name='simulador_costos'),
+    path('inventario/magazzino/', views.inventario_magazzino, name='inv_magazzino'),
+    path('inventario/percheron/', views.inventario_percheron, name='inv_percheron'),
 ]
