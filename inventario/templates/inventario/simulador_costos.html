@@ -1,0 +1,95 @@
+{% extends 'inventario/inicio.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2><i class="fas fa-calculator"></i> Simulador de Costos: {{ canal }}</h2>
+        <span id="badge-comision" style="background: var(--color-principal); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8em;">
+            Cargando comisión...
+        </span>
+    </div>
+    <hr style="border: 0.5px solid #eee;">
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Precio de Venta Sugerido (S/)</label>
+                <input type="number" id="precioVenta" placeholder="Ej: 1500" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1.1em;">
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Costo del Producto (S/)</label>
+                <input type="number" id="costoProducto" placeholder="Ej: 1000" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Gasto de Envío (S/)</label>
+                <input type="number" id="gastoEnvio" value="0" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+            <button onclick="calcularSimulacion()" style="background: var(--color-principal); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1em;">
+                <i class="fas fa-sync-alt"></i> Calcular Margen
+            </button>
+        </div>
+
+        <div id="resultado-simulador" style="background: #f8f9fa; padding: 20px; border-radius: 10px; border: 1px solid #eee;">
+            <h4 style="margin-top: 0; color: #2c3e50;">Resumen de Utilidad</h4>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span>Comisión Plataforma (<span id="txt-porcentaje">0</span>%):</span>
+                <span id="res-comision" style="color: #e74c3c;">- S/ 0.00</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span>Impuestos (IGV):</span>
+                <span id="res-igv" style="color: #e74c3c;">- S/ 0.00</span>
+            </div>
+            <hr>
+            <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+                <span style="font-weight: bold; font-size: 1.2em;">Ganancia Neta:</span>
+                <span id="res-total" style="font-weight: bold; font-size: 1.2em; color: #27ae60;">S/ 0.00</span>
+            </div>
+            <div style="text-align: right; margin-top: 5px;">
+                <span id="res-margen-porcentual" style="font-size: 0.9em; background: #27ae60; color: white; padding: 2px 8px; border-radius: 4px;">0% margen</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Configuración de comisiones según la plataforma
+    const configuracion = {
+        "Mercado Libre": 0.15, // 15%
+        "Mercado Libre - Junior": 0.15,
+        "Falabella": 0.12,    // 12%
+        "Creditienda": 0.10,  // 10%
+        "TikTok": 0.05,       // 5%
+        "Web": 0.00           // 0%
+    };
+
+    const canalActivo = "{{ canal }}";
+    const porcentajeComision = configuracion[canalActivo] || 0.10; // Default 10%
+
+    // Mostrar el porcentaje actual en la interfaz
+    document.getElementById('badge-comision').innerText = "Comisión: " + (porcentajeComision * 100) + "%";
+    document.getElementById('txt-porcentaje').innerText = (porcentajeComision * 100);
+
+    function calcularSimulacion() {
+        const venta = parseFloat(document.getElementById('precioVenta').value) || 0;
+        const costo = parseFloat(document.getElementById('costoProducto').value) || 0;
+        const envio = parseFloat(document.getElementById('gastoEnvio').value) || 0;
+
+        if (venta === 0) return;
+
+        const comision = venta * porcentajeComision;
+        const igv = (venta - comision) * 0.18; // Calculando sobre el ingreso neto aproximado
+        const ganancia = venta - costo - comision - envio - igv;
+        const margenPorcentual = (ganancia / venta) * 100;
+
+        // Actualizar UI
+        document.getElementById('res-comision').innerText = "- S/ " + comision.toFixed(2);
+        document.getElementById('res-igv').innerText = "- S/ " + igv.toFixed(2);
+        document.getElementById('res-total').innerText = "S/ " + ganancia.toFixed(2);
+        document.getElementById('res-margen-porcentual').innerText = margenPorcentual.toFixed(1) + "% margen";
+
+        // Cambiar color si hay pérdida
+        document.getElementById('res-total').style.color = ganancia >= 0 ? '#27ae60' : '#e74c3c';
+        document.getElementById('res-margen-porcentual').style.background = ganancia >= 0 ? '#27ae60' : '#e74c3c';
+    }
+</script>
+{% endblock %}
