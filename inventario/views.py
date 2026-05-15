@@ -118,3 +118,5 @@ class LoginCamaleonicoView(LoginView):
         self.request.session['icono_actual'] = f"{icon_prefix} {tema['icono']}"
         
         return super().form_valid(form)
+    
+    #sdasd
