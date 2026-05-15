@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+# 1. Modelos de productos (Tus modelos originales)
 class Categoria(models.Model):
     nombre = models.CharField(max_length=100)
 
@@ -18,24 +19,21 @@ class Electrodomestico(models.Model):
 
     def __str__(self):
         return f"{self.nombre} - {self.marca}"
-    
-    # Creamos un perfil anexo al usuario de Django
-class Perfil(models.Model):
-    # Lista de opciones exactas de tus plataformas
-    PLATAFORMAS_CHOICES = [
-        ("Mercado Libre", "Mercado Libre"),
-        ("Mercado Libre - Junior", "Mercado Libre - Junior"),
-        ("Creditienda", "Creditienda"),
-        ("Falabella", "Falabella"),
-        ("Intercorp", "Intercorp"),
-        ("Venta Libre", "Venta Libre"),
-        ("Tik tok", "Tik tok"),
-        ("Web", "Web"),
-    ]
-    
-    # Conectamos este perfil con un usuario (Si se borra el usuario, se borra el perfil)
-    usuario = models.OneToOneField(User, on_delete=models.CASCADE)
-    plataforma = models.CharField(max_length=50, choices=PLATAFORMAS_CHOICES, default="Web")
+
+# 2. NUEVA TABLA: Para registrar las plataformas disponibles
+class Plataforma(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
-        return f"{self.usuario.username} - {self.plataforma}"
+        return self.nombre
+
+# 3. PERFIL ACTUALIZADO: Ahora permite múltiples plataformas
+class Perfil(models.Model):
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE)
+    
+    # Cambiamos CharField por ManyToManyField para permitir varias selecciones
+    plataformas = models.ManyToManyField(Plataforma, blank=True)
+
+    def __str__(self):
+        # Mostramos el nombre y cuántas plataformas tiene asignadas
+        return f"{self.usuario.username} ({self.plataformas.count()} plataformas)"

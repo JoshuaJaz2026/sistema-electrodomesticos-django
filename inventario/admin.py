@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Perfil
+from .models import Perfil, Plataforma
 
-# Registramos el perfil para poder editarlo
+admin.site.register(Plataforma)
 admin.site.register(Perfil)
