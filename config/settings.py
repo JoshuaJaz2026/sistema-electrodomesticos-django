@@ -29,6 +29,7 @@ if RENDER_EXTERNAL_HOSTNAME:
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',  # El nuevo diseño elegante (debe ir primero)
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
