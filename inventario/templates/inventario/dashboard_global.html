@@ -27,14 +27,22 @@
         .menu-item:hover { background: #34495e; color: white; border-left: 4px solid var(--color-principal); }
         .menu-item i:first-child { margin-right: 15px; width: 20px; text-align: center; }
 
-        /* Estilos Submenú */
+        /* Estilos Submenú (ANIMADO) */
         .submenu {
-            display: none;
+            max-height: 0;
+            overflow: hidden;
             background: #1e2b37;
             list-style: none;
             padding: 0;
             margin: 0;
+            transition: max-height 0.4s ease-in-out; /* Esta es la magia del deslizamiento */
         }
+        
+        /* Esta clase la pondremos con Javascript para abrirlo */
+        .submenu.open {
+            max-height: 500px; 
+        }
+
         .submenu-item {
             padding: 10px 25px 10px 50px;
             display: flex;
@@ -43,11 +51,12 @@
             text-decoration: none;
             font-size: 0.9em;
             transition: 0.3s;
+            border-left: 3px solid transparent;
         }
         .submenu-item:hover { color: white; background: #2c3e50; }
         .submenu-item i { margin-right: 10px; font-size: 0.8em; width: 15px; text-align: center; }
         
-        .rotate { transform: rotate(180deg); }
+        .rotate { transform: rotate(180deg); transition: transform 0.3s ease; }
         
         /* Contenido Principal */
         .main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; }
@@ -134,15 +143,50 @@
     </div>
 
     <script>
+        // 1. Lógica Automática: Revisa en qué página estamos al cargar
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentPath = window.location.pathname; // Ej: /inventario/percheron/registros/
+            
+            const submenuItems = document.querySelectorAll('.submenu-item');
+            
+            submenuItems.forEach(item => {
+                let linkPath = item.getAttribute('href');
+                
+                // Si el link del botón coincide con la URL actual de la página
+                if (linkPath && linkPath !== '#' && linkPath.split('?')[0] === currentPath) {
+                    
+                    // a) Resaltar el botón activo visualmente
+                    item.style.color = 'white';
+                    item.style.borderLeftColor = 'var(--color-principal)';
+                    item.style.background = '#2c3e50';
+                    
+                    // b) Encontrar la cajita del menú y abrirla (animación hacia abajo)
+                    const parentMenu = item.closest('.submenu');
+                    if (parentMenu) {
+                        parentMenu.classList.add('open');
+                        
+                        // c) Girar la flechita
+                        const menuHeader = parentMenu.previousElementSibling;
+                        if(menuHeader) {
+                            const arrow = menuHeader.querySelector('.fa-chevron-down');
+                            if (arrow) arrow.classList.add('rotate');
+                        }
+                    }
+                }
+            });
+        });
+
+        // 2. Animación manual cuando el usuario hace clic
         function toggleMenu(menuId, arrowId) {
             const menu = document.getElementById(menuId);
             const arrow = document.getElementById(arrowId);
             
-            if (menu.style.display === 'block') {
-                menu.style.display = 'none';
+            // Alterna la clase 'open' para activar la animación CSS
+            if (menu.classList.contains('open')) {
+                menu.classList.remove('open');
                 arrow.classList.remove('rotate');
             } else {
-                menu.style.display = 'block';
+                menu.classList.add('open');
                 arrow.classList.add('rotate');
             }
         }
