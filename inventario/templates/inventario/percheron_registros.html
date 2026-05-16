@@ -1,0 +1,144 @@
+{% extends 'inventario/dashboard_global.html' %}
+
+{% block content %}
+<div class="card" style="border-top: 4px solid var(--color-principal);">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0; color: #2c3e50;">
+            <i class="fas fa-history" style="color: var(--color-principal);"></i> Registros y Movimientos - Percherón
+        </h2>
+        <button style="background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s;">
+            <i class="fas fa-file-pdf"></i> Descargar Reporte
+        </button>
+    </div>
+    <hr style="border: 0.5px solid #eee; margin-bottom: 25px;">
+
+    <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 30px;">
+        <form action="#" method="GET" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            
+            <div style="display: flex; flex-direction: column;">
+                <label style="font-weight: 600; color: #475569; margin-bottom: 8px; font-size: 0.85em;">Tipo de Movimiento</label>
+                <select name="tipo" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background-color: white;">
+                    <option value="">Todos los movimientos</option>
+                    <option value="ingreso">Ingresos (+)</option>
+                    <option value="salida">Salidas (-)</option>
+                    <option value="ajuste">Ajuste de Inventario</option>
+                </select>
+            </div>
+
+            <div style="display: flex; flex-direction: column;">
+                <label style="font-weight: 600; color: #475569; margin-bottom: 8px; font-size: 0.85em;">Fecha de Inicio</label>
+                <input type="date" name="fecha_inicio" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; color: #334155;">
+            </div>
+
+            <div style="display: flex; flex-direction: column;">
+                <label style="font-weight: 600; color: #475569; margin-bottom: 8px; font-size: 0.85em;">Fecha de Fin</label>
+                <input type="date" name="fecha_fin" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; color: #334155;">
+            </div>
+
+            <div style="display: flex; align-items: flex-end;">
+                <button type="submit" style="background-color: var(--color-principal); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; transition: 0.2s;">
+                    <i class="fas fa-filter"></i> Aplicar Filtros
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div>
+        <h3 style="color: #334155; margin-bottom: 15px; font-size: 1.1rem;">
+            <i class="fas fa-clipboard-list" style="color: var(--color-principal);"></i> Bitácora de Actividades
+        </h3>
+        
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.03);">
+                <thead>
+                    <tr style="background-color: var(--color-principal); color: white;">
+                        <th style="padding: 15px; text-align: left;">Fecha y Hora</th>
+                        <th style="padding: 15px; text-align: left;">Usuario</th>
+                        <th style="padding: 15px; text-align: center;">Tipo</th>
+                        <th style="padding: 15px; text-align: left;">Producto / Detalle</th>
+                        <th style="padding: 15px; text-align: center;">Cant.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #eee; transition: 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc';" onmouseout="this.style.backgroundColor='transparent';">
+                        <td style="padding: 15px; color: #64748b; font-size: 0.9em;">
+                            <strong>15 May 2026</strong><br>10:24 AM
+                        </td>
+                        <td style="padding: 15px;">
+                            <span style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: #334155;">
+                                <i class="fas fa-user-circle" style="color: #94a3b8; font-size: 1.2em;"></i> jabarcap
+                            </span>
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            <span style="background-color: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 12px; font-size: 0.8em; font-weight: bold;">
+                                INGRESO
+                            </span>
+                        </td>
+                        <td style="padding: 15px;">
+                            <strong style="color: #1e293b;">Refrigeradora LG 250L Inverter</strong>
+                            <div style="font-size: 0.85em; color: #64748b; margin-top: 4px;">
+                                <i class="fas fa-file-invoice"></i> Guía: F001-004521 | Origen: Proveedor Principal
+                            </div>
+                        </td>
+                        <td style="padding: 15px; text-align: center; font-weight: 700; color: #10b981;">
+                            +10
+                        </td>
+                    </tr>
+
+                    <tr style="border-bottom: 1px solid #eee; transition: 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc';" onmouseout="this.style.backgroundColor='transparent';">
+                        <td style="padding: 15px; color: #64748b; font-size: 0.9em;">
+                            <strong>14 May 2026</strong><br>04:15 PM
+                        </td>
+                        <td style="padding: 15px;">
+                            <span style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: #334155;">
+                                <i class="fas fa-user-circle" style="color: #94a3b8; font-size: 1.2em;"></i> lmartinez
+                            </span>
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            <span style="background-color: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 12px; font-size: 0.8em; font-weight: bold;">
+                                SALIDA
+                            </span>
+                        </td>
+                        <td style="padding: 15px;">
+                            <strong style="color: #1e293b;">Microondas Panasonic</strong>
+                            <div style="font-size: 0.85em; color: #64748b; margin-top: 4px;">
+                                <i class="fas fa-tag"></i> Motivo: Venta a Cliente | Bol: B001-000458
+                            </div>
+                        </td>
+                        <td style="padding: 15px; text-align: center; font-weight: 700; color: #ef4444;">
+                            -2
+                        </td>
+                    </tr>
+
+                    <tr style="border-bottom: 1px solid #eee; transition: 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc';" onmouseout="this.style.backgroundColor='transparent';">
+                        <td style="padding: 15px; color: #64748b; font-size: 0.9em;">
+                            <strong>12 May 2026</strong><br>09:00 AM
+                        </td>
+                        <td style="padding: 15px;">
+                            <span style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: #334155;">
+                                <i class="fas fa-user-shield" style="color: #f59e0b; font-size: 1.2em;"></i> admin
+                            </span>
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            <span style="background-color: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 12px; font-size: 0.8em; font-weight: bold;">
+                                AJUSTE
+                            </span>
+                        </td>
+                        <td style="padding: 15px;">
+                            <strong style="color: #1e293b;">Lavadora Samsung 13kg</strong>
+                            <div style="font-size: 0.85em; color: #64748b; margin-top: 4px;">
+                                <i class="fas fa-info-circle"></i> Observación: Corrección de inventario físico
+                            </div>
+                        </td>
+                        <td style="padding: 15px; text-align: center; font-weight: 700; color: #f59e0b;">
+                            -1
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
