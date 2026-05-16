@@ -1,69 +1,80 @@
-{% extends 'inventario/inicio.html' %}
+{% extends 'inventario/dashboard_global.html' %}
 
 {% block content %}
-<div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <h2 style="margin: 0;">
-            <i class="fas fa-warehouse"></i> Inventario: {{ nombre_almacen }}
+<div class="card" style="border-top: 4px solid var(--color-principal);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h2 style="margin: 0; color: #2c3e50;">
+            <i class="fas fa-warehouse" style="color: var(--color-principal);"></i> Inventario: {{ nombre_almacen }}
         </h2>
-        <span style="background-color: var(--color-principal); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85em; font-weight: bold;">
+        <span style="background-color: var(--color-principal); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.85em; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             Canal: {{ canal }}
         </span>
     </div>
-    <hr style="border: 0.5px solid #eee;">
+    <hr style="border: 0.5px solid #eee; margin-bottom: 20px;">
 
-    <div style="margin: 20px 0; display: flex; gap: 10px;">
+    <div style="margin-bottom: 20px; display: flex; gap: 10px;">
         <input type="text" id="searchInput" placeholder="Buscar por nombre o marca..." 
-               style="padding: 10px; flex: 1; border: 1px solid #ddd; border-radius: 5px; outline: none;">
-        <button style="padding: 10px 20px; background-color: #2c3e50; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            <i class="fas fa-search"></i>
+               style="padding: 12px 15px; flex: 1; border: 1px solid #ddd; border-radius: 8px; outline: none; font-size: 0.95rem; transition: border-color 0.3s;">
+        <button style="padding: 12px 25px; background-color: var(--color-principal); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95rem;">
+            <i class="fas fa-search"></i> Buscar
         </button>
     </div>
 
-    <table style="width: 100%; border-collapse: collapse; margin-top: 10px; background: white;">
-        <thead>
-            <tr style="background-color: var(--color-principal); color: white;">
-                <th style="padding: 15px; text-align: left; border-radius: 5px 0 0 0;">Producto</th>
-                <th style="padding: 15px; text-align: left;">Marca</th>
-                <th style="padding: 15px; text-align: left;">Precio</th>
-                <th style="padding: 15px; text-align: center; border-radius: 0 5px 0 0;">Stock</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for p in productos %}
-            <tr style="border-bottom: 1px solid #eee;">
-                <td style="padding: 12px;"><strong>{{ p.nombre }}</strong></td>
-                <td style="padding: 12px; color: #666;">{{ p.marca }}</td>
-                <td style="padding: 12px; font-weight: bold;">S/ {{ p.precio }}</td>
-                <td style="padding: 12px; text-align: center;">
-                    {% if p.stock <= 5 %}
-                        <span style="color: #e74c3c; font-weight: bold;">
-                            <i class="fas fa-exclamation-triangle"></i> {{ p.stock }} (Bajo)
-                        </span>
-                    {% else %}
-                        <span style="color: #2c3e50;">{{ p.stock }}</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4" style="padding: 40px; text-align: center; color: #95a5a6;">
-                    <i class="fas fa-box-open fa-3x" style="display: block; margin-bottom: 10px; opacity: 0.5;"></i>
-                    No hay productos registrados en {{ nombre_almacen }} actualmente.
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.03);">
+            <thead>
+                <tr style="background-color: var(--color-principal); color: white;">
+                    <th style="padding: 15px; text-align: left;">Producto</th>
+                    <th style="padding: 15px; text-align: left;">Marca</th>
+                    <th style="padding: 15px; text-align: left;">Precio</th>
+                    <th style="padding: 15px; text-align: center;">Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in productos %}
+                <tr style="border-bottom: 1px solid #eee; transition: 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc';" onmouseout="this.style.backgroundColor='transparent';">
+                    <td style="padding: 15px;"><strong>{{ p.nombre }}</strong></td>
+                    <td style="padding: 15px; color: #64748b;">{{ p.marca }}</td>
+                    <td style="padding: 15px; font-weight: 600; color: #334155;">S/ {{ p.precio }}</td>
+                    <td style="padding: 15px; text-align: center;">
+                        {% if p.stock <= 5 %}
+                            <span style="background-color: #fee2e2; color: #e74c3c; padding: 5px 12px; border-radius: 12px; font-weight: bold; font-size: 0.85em;">
+                                <i class="fas fa-exclamation-triangle"></i> {{ p.stock }} (Bajo)
+                            </span>
+                        {% else %}
+                            <span style="background-color: #e2e8f0; color: #334155; padding: 5px 15px; border-radius: 12px; font-weight: bold; font-size: 0.85em;">
+                                {{ p.stock }}
+                            </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="padding: 50px; text-align: center; color: #94a3b8;">
+                        <i class="fas fa-box-open fa-3x" style="display: block; margin-bottom: 15px; opacity: 0.5;"></i>
+                        <p style="margin: 0; font-size: 1.1em;">No hay productos registrados en {{ nombre_almacen }} actualmente.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
+    // Buscador en tiempo real
     document.getElementById('searchInput').addEventListener('keyup', function() {
         let value = this.value.toLowerCase();
         let rows = document.querySelectorAll('tbody tr');
         rows.forEach(row => {
-            row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
+            // Evitamos ocultar la fila de "No hay productos" si está vacía
+            if(row.cells.length > 1) {
+                row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
+            }
         });
+        
+        // Efecto visual en el borde del input
+        this.style.borderColor = value ? 'var(--color-principal)' : '#ddd';
     });
 </script>
 {% endblock %}
