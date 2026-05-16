@@ -5,115 +5,160 @@
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h2 style="margin: 0; color: #2c3e50;">
-            <i class="fas fa-search" style="color: var(--color-principal);"></i> Buscador Avanzado - Percherón
+            <i class="fas fa-search" style="color: var(--color-principal);"></i> Buscador por Modelo - Percherón
         </h2>
-        <span style="background-color: #f1f5f9; color: #475569; padding: 5px 15px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">
-            <i class="fas fa-sliders-h"></i> Búsqueda Global
+        <span style="background-color: #e0f2fe; color: #0284c7; padding: 5px 15px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">
+            <i class="fas fa-keyboard"></i> Búsqueda Dinámica
         </span>
     </div>
     <hr style="border: 0.5px solid #eee; margin-bottom: 25px;">
 
-    <form action="#" method="GET" style="background-color: #f8fafc; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 30px;">
+    <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 30px;">
         
-        <div style="display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px;">
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 8px; font-size: 0.95em;">¿Qué estás buscando?</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" name="q" placeholder="Ingrese nombre, código, marca o modelo del producto..." style="padding: 15px; flex: 1; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 1rem; transition: all 0.3s;" autofocus>
-                    <button type="submit" style="background-color: var(--color-principal); color: white; border: none; padding: 0 35px; border-radius: 8px; font-weight: 600; font-size: 1.05rem; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                        <i class="fas fa-search"></i> Buscar
-                    </button>
+        <div style="display: flex; gap: 30px; align-items: stretch; max-width: 600px;">
+            
+            <div style="display: flex; border: 1px dashed #94a3b8; border-radius: 4px; overflow: hidden; flex: 1;">
+                <div style="background-color: #f8fafc; padding: 15px 20px; font-weight: bold; color: #334155; display: flex; align-items: center; border-right: 1px dashed #94a3b8;">
+                    MODELO:
+                </div>
+                <input type="text" id="inputModelo" placeholder="Ej. EFH25S2P4AW" autofocus autocomplete="off"
+                       style="flex: 1; padding: 15px; border: none; outline: none; font-size: 1.1rem; color: #1e293b; font-weight: 600;">
+            </div>
+
+            <div style="display: flex; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; width: 200px;">
+                <div style="background-color: #f1f5f9; padding: 15px; font-weight: bold; color: #334155; display: flex; align-items: center; border-right: 1px solid #cbd5e1;">
+                    STOCK:
+                </div>
+                <div id="displayStock" style="flex: 1; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: bold; color: #1d4ed8; background-color: white;">
+                    -
                 </div>
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 8px; font-size: 0.85em;">Categoría</label>
-                <select name="categoria" style="padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 0.95rem; background-color: white;">
-                    <option value="">Todas las categorías</option>
-                    <option value="refrigeracion">Refrigeración</option>
-                    <option value="lavado">Lavado</option>
-                    <option value="cocina">Cocina</option>
-                    <option value="pequenos">Pequeños Electrodomésticos</option>
-                </select>
-            </div>
-
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 8px; font-size: 0.85em;">Marca</label>
-                <select name="marca" style="padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 0.95rem; background-color: white;">
-                    <option value="">Todas las marcas</option>
-                    <option value="samsung">Samsung</option>
-                    <option value="lg">LG</option>
-                    <option value="panasonic">Panasonic</option>
-                    <option value="mabe">Mabe</option>
-                </select>
-            </div>
-
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 8px; font-size: 0.85em;">Estado de Stock</label>
-                <select name="stock" style="padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 0.95rem; background-color: white;">
-                    <option value="">Cualquier estado</option>
-                    <option value="disponible">Con Stock (> 5)</option>
-                    <option value="bajo">Stock Bajo (1 - 5)</option>
-                    <option value="agotado">Agotado (0)</option>
-                </select>
-            </div>
+        <div style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 15px 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); text-align: center; min-height: 55px; display: flex; align-items: center; justify-content: center;">
+            <span id="displayTitulo" style="font-size: 1.3rem; font-weight: 700; color: #1e40af;">
+                Esperando búsqueda...
+            </span>
         </div>
-    </form>
+    </div>
 
-    <div>
-        <h3 style="color: #334155; margin-bottom: 15px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-list-ul" style="color: var(--color-principal);"></i> Resultados
-        </h3>
+    <h3 style="color: #334155; margin-bottom: 15px; font-size: 1.1rem;">
+        <i class="fas fa-list" style="color: var(--color-principal);"></i> Detalle de Ingresos del Modelo
+    </h3>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.03); white-space: nowrap;">
+            <thead>
+                <tr style="background-color: #f8fafc; color: #1e293b; border-bottom: 2px solid var(--color-principal); font-size: 0.85em; text-transform: uppercase;">
+                    <th style="padding: 15px 12px; text-align: left; border-right: 1px solid #e2e8f0;">SKU</th>
+                    <th style="padding: 15px 12px; text-align: left; border-right: 1px solid #e2e8f0;">MODELO</th>
+                    <th style="padding: 15px 12px; text-align: left; border-right: 1px solid #e2e8f0;">MARCA</th>
+                    <th style="padding: 15px 12px; text-align: center; border-right: 1px solid #e2e8f0;">FECHA DE INGRESO</th>
+                    <th style="padding: 15px 12px; text-align: center; border-right: 1px solid #e2e8f0; background-color: #f1f5f9;">a</th>
+                    <th style="padding: 15px 12px; text-align: left; border-right: 1px solid #e2e8f0;">NRO. SERIE</th>
+                    <th style="padding: 15px 12px; text-align: right; border-right: 1px solid #e2e8f0;">COSTO UNITARIO</th>
+                    <th style="padding: 15px 12px; text-align: left; border-right: 1px solid #e2e8f0;">PROVEEDOR / MOTIVO DE INGRESO</th>
+                    <th style="padding: 15px 12px; text-align: left; border-right: 1px solid #e2e8f0;">UBICACIÓN DEL PRODUCTO</th>
+                    <th style="padding: 15px 12px; text-align: center;">INGRESADO POR:</th>
+                </tr>
+            </thead>
+            <tbody id="tablaBuscador">
+                <tr class="fila-dato" data-modelo="EFH25S2P4AW" data-titulo="Congeladora Horizontal 251 L Blanco – EFH25S2P4AW" style="border-bottom: 1px solid #eee; transition: 0.2s; font-size: 0.9em;">
+                    <td style="padding: 12px; font-family: monospace; font-weight: bold;">PRC-2001</td>
+                    <td style="padding: 12px; color: #0f172a; font-weight: 600;">EFH25S2P4AW</td>
+                    <td style="padding: 12px; color: #64748b;">Electrolux</td>
+                    <td style="padding: 12px; text-align: center;">10/05/2026</td>
+                    <td style="padding: 12px; text-align: center; background-color: #f8fafc;"></td>
+                    <td style="padding: 12px; color: #64748b;">SN-5544332211</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 600;">S/ 850.00</td>
+                    <td style="padding: 12px; color: #475569;">Compra Directa</td>
+                    <td style="padding: 12px; color: #475569;">Almacén B - Fila 1</td>
+                    <td style="padding: 12px; text-align: center;"><span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px; font-size: 0.85em;">ADMIN</span></td>
+                </tr>
+
+                <tr class="fila-dato" data-modelo="EFH25S2P4AW" data-titulo="Congeladora Horizontal 251 L Blanco – EFH25S2P4AW" style="border-bottom: 1px solid #eee; transition: 0.2s; font-size: 0.9em;">
+                    <td style="padding: 12px; font-family: monospace; font-weight: bold;">PRC-2002</td>
+                    <td style="padding: 12px; color: #0f172a; font-weight: 600;">EFH25S2P4AW</td>
+                    <td style="padding: 12px; color: #64748b;">Electrolux</td>
+                    <td style="padding: 12px; text-align: center;">12/05/2026</td>
+                    <td style="padding: 12px; text-align: center; background-color: #f8fafc;"></td>
+                    <td style="padding: 12px; color: #64748b;">SN-5544332299</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 600;">S/ 850.00</td>
+                    <td style="padding: 12px; color: #475569;">Traslado Magazzino</td>
+                    <td style="padding: 12px; color: #475569;">Almacén B - Fila 1</td>
+                    <td style="padding: 12px; text-align: center;"><span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px; font-size: 0.85em;">JABARCAP</span></td>
+                </tr>
+                
+                <tr class="fila-dato" data-modelo="RF-250L" data-titulo="Refrigeradora LG Inverter 250L" style="border-bottom: 1px solid #eee; transition: 0.2s; font-size: 0.9em;">
+                    <td style="padding: 12px; font-family: monospace; font-weight: bold;">PRC-1029</td>
+                    <td style="padding: 12px; color: #0f172a; font-weight: 600;">RF-250L</td>
+                    <td style="padding: 12px; color: #64748b;">LG</td>
+                    <td style="padding: 12px; text-align: center;">15/05/2026</td>
+                    <td style="padding: 12px; text-align: center; background-color: #f8fafc;"></td>
+                    <td style="padding: 12px; color: #64748b;">SN-99887766</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 600;">S/ 1,250.00</td>
+                    <td style="padding: 12px; color: #475569;">Proveedor Principal</td>
+                    <td style="padding: 12px; color: #475569;">Pasillo 2 - A</td>
+                    <td style="padding: 12px; text-align: center;"><span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px; font-size: 0.85em;">ADMIN</span></td>
+                </tr>
+            </tbody>
+        </table>
         
-        <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.03);">
-                <thead>
-                    <tr style="background-color: #f1f5f9; color: #475569; border-bottom: 2px solid #cbd5e1;">
-                        <th style="padding: 15px; text-align: left;">Código</th>
-                        <th style="padding: 15px; text-align: left;">Detalles del Producto</th>
-                        <th style="padding: 15px; text-align: left;">Ubicación</th>
-                        <th style="padding: 15px; text-align: center;">Stock</th>
-                        <th style="padding: 15px; text-align: center;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr style="border-bottom: 1px solid #eee; transition: 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc';" onmouseout="this.style.backgroundColor='transparent';">
-                        <td style="padding: 15px; font-family: monospace; color: #64748b; font-weight: 600;">#PRC-0042</td>
-                        <td style="padding: 15px;">
-                            <strong style="color: #334155; display: block; font-size: 1.05em;">Refrigeradora LG 250L Inverter</strong>
-                            <span style="font-size: 0.85em; color: #64748b;">Marca: LG | Cat: Refrigeración</span>
-                        </td>
-                        <td style="padding: 15px; color: #64748b;">
-                            <i class="fas fa-map-marker-alt" style="color: var(--color-principal);"></i> Pasillo 3, Estante B
-                        </td>
-                        <td style="padding: 15px; text-align: center;">
-                            <span style="background-color: #e2e8f0; color: #334155; padding: 5px 15px; border-radius: 12px; font-weight: bold; font-size: 0.85em;">12</span>
-                        </td>
-                        <td style="padding: 15px; text-align: center;">
-                            <button title="Ver ficha técnica" style="background: none; border: none; color: var(--color-principal); cursor: pointer; font-size: 1.2rem; margin: 0 5px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"><i class="fas fa-eye"></i></button>
-                            <button title="Registrar movimiento" style="background: none; border: none; color: #475569; cursor: pointer; font-size: 1.2rem; margin: 0 5px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"><i class="fas fa-exchange-alt"></i></button>
-                        </td>
-                    </tr>
-                    
-                    </tbody>
-            </table>
+        <div id="mensajeVacio" style="display: none; padding: 40px; text-align: center; color: #94a3b8;">
+            <i class="fas fa-box-open fa-3x" style="margin-bottom: 15px; opacity: 0.5;"></i>
+            <p style="margin: 0; font-size: 1.1em;">No se encontraron registros para este modelo.</p>
         </div>
     </div>
 
 </div>
 
 <script>
-    // Efecto visual para que la barra de búsqueda brille con el color de la plataforma al hacer clic
-    const searchInput = document.querySelector('input[name="q"]');
-    searchInput.addEventListener('focus', function() {
-        this.style.borderColor = 'var(--color-principal)';
-        this.style.boxShadow = '0 0 0 3px color-mix(in srgb, var(--color-principal) 20%, transparent)';
-    });
-    searchInput.addEventListener('blur', function() {
-        this.style.borderColor = '#cbd5e1';
-        this.style.boxShadow = 'none';
+    document.getElementById('inputModelo').addEventListener('keyup', function() {
+        let valorBusqueda = this.value.trim().toUpperCase();
+        let filas = document.querySelectorAll('.fila-dato');
+        let displayTitulo = document.getElementById('displayTitulo');
+        let displayStock = document.getElementById('displayStock');
+        let mensajeVacio = document.getElementById('mensajeVacio');
+        
+        let stockCalculado = 0;
+        let tituloEncontrado = "Esperando búsqueda...";
+        let coincidencias = 0;
+
+        if (valorBusqueda === "") {
+            // Si está vacío, mostrar todo y reiniciar visuales
+            filas.forEach(fila => fila.style.display = '');
+            displayTitulo.textContent = "Esperando búsqueda...";
+            displayTitulo.style.color = "#94a3b8";
+            displayStock.textContent = "-";
+            mensajeVacio.style.display = 'none';
+            return;
+        }
+
+        filas.forEach(fila => {
+            let modeloFila = fila.getAttribute('data-modelo').toUpperCase();
+            
+            // Si el modelo coincide parcial o totalmente
+            if (modeloFila.includes(valorBusqueda)) {
+                fila.style.display = '';
+                coincidencias++;
+                stockCalculado++; // Cada fila es 1 unidad de ingreso en este ejemplo
+                tituloEncontrado = fila.getAttribute('data-titulo'); // Capturamos el título
+            } else {
+                fila.style.display = 'none';
+            }
+        });
+
+        // Actualizar la interfaz con los resultados
+        if (coincidencias > 0) {
+            displayTitulo.textContent = tituloEncontrado;
+            displayTitulo.style.color = "#1e40af"; // Azul oscuro para resaltar
+            displayStock.textContent = stockCalculado;
+            mensajeVacio.style.display = 'none';
+        } else {
+            displayTitulo.textContent = "Modelo no encontrado";
+            displayTitulo.style.color = "#ef4444"; // Rojo de alerta
+            displayStock.textContent = "0";
+            mensajeVacio.style.display = 'block';
+        }
     });
 </script>
 {% endblock %}

@@ -5,7 +5,7 @@
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h2 style="margin: 0; color: #2c3e50;">
-            <i class="fas fa-bolt" style="color: var(--color-principal);"></i> Consulta Rápida - Percherón
+            <i class="fas fa-bolt" style="color: var(--color-principal);"></i> Consulta Rápida de Precios y Stock
         </h2>
         <span style="background-color: #fef9c3; color: #ca8a04; padding: 5px 15px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">
             <i class="fas fa-barcode"></i> Listo para escanear
@@ -13,65 +13,76 @@
     </div>
     <hr style="border: 0.5px solid #eee; margin-bottom: 30px;">
 
-    <div style="max-width: 600px; margin: 0 auto 40px auto; text-align: center;">
-        <p style="color: #64748b; margin-bottom: 15px; font-size: 1.05rem;">Ingrese o escanee el código del producto (SKU)</p>
+    <div style="max-width: 700px; margin: 0 auto 40px auto; text-align: center;">
+        <p style="color: #64748b; margin-bottom: 15px; font-size: 1.05rem;">Ingrese Modelo, SKU o escanee el código de barras</p>
         
         <form action="#" method="GET" style="display: flex; gap: 10px; justify-content: center;">
-            <input type="text" name="sku" placeholder="Ej. PRC-0042..." autofocus autocomplete="off"
-                   style="padding: 18px 25px; width: 100%; max-width: 400px; border: 2px solid #cbd5e1; border-radius: 12px; outline: none; font-size: 1.2rem; text-align: center; font-weight: 600; letter-spacing: 1px; transition: border-color 0.3s;">
+            <input type="text" name="q" placeholder="Buscar..." autofocus autocomplete="off"
+                   style="padding: 15px 25px; width: 100%; border: 2px solid #cbd5e1; border-radius: 12px; outline: none; font-size: 1.2rem; text-align: center; font-weight: 600; letter-spacing: 1px; transition: border-color 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
             <button type="submit" style="background-color: var(--color-principal); color: white; border: none; padding: 0 30px; border-radius: 12px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <i class="fas fa-bolt"></i> Consultar
+                <i class="fas fa-search"></i> Buscar
             </button>
         </form>
     </div>
 
-    <div style="max-width: 600px; margin: 0 auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 30px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);">
-        
-        <div style="text-align: center; margin-bottom: 20px;">
-            <span style="display: inline-block; background: #dcfce7; color: #166534; padding: 6px 16px; border-radius: 20px; font-size: 0.85em; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">
-                <i class="fas fa-check-circle"></i> Producto Encontrado
-            </span>
-        </div>
+    <h3 style="color: #334155; margin-bottom: 15px; font-size: 1.1rem;">
+        <i class="fas fa-list" style="color: var(--color-principal);"></i> Resultados de la Consulta
+    </h3>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.03); white-space: nowrap;">
+            <thead>
+                <tr style="text-transform: uppercase; font-size: 0.85em; color: #334155;">
+                    <th style="padding: 15px 12px; text-align: left; background-color: #f8fafc; border-bottom: 2px solid #cbd5e1;">Modelo</th>
+                    <th style="padding: 15px 12px; text-align: left; background-color: #f8fafc; border-bottom: 2px solid #cbd5e1;">Título</th>
+                    <th style="padding: 15px 12px; text-align: left; background-color: #f8fafc; border-bottom: 2px solid #cbd5e1;">Marca</th>
+                    <th style="padding: 15px 12px; text-align: center; background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; border-right: 2px solid #cbd5e1;">Stock</th>
+                    
+                    <th style="padding: 15px 12px; text-align: center; background-color: #FDE047; color: #854D0E; border-bottom: 2px solid #EAB308;">Mercado Libre</th>
+                    <th style="padding: 15px 12px; text-align: center; background-color: #bef264; color: #3f6212; border-bottom: 2px solid #84cc16;">Falabella</th>
+                    <th style="padding: 15px 12px; text-align: center; background-color: #c084fc; color: #4c1d95; border-bottom: 2px solid #9333ea;">Página Web</th>
+                    <th style="padding: 15px 12px; text-align: center; background-color: #bae6fd; color: #0369a1; border-bottom: 2px solid #38bdf8;">Creditienda</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #eee; transition: 0.2s; font-size: 0.95em;" onmouseover="this.style.backgroundColor='#f8fafc';" onmouseout="this.style.backgroundColor='transparent';">
+                    <td style="padding: 15px 12px; font-weight: bold; color: #475569;">RF-250L</td>
+                    <td style="padding: 15px 12px;">Refrigeradora Inverter 250L</td>
+                    <td style="padding: 15px 12px; color: #64748b;">LG</td>
+                    <td style="padding: 15px 12px; text-align: center; font-weight: 900; font-size: 1.1em; color: #0284c7; border-right: 2px solid #f1f5f9;">12</td>
+                    
+                    <td style="padding: 15px 12px; text-align: center; font-weight: 600;">S/ 1,450.00</td>
+                    <td style="padding: 15px 12px; text-align: center; font-weight: 600;">S/ 1,499.00</td>
+                    <td style="padding: 15px 12px; text-align: center; font-weight: 600;">S/ 1,399.00</td>
+                    <td style="padding: 15px 12px; text-align: center; font-weight: 600;">S/ 1,550.00</td>
+                </tr>
 
-        <div style="text-align: center; margin-bottom: 25px;">
-            <h3 style="margin: 0 0 5px 0; color: #1e293b; font-size: 1.5rem;">Refrigeradora LG 250L Inverter</h3>
-            <p style="margin: 0; color: #64748b; font-family: monospace; font-size: 1.1rem;">SKU: PRC-0042</p>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: center;">
-            <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
-                <p style="margin: 0; color: #64748b; font-size: 0.9rem; font-weight: 600; text-transform: uppercase;">Stock Actual</p>
-                <p style="margin: 5px 0 0 0; color: var(--color-principal); font-size: 2.5rem; font-weight: 800;">12</p>
-                <p style="margin: 5px 0 0 0; color: #10b981; font-size: 0.85rem; font-weight: 600;"><i class="fas fa-arrow-up"></i> Disponible</p>
-            </div>
-            
-            <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
-                <p style="margin: 0; color: #64748b; font-size: 0.9rem; font-weight: 600; text-transform: uppercase;">Precio de Venta</p>
-                <p style="margin: 5px 0 0 0; color: #334155; font-size: 2.5rem; font-weight: 800;">
-                    <span style="font-size: 1.2rem; vertical-align: super;">S/</span>1,450
-                </p>
-            </div>
-        </div>
-
-        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px dashed #cbd5e1; display: flex; justify-content: space-between; align-items: center; color: #475569; font-size: 0.95rem;">
-            <span><i class="fas fa-map-marker-alt" style="color: var(--color-principal);"></i> Ubicación: Pasillo 3, Estante B</span>
-            <span><i class="fas fa-tag"></i> Marca: LG</span>
-        </div>
-        
+                <tr style="border-bottom: 1px solid #eee; transition: 0.2s; font-size: 0.95em;" onmouseover="this.style.backgroundColor='#f8fafc';" onmouseout="this.style.backgroundColor='transparent';">
+                    <td style="padding: 15px 12px; font-weight: bold; color: #475569;">WM-13KG</td>
+                    <td style="padding: 15px 12px;">Lavadora Carga Superior 13kg</td>
+                    <td style="padding: 15px 12px; color: #64748b;">Samsung</td>
+                    <td style="padding: 15px 12px; text-align: center; font-weight: 900; font-size: 1.1em; color: #ef4444; border-right: 2px solid #f1f5f9;">2</td>
+                    
+                    <td style="padding: 15px 12px; text-align: center; font-weight: 600;">S/ 980.00</td>
+                    <td style="padding: 15px 12px; text-align: center; font-weight: 600;">S/ 999.00</td>
+                    <td style="padding: 15px 12px; text-align: center; font-weight: 600;">S/ 950.00</td>
+                    <td style="padding: 15px 12px; text-align: center; font-weight: 600;">S/ 1,050.00</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
 </div>
 
 <script>
     // Efecto para iluminar el borde cuando el usuario va a escribir
-    const skuInput = document.querySelector('input[name="sku"]');
-    skuInput.addEventListener('focus', function() {
+    const searchInput = document.querySelector('input[name="q"]');
+    searchInput.addEventListener('focus', function() {
         this.style.borderColor = 'var(--color-principal)';
         this.style.boxShadow = '0 0 0 4px color-mix(in srgb, var(--color-principal) 15%, transparent)';
     });
-    skuInput.addEventListener('blur', function() {
+    searchInput.addEventListener('blur', function() {
         this.style.borderColor = '#cbd5e1';
-        this.style.boxShadow = 'none';
+        this.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)';
     });
 </script>
 {% endblock %}
