@@ -119,12 +119,12 @@ def percheron_costos_general(request):
     })
 
 @login_required
-def percheron_registro(request):
+def percheron_registros(request):
     canal = request.session.get('canal_activo', 'Web')
     color = request.session.get('color_actual', '#3498DB')
     icono = request.session.get('icono_actual', 'fas fa-globe')
     
-    return render(request, 'inventario/percheron_registro.html', {
+    return render(request, 'inventario/percheron_registros.html', {
         'canal': canal,
         'color_actual': color,
         'icono_actual': icono
