@@ -3,7 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from .models import Electrodomestico, Plataforma 
 
-# 1. El Pre-Login (Portal público)
+# =========================================================
+# 1. EL PRE-LOGIN (Portal público)
+# =========================================================
 def selector_plataformas(request):
     plataformas = [
         {"nombre": "Mercado Libre", "icono": "fas fa-handshake", "color": "#F1C40F"},
@@ -17,9 +19,10 @@ def selector_plataformas(request):
     ]
     return render(request, 'inventario/selector.html', {'plataformas': plataformas})
 
-# ---------------------------------------------------------
+
+# =========================================================
 # 2. VISTAS DEL SISTEMA (Post-Login)
-# ---------------------------------------------------------
+# =========================================================
 
 @login_required
 def inicio(request):
@@ -29,7 +32,7 @@ def inicio(request):
 # INVENTARIO GLOBAL: MAGAZZINO
 @login_required
 def inventario_magazzino(request):
-    productos = Electrodomestico.objects.all() # Aquí podrías filtrar por almacén luego
+    productos = Electrodomestico.objects.all()  # Aquí podrás filtrar por almacén luego
     canal = request.session.get('canal_activo', 'Web')
     return render(request, 'inventario/inventario_lista.html', {
         'productos': productos, 
@@ -37,17 +40,47 @@ def inventario_magazzino(request):
         'nombre_almacen': 'MAGAZZINO'
     })
 
-# INVENTARIO GLOBAL: PERCHERON
+# SUBSECCIONES ESPECÍFICAS DEL MÓDULO PERCHERÓN (GLOBALES)
 @login_required
-def inventario_percheron(request):
-    productos = Electrodomestico.objects.all() # Aquí podrías filtrar por almacén luego
+def percheron_inventario(request):
+    productos = Electrodomestico.objects.all()  # Filtrar por almacén o lógica global
     canal = request.session.get('canal_activo', 'Web')
-    return render(request, 'inventario/inventario_lista.html', {
-        'productos': productos, 
+    color = request.session.get('color_actual', '#3498DB')
+    icono = request.session.get('icono_actual', 'fas fa-globe')
+    
+    return render(request, 'inventario/percheron_inventario.html', {
+        'productos': productos,
         'canal': canal,
+        'color_actual': color,
+        'icono_actual': icono,
         'nombre_almacen': 'PERCHERON'
     })
 
+@login_required
+def percheron_ingresos(request):
+    canal = request.session.get('canal_activo', 'Web')
+    color = request.session.get('color_actual', '#3498DB')
+    icono = request.session.get('icono_actual', 'fas fa-globe')
+    
+    return render(request, 'inventario/percheron_ingresos.html', {
+        'canal': canal,
+        'color_actual': color,
+        'icono_actual': icono
+    })
+
+@login_required
+def percheron_salidas(request):
+    canal = request.session.get('canal_activo', 'Web')
+    color = request.session.get('color_actual', '#3498DB')
+    icono = request.session.get('icono_actual', 'fas fa-globe')
+    
+    return render(request, 'inventario/percheron_salidas.html', {
+        'canal': canal,
+        'color_actual': color,
+        'icono_actual': icono
+    })
+
+# REPORTES Y HERRAMIENTAS
 @login_required
 def reporte_ventas(request):
     canal = request.session.get('canal_activo', 'Web')
@@ -58,15 +91,15 @@ def simulador_costos(request):
     canal = request.session.get('canal_activo', 'Web')
     return render(request, 'inventario/simulador_costos.html', {'canal': canal})
 
-# Agrega esta función en tus vistas
 @login_required
 def pantalla_carga(request):
     canal = request.session.get('canal_activo', 'Web')
     return render(request, 'inventario/loading.html', {'canal': canal})
 
-# ---------------------------------------------------------
+
+# =========================================================
 # 3. EL CEREBRO: Login Camaleónico
-# ---------------------------------------------------------
+# =========================================================
 class LoginCamaleonicoView(LoginView):
     template_name = 'inventario/login.html'
     
@@ -81,9 +114,8 @@ class LoginCamaleonicoView(LoginView):
         "Web": {"color": "#3498DB", "icono": "fa-globe"}
     }
 
-    # Dentro de la clase LoginCamaleonicoView
     def get_success_url(self):
-        return '/loading/' # O el nombre que le des en urls.py
+        return '/loading/'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -118,5 +150,3 @@ class LoginCamaleonicoView(LoginView):
         self.request.session['icono_actual'] = f"{icon_prefix} {tema['icono']}"
         
         return super().form_valid(form)
-    
-    #sdasd
