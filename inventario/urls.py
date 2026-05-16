@@ -22,7 +22,7 @@ urlpatterns = [
     path('inventario/percheron/buscador/', views.percheron_buscador, name='percheron_buscador'),
     path('inventario/percheron/consulta-rapida/', views.percheron_consulta_rapida, name='percheron_consulta_rapida'),
     path('inventario/percheron/costos/', views.percheron_costos_general, name='percheron_costos'),
-    path('inventario/percheron/registros/', views.percheron_registros, name='percheron_registro'),
+    path('inventario/percheron/registros/', views.percheron_registros, name='percheron_registros'),
     
     # 5. Reportes y Herramientas
     path('reportes/', views.reporte_ventas, name='reporte_ventas'),
