@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- El título de la pestaña cambia automáticamente -->
     <title>Acceso - {{ nombre_canal }}</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -64,6 +63,8 @@
         .form-group input { 
             width: 100%; 
             padding: 12px 16px; 
+            /* Damos un poco más de espacio a la derecha para que el texto no pise el ojito */
+            padding-right: 40px; 
             border: 1px solid #cbd5e1; 
             border-radius: 8px; 
             font-size: 15px; 
@@ -122,11 +123,9 @@
 
     <div class="login-container">
         <div class="login-header">
-            <!-- Cargamos el ícono dinámico que mandó Python -->
             <div class="icon-wrapper">
                 <i class="{{ icono_canal }}"></i>
             </div>
-            <!-- Cargamos el nombre dinámico -->
             <h2>Ingreso a {{ nombre_canal }}</h2>
             <p>Bienvenido. Ingrese sus credenciales de acceso.</p>
         </div>
@@ -137,7 +136,6 @@
             </div>
         {% endif %}
 
-        <!-- MUY IMPORTANTE: Mandamos el canal en la url al enviar el formulario para no perder el color si hay un error -->
         <form method="post" action="{% url 'login' %}?canal={{ nombre_canal|urlencode }}">
             {% csrf_token %}
             
@@ -148,17 +146,40 @@
             
             <div class="form-group">
                 <label for="id_password">Contraseña</label>
-                <input type="password" name="password" autocomplete="current-password" required id="id_password">
+                <div style="position: relative; width: 100%;">
+                    <input type="password" name="password" autocomplete="current-password" required id="id_password">
+                    <span onclick="togglePassword()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #6c757d; display: flex; align-items: center;" title="Mostrar/Ocultar contraseña">
+                        <svg id="icono-ojo" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </span>
+                </div>
             </div>
             
             <button type="submit" class="btn-submit">Ingresar al Sistema</button>
         </form>
 
-        <!-- Botón para regresar si te equivocaste de plataforma -->
         <a href="{% url 'selector' %}" class="back-link">
             <i class="fas fa-arrow-left"></i> Volver a plataformas
         </a>
     </div>
 
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('id_password');
+            const iconoOjo = document.getElementById('icono-ojo');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                // Cambia al icono de ojo tachado
+                iconoOjo.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+            } else {
+                passwordInput.type = 'password';
+                // Regresa al icono de ojo normal
+                iconoOjo.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+            }
+        }
+    </script>
 </body>
 </html>
