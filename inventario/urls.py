@@ -19,6 +19,10 @@ urlpatterns = [
     path('inventario/percheron/', views.percheron_inventario, name='percheron_inventario'),
     path('inventario/percheron/ingresos/', views.percheron_ingresos, name='percheron_ingresos'),
     path('inventario/percheron/salidas/', views.percheron_salidas, name='percheron_salidas'),
+    path('inventario/percheron/buscador/', views.percheron_buscador, name='percheron_buscador'),
+    path('inventario/percheron/consulta-rapida/', views.percheron_consulta_rapida, name='percheron_consulta_rapida'),
+    path('inventario/percheron/costos/', views.percheron_costos_general, name='percheron_costos'),
+    path('inventario/percheron/registros/', views.percheron_registro, name='percheron_registro'),
     
     # 5. Reportes y Herramientas
     path('reportes/', views.reporte_ventas, name='reporte_ventas'),

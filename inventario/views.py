@@ -40,7 +40,9 @@ def inventario_magazzino(request):
         'nombre_almacen': 'MAGAZZINO'
     })
 
+# =========================================================
 # SUBSECCIONES ESPECÍFICAS DEL MÓDULO PERCHERÓN (GLOBALES)
+# =========================================================
 @login_required
 def percheron_inventario(request):
     productos = Electrodomestico.objects.all()  # Filtrar por almacén o lógica global
@@ -80,7 +82,57 @@ def percheron_salidas(request):
         'icono_actual': icono
     })
 
+@login_required
+def percheron_buscador(request):
+    canal = request.session.get('canal_activo', 'Web')
+    color = request.session.get('color_actual', '#3498DB')
+    icono = request.session.get('icono_actual', 'fas fa-globe')
+    
+    return render(request, 'inventario/percheron_buscador.html', {
+        'canal': canal,
+        'color_actual': color,
+        'icono_actual': icono
+    })
+
+@login_required
+def percheron_consulta_rapida(request):
+    canal = request.session.get('canal_activo', 'Web')
+    color = request.session.get('color_actual', '#3498DB')
+    icono = request.session.get('icono_actual', 'fas fa-globe')
+    
+    return render(request, 'inventario/percheron_consulta_rapida.html', {
+        'canal': canal,
+        'color_actual': color,
+        'icono_actual': icono
+    })
+
+@login_required
+def percheron_costos_general(request):
+    canal = request.session.get('canal_activo', 'Web')
+    color = request.session.get('color_actual', '#3498DB')
+    icono = request.session.get('icono_actual', 'fas fa-globe')
+    
+    return render(request, 'inventario/percheron_costos_general.html', {
+        'canal': canal,
+        'color_actual': color,
+        'icono_actual': icono
+    })
+
+@login_required
+def percheron_registro(request):
+    canal = request.session.get('canal_activo', 'Web')
+    color = request.session.get('color_actual', '#3498DB')
+    icono = request.session.get('icono_actual', 'fas fa-globe')
+    
+    return render(request, 'inventario/percheron_registro.html', {
+        'canal': canal,
+        'color_actual': color,
+        'icono_actual': icono
+    })
+
+# =========================================================
 # REPORTES Y HERRAMIENTAS
+# =========================================================
 @login_required
 def reporte_ventas(request):
     canal = request.session.get('canal_activo', 'Web')
