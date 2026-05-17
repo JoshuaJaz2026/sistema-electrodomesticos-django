@@ -81,23 +81,6 @@
             <div class="menu-category">Inventarios Globales</div>
             
             <div class="dropdown">
-                <div class="menu-item" onclick="toggleMenu('magazzino-menu', 'arrow-mag')">
-                    <i class="fas fa-warehouse"></i> 
-                    <span>MAGAZZINO</span>
-                    <i class="fas fa-chevron-down" id="arrow-mag" style="margin-left: auto; font-size: 0.7em; transition: 0.3s;"></i>
-                </div>
-                <div class="submenu" id="magazzino-menu">
-                    <a href="{% url 'inventario_magazzino' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-list"></i> Ver Todo</a>
-                    <a href="#" class="submenu-item"><i class="fas fa-sign-out-alt"></i> Salidas</a>
-                    <a href="#" class="submenu-item"><i class="fas fa-bolt"></i> Consulta Rápida</a>
-                    <a href="#" class="submenu-item"><i class="fas fa-search"></i> Buscador</a>
-                    <a href="#" class="submenu-item"><i class="fas fa-history"></i> Registros</a>
-                    <a href="#" class="submenu-item"><i class="fas fa-file-invoice-dollar"></i> Costos General</a>
-                    <a href="#" class="submenu-item"><i class="fas fa-sign-in-alt"></i> Ingresos</a>
-                </div>
-            </div>
-
-            <div class="dropdown">
                 <div class="menu-item" onclick="toggleMenu('percheron-menu', 'arrow-per')">
                     <i class="fas fa-boxes"></i> 
                     <span>PERCHERON</span>
