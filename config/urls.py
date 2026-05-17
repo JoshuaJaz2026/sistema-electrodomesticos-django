@@ -9,7 +9,8 @@ urlpatterns = [
     # Aquí conectamos tu Login Camaleónico
     path('login/', inventario_views.LoginCamaleonicoView.as_view(), name='login'),
     
-    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+    # ¡AQUÍ ESTÁ EL CAMBIO! Ahora te enviará a la pantalla de plataformas al salir
+    path('logout/', auth_views.LogoutView.as_view(next_page='selector'), name='logout'),
     
     # Tu portal de plataformas
     path('', include('inventario.urls')), 

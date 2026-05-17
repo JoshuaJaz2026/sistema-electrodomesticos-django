@@ -132,4 +132,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Configuraciones de Login
 LOGIN_URL = 'login'              # Si no está logueado, mándalo aquí
 LOGIN_REDIRECT_URL = 'inicio'    # Si el login es exitoso, mándalo al inventario (crearemos esta ruta luego)
-LOGOUT_REDIRECT_URL = 'login'    # Al cerrar sesión, vuelve al login
+LOGOUT_REDIRECT_URL = 'selector'    # Al cerrar sesión, vuelve al login
