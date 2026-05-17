@@ -1,133 +1,177 @@
 {% extends 'inventario/dashboard_global.html' %}
 
 {% block content %}
-<div class="card" style="border-top: 4px solid var(--color-principal);">
+<div class="card" style="border-top: 4px solid var(--color-principal); padding: 20px;">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
         <h2 style="margin: 0; color: #2c3e50;">
-            <i class="fas fa-sign-in-alt" style="color: var(--color-principal);"></i> Registro de Ingresos - Percherón
+            <i class="fas fa-box-open" style="color: var(--color-principal);"></i> Ingresos Masivos - Percherón
         </h2>
-        <span style="background-color: #e2e8f0; color: #475569; padding: 5px 15px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">
-            <i class="far fa-calendar-alt"></i> Hoy: {% now "d/m/Y" %}
-        </span>
+        <div style="display: flex; gap: 12px;">
+            <button type="button" onclick="agregarFilaNueva()" style="background-color: var(--color-principal); color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-plus"></i> Insertar Fila
+            </button>
+            <button type="button" onclick="guardarMatrizCompleta()" style="background-color: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-save"></i> Guardar Ingresos
+            </button>
+        </div>
     </div>
-    <hr style="border: 0.5px solid #eee; margin-bottom: 25px;">
+    <p style="color: #64748b; margin-top: -10px; margin-bottom: 25px; font-size: 0.9rem;">
+        <i class="fas fa-info-circle"></i> Modo Edición Libre. Ingrese los productos rápidamente. La columna de salidas (OUT) está deshabilitada en esta sección por seguridad.
+    </p>
 
-    <form action="#" method="POST">
-        {% csrf_token %}
-        
-        <h4 style="color: #64748b; margin-bottom: 15px; border-bottom: 1px dashed #cbd5e1; padding-bottom: 5px;">1. Datos del Producto</h4>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px;">
-            
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 5px; font-size: 0.85em;">SKU</label>
-                <input type="text" name="sku" placeholder="Ej. PRC-1029" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;" required autofocus>
-            </div>
-
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 5px; font-size: 0.85em;">TÍTULO</label>
-                <input type="text" name="titulo" placeholder="Nombre del producto" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;" required>
-            </div>
-
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 5px; font-size: 0.85em;">MODELO</label>
-                <input type="text" name="modelo" placeholder="Ej. RF-250L" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
-            </div>
-
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 5px; font-size: 0.85em;">CÓDIGO EAN</label>
-                <input type="text" name="ean" placeholder="Código de barras" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
-            </div>
-        </div>
-
-        <h4 style="color: #64748b; margin-bottom: 15px; border-bottom: 1px dashed #cbd5e1; padding-bottom: 5px;">2. Detalles de Operación</h4>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px;">
-            
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 5px; font-size: 0.85em;">SERIE / N°</label>
-                <input type="text" name="serie" placeholder="N° de Serie" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
-            </div>
-
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 5px; font-size: 0.85em;">INGRESO x 1und</label>
-                <input type="number" name="cantidad" min="1" placeholder="Cantidad" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;" required>
-            </div>
-
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 5px; font-size: 0.85em;">COSTO UNT. (S/)</label>
-                <input type="number" step="0.01" name="costo" placeholder="0.00" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;" required>
-            </div>
-
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 5px; font-size: 0.85em;">PROVEEDOR / MOTIVO</label>
-                <input type="text" name="proveedor_motivo" placeholder="Ej. Traslado Magazzino" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;" required>
-            </div>
-
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 5px; font-size: 0.85em;">UBICACIÓN</label>
-                <input type="text" name="ubicacion" placeholder="Ej. Estante A-3" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
-            </div>
-
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 5px; font-size: 0.85em;">FECHA DE INGRESO</label>
-                <input type="date" name="fecha_ingreso" value="{% now 'Y-m-d' %}" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; color: #334155;" required>
-            </div>
-            
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 5px; font-size: 0.85em;">BY:</label>
-                <input type="text" value="{{ user.username|upper }}" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #f1f5f9; color: #94a3b8; font-weight: bold; outline: none;" readonly>
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 15px; border-top: 1px solid #eee; padding-top: 20px; margin-bottom: 40px;">
-            <button type="submit" style="background-color: var(--color-principal); color: white; border: none; padding: 10px 25px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s;">
-                <i class="fas fa-save"></i> Guardar Ingreso
-            </button>
-            <button type="reset" style="background-color: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; padding: 10px 25px; border-radius: 6px; font-weight: 600; cursor: pointer;">
-                Limpiar
-            </button>
-        </div>
-    </form>
-
-    <h3 style="color: #334155; margin-bottom: 15px; font-size: 1.1rem;">
-        <i class="fas fa-list-ul" style="color: var(--color-principal);"></i> Últimos Registros
-    </h3>
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.03); white-space: nowrap;">
+    <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <table style="width: 100%; border-collapse: collapse; background: white; white-space: nowrap; font-size: 0.85em;">
             <thead>
-                <tr style="background-color: #f8fafc; border-bottom: 2px solid var(--color-principal); color: #475569; font-size: 0.85em; text-transform: uppercase;">
-                    <th style="padding: 12px; text-align: left;">SKU</th>
-                    <th style="padding: 12px; text-align: left;">Modelo</th>
-                    <th style="padding: 12px; text-align: left;">Título</th>
-                    <th style="padding: 12px; text-align: center;">Fecha de Ingreso</th>
-                    <th style="padding: 12px; text-align: left;">Código EAN</th>
-                    <th style="padding: 12px; text-align: left;">Serie / N°</th>
-                    <th style="padding: 12px; text-align: right;">Costo Unt.</th>
-                    <th style="padding: 12px; text-align: center;">Ingreso x 1und</th>
-                    <th style="padding: 12px; text-align: left;">Proveedor / Motivo</th>
-                    <th style="padding: 12px; text-align: left;">Ubicación</th>
-                    <th style="padding: 12px; text-align: center;">By:</th>
+                <tr style="background-color: #f8fafc; color: #334155; border-bottom: 2px solid #cbd5e1; text-transform: uppercase; font-weight: bold;">
+                    <th style="padding: 10px; text-align: center; background-color: #f1f5f9; width: 40px; border-right: 1px solid #cbd5e1;">#</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">SKU</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Modelo</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Marca</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 200px;">Título</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center;">Fecha Ingreso</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Código EAN</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Nro. Serie</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right;">Costo Unitario</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Proveedor</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Ubicación Producto</th>
+                    <th style="padding: 10px; border-right: 2px solid #cbd5e1; text-align: center;">Registrado Por</th>
+                    <th style="padding: 10px; text-align: center; background-color: #f0fdf4; color: #166534; border-right: 1px solid #bbf7d0; width: 80px;">IN (ENTRADA)</th>
+                    <th style="padding: 10px; text-align: center; background-color: #f0f9ff; color: #075985; width: 70px;">STOCK TOTAL</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr style="border-bottom: 1px solid #eee; font-size: 0.9em; transition: 0.2s;" onmouseover="this.style.backgroundColor='#f1f5f9';" onmouseout="this.style.backgroundColor='transparent';">
-                    <td style="padding: 12px; font-family: monospace; font-weight: bold; color: #334155;">PRC-1029</td>
-                    <td style="padding: 12px; color: #64748b;">RF-250L</td>
-                    <td style="padding: 12px;"><strong>Refrigeradora LG Inverter</strong></td>
-                    <td style="padding: 12px; text-align: center; color: #64748b;">16/05/2026</td>
-                    <td style="padding: 12px; color: #64748b;">7701234567890</td>
-                    <td style="padding: 12px; color: #64748b;">SN-99887766</td>
-                    <td style="padding: 12px; text-align: right; font-weight: 600;">S/ 1,250.00</td>
-                    <td style="padding: 12px; text-align: center;"><span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 12px; font-weight: bold;">+5</span></td>
-                    <td style="padding: 12px; color: #475569;">Traslado Magazzino</td>
-                    <td style="padding: 12px; color: #475569;">Pasillo 2 - A</td>
-                    <td style="padding: 12px; text-align: center;">
-                        <span style="background: #e2e8f0; color: #334155; padding: 2px 8px; border-radius: 4px; font-size: 0.85em;"><i class="fas fa-user"></i> ADMIN</span>
+            <tbody id="cuerpoExcel">
+                
+                {% for mov in movimientos %}
+                <tr class="fila-excel" data-id="{{ mov.id }}">
+                    <td style="padding: 5px; text-align: center; background-color: #f8fafc; border-right: 1px solid #cbd5e1; color: #94a3b8; font-weight: bold;">{{ forloop.counter }}</td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.sku }}" class="input-celda centralizar input-sku" style="font-weight: bold;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.modelo }}" class="input-celda input-modelo"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.marca|default:'' }}" class="input-celda input-marca"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.titulo }}" class="input-celda input-titulo" style="font-weight: 600;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" value="{{ mov.fecha|date:'Y-m-d' }}" class="input-celda centralizar input-fecha"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.codigo_ean|default:'' }}" class="input-celda input-ean"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.serie|default:'' }}" class="input-celda input-serie"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" step="0.01" value="{{ mov.costo_transaccion }}" class="input-celda alinear-derecha input-costo"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.proveedor_motivo|default:'' }}" class="input-celda input-proveedor"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.ubicacion|default:'' }}" class="input-celda input-ubicacion"></td>
+                    <td style="padding: 0; border-right: 2px solid #cbd5e1;"><input type="text" value="{{ mov.usuario.username|upper }}" class="input-celda centralizar input-usuario" readonly></td>
+                    
+                    <td style="padding: 0; border-right: 1px solid #bbf7d0; background-color: #f0fdf4;">
+                        <input type="number" value="{{ mov.cantidad }}" class="input-celda centralizar valor-in" style="font-weight: bold; color: #166534;">
+                    </td>
+                    
+                    <td style="padding: 5px; text-align: center; font-weight: 900; color: #0284c7; background-color: #e0f2fe; font-size: 1.05em;">
+                        {{ mov.producto.stock_actual }}
                     </td>
                 </tr>
+                {% empty %}
+                <tr class="fila-excel" data-id="">
+                    <td style="padding: 5px; text-align: center; background-color: #f8fafc; border-right: 1px solid #cbd5e1; color: #94a3b8; font-weight: bold;">1</td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="PRC-..." class="input-celda centralizar input-sku" style="font-weight: bold;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Modelo" class="input-celda input-modelo"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Marca" class="input-celda input-marca"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Descripción" class="input-celda input-titulo" style="font-weight: 600;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" value="{% now 'Y-m-d' %}" class="input-celda centralizar input-fecha"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="EAN" class="input-celda input-ean"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Serie" class="input-celda input-serie"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" step="0.01" placeholder="0.00" class="input-celda alinear-derecha input-costo"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Proveedor" class="input-celda input-proveedor"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Ubicación" class="input-celda input-ubicacion"></td>
+                    <td style="padding: 0; border-right: 2px solid #cbd5e1;"><input type="text" value="{{ user.username|upper }}" class="input-celda centralizar input-usuario" readonly></td>
+                    <td style="padding: 0; border-right: 1px solid #bbf7d0; background-color: #f0fdf4;"><input type="number" value="0" class="input-celda centralizar valor-in" style="font-weight: bold; color: #166534;"></td>
+                    <td style="padding: 5px; text-align: center; font-weight: 900; color: #0284c7; background-color: #e0f2fe; font-size: 1.05em;">0</td>
+                </tr>
+                {% endfor %}
+
             </tbody>
         </table>
     </div>
-
 </div>
+
+<style>
+    .input-celda { width: 100%; box-sizing: border-box; border: none; padding: 8px 10px; font-family: inherit; font-size: inherit; color: #334155; background-color: transparent; outline: none; transition: background-color 0.15s; }
+    .input-celda:focus { background-color: #fffdec; box-shadow: inset 0 0 0 2px #3b82f6; color: #000; }
+    .centralizar { text-align: center; }
+    .alinear-derecha { text-align: right; }
+    .input-celda::-webkit-outer-spin-button, .input-celda::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .input-celda[type=number] { -moz-appearance: textfield; }
+</style>
+
+<script>
+    // 1. Insertar Fila Nueva en blanco
+    function agregarFilaNueva() {
+        const tbody = document.getElementById('cuerpoExcel');
+        const numeroSiguiente = tbody.querySelectorAll('.fila-excel').length + 1;
+        
+        const nuevaFila = document.createElement('tr');
+        nuevaFila.className = 'fila-excel';
+        nuevaFila.setAttribute('data-id', '');
+        nuevaFila.innerHTML = `
+            <td style="padding: 5px; text-align: center; background-color: #f1f5f9; border-right: 1px solid #cbd5e1; color: #475569; font-weight: bold;">${numeroSiguiente}</td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="PRC-..." class="input-celda centralizar input-sku" style="font-weight: bold;"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Modelo" class="input-celda input-modelo"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Marca" class="input-celda input-marca"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Descripción" class="input-celda input-titulo" style="font-weight: 600;"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" value="{% now 'Y-m-d' %}" class="input-celda centralizar input-fecha"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="EAN" class="input-celda input-ean"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Serie" class="input-celda input-serie"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" step="0.01" placeholder="0.00" class="input-celda alinear-derecha input-costo"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Proveedor" class="input-celda input-proveedor"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Ubicación" class="input-celda input-ubicacion"></td>
+            <td style="padding: 0; border-right: 2px solid #cbd5e1;"><input type="text" value="{{ user.username|upper }}" class="input-celda centralizar input-usuario" readonly></td>
+            <td style="padding: 0; border-right: 1px solid #bbf7d0; background-color: #f0fdf4;"><input type="number" value="0" class="input-celda centralizar valor-in" style="font-weight: bold; color: #166534;"></td>
+            <td style="padding: 5px; text-align: center; font-weight: 900; color: #0284c7; background-color: #e0f2fe; font-size: 1.05em;">0</td>
+        `;
+        tbody.appendChild(nuevaFila);
+        nuevaFila.querySelector('.input-sku').focus();
+    }
+
+    // 2. ENVÍO DE DATOS MASIVO MEDIANTE FETCH/AJAX AL MISMO MOTOR DE PERCHERÓN
+    function guardarMatrizCompleta() {
+        const filasDom = document.querySelectorAll('.fila-excel');
+        const paqueteFilas = [];
+
+        filasDom.forEach(fila => {
+            paqueteFilas.push({
+                id: fila.getAttribute('data-id') || null,
+                sku: fila.querySelector('.input-sku').value.trim(),
+                modelo: fila.querySelector('.input-modelo').value.trim(),
+                marca: fila.querySelector('.input-marca').value.trim(),
+                titulo: fila.querySelector('.input-titulo').value.trim(),
+                fecha: fila.querySelector('.input-fecha').value,
+                ean: fila.querySelector('.input-ean').value.trim(),
+                serie: fila.querySelector('.input-serie').value.trim(),
+                costo: fila.querySelector('.input-costo').value || 0,
+                proveedor: fila.querySelector('.input-proveedor').value.trim(),
+                ubicacion: fila.querySelector('.input-ubicacion').value.trim(),
+                in: parseInt(fila.querySelector('.valor-in').value) || 0,
+                out: 0 // <--- AQUÍ ESTÁ LA MAGIA: Forzamos a que todo lo de esta pantalla sea ingreso.
+            });
+        });
+
+        // Reutilizamos la URL de guardado que creamos para el Kardex
+        fetch("{% url 'guardar_kardex_percheron' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}" 
+            },
+            body: JSON.stringify({ filas: paqueteFilas })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === 'ok') {
+                alert("¡Ingresos registrados con éxito!");
+                window.location.reload(); 
+            } else {
+                alert("Error al sincronizar: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Ocurrió un error de comunicación con el servidor.");
+        });
+    }
+</script>
 {% endblock %}

@@ -67,10 +67,14 @@ def percheron_ingresos(request):
     color = request.session.get('color_actual', '#3498DB')
     icono = request.session.get('icono_actual', 'fas fa-globe')
     
+    # Filtramos para que esta tabla solo muestre el historial de INGRESOS
+    movimientos_in = MovimientoPercheron.objects.filter(tipo='IN')
+    
     return render(request, 'inventario/percheron_ingresos.html', {
         'canal': canal,
         'color_actual': color,
-        'icono_actual': icono
+        'icono_actual': icono,
+        'movimientos': movimientos_in
     })
 
 @login_required
