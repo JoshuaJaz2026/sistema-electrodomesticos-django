@@ -16,10 +16,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-!zu)9htnpr1)7w=m8w67q^3__txveo(wooc9sr(@p#vct5+)h=')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# Será False cuando esté subido en Render
-DEBUG = 'RENDER' not in os.environ
+# ¡FORZADO A TRUE TEMPORALMENTE PARA VER EL ERROR EN LA NUBE!
+DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*'] # Permitimos todos temporalmente por seguridad con el Debug
 
 # Configuración automática de hosts para Render
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
@@ -120,6 +120,9 @@ STATIC_URL = 'static/'
 if not DEBUG:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+else:
+    # Agregamos esto para que WhiteNoise no explote en modo Debug en Render
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
