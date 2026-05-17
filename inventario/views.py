@@ -88,7 +88,7 @@ def percheron_salidas(request):
         'color_actual': color,
         'icono_actual': icono
     })
-
+#HOP
 @login_required
 def percheron_buscador(request):
     canal = request.session.get('canal_activo', 'Web')
