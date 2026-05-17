@@ -43,41 +43,51 @@
             </thead>
             <tbody id="cuerpoExcel">
                 
-                <tr class="fila-excel">
+                {% for mov in movimientos %}
+                <tr class="fila-excel" data-id="{{ mov.id }}">
+                    <td style="padding: 5px; text-align: center; background-color: #f8fafc; border-right: 1px solid #cbd5e1; color: #94a3b8; font-weight: bold;">{{ forloop.counter }}</td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.sku }}" class="input-celda centralizar input-sku" style="font-weight: bold;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.modelo }}" class="input-celda input-modelo"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.marca|default:'' }}" class="input-celda input-marca"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.titulo }}" class="input-celda input-titulo" style="font-weight: 600;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" value="{{ mov.fecha|date:'Y-m-d' }}" class="input-celda centralizar input-fecha"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.codigo_ean|default:'' }}" class="input-celda input-ean"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.serie|default:'' }}" class="input-celda input-serie"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" step="0.01" value="{{ mov.costo_transaccion }}" class="input-celda alinear-derecha input-costo"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.proveedor_motivo|default:'' }}" class="input-celda input-proveedor"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.ubicacion|default:'' }}" class="input-celda input-ubicacion"></td>
+                    <td style="padding: 0; border-right: 2px solid #cbd5e1;"><input type="text" value="{{ mov.usuario.username|upper }}" class="input-celda centralizar input-usuario" style="text-transform: uppercase;" readonly></td>
+                    
+                    <td style="padding: 0; border-right: 1px solid #bbf7d0; background-color: #f0fdf4;">
+                        <input type="number" value="{% if mov.tipo == 'IN' %}{{ mov.cantidad }}{% else %}0{% endif %}" class="input-celda centralizar valor-in" oninput="calcularFilaStock(this)">
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #fecaca; background-color: #fef2f2;">
+                        <input type="number" value="{% if mov.tipo == 'OUT' %}{{ mov.cantidad }}{% else %}0{% endif %}" class="input-celda centralizar valor-out" oninput="calcularFilaStock(this)">
+                    </td>
+                    
+                    <td style="padding: 5px; text-align: center; font-weight: 900; color: #0284c7; background-color: #e0f2fe; font-size: 1.05em;" class="celda-stock">
+                        {{ mov.producto.stock_actual }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="fila-excel" data-id="">
                     <td style="padding: 5px; text-align: center; background-color: #f8fafc; border-right: 1px solid #cbd5e1; color: #94a3b8; font-weight: bold;">1</td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="PRC-1029" class="input-celda centralizar" style="font-weight: bold;"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="RF-250L" class="input-celda"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="LG" class="input-celda"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="Refrigeradora LG Inverter 250L" class="input-celda" style="font-weight: 600;"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" value="2026-05-16" class="input-celda centralizar"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="7701234567890" class="input-celda"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="SN-99887766" class="input-celda"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" step="0.01" value="1250.00" class="input-celda alinear-derecha"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="Distribuidora Central" class="input-celda"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="Pasillo 2 - A" class="input-celda"></td>
-                    <td style="padding: 0; border-right: 2px solid #cbd5e1;"><input type="text" value="ADMIN" class="input-celda centralizar" style="text-transform: uppercase;"></td>
-                    <td style="padding: 0; border-right: 1px solid #bbf7d0; background-color: #f0fdf4;"><input type="number" value="10" class="input-celda centralizar valor-in" oninput="calcularFilaStock(this)"></td>
-                    <td style="padding: 0; border-right: 1px solid #fecaca; background-color: #fef2f2;"><input type="number" value="2" class="input-celda centralizar valor-out" oninput="calcularFilaStock(this)"></td>
-                    <td style="padding: 5px; text-align: center; font-weight: 900; color: #0284c7; background-color: #e0f2fe; font-size: 1.05em;" class="celda-stock">8</td>
-                </tr>
-
-                <tr class="fila-excel">
-                    <td style="padding: 5px; text-align: center; background-color: #f8fafc; border-right: 1px solid #cbd5e1; color: #94a3b8; font-weight: bold;">2</td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="PRC-1030" class="input-celda centralizar" style="font-weight: bold;"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="WM-13KG" class="input-celda"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="Samsung" class="input-celda"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="Lavadora Samsung Carga Superior 13kg" class="input-celda" style="font-weight: 600;"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" value="2026-05-15" class="input-celda centralizar"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="8801234567891" class="input-celda"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="SN-11223344" class="input-celda"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" step="0.01" value="980.00" class="input-celda alinear-derecha"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="Traslado Magazzino" class="input-celda"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="Pasillo 1 - B" class="input-celda"></td>
-                    <td style="padding: 0; border-right: 2px solid #cbd5e1;"><input type="text" value="JABARCAP" class="input-celda centralizar" style="text-transform: uppercase;"></td>
-                    <td style="padding: 0; border-right: 1px solid #bbf7d0; background-color: #f0fdf4;"><input type="number" value="5" class="input-celda centralizar valor-in" oninput="calcularFilaStock(this)"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="PRC-..." class="input-celda centralizar input-sku" style="font-weight: bold;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Modelo" class="input-celda input-modelo"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Marca" class="input-celda input-marca"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Descripción" class="input-celda input-titulo" style="font-weight: 600;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" value="{% now 'Y-m-d' %}" class="input-celda centralizar input-fecha"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="EAN" class="input-celda input-ean"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Serie" class="input-celda input-serie"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" step="0.01" placeholder="0.00" class="input-celda alinear-derecha input-costo"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Proveedor" class="input-celda input-proveedor"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Ubicación" class="input-celda input-ubicacion"></td>
+                    <td style="padding: 0; border-right: 2px solid #cbd5e1;"><input type="text" value="{{ user.username|upper }}" class="input-celda centralizar input-usuario" readonly></td>
+                    <td style="padding: 0; border-right: 1px solid #bbf7d0; background-color: #f0fdf4;"><input type="number" value="0" class="input-celda centralizar valor-in" oninput="calcularFilaStock(this)"></td>
                     <td style="padding: 0; border-right: 1px solid #fecaca; background-color: #fef2f2;"><input type="number" value="0" class="input-celda centralizar valor-out" oninput="calcularFilaStock(this)"></td>
-                    <td style="padding: 5px; text-align: center; font-weight: 900; color: #0284c7; background-color: #e0f2fe; font-size: 1.05em;" class="celda-stock">5</td>
+                    <td style="padding: 5px; text-align: center; font-weight: 900; color: #0284c7; background-color: #e0f2fe; font-size: 1.05em;" class="celda-stock">0</td>
                 </tr>
+                {% endfor %}
 
             </tbody>
         </table>
@@ -85,56 +95,25 @@
 </div>
 
 <style>
-    .input-celda {
-        width: 100%;
-        box-sizing: border-box;
-        border: none;
-        padding: 8px 10px;
-        font-family: inherit;
-        font-size: inherit;
-        color: #334155;
-        background-color: transparent;
-        outline: none;
-        transition: background-color 0.15s;
-    }
-    /* Al hacer clic en una casilla se ilumina como una celda seleccionada de Excel */
-    .input-celda:focus {
-        background-color: #fffdec;
-        box-shadow: inset 0 0 0 2px #3b82f6;
-        color: #000;
-    }
+    .input-celda { width: 100%; box-sizing: border-box; border: none; padding: 8px 10px; font-family: inherit; font-size: inherit; color: #334155; background-color: transparent; outline: none; transition: background-color 0.15s; }
+    .input-celda:focus { background-color: #fffdec; box-shadow: inset 0 0 0 2px #3b82f6; color: #000; }
     .centralizar { text-align: center; }
     .alinear-derecha { text-align: right; }
-    
-    /* Quitar flechas por defecto de inputs numéricos para mantener limpieza visual */
-    .input-celda::-webkit-outer-spin-button,
-    .input-celda::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-    .input-celda[type=number] {
-        -moz-appearance: textfield;
-    }
+    .input-celda::-webkit-outer-spin-button, .input-celda::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .input-celda[type=number] { -moz-appearance: textfield; }
 </style>
 
 <script>
-    // 1. Cálculo Dinámico del Stock de cada fila
+    // 1. Cálculo del Stock interactivo por fila
     function calcularFilaStock(elemento) {
-        // Encontrar la fila contenedora (tr)
         const fila = elemento.closest('.fila-excel');
-        
-        // Capturar los valores numéricos ingresados en IN y OUT
         const valIn = parseInt(fila.querySelector('.valor-in').value) || 0;
         const valOut = parseInt(fila.querySelector('.valor-out').value) || 0;
-        
-        // Calcular balance matemático
         const stockFinal = valIn - valOut;
         
-        // Pintar el resultado en la celda final de stock
         const celdaStock = fila.querySelector('.celda-stock');
         celdaStock.textContent = stockFinal;
         
-        // Alerta visual si se cae en stock negativo
         if (stockFinal < 0) {
             celdaStock.style.backgroundColor = '#fecaca';
             celdaStock.style.color = '#b91c1c';
@@ -144,40 +123,88 @@
         }
     }
 
-    // 2. Insertar Filas Dinámicamente al presionar el botón superior
+    // 2. Insertar Fila Nueva en blanco
     function agregarFilaNueva() {
         const tbody = document.getElementById('cuerpoExcel');
         const numeroSiguiente = tbody.querySelectorAll('.fila-excel').length + 1;
         
-        // Clonar la estructura de campos vacíos listos para rellenar
         const nuevaFila = document.createElement('tr');
         nuevaFila.className = 'fila-excel';
+        nuevaFila.setAttribute('data-id', ''); // Fila nueva no tiene ID de BD
         nuevaFila.innerHTML = `
             <td style="padding: 5px; text-align: center; background-color: #f1f5f9; border-right: 1px solid #cbd5e1; color: #475569; font-weight: bold;">${numeroSiguiente}</td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="PRC-..." class="input-celda centralizar" style="font-weight: bold;"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Modelo" class="input-celda"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Marca" class="input-celda"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Descripción corta" class="input-celda" style="font-weight: 600;"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" value="{% now 'Y-m-d' %}" class="input-celda centralizar"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="EAN" class="input-celda"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Serie" class="input-celda"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" step="0.01" placeholder="0.00" class="input-celda alinear-derecha"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Proveedor" class="input-celda"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Ubicación" class="input-celda"></td>
-            <td style="padding: 0; border-right: 2px solid #cbd5e1;"><input type="text" value="{{ user.username|upper }}" class="input-celda centralizar" style="text-transform: uppercase;"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="PRC-..." class="input-celda centralizar input-sku" style="font-weight: bold;"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Modelo" class="input-celda input-modelo"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Marca" class="input-celda input-marca"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Descripción" class="input-celda input-titulo" style="font-weight: 600;"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" value="{% now 'Y-m-d' %}" class="input-celda centralizar input-fecha"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="EAN" class="input-celda input-ean"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Serie" class="input-celda input-serie"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" step="0.01" placeholder="0.00" class="input-celda alinear-derecha input-costo"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Proveedor" class="input-celda input-proveedor"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Ubicación" class="input-celda input-ubicacion"></td>
+            <td style="padding: 0; border-right: 2px solid #cbd5e1;"><input type="text" value="{{ user.username|upper }}" class="input-celda centralizar input-usuario" readonly></td>
             <td style="padding: 0; border-right: 1px solid #bbf7d0; background-color: #f0fdf4;"><input type="number" value="0" class="input-celda centralizar valor-in" oninput="calcularFilaStock(this)"></td>
             <td style="padding: 0; border-right: 1px solid #fecaca; background-color: #fef2f2;"><input type="number" value="0" class="input-celda centralizar valor-out" oninput="calcularFilaStock(this)"></td>
             <td style="padding: 5px; text-align: center; font-weight: 900; color: #0284c7; background-color: #e0f2fe; font-size: 1.05em;" class="celda-stock">0</td>
         `;
-        
         tbody.appendChild(nuevaFila);
-        // Hacer foco automático en el SKU de la nueva fila añadida
-        nuevaFila.querySelectorAll('input')[0].focus();
+        nuevaFila.querySelector('.input-sku').focus();
     }
 
-    // 3. Preparación de guardado global (Esta función enviará la matriz de datos a Django más adelante)
+    // 3. ENVÍO DE DATOS MASIVO MEDIANTE FETCH/AJAX
     function guardarMatrizCompleta() {
-        alert("¡Estructura de datos Excel lista! Al configurar la conexión a la base de datos, este botón enviará todas las filas editadas al servidor en un solo bloque seguro.");
+        const filasDom = document.querySelectorAll('.fila-excel');
+        const paqueteFilas = [];
+
+        filasDom.forEach(fila => {
+            const sku = fila.querySelector('.input-sku').value.trim();
+            if(sku !== "") {
+                paqueteFilas.push({
+                    id: fila.getAttribute('data-id') || null,
+                    sku: sku,
+                    modelo: fila.querySelector('.input-modelo').value,
+                    marca: fila.querySelector('.input-marca').value,
+                    titulo: fila.querySelector('.input-titulo').value,
+                    fecha: fila.querySelector('.input-fecha').value,
+                    ean: fila.querySelector('.input-ean').value,
+                    serie: fila.querySelector('.input-serie').value,
+                    costo: fila.querySelector('.input-costo').value,
+                    proveedor: fila.querySelector('.input-proveedor').value,
+                    ubicacion: fila.querySelector('.input-ubicacion').value,
+                    in: fila.querySelector('.valor-in').value,
+                    out: fila.querySelector('.valor-out').value
+                });
+            }
+        });
+
+        if(paqueteFilas.length === 0) {
+            alert("No hay datos válidos con SKU para sincronizar.");
+            return;
+        }
+
+        // Enviamos la información mediante una petición POST en segundo plano
+        fetch("{% url 'guardar_kardex_percheron' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}" // Clave de seguridad obligatoria de Django
+            },
+            body: JSON.stringify({ filas: paqueteFilas })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === 'ok') {
+                alert(data.message);
+                window.location.reload(); // Recargamos para ver las llaves primarias actualizadas
+            } else {
+                alert("Error al sincronizar: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Ocurrió un error de comunicación con el servidor.");
+        });
     }
 </script>
 {% endblock %}

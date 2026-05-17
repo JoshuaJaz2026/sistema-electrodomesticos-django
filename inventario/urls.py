@@ -23,6 +23,9 @@ urlpatterns = [
     path('inventario/percheron/consulta-rapida/', views.percheron_consulta_rapida, name='percheron_consulta_rapida'),
     path('inventario/percheron/costos/', views.percheron_costos_general, name='percheron_costos'),
     path('inventario/percheron/registros/', views.percheron_registros, name='percheron_registros'),
+
+    # NUEVA RUTA AJAX PARA GUARDAR LA MATRIZ DEL EXCEL
+    path('inventario/percheron/registros/guardar/', views.guardar_kardex_percheron, name='guardar_kardex_percheron'),
     
     # 5. Reportes y Herramientas
     path('reportes/', views.reporte_ventas, name='reporte_ventas'),
