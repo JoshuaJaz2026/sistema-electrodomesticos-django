@@ -158,43 +158,30 @@
         const paqueteFilas = [];
 
         filasDom.forEach(fila => {
-            const sku = fila.querySelector('.input-sku').value.trim();
-            const modelo = fila.querySelector('.input-modelo').value.trim();
-            const titulo = fila.querySelector('.input-titulo').value.trim();
-            const inVal = parseInt(fila.querySelector('.valor-in').value) || 0;
-            const outVal = parseInt(fila.querySelector('.valor-out').value) || 0;
-
-            // Condición relajada: Si tiene al menos UN dato útil, la guardamos
-            if(sku !== "" || modelo !== "" || titulo !== "" || inVal > 0 || outVal > 0) {
-                paqueteFilas.push({
-                    id: fila.getAttribute('data-id') || null,
-                    sku: sku,
-                    modelo: modelo,
-                    marca: fila.querySelector('.input-marca').value,
-                    titulo: titulo,
-                    fecha: fila.querySelector('.input-fecha').value,
-                    ean: fila.querySelector('.input-ean').value,
-                    serie: fila.querySelector('.input-serie').value,
-                    costo: fila.querySelector('.input-costo').value,
-                    proveedor: fila.querySelector('.input-proveedor').value,
-                    ubicacion: fila.querySelector('.input-ubicacion').value,
-                    in: inVal,
-                    out: outVal
-                });
-            }
+            // Empaquetamos TODO sin hacerle preguntas al usuario
+            paqueteFilas.push({
+                id: fila.getAttribute('data-id') || null,
+                sku: fila.querySelector('.input-sku').value.trim(),
+                modelo: fila.querySelector('.input-modelo').value.trim(),
+                marca: fila.querySelector('.input-marca').value.trim(),
+                titulo: fila.querySelector('.input-titulo').value.trim(),
+                fecha: fila.querySelector('.input-fecha').value,
+                ean: fila.querySelector('.input-ean').value.trim(),
+                serie: fila.querySelector('.input-serie').value.trim(),
+                costo: fila.querySelector('.input-costo').value || 0,
+                proveedor: fila.querySelector('.input-proveedor').value.trim(),
+                ubicacion: fila.querySelector('.input-ubicacion').value.trim(),
+                in: parseInt(fila.querySelector('.valor-in').value) || 0,
+                out: parseInt(fila.querySelector('.valor-out').value) || 0
+            });
         });
 
-        if(paqueteFilas.length === 0) {
-            alert("No hay ningún dato nuevo para guardar. La tabla está vacía.");
-            return;
-        }
-
-        // Enviamos la información mediante una petición POST en segundo plano
+        // Enviamos la información directamente al servidor
         fetch("{% url 'guardar_kardex_percheron' %}", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}" // Clave de seguridad obligatoria de Django
+                "X-CSRFToken": "{{ csrf_token }}" 
             },
             body: JSON.stringify({ filas: paqueteFilas })
         })
@@ -202,7 +189,7 @@
         .then(data => {
             if(data.status === 'ok') {
                 alert(data.message);
-                window.location.reload(); // Recargamos para ver las llaves primarias actualizadas
+                window.location.reload(); 
             } else {
                 alert("Error al sincronizar: " + data.message);
             }

@@ -152,43 +152,39 @@ def guardar_kardex_percheron(request):
                 modelo = fila.get('modelo', '').strip()
                 titulo = fila.get('titulo', '').strip()
                 
-                # 1. Si la fila está 100% vacía (sin sku, sin modelo, sin IN/OUT), la ignoramos
-                if not sku and not modelo and not titulo and val_in == 0 and val_out == 0:
-                    continue 
-
-                # 2. El Truco: Si el usuario no puso SKU, le inventamos uno temporal
+                # EL TRUCO: Si la fila no tiene SKU, le inventamos uno temporal automáticamente
                 if not sku:
                     sku = f"SIN-SKU-{uuid.uuid4().hex[:6].upper()}"
                 
-                # 3. Buscamos o creamos el producto con el SKU (real o temporal)
+                # Buscamos o creamos el producto
                 producto, creado = Producto.objects.get_or_create(
                     sku=sku,
                     defaults={
-                        'modelo': fila.get('modelo', ''),
+                        'modelo': modelo,
                         'marca': fila.get('marca', ''),
-                        'titulo': fila.get('titulo', 'Producto sin título') if not titulo else titulo,
+                        'titulo': titulo if titulo else 'Fila en blanco',
                         'codigo_ean': fila.get('ean', ''),
                         'ubicacion': fila.get('ubicacion', ''),
                         'costo_soles': float(fila.get('costo', 0) or 0)
                     }
                 )
                 
-                # Si ya existía, actualizamos sus datos
+                # Si el producto ya existía, actualizamos sus datos
                 if not creado:
-                    producto.modelo = fila.get('modelo', producto.modelo)
+                    producto.modelo = modelo if modelo else producto.modelo
                     producto.marca = fila.get('marca', producto.marca)
-                    producto.titulo = fila.get('titulo', producto.titulo)
+                    producto.titulo = titulo if titulo else producto.titulo
                     producto.codigo_ean = fila.get('ean', producto.codigo_ean)
                     producto.ubicacion = fila.get('ubicacion', producto.ubicacion)
                     producto.costo_soles = float(fila.get('costo', 0) or 0)
                     producto.save()
                 
-                # 4. Procesamos los Movimientos
+                # Procesamos los Movimientos (IN y OUT)
                 mov_id = fila.get('id')
                 tipo_mov = 'IN' if val_in > 0 else 'OUT'
                 cantidad_mov = val_in if val_in > 0 else val_out
                 
-                # Si el usuario no puso ni IN ni OUT, lo registramos como IN con 0 para que se guarde la fila
+                # Si no pusieron cantidades, forzamos que se guarde como un ingreso de 0
                 if cantidad_mov == 0 and not mov_id:
                      tipo_mov = 'IN'
                 
