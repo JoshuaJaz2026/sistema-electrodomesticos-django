@@ -17,7 +17,7 @@
         </div>
     </div>
     <p style="color: #64748b; margin-top: -10px; margin-bottom: 25px; font-size: 0.9rem;">
-        <i class="fas fa-info-circle"></i> Modo Edición Libre. Ingrese los productos rápidamente. La columna de salidas (OUT) está deshabilitada en esta sección por seguridad.
+        <i class="fas fa-info-circle"></i> Modo Entrada de Inventario. Las columnas SKU y TÍTULO no son editables de forma directa ya que sincronizarán con los datos maestros de las demás subsecciones.
     </p>
 
     <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
@@ -26,18 +26,16 @@
                 <tr style="background-color: #f8fafc; color: #334155; border-bottom: 2px solid #cbd5e1; text-transform: uppercase; font-weight: bold;">
                     <th style="padding: 10px; text-align: center; background-color: #f1f5f9; width: 40px; border-right: 1px solid #cbd5e1;">#</th>
                     <th style="padding: 10px; border-right: 1px solid #e2e8f0;">SKU</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Modelo</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Marca</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 200px;">Título</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center;">Fecha Ingreso</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Código EAN</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Nro. Serie</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right;">Costo Unitario</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Proveedor</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Ubicación Producto</th>
-                    <th style="padding: 10px; border-right: 2px solid #cbd5e1; text-align: center;">Registrado Por</th>
-                    <th style="padding: 10px; text-align: center; background-color: #f0fdf4; color: #166534; border-right: 1px solid #bbf7d0; width: 80px;">IN (ENTRADA)</th>
-                    <th style="padding: 10px; text-align: center; background-color: #f0f9ff; color: #075985; width: 70px;">STOCK TOTAL</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">MODELO</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 200px;">TITULO</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center;">FECHA DE INGRESO</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">CODIGO EAN</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">N° SERIE</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right;">COSTO UNIT</th>
+                    <th style="padding: 10px; text-align: center; background-color: #f0fdf4; color: #166534; border-right: 1px solid #bbf7d0; width: 100px;">INGRESO x UNIDAD</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">PROVEEDOR / MOTIVO DE INGRESO</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 210px;">UBICACIÓN</th>
+                    <th style="padding: 10px; text-align: center; min-width: 130px;">BY</th>
                 </tr>
             </thead>
             <tbody id="cuerpoExcel">
@@ -45,42 +43,86 @@
                 {% for mov in movimientos %}
                 <tr class="fila-excel" data-id="{{ mov.id }}">
                     <td style="padding: 5px; text-align: center; background-color: #f8fafc; border-right: 1px solid #cbd5e1; color: #94a3b8; font-weight: bold;">{{ forloop.counter }}</td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.sku }}" class="input-celda centralizar input-sku" style="font-weight: bold;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background-color: #f1f5f9;"><input type="text" value="{{ mov.producto.sku }}" class="input-celda centralizar input-sku" style="font-weight: bold; color: #64748b;" readonly></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.modelo }}" class="input-celda input-modelo"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.marca|default:'' }}" class="input-celda input-marca"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.titulo }}" class="input-celda input-titulo" style="font-weight: 600;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background-color: #f1f5f9;"><input type="text" value="{{ mov.producto.titulo }}" class="input-celda input-titulo" style="font-weight: 600; color: #64748b;" readonly></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" value="{{ mov.fecha|date:'Y-m-d' }}" class="input-celda centralizar input-fecha"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.codigo_ean|default:'' }}" class="input-celda input-ean"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.serie|default:'' }}" class="input-celda input-serie"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" step="0.01" value="{{ mov.costo_transaccion }}" class="input-celda alinear-derecha input-costo"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.proveedor_motivo|default:'' }}" class="input-celda input-proveedor"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.producto.ubicacion|default:'' }}" class="input-celda input-ubicacion"></td>
-                    <td style="padding: 0; border-right: 2px solid #cbd5e1;"><input type="text" value="{{ mov.usuario.username|upper }}" class="input-celda centralizar input-usuario" readonly></td>
                     
                     <td style="padding: 0; border-right: 1px solid #bbf7d0; background-color: #f0fdf4;">
                         <input type="number" value="{{ mov.cantidad }}" class="input-celda centralizar valor-in" style="font-weight: bold; color: #166534;">
                     </td>
                     
-                    <td style="padding: 5px; text-align: center; font-weight: 900; color: #0284c7; background-color: #e0f2fe; font-size: 1.05em;">
-                        {{ mov.producto.stock_actual }}
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ mov.proveedor_motivo|default:'' }}" class="input-celda input-proveedor"></td>
+                    
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <select class="select-celda input-ubicacion">
+                            <option value="ALMACEN DE LINEA BLANCA" {% if mov.producto.ubicacion == "ALMACEN DE LINEA BLANCA" %}selected{% endif %}>ALMACEN DE LINEA BLANCA</option>
+                            <option value="ALMACEN DE OSTER" {% if mov.producto.ubicacion == "ALMACEN DE OSTER" %}selected{% endif %}>ALMACEN DE OSTER</option>
+                            <option value="ALMACEN DE FINEZZA" {% if mov.producto.ubicacion == "ALMACEN DE FINEZZA" %}selected{% endif %}>ALMACEN DE FINEZZA</option>
+                            <option value="ALMACEN DE IMACO" {% if mov.producto.ubicacion == "ALMACEN DE IMACO" %}selected{% endif %}>ALMACEN DE IMACO</option>
+                            <option value="ALMACEN DE RECORD" {% if mov.producto.ubicacion == "ALMACEN DE RECORD" %}selected{% endif %}>ALMACEN DE RECORD</option>
+                            <option value="ALMACEN 1.ER.PISO" {% if mov.producto.ubicacion == "ALMACEN 1.ER.PISO" %}selected{% endif %}>ALMACEN 1.ER.PISO</option>
+                            <option value="ALMACEN 2.PISO" {% if mov.producto.ubicacion == "ALMACEN 2.PISO" %}selected{% endif %}>ALMACEN 2.PISO</option>
+                        </select>
+                    </td>
+                    
+                    <td style="padding: 0;">
+                        <select class="select-celda input-usuario">
+                            <option value="MILAGROS" {% if mov.usuario.username|upper == "MILAGROS" %}selected{% endif %}>MILAGROS</option>
+                            <option value="PABLO" {% if mov.usuario.username|upper == "PABLO" %}selected{% endif %}>PABLO</option>
+                            <option value="ADAMARI" {% if mov.usuario.username|upper == "ADAMARI" %}selected{% endif %}>ADAMARI</option>
+                            <option value="JOSHUA" {% if mov.usuario.username|upper == "JOSHUA" %}selected{% endif %}>JOSHUA</option>
+                            <option value="DENISE" {% if mov.usuario.username|upper == "DENISE" %}selected{% endif %}>DENISE</option>
+                            <option value="ALDO" {% if mov.usuario.username|upper == "ALDO" %}selected{% endif %}>ALDO</option>
+                            <option value="CARLO" {% if mov.usuario.username|upper == "CARLO" %}selected{% endif %}>CARLO</option>
+                            <option value="DAVID" {% if mov.usuario.username|upper == "DAVID" %}selected{% endif %}>DAVID</option>
+                            <option value="KEVIN" {% if mov.usuario.username|upper == "KEVIN" %}selected{% endif %}>KEVIN</option>
+                            <option value="ANDERSON" {% if mov.usuario.username|upper == "ANDERSON" %}selected{% endif %}>ANDERSON</option>
+                            <option value="MISTER" {% if mov.usuario.username|upper == "MISTER" %}selected{% endif %}>MISTER</option>
+                        </select>
                     </td>
                 </tr>
                 {% empty %}
                 <tr class="fila-excel" data-id="">
                     <td style="padding: 5px; text-align: center; background-color: #f8fafc; border-right: 1px solid #cbd5e1; color: #94a3b8; font-weight: bold;">1</td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="PRC-..." class="input-celda centralizar input-sku" style="font-weight: bold;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background-color: #f1f5f9;"><input type="text" placeholder="Autogenerado..." class="input-celda centralizar input-sku" style="font-weight: bold; color: #64748b;" readonly></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Modelo" class="input-celda input-modelo"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Marca" class="input-celda input-marca"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Descripción" class="input-celda input-titulo" style="font-weight: 600;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background-color: #f1f5f9;"><input type="text" placeholder="Autogenerado..." class="input-celda input-titulo" style="font-weight: 600; color: #64748b;" readonly></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" value="{% now 'Y-m-d' %}" class="input-celda centralizar input-fecha"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="EAN" class="input-celda input-ean"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Serie" class="input-celda input-serie"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" step="0.01" placeholder="0.00" class="input-celda alinear-derecha input-costo"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Proveedor" class="input-celda input-proveedor"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Ubicación" class="input-celda input-ubicacion"></td>
-                    <td style="padding: 0; border-right: 2px solid #cbd5e1;"><input type="text" value="{{ user.username|upper }}" class="input-celda centralizar input-usuario" readonly></td>
                     <td style="padding: 0; border-right: 1px solid #bbf7d0; background-color: #f0fdf4;"><input type="number" value="0" class="input-celda centralizar valor-in" style="font-weight: bold; color: #166534;"></td>
-                    <td style="padding: 5px; text-align: center; font-weight: 900; color: #0284c7; background-color: #e0f2fe; font-size: 1.05em;">0</td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Proveedor / Motivo" class="input-celda input-proveedor"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <select class="select-celda input-ubicacion">
+                            <option value="ALMACEN DE LINEA BLANCA">ALMACEN DE LINEA BLANCA</option>
+                            <option value="ALMACEN DE OSTER">ALMACEN DE OSTER</option>
+                            <option value="ALMACEN DE FINEZZA">ALMACEN DE FINEZZA</option>
+                            <option value="ALMACEN DE IMACO">ALMACEN DE IMACO</option>
+                            <option value="ALMACEN DE RECORD">ALMACEN DE RECORD</option>
+                            <option value="ALMACEN 1.ER.PISO">ALMACEN 1.ER.PISO</option>
+                            <option value="ALMACEN 2.PISO">ALMACEN 2.PISO</option>
+                        </select>
+                    </td>
+                    <td style="padding: 0;">
+                        <select class="select-celda input-usuario">
+                            <option value="MILAGROS">MILAGROS</option>
+                            <option value="PABLO">PABLO</option>
+                            <option value="ADAMARI">ADAMARI</option>
+                            <option value="JOSHUA">JOSHUA</option>
+                            <option value="DENISE">DENISE</option>
+                            <option value="ALDO">ALDO</option>
+                            <option value="CARLO">CARLO</option>
+                            <option value="DAVID">DAVID</option>
+                            <option value="KEVIN">KEVIN</option>
+                            <option value="ANDERSON">ANDERSON</option>
+                            <option value="MISTER">MISTER</option>
+                        </select>
+                    </td>
                 </tr>
                 {% endfor %}
 
@@ -92,6 +134,8 @@
 <style>
     .input-celda { width: 100%; box-sizing: border-box; border: none; padding: 8px 10px; font-family: inherit; font-size: inherit; color: #334155; background-color: transparent; outline: none; transition: background-color 0.15s; }
     .input-celda:focus { background-color: #fffdec; box-shadow: inset 0 0 0 2px #3b82f6; color: #000; }
+    .select-celda { width: 100%; box-sizing: border-box; border: none; padding: 8px 5px; font-family: inherit; font-size: inherit; color: #334155; background-color: transparent; outline: none; cursor: pointer; }
+    .select-celda:focus { background-color: #fffdec; box-shadow: inset 0 0 0 2px #3b82f6; }
     .centralizar { text-align: center; }
     .alinear-derecha { text-align: right; }
     .input-celda::-webkit-outer-spin-button, .input-celda::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -99,7 +143,6 @@
 </style>
 
 <script>
-    // 1. Insertar Fila Nueva en blanco
     function agregarFilaNueva() {
         const tbody = document.getElementById('cuerpoExcel');
         const numeroSiguiente = tbody.querySelectorAll('.fila-excel').length + 1;
@@ -109,25 +152,46 @@
         nuevaFila.setAttribute('data-id', '');
         nuevaFila.innerHTML = `
             <td style="padding: 5px; text-align: center; background-color: #f1f5f9; border-right: 1px solid #cbd5e1; color: #475569; font-weight: bold;">${numeroSiguiente}</td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="PRC-..." class="input-celda centralizar input-sku" style="font-weight: bold;"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0; background-color: #f1f5f9;"><input type="text" placeholder="Autogenerado..." class="input-celda centralizar input-sku" style="font-weight: bold; color: #64748b;" readonly></td>
             <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Modelo" class="input-celda input-modelo"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Marca" class="input-celda input-marca"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Descripción" class="input-celda input-titulo" style="font-weight: 600;"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0; background-color: #f1f5f9;"><input type="text" placeholder="Autogenerado..." class="input-celda input-titulo" style="font-weight: 600; color: #64748b;" readonly></td>
             <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" value="{% now 'Y-m-d' %}" class="input-celda centralizar input-fecha"></td>
             <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="EAN" class="input-celda input-ean"></td>
             <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Serie" class="input-celda input-serie"></td>
             <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" step="0.01" placeholder="0.00" class="input-celda alinear-derecha input-costo"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Proveedor" class="input-celda input-proveedor"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Ubicación" class="input-celda input-ubicacion"></td>
-            <td style="padding: 0; border-right: 2px solid #cbd5e1;"><input type="text" value="{{ user.username|upper }}" class="input-celda centralizar input-usuario" readonly></td>
             <td style="padding: 0; border-right: 1px solid #bbf7d0; background-color: #f0fdf4;"><input type="number" value="0" class="input-celda centralizar valor-in" style="font-weight: bold; color: #166534;"></td>
-            <td style="padding: 5px; text-align: center; font-weight: 900; color: #0284c7; background-color: #e0f2fe; font-size: 1.05em;">0</td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Proveedor / Motivo" class="input-celda input-proveedor"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                <select class="select-celda input-ubicacion">
+                    <option value="ALMACEN DE LINEA BLANCA">ALMACEN DE LINEA BLANCA</option>
+                    <option value="ALMACEN DE OSTER">ALMACEN DE OSTER</option>
+                    <option value="ALMACEN DE FINEZZA">ALMACEN DE FINEZZA</option>
+                    <option value="ALMACEN DE IMACO">ALMACEN DE IMACO</option>
+                    <option value="ALMACEN DE RECORD">ALMACEN DE RECORD</option>
+                    <option value="ALMACEN 1.ER.PISO">ALMACEN 1.ER.PISO</option>
+                    <option value="ALMACEN 2.PISO">ALMACEN 2.PISO</option>
+                </select>
+            </td>
+            <td style="padding: 0;">
+                <select class="select-celda input-usuario">
+                    <option value="MILAGROS">MILAGROS</option>
+                    <option value="PABLO">PABLO</option>
+                    <option value="ADAMARI">ADAMARI</option>
+                    <option value="JOSHUA">JOSHUA</option>
+                    <option value="DENISE">DENISE</option>
+                    <option value="ALDO">ALDO</option>
+                    <option value="CARLO">CARLO</option>
+                    <option value="DAVID">DAVID</option>
+                    <option value="KEVIN">KEVIN</option>
+                    <option value="ANDERSON">ANDERSON</option>
+                    <option value="MISTER">MISTER</option>
+                </select>
+            </td>
         `;
         tbody.appendChild(nuevaFila);
-        nuevaFila.querySelector('.input-sku').focus();
+        nuevaFila.querySelector('.input-modelo').focus();
     }
 
-    // 2. ENVÍO DE DATOS MASIVO MEDIANTE FETCH/AJAX AL MISMO MOTOR DE PERCHERÓN
     function guardarMatrizCompleta() {
         const filasDom = document.querySelectorAll('.fila-excel');
         const paqueteFilas = [];
@@ -137,20 +201,19 @@
                 id: fila.getAttribute('data-id') || null,
                 sku: fila.querySelector('.input-sku').value.trim(),
                 modelo: fila.querySelector('.input-modelo').value.trim(),
-                marca: fila.querySelector('.input-marca').value.trim(),
+                marca: '', 
                 titulo: fila.querySelector('.input-titulo').value.trim(),
                 fecha: fila.querySelector('.input-fecha').value,
                 ean: fila.querySelector('.input-ean').value.trim(),
                 serie: fila.querySelector('.input-serie').value.trim(),
                 costo: fila.querySelector('.input-costo').value || 0,
                 proveedor: fila.querySelector('.input-proveedor').value.trim(),
-                ubicacion: fila.querySelector('.input-ubicacion').value.trim(),
+                ubicacion: fila.querySelector('.input-ubicacion').value,
                 in: parseInt(fila.querySelector('.valor-in').value) || 0,
-                out: 0 // <--- AQUÍ ESTÁ LA MAGIA: Forzamos a que todo lo de esta pantalla sea ingreso.
+                out: 0
             });
         });
 
-        // Reutilizamos la URL de guardado que creamos para el Kardex
         fetch("{% url 'guardar_kardex_percheron' %}", {
             method: "POST",
             headers: {
