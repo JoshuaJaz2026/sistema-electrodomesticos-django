@@ -35,13 +35,10 @@
             list-style: none;
             padding: 0;
             margin: 0;
-            transition: max-height 0.4s ease-in-out; /* Esta es la magia del deslizamiento */
+            transition: max-height 0.4s ease-in-out; 
         }
         
-        /* Esta clase la pondremos con Javascript para abrirlo */
-        .submenu.open {
-            max-height: 500px; 
-        }
+        .submenu.open { max-height: 500px; }
 
         .submenu-item {
             padding: 10px 25px 10px 50px;
@@ -68,6 +65,7 @@
         .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         
         .btn-logout { background: #e74c3c; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-size: 0.9em; }
+        .btn-logout:hover { background: #c0392b; }
     </style>
 </head>
 <body>
@@ -89,7 +87,7 @@
                     <i class="fas fa-chevron-down" id="arrow-mag" style="margin-left: auto; font-size: 0.7em; transition: 0.3s;"></i>
                 </div>
                 <div class="submenu" id="magazzino-menu">
-                    <a href="{% url 'inv_magazzino' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-list"></i> Ver Todo</a>
+                    <a href="{% url 'inventario_magazzino' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-list"></i> Ver Todo</a>
                     <a href="#" class="submenu-item"><i class="fas fa-sign-out-alt"></i> Salidas</a>
                     <a href="#" class="submenu-item"><i class="fas fa-bolt"></i> Consulta Rápida</a>
                     <a href="#" class="submenu-item"><i class="fas fa-search"></i> Buscador</a>
@@ -111,7 +109,7 @@
                     <a href="{% url 'percheron_consulta_rapida' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-bolt"></i> Consulta Rápida</a>
                     <a href="{% url 'percheron_buscador' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-search"></i> Buscador</a>
                     <a href="{% url 'percheron_registros' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-history"></i> Registros</a>
-                    <a href="{% url 'percheron_costos' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-file-invoice-dollar"></i> Costos General</a>
+                    <a href="{% url 'percheron_costos_general' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-file-invoice-dollar"></i> Costos General</a>
                     <a href="{% url 'percheron_ingresos' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-sign-in-alt"></i> Ingresos</a>
                 </div>
             </div>
@@ -128,11 +126,13 @@
         <header>
             <span>Sesión activa en: <strong style="color: var(--color-principal)">{{ canal }}</strong></span>
             <div>
-                <span style="margin-right: 15px;"><i class="fas fa-user-circle"></i> {{ user.username }}</span>
+                <span style="margin-right: 15px;"><i class="fas fa-user-circle"></i> {{ user.username|upper }}</span>
+                
                 <form method="post" action="{% url 'logout' %}" style="display:inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn-logout" style="border:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Salir</button>
                 </form>
+                
             </div>
         </header>
 
@@ -143,29 +143,22 @@
     </div>
 
     <script>
-        // 1. Lógica Automática: Revisa en qué página estamos al cargar
         document.addEventListener("DOMContentLoaded", function() {
-            const currentPath = window.location.pathname; // Ej: /inventario/percheron/registros/
-            
+            const currentPath = window.location.pathname; 
             const submenuItems = document.querySelectorAll('.submenu-item');
             
             submenuItems.forEach(item => {
                 let linkPath = item.getAttribute('href');
                 
-                // Si el link del botón coincide con la URL actual de la página
                 if (linkPath && linkPath !== '#' && linkPath.split('?')[0] === currentPath) {
-                    
-                    // a) Resaltar el botón activo visualmente
                     item.style.color = 'white';
                     item.style.borderLeftColor = 'var(--color-principal)';
                     item.style.background = '#2c3e50';
                     
-                    // b) Encontrar la cajita del menú y abrirla (animación hacia abajo)
                     const parentMenu = item.closest('.submenu');
                     if (parentMenu) {
                         parentMenu.classList.add('open');
                         
-                        // c) Girar la flechita
                         const menuHeader = parentMenu.previousElementSibling;
                         if(menuHeader) {
                             const arrow = menuHeader.querySelector('.fa-chevron-down');
@@ -176,12 +169,10 @@
             });
         });
 
-        // 2. Animación manual cuando el usuario hace clic
         function toggleMenu(menuId, arrowId) {
             const menu = document.getElementById(menuId);
             const arrow = document.getElementById(arrowId);
             
-            // Alterna la clase 'open' para activar la animación CSS
             if (menu.classList.contains('open')) {
                 menu.classList.remove('open');
                 arrow.classList.remove('rotate');

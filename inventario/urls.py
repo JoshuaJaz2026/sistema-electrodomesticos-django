@@ -6,7 +6,7 @@ urlpatterns = [
     # 1. Rutas de Acceso y Portal Público
     path('', views.selector_plataformas, name='selector'),
     path('login/', views.LoginCamaleonicoView.as_view(), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
     path('loading/', views.pantalla_carga, name='pantalla_carga'),
     
     # 2. Dashboard Principal
