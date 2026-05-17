@@ -78,8 +78,8 @@
         <nav class="sidebar-menu">
             <a href="{% url 'inicio' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-home"></i> Inicio</a>
             
-            <div class="menu-category">Inventarios Globales</div>
-            
+            <div class="menu-category">Inventario Principal</div>
+
             <div class="dropdown">
                 <div class="menu-item" onclick="toggleMenu('percheron-menu', 'arrow-per')">
                     <i class="fas fa-boxes"></i> 
@@ -92,7 +92,9 @@
                     <a href="{% url 'percheron_consulta_rapida' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-bolt"></i> Consulta Rápida</a>
                     <a href="{% url 'percheron_buscador' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-search"></i> Buscador</a>
                     <a href="{% url 'percheron_registros' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-history"></i> Registros</a>
-                    <a href="{% url 'percheron_costos_general' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-file-invoice-dollar"></i> Costos General</a>
+                    
+                    <a href="{% url 'percheron_costos' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-file-invoice-dollar"></i> Costos General</a>
+                    
                     <a href="{% url 'percheron_ingresos' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-sign-in-alt"></i> Ingresos</a>
                 </div>
             </div>
