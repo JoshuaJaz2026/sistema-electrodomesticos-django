@@ -87,14 +87,11 @@
                     <i class="fas fa-chevron-down" id="arrow-per" style="margin-left: auto; font-size: 0.7em; transition: 0.3s;"></i>
                 </div>
                 <div class="submenu" id="percheron-menu">
-                    <a href="{% url 'percheron_inventario' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-list"></i> Ver Todo</a>
                     <a href="{% url 'percheron_salidas' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-sign-out-alt"></i> Salidas</a>
                     <a href="{% url 'percheron_consulta_rapida' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-bolt"></i> Consulta Rápida</a>
                     <a href="{% url 'percheron_buscador' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-search"></i> Buscador</a>
                     <a href="{% url 'percheron_registros' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-history"></i> Registros</a>
-                    
                     <a href="{% url 'percheron_costos_general' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-file-invoice-dollar"></i> Costos General</a>
-                    
                     <a href="{% url 'percheron_ingresos' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-sign-in-alt"></i> Ingresos</a>
                 </div>
             </div>
