@@ -159,27 +159,33 @@
 
         filasDom.forEach(fila => {
             const sku = fila.querySelector('.input-sku').value.trim();
-            if(sku !== "") {
+            const modelo = fila.querySelector('.input-modelo').value.trim();
+            const titulo = fila.querySelector('.input-titulo').value.trim();
+            const inVal = parseInt(fila.querySelector('.valor-in').value) || 0;
+            const outVal = parseInt(fila.querySelector('.valor-out').value) || 0;
+
+            // Condición relajada: Si tiene al menos UN dato útil, la guardamos
+            if(sku !== "" || modelo !== "" || titulo !== "" || inVal > 0 || outVal > 0) {
                 paqueteFilas.push({
                     id: fila.getAttribute('data-id') || null,
                     sku: sku,
-                    modelo: fila.querySelector('.input-modelo').value,
+                    modelo: modelo,
                     marca: fila.querySelector('.input-marca').value,
-                    titulo: fila.querySelector('.input-titulo').value,
+                    titulo: titulo,
                     fecha: fila.querySelector('.input-fecha').value,
                     ean: fila.querySelector('.input-ean').value,
                     serie: fila.querySelector('.input-serie').value,
                     costo: fila.querySelector('.input-costo').value,
                     proveedor: fila.querySelector('.input-proveedor').value,
                     ubicacion: fila.querySelector('.input-ubicacion').value,
-                    in: fila.querySelector('.valor-in').value,
-                    out: fila.querySelector('.valor-out').value
+                    in: inVal,
+                    out: outVal
                 });
             }
         });
 
         if(paqueteFilas.length === 0) {
-            alert("No hay datos válidos con SKU para sincronizar.");
+            alert("No hay ningún dato nuevo para guardar. La tabla está vacía.");
             return;
         }
 

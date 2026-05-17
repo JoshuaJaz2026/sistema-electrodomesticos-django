@@ -1,4 +1,5 @@
 import json
+import uuid
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
@@ -146,23 +147,33 @@ def guardar_kardex_percheron(request):
             
             for fila in filas:
                 sku = fila.get('sku', '').strip()
-                if not sku:
-                    continue # Si no hay SKU, saltamos la fila
+                val_in = int(fila.get('in', 0) or 0)
+                val_out = int(fila.get('out', 0) or 0)
+                modelo = fila.get('modelo', '').strip()
+                titulo = fila.get('titulo', '').strip()
                 
-                # 1. Buscamos el producto por SKU. Si no existe, lo creamos con los datos de la celda
+                # 1. Si la fila está 100% vacía (sin sku, sin modelo, sin IN/OUT), la ignoramos
+                if not sku and not modelo and not titulo and val_in == 0 and val_out == 0:
+                    continue 
+
+                # 2. El Truco: Si el usuario no puso SKU, le inventamos uno temporal
+                if not sku:
+                    sku = f"SIN-SKU-{uuid.uuid4().hex[:6].upper()}"
+                
+                # 3. Buscamos o creamos el producto con el SKU (real o temporal)
                 producto, creado = Producto.objects.get_or_create(
                     sku=sku,
                     defaults={
                         'modelo': fila.get('modelo', ''),
                         'marca': fila.get('marca', ''),
-                        'titulo': fila.get('titulo', 'Producto sin título'),
+                        'titulo': fila.get('titulo', 'Producto sin título') if not titulo else titulo,
                         'codigo_ean': fila.get('ean', ''),
                         'ubicacion': fila.get('ubicacion', ''),
                         'costo_soles': float(fila.get('costo', 0) or 0)
                     }
                 )
                 
-                # Si el producto ya existía, actualizamos sus datos base por si el usuario los editó en el Excel
+                # Si ya existía, actualizamos sus datos
                 if not creado:
                     producto.modelo = fila.get('modelo', producto.modelo)
                     producto.marca = fila.get('marca', producto.marca)
@@ -172,54 +183,51 @@ def guardar_kardex_percheron(request):
                     producto.costo_soles = float(fila.get('costo', 0) or 0)
                     producto.save()
                 
-                # 2. Procesamos los Movimientos (IN y OUT)
-                val_in = int(fila.get('in', 0) or 0)
-                val_out = int(fila.get('out', 0) or 0)
-                mov_id = fila.get('id') # ID del movimiento si ya existía en la BD
-                
-                # Determinamos el tipo de movimiento preponderante de la fila
+                # 4. Procesamos los Movimientos
+                mov_id = fila.get('id')
                 tipo_mov = 'IN' if val_in > 0 else 'OUT'
                 cantidad_mov = val_in if val_in > 0 else val_out
                 
-                if cantidad_mov > 0:
-                    if mov_id:
-                        # Si tiene ID, es un movimiento existente que se está editando
-                        try:
-                            mov = MovimientoPercheron.objects.get(id=mov_id)
-                            mov.producto = producto
-                            mov.tipo = tipo_mov
-                            mov.cantidad = cantidad_mov
-                            mov.fecha = fila.get('fecha')
-                            mov.serie = fila.get('serie', '')
-                            mov.costo_transaccion = float(fila.get('costo', 0) or 0)
-                            # Se asume que el campo "proveedor" del excel puede ser Proveedor (IN) o Documento (OUT)
-                            mov.proveedor_motivo = fila.get('proveedor', '') if tipo_mov == 'IN' else ''
-                            mov.documento_salida = fila.get('proveedor', '') if tipo_mov == 'OUT' else '' 
-                            mov.save()
-                        except MovimientoPercheron.DoesNotExist:
-                            pass
-                    else:
-                        # Si no tiene ID, es una fila nueva insertada por el usuario. La creamos de cero.
-                        canal_activo = request.session.get('canal_activo', 'Web')
-                        MovimientoPercheron.objects.create(
-                            producto=producto,
-                            tipo=tipo_mov,
-                            cantidad=cantidad_mov,
-                            fecha=fila.get('fecha'),
-                            serie=fila.get('serie', ''),
-                            costo_transaccion=float(fila.get('costo', 0) or 0),
-                            proveedor_motivo=fila.get('proveedor', '') if tipo_mov == 'IN' else '',
-                            documento_salida=fila.get('proveedor', '') if tipo_mov == 'OUT' else '',
-                            canal_venta=canal_activo if tipo_mov == 'OUT' else '',
-                            usuario=request.user
-                        )
+                # Si el usuario no puso ni IN ni OUT, lo registramos como IN con 0 para que se guarde la fila
+                if cantidad_mov == 0 and not mov_id:
+                     tipo_mov = 'IN'
+                
+                if mov_id:
+                    # Editando fila existente
+                    try:
+                        mov = MovimientoPercheron.objects.get(id=mov_id)
+                        mov.producto = producto
+                        mov.tipo = tipo_mov
+                        mov.cantidad = cantidad_mov
+                        mov.fecha = fila.get('fecha')
+                        mov.serie = fila.get('serie', '')
+                        mov.costo_transaccion = float(fila.get('costo', 0) or 0)
+                        mov.proveedor_motivo = fila.get('proveedor', '') if tipo_mov == 'IN' else ''
+                        mov.documento_salida = fila.get('proveedor', '') if tipo_mov == 'OUT' else '' 
+                        mov.save()
+                    except MovimientoPercheron.DoesNotExist:
+                        pass
+                else:
+                    # Creando fila nueva
+                    canal_activo = request.session.get('canal_activo', 'Web')
+                    MovimientoPercheron.objects.create(
+                        producto=producto,
+                        tipo=tipo_mov,
+                        cantidad=cantidad_mov,
+                        fecha=fila.get('fecha'),
+                        serie=fila.get('serie', ''),
+                        costo_transaccion=float(fila.get('costo', 0) or 0),
+                        proveedor_motivo=fila.get('proveedor', '') if tipo_mov == 'IN' else '',
+                        documento_salida=fila.get('proveedor', '') if tipo_mov == 'OUT' else '',
+                        canal_venta=canal_activo if tipo_mov == 'OUT' else '',
+                        usuario=request.user
+                    )
             
             return JsonResponse({'status': 'ok', 'message': '¡Sincronización con la Base de Datos exitosa!'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
             
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
-
 
 # =========================================================
 # REPORTES Y HERRAMIENTAS
