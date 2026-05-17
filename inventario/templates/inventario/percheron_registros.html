@@ -1,105 +1,183 @@
 {% extends 'inventario/dashboard_global.html' %}
 
 {% block content %}
-<div class="card" style="border-top: 4px solid var(--color-principal);">
+<div class="card" style="border-top: 4px solid var(--color-principal); padding: 20px;">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
         <h2 style="margin: 0; color: #2c3e50;">
-            <i class="fas fa-history" style="color: var(--color-principal);"></i> Registros Maestros - Percherón
+            <i class="fas fa-th" style="color: var(--color-principal);"></i> Kardex Maestro Interactivo - Percherón
         </h2>
-        <button style="background-color: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <i class="fas fa-file-excel"></i> Exportar Data
-        </button>
+        <div style="display: flex; gap: 12px;">
+            <button type="button" onclick="agregarFilaNueva()" style="background-color: var(--color-principal); color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-plus"></i> Insertar Fila
+            </button>
+            <button type="button" onclick="guardarMatrizCompleta()" style="background-color: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-save"></i> Guardar Todo (Sincronizar)
+            </button>
+        </div>
     </div>
-    <hr style="border: 0.5px solid #eee; margin-bottom: 25px;">
+    <p style="color: #64748b; margin-top: -10px; margin-bottom: 25px; font-size: 0.9rem;">
+        <i class="fas fa-info-circle"></i> Modo Edición Libre Activo. Puede modificar cualquier casilla directamente. El Stock se calcula automáticamente al cambiar IN u OUT.
+    </p>
 
-    <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 30px;">
-        <form action="#" method="GET" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-            
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 8px; font-size: 0.85em;">Buscar Producto</label>
-                <input type="text" name="q" placeholder="SKU, EAN o Título..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
-            </div>
-
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 8px; font-size: 0.85em;">Fecha de Inicio</label>
-                <input type="date" name="fecha_inicio" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; color: #334155;">
-            </div>
-
-            <div style="display: flex; flex-direction: column;">
-                <label style="font-weight: 600; color: #475569; margin-bottom: 8px; font-size: 0.85em;">Fecha de Fin</label>
-                <input type="date" name="fecha_fin" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; color: #334155;">
-            </div>
-
-            <div style="display: flex; align-items: flex-end;">
-                <button type="submit" style="background-color: var(--color-principal); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; transition: 0.2s;">
-                    <i class="fas fa-filter"></i> Filtrar
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <div style="overflow-x: auto; padding-bottom: 15px;">
-        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.03); white-space: nowrap; font-size: 0.9em;">
+    <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <table style="width: 100%; border-collapse: collapse; background: white; white-space: nowrap; font-size: 0.85em;">
             <thead>
-                <tr style="background-color: #f1f5f9; color: #334155; border-bottom: 2px solid var(--color-principal); text-transform: uppercase; font-size: 0.85em;">
-                    <th style="padding: 12px; text-align: left; border-right: 1px solid #e2e8f0;">SKU</th>
-                    <th style="padding: 12px; text-align: left; border-right: 1px solid #e2e8f0;">Modelo</th>
-                    <th style="padding: 12px; text-align: left; border-right: 1px solid #e2e8f0;">Marca</th>
-                    <th style="padding: 12px; text-align: left; border-right: 1px solid #e2e8f0;">Título</th>
-                    <th style="padding: 12px; text-align: center; border-right: 1px solid #e2e8f0;">Fecha de Ingreso</th>
-                    <th style="padding: 12px; text-align: left; border-right: 1px solid #e2e8f0;">Código EAN</th>
-                    <th style="padding: 12px; text-align: left; border-right: 1px solid #e2e8f0;">Nro. Serie</th>
-                    <th style="padding: 12px; text-align: right; border-right: 1px solid #e2e8f0;">Costo Unitario</th>
-                    <th style="padding: 12px; text-align: left; border-right: 1px solid #e2e8f0;">Proveedor</th>
-                    <th style="padding: 12px; text-align: left; border-right: 1px solid #e2e8f0;">Ubicación del Producto</th>
-                    <th style="padding: 12px; text-align: center; border-right: 2px solid #cbd5e1;">Registrado Por:</th>
-                    <th style="padding: 12px; text-align: center; background-color: #dcfce7; color: #166534; border-right: 1px solid #bbf7d0;">IN</th>
-                    <th style="padding: 12px; text-align: center; background-color: #fee2e2; color: #991b1b; border-right: 1px solid #fecaca;">OUT</th>
-                    <th style="padding: 12px; text-align: center; background-color: #e0f2fe; color: #075985;">STOCK</th>
+                <tr style="background-color: #f8fafc; color: #334155; border-bottom: 2px solid #cbd5e1; text-transform: uppercase; font-weight: bold;">
+                    <th style="padding: 10px; text-align: center; background-color: #f1f5f9; width: 40px; border-right: 1px solid #cbd5e1;">#</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">SKU</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Modelo</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Marca</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 200px;">Título</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center;">Fecha Ingreso</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Código EAN</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Nro. Serie</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right;">Costo Unitario</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Proveedor</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">Ubicación Producto</th>
+                    <th style="padding: 10px; border-right: 2px solid #cbd5e1; text-align: center;">Registrado Por</th>
+                    <th style="padding: 10px; text-align: center; background-color: #f0fdf4; color: #166534; border-right: 1px solid #bbf7d0; width: 60px;">IN</th>
+                    <th style="padding: 10px; text-align: center; background-color: #fef2f2; color: #991b1b; border-right: 1px solid #fecaca; width: 60px;">OUT</th>
+                    <th style="padding: 10px; text-align: center; background-color: #f0f9ff; color: #075985; width: 70px;">STOCK</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr style="border-bottom: 1px solid #eee; transition: 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc';" onmouseout="this.style.backgroundColor='transparent';">
-                    <td style="padding: 12px; font-family: monospace; font-weight: bold; color: #475569;">PRC-1029</td>
-                    <td style="padding: 12px; color: #64748b;">RF-250L</td>
-                    <td style="padding: 12px; color: #64748b;">LG</td>
-                    <td style="padding: 12px;"><strong>Refrigeradora LG Inverter</strong></td>
-                    <td style="padding: 12px; text-align: center; color: #64748b;">16/05/2026</td>
-                    <td style="padding: 12px; color: #64748b;">7701234567890</td>
-                    <td style="padding: 12px; color: #64748b;">SN-99887766</td>
-                    <td style="padding: 12px; text-align: right; font-weight: 600;">S/ 1,250.00</td>
-                    <td style="padding: 12px; color: #475569;">Distribuidora Central</td>
-                    <td style="padding: 12px; color: #475569;">Pasillo 2 - A</td>
-                    <td style="padding: 12px; text-align: center; border-right: 2px solid #f1f5f9;">
-                        <span style="background: #e2e8f0; color: #334155; padding: 2px 8px; border-radius: 4px; font-size: 0.85em;">ADMIN</span>
-                    </td>
-                    <td style="padding: 12px; text-align: center; font-weight: bold; color: #166534; background-color: #f0fdf4;">10</td>
-                    <td style="padding: 12px; text-align: center; font-weight: bold; color: #991b1b; background-color: #fef2f2;">2</td>
-                    <td style="padding: 12px; text-align: center; font-weight: 900; color: #0284c7; background-color: #f0f9ff; font-size: 1.1em;">8</td>
+            <tbody id="cuerpoExcel">
+                
+                <tr class="fila-excel">
+                    <td style="padding: 5px; text-align: center; background-color: #f8fafc; border-right: 1px solid #cbd5e1; color: #94a3b8; font-weight: bold;">1</td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="PRC-1029" class="input-celda centralizar" style="font-weight: bold;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="RF-250L" class="input-celda"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="LG" class="input-celda"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="Refrigeradora LG Inverter 250L" class="input-celda" style="font-weight: 600;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" value="2026-05-16" class="input-celda centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="7701234567890" class="input-celda"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="SN-99887766" class="input-celda"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" step="0.01" value="1250.00" class="input-celda alinear-derecha"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="Distribuidora Central" class="input-celda"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="Pasillo 2 - A" class="input-celda"></td>
+                    <td style="padding: 0; border-right: 2px solid #cbd5e1;"><input type="text" value="ADMIN" class="input-celda centralizar" style="text-transform: uppercase;"></td>
+                    <td style="padding: 0; border-right: 1px solid #bbf7d0; background-color: #f0fdf4;"><input type="number" value="10" class="input-celda centralizar valor-in" oninput="calcularFilaStock(this)"></td>
+                    <td style="padding: 0; border-right: 1px solid #fecaca; background-color: #fef2f2;"><input type="number" value="2" class="input-celda centralizar valor-out" oninput="calcularFilaStock(this)"></td>
+                    <td style="padding: 5px; text-align: center; font-weight: 900; color: #0284c7; background-color: #e0f2fe; font-size: 1.05em;" class="celda-stock">8</td>
                 </tr>
 
-                <tr style="border-bottom: 1px solid #eee; transition: 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc';" onmouseout="this.style.backgroundColor='transparent';">
-                    <td style="padding: 12px; font-family: monospace; font-weight: bold; color: #475569;">PRC-1030</td>
-                    <td style="padding: 12px; color: #64748b;">WM-13KG</td>
-                    <td style="padding: 12px; color: #64748b;">Samsung</td>
-                    <td style="padding: 12px;"><strong>Lavadora Samsung 13kg</strong></td>
-                    <td style="padding: 12px; text-align: center; color: #64748b;">15/05/2026</td>
-                    <td style="padding: 12px; color: #64748b;">8801234567891</td>
-                    <td style="padding: 12px; color: #64748b;">SN-11223344</td>
-                    <td style="padding: 12px; text-align: right; font-weight: 600;">S/ 980.00</td>
-                    <td style="padding: 12px; color: #475569;">Traslado Magazzino</td>
-                    <td style="padding: 12px; color: #475569;">Pasillo 1 - B</td>
-                    <td style="padding: 12px; text-align: center; border-right: 2px solid #f1f5f9;">
-                        <span style="background: #e2e8f0; color: #334155; padding: 2px 8px; border-radius: 4px; font-size: 0.85em;">JABARCAP</span>
-                    </td>
-                    <td style="padding: 12px; text-align: center; font-weight: bold; color: #166534; background-color: #f0fdf4;">5</td>
-                    <td style="padding: 12px; text-align: center; font-weight: bold; color: #991b1b; background-color: #fef2f2;">0</td>
-                    <td style="padding: 12px; text-align: center; font-weight: 900; color: #0284c7; background-color: #f0f9ff; font-size: 1.1em;">5</td>
+                <tr class="fila-excel">
+                    <td style="padding: 5px; text-align: center; background-color: #f8fafc; border-right: 1px solid #cbd5e1; color: #94a3b8; font-weight: bold;">2</td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="PRC-1030" class="input-celda centralizar" style="font-weight: bold;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="WM-13KG" class="input-celda"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="Samsung" class="input-celda"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="Lavadora Samsung Carga Superior 13kg" class="input-celda" style="font-weight: 600;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" value="2026-05-15" class="input-celda centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="8801234567891" class="input-celda"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="SN-11223344" class="input-celda"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" step="0.01" value="980.00" class="input-celda alinear-derecha"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="Traslado Magazzino" class="input-celda"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="Pasillo 1 - B" class="input-celda"></td>
+                    <td style="padding: 0; border-right: 2px solid #cbd5e1;"><input type="text" value="JABARCAP" class="input-celda centralizar" style="text-transform: uppercase;"></td>
+                    <td style="padding: 0; border-right: 1px solid #bbf7d0; background-color: #f0fdf4;"><input type="number" value="5" class="input-celda centralizar valor-in" oninput="calcularFilaStock(this)"></td>
+                    <td style="padding: 0; border-right: 1px solid #fecaca; background-color: #fef2f2;"><input type="number" value="0" class="input-celda centralizar valor-out" oninput="calcularFilaStock(this)"></td>
+                    <td style="padding: 5px; text-align: center; font-weight: 900; color: #0284c7; background-color: #e0f2fe; font-size: 1.05em;" class="celda-stock">5</td>
                 </tr>
+
             </tbody>
         </table>
     </div>
-
 </div>
+
+<style>
+    .input-celda {
+        width: 100%;
+        box-sizing: border-box;
+        border: none;
+        padding: 8px 10px;
+        font-family: inherit;
+        font-size: inherit;
+        color: #334155;
+        background-color: transparent;
+        outline: none;
+        transition: background-color 0.15s;
+    }
+    /* Al hacer clic en una casilla se ilumina como una celda seleccionada de Excel */
+    .input-celda:focus {
+        background-color: #fffdec;
+        box-shadow: inset 0 0 0 2px #3b82f6;
+        color: #000;
+    }
+    .centralizar { text-align: center; }
+    .alinear-derecha { text-align: right; }
+    
+    /* Quitar flechas por defecto de inputs numéricos para mantener limpieza visual */
+    .input-celda::-webkit-outer-spin-button,
+    .input-celda::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    .input-celda[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
+
+<script>
+    // 1. Cálculo Dinámico del Stock de cada fila
+    function calcularFilaStock(elemento) {
+        // Encontrar la fila contenedora (tr)
+        const fila = elemento.closest('.fila-excel');
+        
+        // Capturar los valores numéricos ingresados en IN y OUT
+        const valIn = parseInt(fila.querySelector('.valor-in').value) || 0;
+        const valOut = parseInt(fila.querySelector('.valor-out').value) || 0;
+        
+        // Calcular balance matemático
+        const stockFinal = valIn - valOut;
+        
+        // Pintar el resultado en la celda final de stock
+        const celdaStock = fila.querySelector('.celda-stock');
+        celdaStock.textContent = stockFinal;
+        
+        // Alerta visual si se cae en stock negativo
+        if (stockFinal < 0) {
+            celdaStock.style.backgroundColor = '#fecaca';
+            celdaStock.style.color = '#b91c1c';
+        } else {
+            celdaStock.style.backgroundColor = '#e0f2fe';
+            celdaStock.style.color = '#0284c7';
+        }
+    }
+
+    // 2. Insertar Filas Dinámicamente al presionar el botón superior
+    function agregarFilaNueva() {
+        const tbody = document.getElementById('cuerpoExcel');
+        const numeroSiguiente = tbody.querySelectorAll('.fila-excel').length + 1;
+        
+        // Clonar la estructura de campos vacíos listos para rellenar
+        const nuevaFila = document.createElement('tr');
+        nuevaFila.className = 'fila-excel';
+        nuevaFila.innerHTML = `
+            <td style="padding: 5px; text-align: center; background-color: #f1f5f9; border-right: 1px solid #cbd5e1; color: #475569; font-weight: bold;">${numeroSiguiente}</td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="PRC-..." class="input-celda centralizar" style="font-weight: bold;"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Modelo" class="input-celda"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Marca" class="input-celda"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Descripción corta" class="input-celda" style="font-weight: 600;"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" value="{% now 'Y-m-d' %}" class="input-celda centralizar"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="EAN" class="input-celda"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Serie" class="input-celda"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" step="0.01" placeholder="0.00" class="input-celda alinear-derecha"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Proveedor" class="input-celda"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Ubicación" class="input-celda"></td>
+            <td style="padding: 0; border-right: 2px solid #cbd5e1;"><input type="text" value="{{ user.username|upper }}" class="input-celda centralizar" style="text-transform: uppercase;"></td>
+            <td style="padding: 0; border-right: 1px solid #bbf7d0; background-color: #f0fdf4;"><input type="number" value="0" class="input-celda centralizar valor-in" oninput="calcularFilaStock(this)"></td>
+            <td style="padding: 0; border-right: 1px solid #fecaca; background-color: #fef2f2;"><input type="number" value="0" class="input-celda centralizar valor-out" oninput="calcularFilaStock(this)"></td>
+            <td style="padding: 5px; text-align: center; font-weight: 900; color: #0284c7; background-color: #e0f2fe; font-size: 1.05em;" class="celda-stock">0</td>
+        `;
+        
+        tbody.appendChild(nuevaFila);
+        // Hacer foco automático en el SKU de la nueva fila añadida
+        nuevaFila.querySelectorAll('input')[0].focus();
+    }
+
+    // 3. Preparación de guardado global (Esta función enviará la matriz de datos a Django más adelante)
+    function guardarMatrizCompleta() {
+        alert("¡Estructura de datos Excel lista! Al configurar la conexión a la base de datos, este botón enviará todas las filas editadas al servidor en un solo bloque seguro.");
+    }
+</script>
 {% endblock %}
