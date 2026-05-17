@@ -53,11 +53,13 @@ class Producto(models.Model):
     costo_dolares = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Costo Unit. ($)")
     costo_soles = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Costo Cero (S/.)")
     
-    # Precios para tu módulo "Consulta Rápida"
-    precio_mercado_libre = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, blank=True, null=True)
-    precio_falabella = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, blank=True, null=True)
-    precio_web = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, blank=True, null=True)
-    precio_creditienda = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, blank=True, null=True)
+    # NUEVO: Casillas (Checkboxes) para tu pantalla "Consulta Rápida"
+    activo_ml = models.BooleanField(default=False, verbose_name="Mercado Libre")
+    activo_ml_jr = models.BooleanField(default=False, verbose_name="Mercado Libre Junior")
+    activo_falabella = models.BooleanField(default=False, verbose_name="Falabella")
+    activo_web = models.BooleanField(default=False, verbose_name="Página Web")
+    activo_creditienda = models.BooleanField(default=False, verbose_name="Creditienda")
+    activo_intercorp = models.BooleanField(default=False, verbose_name="Intercorp")
 
     def __str__(self):
         return f"{self.sku} - {self.titulo}"
@@ -68,7 +70,6 @@ class Producto(models.Model):
         ingresos = sum(mov.cantidad for mov in self.movimientos_percheron.filter(tipo='IN'))
         salidas = sum(mov.cantidad for mov in self.movimientos_percheron.filter(tipo='OUT'))
         return ingresos - salidas
-
 
 # =========================================================
 # 4. KARDEX PERCHERÓN (El Historial de Movimientos)

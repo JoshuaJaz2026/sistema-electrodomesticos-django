@@ -30,4 +30,6 @@ urlpatterns = [
     # 5. Reportes y Herramientas
     path('reportes/', views.reporte_ventas, name='reporte_ventas'),
     path('simulador/', views.simulador_costos, name='simulador_costos'),
+    # API
+    path('api/buscar-producto/', views.api_buscar_producto, name='api_buscar_producto'),
 ]

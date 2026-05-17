@@ -225,5 +225,47 @@
             alert("Ocurrió un error de comunicación con el servidor.");
         });
     }
+
+// MAGIA DE AUTOCOMPLETADO: Escucha cuando se escribe un SKU
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('input-sku')) {
+            const skuInput = e.target;
+            const fila = skuInput.closest('tr'); // Detecta en qué fila estamos
+            const sku = skuInput.value.trim();
+
+            if (sku !== '') {
+                // Llama a la API de Django que acabamos de crear
+                fetch(`/api/buscar-producto/?sku=${sku}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        // Si existe, rellena los campos bloqueados de esa fila
+                        fila.querySelector('.input-modelo').value = data.modelo || '';
+                        fila.querySelector('.input-titulo').value = data.titulo || '';
+                        
+                        const eanInput = fila.querySelector('.input-ean');
+                        if (eanInput) eanInput.value = data.codigo_ean || '';
+                        
+                        const costoInput = fila.querySelector('.input-costo');
+                        if (costoInput) costoInput.value = data.costo_soles || '0.00';
+                        
+                        // Opcional: Mueve el cursor automáticamente a "N° SERIE" para seguir trabajando rápido
+                        const serieInput = fila.querySelector('.input-serie');
+                        if (serieInput) serieInput.focus(); 
+                        
+                        skuInput.style.color = '#047857'; // Pone el SKU en verde para confirmar éxito
+                    } else {
+                        // Si no existe, lanza un aviso y limpia
+                        alert('⚠️ ' + data.message + ' verifique el SKU.');
+                        fila.querySelector('.input-modelo').value = '';
+                        fila.querySelector('.input-titulo').value = '';
+                        skuInput.style.color = '#ef4444'; // Rojo de error
+                        skuInput.focus();
+                    }
+                })
+                .catch(error => console.error("Error buscando SKU:", error));
+            }
+        }
+    });
 </script>
 {% endblock %}

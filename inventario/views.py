@@ -301,3 +301,31 @@ class LoginCamaleonicoView(LoginView):
         self.request.session['icono_actual'] = f"{icon_prefix} {tema['icono']}"
         
         return super().form_valid(form)
+    
+    from django.http import JsonResponse
+from .models import Producto
+
+# ==========================================
+# API: AUTOCOMPLETADO DE PRODUCTOS
+# ==========================================
+def api_buscar_producto(request):
+    sku = request.GET.get('sku', '').strip()
+    
+    if not sku:
+        return JsonResponse({'status': 'error', 'message': 'SKU vacío'})
+    
+    try:
+        # Buscamos el producto en la base de datos
+        producto = Producto.objects.get(sku=sku)
+        
+        # Devolvemos un diccionario JSON con la información
+        return JsonResponse({
+            'status': 'ok',
+            'modelo': producto.modelo,
+            'titulo': producto.titulo,
+            'marca': producto.marca,
+            'codigo_ean': producto.codigo_ean,
+            'costo_soles': producto.costo_soles,
+        })
+    except Producto.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Producto no encontrado'})
