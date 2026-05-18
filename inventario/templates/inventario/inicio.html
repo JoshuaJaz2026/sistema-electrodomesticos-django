@@ -5,179 +5,244 @@
 
 <div class="dashboard-header animated-fade">
     <h2 style="color: #2c3e50; font-weight: 700; margin-bottom: 5px;">
-        <i class="fas fa-chart-pie" style="color: var(--color-principal);"></i> Resumen de Operaciones - {{ canal }}
+        <i class="fas fa-chart-line" style="color: var(--color-principal);"></i> Panel Analítico - {{ canal }}
     </h2>
-    <p style="color: #64748b; margin-top: 0;">Visualización en tiempo real del rendimiento y estado del inventario.</p>
+    <p style="color: #64748b; margin-top: 0; font-size: 0.9rem;">Métricas de rendimiento e inventario en tiempo real.</p>
 </div>
 
-<div class="chart-grid">
-    <div class="chart-card animated-card" style="--delay: 0.1s;">
-        <h3 class="chart-title">Distribución de Ventas</h3>
-        <div class="chart-container">
-            <canvas id="chartVentas"></canvas>
+<div class="kpi-grid">
+    
+    <div class="grid-column">
+        <div class="kpi-card animated-card" style="--delay: 0.1s;">
+            <div class="kpi-title">VENTAS TOTALES (MES)</div>
+            <div class="kpi-subtitle">PRODUCTOS DESPACHADOS</div>
+            <div class="kpi-big-number">1,248</div>
+        </div>
+        
+        <div class="kpi-card animated-card" style="--delay: 0.2s;">
+            <div class="kpi-title">META DE VENTAS</div>
+            <div class="kpi-subtitle">PROGRESO DEL OBJETIVO</div>
+            <div style="position: relative; height: 120px; margin-top: 10px;">
+                <canvas id="chartVelocimetro"></canvas>
+                <div class="velocimetro-text">75%</div>
+            </div>
         </div>
     </div>
 
-    <div class="chart-card animated-card" style="--delay: 0.3s;">
-        <h3 class="chart-title">Top Categorías Globales</h3>
-        <div class="chart-container">
-            <canvas id="chartCategorias"></canvas>
+    <div class="kpi-card animated-card center-span" style="--delay: 0.3s;">
+        <div class="kpi-title">ACTIVIDAD DE INVENTARIO</div>
+        <div class="kpi-subtitle">POR SUBCATEGORÍA</div>
+        <div style="height: 250px; margin-top: 15px;">
+            <canvas id="chartBarras"></canvas>
         </div>
     </div>
 
-    <div class="chart-card animated-card" style="--delay: 0.5s;">
-        <h3 class="chart-title">Estado de Inventario (Percherón)</h3>
-        <div class="chart-container">
-            <canvas id="chartInventario"></canvas>
+    <div class="kpi-card animated-card right-span" style="--delay: 0.4s;">
+        <div class="kpi-title">DISTRIBUCIÓN DE STOCK</div>
+        <div class="kpi-subtitle">POR ALMACÉN / ESTADO</div>
+        <div style="height: 230px; margin-top: 15px;">
+            <canvas id="chartPastel"></canvas>
         </div>
+    </div>
+
+</div>
+
+<div class="trend-grid">
+    <div class="kpi-card animated-card" style="--delay: 0.5s;">
+        <div class="kpi-title">CRECIMIENTO YTD</div>
+        <div class="kpi-subtitle">COMPARADO AL AÑO PASADO</div>
+        <div class="trend-content">
+            <span class="trend-value">23%</span>
+            <i class="fas fa-arrow-up trend-icon trend-up"></i>
+        </div>
+        <div style="height: 60px;"><canvas id="miniChart1"></canvas></div>
+    </div>
+
+    <div class="kpi-card animated-card" style="--delay: 0.6s;">
+        <div class="kpi-title">NUEVOS CLIENTES</div>
+        <div class="kpi-subtitle">PROMEDIO DIARIO</div>
+        <div class="trend-content">
+            <span class="trend-value">12</span>
+            <i class="fas fa-users trend-icon" style="color: var(--color-principal);"></i>
+        </div>
+        <div style="height: 60px;"><canvas id="miniChart2"></canvas></div>
+    </div>
+
+    <div class="kpi-card animated-card" style="--delay: 0.7s;">
+        <div class="kpi-title">TASA DE DEVOLUCIONES</div>
+        <div class="kpi-subtitle">COMPARADO AL MES PASADO</div>
+        <div class="trend-content">
+            <span class="trend-value">-4%</span>
+            <i class="fas fa-arrow-down trend-icon trend-down"></i>
+        </div>
+        <div style="height: 60px;"><canvas id="miniChart3"></canvas></div>
     </div>
 </div>
 
 <style>
-    /* ===============================
-       ANIMACIONES DE ENTRADA
-       =============================== */
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+    /* ANIMACIONES */
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    .animated-fade { animation: fadeInUp 0.4s ease-out forwards; }
+    .animated-card { opacity: 0; animation: fadeInUp 0.5s ease-out forwards; animation-delay: var(--delay); }
 
-    .animated-fade {
-        animation: fadeInUp 0.6s ease-out forwards;
-    }
-
-    .animated-card {
-        opacity: 0; /* Inicia invisible */
-        animation: fadeInUp 0.7s ease-out forwards;
-        animation-delay: var(--delay); /* Crea el efecto cascada */
-    }
-
-    /* ===============================
-       ESTILOS DE LAS TARJETAS Y GRID
-       =============================== */
-    .chart-grid {
+    /* LAYOUT GRID (Estructura tipo Power BI) */
+    .kpi-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 25px;
-        margin-top: 30px;
+        grid-template-columns: 250px 1fr 350px; /* Columna izq fija, centro expansible, derecha fija */
+        gap: 15px;
+        margin-top: 20px;
+    }
+    .grid-column { display: flex; flex-direction: column; gap: 15px; }
+    
+    .trend-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-top: 15px;
     }
 
-    .chart-card {
+    /* ESTILO DE TARJETAS MINIMALISTAS */
+    .kpi-card {
         background: #ffffff;
-        border-radius: 16px;
-        padding: 25px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.03);
-        border-top: 4px solid var(--color-principal);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .chart-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.08);
-    }
-
-    .chart-title {
-        margin: 0 0 20px 0;
-        color: #334155;
-        font-size: 1.1rem;
-        text-align: center;
-        font-weight: 600;
-    }
-
-    .chart-container {
-        position: relative;
-        height: 250px;
-        width: 100%;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px; /* Bordes menos redondeados, más corporativos */
+        padding: 15px 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         display: flex;
-        justify-content: center;
+        flex-direction: column;
+    }
+
+    .kpi-title { font-size: 0.8rem; color: #475569; font-weight: 600; letter-spacing: 0.5px; }
+    .kpi-subtitle { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px; }
+    
+    .kpi-big-number {
+        font-size: 2.8rem;
+        font-weight: 300;
+        color: #1e293b;
+        text-align: center;
+        margin: auto 0;
+    }
+
+    .velocimetro-text {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        text-align: center;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    /* Tendencias */
+    .trend-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 10px;
+        margin-bottom: 15px;
+    }
+    .trend-value { font-size: 2.2rem; font-weight: 400; color: #0f172a; }
+    .trend-icon { font-size: 1.8rem; }
+    .trend-up { color: #10b981; }
+    .trend-down { color: #ef4444; }
+
+    /* Responsividad */
+    @media (max-width: 1200px) {
+        .kpi-grid { grid-template-columns: 1fr; }
+        .grid-column { flex-direction: row; }
+        .grid-column > div { flex: 1; }
+    }
+    @media (max-width: 768px) {
+        .grid-column, .trend-grid { flex-direction: column; grid-template-columns: 1fr; }
     }
 </style>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Leemos el color de la plataforma actual (Amarillo en ML, Verde en Falabella, etc.)
         const colorPrincipal = getComputedStyle(document.documentElement).getPropertyValue('--color-principal').trim() || '#3498DB';
         
-        // Configuración elegante compartida para los gráficos
-        const commonOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '75%', // Hace que el anillo (Doughnut) sea más delgado y elegante
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 20,
-                        usePointStyle: true, // Bolitas en lugar de cuadrados en la leyenda
-                        font: { family: "'Segoe UI', sans-serif", size: 12 }
-                    }
-                }
-            },
-            layout: { padding: 10 }
-        };
-
-        // --------------------------------------------------
-        // GRÁFICO 1: VENTAS (Anillo)
-        // --------------------------------------------------
-        const ctxVentas = document.getElementById('chartVentas').getContext('2d');
-        new Chart(ctxVentas, {
+        // 1. VELOCÍMETRO (Medio Anillo)
+        const ctxVel = document.getElementById('chartVelocimetro').getContext('2d');
+        new Chart(ctxVel, {
             type: 'doughnut',
             data: {
-                labels: ['Completadas', 'En Proceso', 'Canceladas'],
+                labels: ['Completado', 'Faltante'],
                 datasets: [{
-                    data: [65, 25, 10], // Números de prueba temporal
-                    backgroundColor: [colorPrincipal, '#cbd5e1', '#f87171'], // El color 1 siempre coincide con la plataforma
+                    data: [75, 25],
+                    backgroundColor: [colorPrincipal, '#e2e8f0'],
                     borderWidth: 0,
-                    hoverOffset: 8
-                }]
-            },
-            options: commonOptions
-        });
-
-        // --------------------------------------------------
-        // GRÁFICO 2: CATEGORÍAS (Anillo)
-        // --------------------------------------------------
-        const ctxCat = document.getElementById('chartCategorias').getContext('2d');
-        new Chart(ctxCat, {
-            type: 'doughnut',
-            data: {
-                labels: ['Línea Blanca', 'Audio y Video', 'Pequeños Electros'],
-                datasets: [{
-                    data: [45, 30, 25],
-                    backgroundColor: ['#8b5cf6', '#3b82f6', '#14b8a6'],
-                    borderWidth: 0,
-                    hoverOffset: 8
-                }]
-            },
-            options: commonOptions
-        });
-
-        // --------------------------------------------------
-        // GRÁFICO 3: INVENTARIO (Pastel sólido para contrastar)
-        // --------------------------------------------------
-        const ctxInv = document.getElementById('chartInventario').getContext('2d');
-        new Chart(ctxInv, {
-            type: 'pie', // Pie en lugar de Doughnut
-            data: {
-                labels: ['Stock Normal', 'Stock Bajo', 'Agotados'],
-                datasets: [{
-                    data: [50, 35, 15],
-                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                    borderWidth: 0,
-                    hoverOffset: 8
+                    cutout: '75%'
                 }]
             },
             options: {
-                ...commonOptions,
-                cutout: '0%' // Lo vuelve sólido
+                responsive: true, maintainAspectRatio: false,
+                rotation: 270, // Inicia a la izquierda
+                circumference: 180, // Solo dibuja medio círculo
+                plugins: { legend: { display: false }, tooltip: { enabled: false } }
             }
         });
+
+        // 2. GRÁFICO DE BARRAS (Inventario)
+        const ctxBarras = document.getElementById('chartBarras').getContext('2d');
+        new Chart(ctxBarras, {
+            type: 'bar',
+            data: {
+                labels: ['Refrigeración', 'Lavado', 'Tv y Video', 'Electro Hogar', 'Climatización'],
+                datasets: [
+                    { label: 'Ingresos', data: [7919, 3010, 5074, 2100, 1500], backgroundColor: '#14b8a6' },
+                    { label: 'Salidas', data: [3182, 1200, 2620, 900, 400], backgroundColor: '#334155' }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'top', align: 'start', labels: { boxWidth: 12, usePointStyle: true } } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { grid: { color: '#f1f5f9' }, beginAtZero: true }
+                }
+            }
+        });
+
+        // 3. GRÁFICO CIRCULAR (Pie clásico)
+        const ctxPastel = document.getElementById('chartPastel').getContext('2d');
+        new Chart(ctxPastel, {
+            type: 'pie',
+            data: {
+                labels: ['Almacén Principal', 'En Tránsito', 'Defectuosos', 'Devoluciones'],
+                datasets: [{
+                    data: [55, 25, 10, 10],
+                    backgroundColor: ['#f59e0b', '#3b82f6', '#ef4444', '#cbd5e1'],
+                    borderWidth: 1, borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'right', labels: { boxWidth: 12 } } }
+            }
+        });
+
+        // 4. MINI GRÁFICOS (Barras pequeñas de tendencia)
+        const miniOptions = {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+            scales: { x: { display: false }, y: { display: false, beginAtZero: true } },
+            layout: { padding: 0 }
+        };
+
+        const crearMiniBarra = (id, color) => {
+            new Chart(document.getElementById(id).getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['1','2','3','4','5','6','7'],
+                    datasets: [{ data: Array.from({length: 7}, () => Math.floor(Math.random() * 100) + 20), backgroundColor: color, borderRadius: 2 }]
+                },
+                options: miniOptions
+            });
+        };
+
+        crearMiniBarra('miniChart1', '#10b981'); // Verde
+        crearMiniBarra('miniChart2', colorPrincipal); // Camaleónico
+        crearMiniBarra('miniChart3', '#0ea5e9'); // Azul
     });
 </script>
 {% endblock %}
