@@ -5,9 +5,9 @@
 
 <div class="dashboard-header animated-fade">
     <h2 style="color: #2c3e50; font-weight: 700; margin-bottom: 5px;">
-        <i class="fas fa-chart-pie" style="color: var(--color-principal);"></i> Resumen de Operaciones - {{ canal }}
+        <i class="fas fa-thin fa-chart-pie-simple" style="color: var(--color-principal);"></i> Panel Ejecutivo - {{ canal }}
     </h2>
-    <p style="color: #64748b; margin-top: 0;">Visualización en tiempo real del rendimiento y estado del inventario.</p>
+    <p style="color: #94a3b8; margin-top: 0; font-size: 0.95rem;">Resumen visual de operaciones. Pasa el mouse sobre los gráficos para ver detalles.</p>
 </div>
 
 <div class="chart-grid">
@@ -15,6 +15,7 @@
         <h3 class="chart-title">Distribución de Ventas</h3>
         <div class="chart-container">
             <canvas id="chartVentas"></canvas>
+            <div id="centerTextVentas" class="chart-center-text animated-fade-in">Pasa el mouse</div>
         </div>
     </div>
 
@@ -22,25 +23,27 @@
         <h3 class="chart-title">Top Categorías Globales</h3>
         <div class="chart-container">
             <canvas id="chartCategorias"></canvas>
+            <div id="centerTextCat" class="chart-center-text animated-fade-in">Pasa el mouse</div>
         </div>
     </div>
 
     <div class="chart-card animated-card" style="--delay: 0.5s;">
-        <h3 class="chart-title">Estado de Inventario (Percherón)</h3>
+        <h3 class="chart-title">Estado de Inventario</h3>
         <div class="chart-container">
             <canvas id="chartInventario"></canvas>
+            <div id="centerTextInv" class="chart-center-text animated-fade-in">Pasa el mouse</div>
         </div>
     </div>
 </div>
 
 <style>
     /* ===============================
-       ANIMACIONES DE ENTRADA
+       ANIMACIONES DE ENTRADA (CASCADA)
        =============================== */
     @keyframes fadeInUp {
         from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(20px);
         }
         to {
             opacity: 1;
@@ -48,103 +51,165 @@
         }
     }
 
+    @keyframes fadeInCenterText {
+        from { opacity: 0; transform: translate(-50%, -40%); }
+        to { opacity: 1; transform: translate(-50%, -50%); }
+    }
+
     .animated-fade {
-        animation: fadeInUp 0.6s ease-out forwards;
+        animation: fadeInUp 0.5s ease-out forwards;
     }
 
     .animated-card {
         opacity: 0; /* Inicia invisible */
-        animation: fadeInUp 0.7s ease-out forwards;
-        animation-delay: var(--delay); /* Crea el efecto cascada */
+        animation: fadeInUp 0.6s ease-out forwards;
+        animation-delay: var(--delay); /* Efecto cascada */
+    }
+
+    .animated-fade-in {
+        animation: fadeInCenterText 0.3s ease-out forwards;
     }
 
     /* ===============================
-       ESTILOS DE LAS TARJETAS Y GRID
+       ESTILOS MINIMALISTAS
        =============================== */
     .chart-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 25px;
-        margin-top: 30px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
     }
 
     .chart-card {
         background: #ffffff;
-        border-radius: 16px;
-        padding: 25px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.03);
-        border-top: 4px solid var(--color-principal);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 20px; /* Bordes más sutiles */
+        padding: 30px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.015); /* Sombra casi invisible */
+        border: 1px solid #f1f5f9; /* Borde muy suave */
+        transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+        position: relative;
     }
 
     .chart-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        transform: translateY(-8px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.05);
+        border-color: #e2e8f0;
     }
 
     .chart-title {
-        margin: 0 0 20px 0;
+        margin: 0 0 25px 0;
         color: #334155;
-        font-size: 1.1rem;
+        font-size: 1rem;
         text-align: center;
         font-weight: 600;
+        letter-spacing: 0.5px;
     }
 
     .chart-container {
         position: relative;
-        height: 250px;
+        height: 220px;
         width: 100%;
         display: flex;
         justify-content: center;
+        align-items: center;
+    }
+
+    /* Texto en el centro del anillo */
+    .chart-center-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: #64748b;
+        font-family: "'Segoe UI', sans-serif";
+        font-size: 0.85rem;
+        font-weight: 500;
+        line-height: 1.3;
+        pointer-events: none; /* No interfiere con el hover */
+    }
+
+    .chart-center-text span.value {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #2c3e50;
+        display: block;
+        margin-bottom: 2px;
     }
 </style>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Leemos el color de la plataforma actual (Amarillo en ML, Verde en Falabella, etc.)
+        // Color de la plataforma (Amarillo en ML, Verde en Falabella, etc.)
         const colorPrincipal = getComputedStyle(document.documentElement).getPropertyValue('--color-principal').trim() || '#3498DB';
         
-        // Configuración elegante compartida para los gráficos
+        // Configuración minimalista compartida (SIN LEYENDA)
         const commonOptions = {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '75%', // Hace que el anillo (Doughnut) sea más delgado y elegante
+            cutout: '82%', // ANILLOS ULTRA FINOS Y ELEGANTES
             plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 20,
-                        usePointStyle: true, // Bolitas en lugar de cuadrados en la leyenda
-                        font: { family: "'Segoe UI', sans-serif", size: 12 }
-                    }
-                }
+                legend: { display: false }, // OCULTAR LEYENDA FIJA
+                tooltip: { enabled: false } // Desactivamos el tooltip default para usar el centro
             },
-            layout: { padding: 10 }
+            layout: { padding: 5 },
+            animation: {
+                animateRotate: true,
+                animateScale: false,
+                duration: 1000,
+                easing: 'easeOutQuart'
+            },
+            // Microanimación al pasar el mouse
+            hover: {
+                mode: 'nearest',
+                intersect: true,
+                onHover: (event, chartElement) => {
+                    event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+                }
+            }
         };
 
+        // Función para actualizar el texto central dinámicamente
+        function updateCenterText(chart, elementId) {
+            const centerText = document.getElementById(elementId);
+            const activePoint = chart.getActiveElements()[0];
+
+            if (activePoint) {
+                const label = chart.data.labels[activePoint.index];
+                const value = chart.data.datasets[0].data[activePoint.index];
+                const color = chart.data.datasets[0].backgroundColor[activePoint.index];
+                centerText.innerHTML = `<span class="value animated-fade-in">${value}%</span><span style="color: ${color};">${label}</span>`;
+            } else {
+                centerText.innerHTML = "Pasa el mouse"; // Texto por defecto
+            }
+        }
+
         // --------------------------------------------------
-        // GRÁFICO 1: VENTAS (Anillo)
+        // GRÁFICO 1: VENTAS (Anillo Fino Interactivo)
         // --------------------------------------------------
         const ctxVentas = document.getElementById('chartVentas').getContext('2d');
-        new Chart(ctxVentas, {
+        const chartVentas = new Chart(ctxVentas, {
             type: 'doughnut',
             data: {
                 labels: ['Completadas', 'En Proceso', 'Canceladas'],
                 datasets: [{
-                    data: [65, 25, 10], // Números de prueba temporal
-                    backgroundColor: [colorPrincipal, '#cbd5e1', '#f87171'], // El color 1 siempre coincide con la plataforma
+                    data: [65, 25, 10], // Datos de prueba
+                    backgroundColor: [colorPrincipal, '#cbd5e1', '#f87171'], 
                     borderWidth: 0,
-                    hoverOffset: 8
+                    hoverOffset: 12 // Expansión suave al hover
                 }]
             },
-            options: commonOptions
+            options: {
+                ...commonOptions,
+                onHover: (e) => updateCenterText(chartVentas, 'centerTextVentas') // Activamos la magia
+            }
         });
 
         // --------------------------------------------------
-        // GRÁFICO 2: CATEGORÍAS (Anillo)
+        // GRÁFICO 2: CATEGORÍAS (Anillo Fino Interactivo)
         // --------------------------------------------------
         const ctxCat = document.getElementById('chartCategorias').getContext('2d');
-        new Chart(ctxCat, {
+        const chartCategorias = new Chart(ctxCat, {
             type: 'doughnut',
             data: {
                 labels: ['Línea Blanca', 'Audio y Video', 'Pequeños Electros'],
@@ -152,30 +217,33 @@
                     data: [45, 30, 25],
                     backgroundColor: ['#8b5cf6', '#3b82f6', '#14b8a6'],
                     borderWidth: 0,
-                    hoverOffset: 8
+                    hoverOffset: 12
                 }]
             },
-            options: commonOptions
+            options: {
+                ...commonOptions,
+                onHover: (e) => updateCenterText(chartCategorias, 'centerTextCat')
+            }
         });
 
         // --------------------------------------------------
-        // GRÁFICO 3: INVENTARIO (Pastel sólido para contrastar)
+        // GRÁFICO 3: INVENTARIO (Anillo Fino Interactivo)
         // --------------------------------------------------
         const ctxInv = document.getElementById('chartInventario').getContext('2d');
-        new Chart(ctxInv, {
-            type: 'pie', // Pie en lugar de Doughnut
+        const chartInventario = new Chart(ctxInv, {
+            type: 'doughnut', // También anillo ultra-fino
             data: {
                 labels: ['Stock Normal', 'Stock Bajo', 'Agotados'],
                 datasets: [{
                     data: [50, 35, 15],
                     backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
                     borderWidth: 0,
-                    hoverOffset: 8
+                    hoverOffset: 12
                 }]
             },
             options: {
                 ...commonOptions,
-                cutout: '0%' // Lo vuelve sólido
+                onHover: (e) => updateCenterText(chartInventario, 'centerTextInv')
             }
         });
     });
