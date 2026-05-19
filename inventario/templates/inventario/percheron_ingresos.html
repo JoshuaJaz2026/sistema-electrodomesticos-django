@@ -1,0 +1,57 @@
+{% extends 'inventario/dashboard_global.html' %}
+
+{% block content %}
+<div class="card" style="border-top: 4px solid #10b981; padding: 20px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+        <h2 style="margin: 0; color: #2c3e50;">
+            <i class="fas fa-box-open" style="color: #10b981;"></i> Control de Ingresos - Almacén Central
+        </h2>
+        <div style="display: flex; gap: 12px;">
+            <button style="background-color: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                <i class="fas fa-plus-circle"></i> Nuevo Ingreso (Kardex)
+            </button>
+        </div>
+    </div>
+    
+    <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">
+        Historial de todos los productos ingresados a Percherón. Aquí se suma el stock oficial.
+    </p>
+
+    <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <table style="width: 100%; border-collapse: collapse; background: white; white-space: nowrap; font-size: 0.85em;">
+            <thead>
+                <tr style="background-color: #f8fafc; color: #334155; border-bottom: 2px solid #cbd5e1; text-transform: uppercase;">
+                    <th style="padding: 12px; text-align: center;">Fecha</th>
+                    <th style="padding: 12px; text-align: left;">SKU</th>
+                    <th style="padding: 12px; text-align: left;">Producto</th>
+                    <th style="padding: 12px; text-align: center; background-color: #dcfce7; color: #166534;">Cant. (+)</th>
+                    <th style="padding: 12px; text-align: left;">Proveedor / Motivo</th>
+                    <th style="padding: 12px; text-align: left;">Usuario</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mov in movimientos %}
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px; text-align: center; color: #64748b;">{{ mov.fecha|date:"d/m/Y" }}</td>
+                    <td style="padding: 12px; font-weight: bold; color: #0f172a;">{{ mov.producto.sku }}</td>
+                    <td style="padding: 12px;">{{ mov.producto.titulo|truncatechars:40 }}</td>
+                    <td style="padding: 12px; text-align: center; font-weight: bold; color: #10b981;">+{{ mov.cantidad }}</td>
+                    <td style="padding: 12px; color: #475569;">{{ mov.proveedor_motivo|default:"Ingreso Regular" }}</td>
+                    <td style="padding: 12px;"><i class="fas fa-user-circle"></i> {{ mov.usuario.username|default:"Admin" }}</td>
+                </tr>
+                {% empty %}
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px; text-align: center; color: #64748b;">Hoy</td>
+                    <td style="padding: 12px; font-weight: bold; color: #0f172a;">SKU-DEMO</td>
+                    <td style="padding: 12px;">Producto de prueba (Aún no hay ingresos reales)</td>
+                    <td style="padding: 12px; text-align: center; font-weight: bold; color: #10b981;">+10</td>
+                    <td style="padding: 12px; color: #475569;">Importación</td>
+                    <td style="padding: 12px;"><i class="fas fa-user-circle"></i> Sistema</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends 'inventario/dashboard_global.html' %}
+
+{% block content %}
+<div class="card" style="border-top: 4px solid #8b5cf6; padding: 20px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+        <h2 style="margin: 0; color: #2c3e50;">
+            <i class="fas fa-clipboard-list" style="color: #8b5cf6;"></i> Alta de Productos Nuevos
+        </h2>
+        <div style="display: flex; gap: 12px;">
+            <button type="button" onclick="agregarFilaNueva()" style="background-color: #8b5cf6; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-plus"></i> Insertar Fila
+            </button>
+            <button type="button" onclick="guardarNuevosProductos()" style="background-color: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-save"></i> Guardar Catálogo
+            </button>
+        </div>
+    </div>
+    <p style="color: #64748b; margin-top: -10px; margin-bottom: 25px; font-size: 0.9rem;">
+        Crea nuevos productos en la base de datos maestra de Percherón. Todo producto nuevo nacerá con Stock 0.
+    </p>
+
+    <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <table style="width: 100%; border-collapse: collapse; background: white; white-space: nowrap; font-size: 0.85em;">
+            <thead>
+                <tr style="background-color: #f8fafc; color: #334155; border-bottom: 2px solid #cbd5e1; text-transform: uppercase; font-weight: bold;">
+                    <th style="padding: 10px; text-align: center; background-color: #f1f5f9; width: 40px; border-right: 1px solid #cbd5e1;">#</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">SKU (Único)</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">MODELO</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">MARCA</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 250px;">TÍTULO / DESCRIPCIÓN</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">UBICACIÓN BASE</th>
+                    <th style="padding: 10px; text-align: right;">COSTO (S/.)</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpoExcel">
+                <tr class="fila-excel">
+                    <td style="padding: 5px; text-align: center; background-color: #f8fafc; border-right: 1px solid #cbd5e1; color: #94a3b8; font-weight: bold;">1</td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <input type="text" placeholder="Obligatorio..." class="input-celda centralizar input-sku" style="font-weight: bold; color: #0f172a;">
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Modelo..." class="input-celda input-modelo"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Marca..." class="input-celda input-marca"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Descripción completa..." class="input-celda input-titulo"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Ej. Zona A..." class="input-celda input-ubicacion"></td>
+                    <td style="padding: 0;"><input type="number" step="0.01" placeholder="0.00" class="input-celda alinear-derecha input-costo-s"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .input-celda { width: 100%; box-sizing: border-box; border: none; padding: 8px 10px; font-family: inherit; font-size: inherit; color: #334155; background-color: transparent; outline: none; transition: background-color 0.15s; }
+    .input-celda:focus { background-color: #fffdec; box-shadow: inset 0 0 0 2px #8b5cf6; color: #000; }
+    .centralizar { text-align: center; }
+    .alinear-derecha { text-align: right; }
+    .input-celda::-webkit-outer-spin-button, .input-celda::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .input-celda[type=number] { -moz-appearance: textfield; }
+</style>
+
+<script>
+    function agregarFilaNueva() {
+        const tbody = document.getElementById('cuerpoExcel');
+        const num = tbody.querySelectorAll('.fila-excel').length + 1;
+        const nuevaFila = document.createElement('tr');
+        nuevaFila.className = 'fila-excel';
+        nuevaFila.innerHTML = `
+            <td style="padding: 5px; text-align: center; background-color: #f1f5f9; border-right: 1px solid #cbd5e1; color: #475569; font-weight: bold;">${num}</td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Obligatorio..." class="input-celda centralizar input-sku" style="font-weight: bold; color: #0f172a;"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Modelo..." class="input-celda input-modelo"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Marca..." class="input-celda input-marca"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Descripción..." class="input-celda input-titulo"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Ej. Zona A..." class="input-celda input-ubicacion"></td>
+            <td style="padding: 0;"><input type="number" step="0.01" placeholder="0.00" class="input-celda alinear-derecha input-costo-s"></td>
+        `;
+        tbody.appendChild(nuevaFila);
+    }
+
+    function guardarNuevosProductos() {
+        const filas = document.querySelectorAll('.fila-excel');
+        const productos = [];
+        filas.forEach(f => {
+            const sku = f.querySelector('.input-sku').value.trim();
+            if (sku) {
+                productos.push({
+                    sku: sku,
+                    modelo: f.querySelector('.input-modelo').value.trim(),
+                    marca: f.querySelector('.input-marca').value.trim(),
+                    titulo: f.querySelector('.input-titulo').value.trim(),
+                    ubicacion: f.querySelector('.input-ubicacion').value.trim(),
+                    costo_soles: f.querySelector('.input-costo-s').value || 0
+                });
+            }
+        });
+
+        if (productos.length === 0) return alert("Llena al menos un SKU válido.");
+
+        fetch("{% url 'guardar_nuevos_productos' %}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+            body: JSON.stringify({ productos: productos })
+        }).then(r => r.json()).then(data => {
+            if(data.status === 'ok') { alert(data.message); window.location.reload(); } 
+            else alert("Error: " + data.message);
+        });
+    }
+</script>
+{% endblock %}
