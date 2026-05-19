@@ -38,7 +38,7 @@
             transition: max-height 0.4s ease-in-out; 
         }
         
-        .submenu.open { max-height: 500px; }
+        .submenu.open { max-height: 600px; } /* Aumentado por si hay más opciones */
 
         .submenu-item {
             padding: 10px 25px 10px 50px;
@@ -86,13 +86,41 @@
                     <span>PERCHERON</span>
                     <i class="fas fa-chevron-down" id="arrow-per" style="margin-left: auto; font-size: 0.7em; transition: 0.3s;"></i>
                 </div>
+                
                 <div class="submenu" id="percheron-menu">
-                    <a href="{% url 'percheron_salidas' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-sign-out-alt"></i> Salidas</a>
-                    <a href="{% url 'percheron_consulta_rapida' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-bolt"></i> Consulta Rápida</a>
-                    <a href="{% url 'percheron_buscador' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-search"></i> Buscador</a>
-                    <a href="{% url 'percheron_registros' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-history"></i> Registros</a>
-                    <a href="{% url 'percheron_costos_general' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-file-invoice-dollar"></i> Costos General</a>
-                    <a href="{% url 'percheron_ingresos' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-sign-in-alt"></i> Ingresos</a>
+                    
+                    <a href="{% url 'percheron_ingresos' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-box-open"></i> Ingresos</a>
+                    <a href="{% url 'percheron_registros' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-clipboard-list"></i> Registros</a>
+                    <a href="{% url 'percheron_modelos' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-tags"></i> Modelos</a>
+                    
+                    <hr style="border: 0.5px solid #3e4f5f; margin: 10px 20px;">
+
+                    {% if canal == 'Mercado Libre' %}
+                        <a href="{% url 'percheron_mercadolibre' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-handshake"></i> Percherón Mercado Libre</a>
+                    
+                    {% elif canal == 'Mercado Libre - Junior' %}
+                        <a href="{% url 'percheron_mercadolibre_junior' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-seedling"></i> Percherón ML Junior</a>
+                    
+                    {% elif canal == 'Falabella' %}
+                        <a href="{% url 'percheron_falabella' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-store"></i> Percherón Falabella</a>
+                    
+                    {% elif canal == 'Creditienda' %}
+                        <a href="{% url 'percheron_creditienda' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-credit-card"></i> Percherón Creditienda</a>
+                    
+                    {% elif canal == 'Intercorp' %}
+                        <a href="{% url 'percheron_intercorp' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-building"></i> Percherón Intercorp</a>
+                    
+                    {% elif canal == 'Tik tok' or canal == 'Tiktok' %}
+                        <a href="{% url 'percheron_tiktok' %}?canal={{ canal }}" class="submenu-item"><i class="fab fa-tiktok"></i> Percherón Tiktok</a>
+                    
+                    {% elif canal == 'Venta Libre' %}
+                        <a href="{% url 'percheron_ventalibre' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-shopping-cart"></i> Percherón Venta Libre</a>
+                    {% endif %}
+
+                    {% if user.is_superuser %}
+                        <hr style="border: 0.5px solid #3e4f5f; margin: 10px 20px;">
+                        <a href="{% url 'percheron_bci' %}?canal={{ canal }}" class="submenu-item" style="color: #f59e0b;"><i class="fas fa-user-shield"></i> BCI Personal Autoriz.</a>
+                    {% endif %}
                 </div>
             </div>
             
@@ -132,11 +160,13 @@
             submenuItems.forEach(item => {
                 let linkPath = item.getAttribute('href');
                 
+                // Verificamos si la ruta actual coincide con el href del enlace
                 if (linkPath && linkPath !== '#' && linkPath.split('?')[0] === currentPath) {
                     item.style.color = 'white';
                     item.style.borderLeftColor = 'var(--color-principal)';
                     item.style.background = '#2c3e50';
                     
+                    // Abrimos el menú padre si estamos dentro de una subsección
                     const parentMenu = item.closest('.submenu');
                     if (parentMenu) {
                         parentMenu.classList.add('open');

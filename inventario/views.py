@@ -35,7 +35,7 @@ def inicio(request):
 # INVENTARIO GLOBAL: MAGAZZINO
 @login_required
 def inventario_magazzino(request):
-    productos = Electrodomestico.objects.all()  # Aquí podrás filtrar por almacén luego
+    productos = Electrodomestico.objects.all()
     canal = request.session.get('canal_activo', 'Web')
     return render(request, 'inventario/inventario_lista.html', {
         'productos': productos, 
@@ -43,86 +43,19 @@ def inventario_magazzino(request):
         'nombre_almacen': 'MAGAZZINO'
     })
 
-# =========================================================
-# SUBSECCIONES ESPECÍFICAS DEL MÓDULO PERCHERÓN (GLOBALES)
-# =========================================================
-@login_required
-def percheron_inventario(request):
-    productos = Electrodomestico.objects.all()  # Filtrar por almacén o lógica global
-    canal = request.session.get('canal_activo', 'Web')
-    color = request.session.get('color_actual', '#3498DB')
-    icono = request.session.get('icono_actual', 'fas fa-globe')
-    
-    return render(request, 'inventario/percheron_inventario.html', {
-        'productos': productos,
-        'canal': canal,
-        'color_actual': color,
-        'icono_actual': icono,
-        'nombre_almacen': 'PERCHERON'
-    })
 
+# =========================================================
+# 3. SECCIÓN PERCHERÓN: GLOBALES
+# =========================================================
 @login_required
 def percheron_ingresos(request):
     canal = request.session.get('canal_activo', 'Web')
     color = request.session.get('color_actual', '#3498DB')
     icono = request.session.get('icono_actual', 'fas fa-globe')
-    
-    # Filtramos para que esta tabla solo muestre el historial de INGRESOS
     movimientos_in = MovimientoPercheron.objects.filter(tipo='IN')
     
-    return render(request, 'inventario/percheron_ingresos.html', {
-        'canal': canal,
-        'color_actual': color,
-        'icono_actual': icono,
-        'movimientos': movimientos_in
-    })
-
-@login_required
-def percheron_salidas(request):
-    canal = request.session.get('canal_activo', 'Web')
-    color = request.session.get('color_actual', '#3498DB')
-    icono = request.session.get('icono_actual', 'fas fa-globe')
-    
-    return render(request, 'inventario/percheron_salidas.html', {
-        'canal': canal,
-        'color_actual': color,
-        'icono_actual': icono
-    })
-#HOP
-@login_required
-def percheron_buscador(request):
-    canal = request.session.get('canal_activo', 'Web')
-    color = request.session.get('color_actual', '#3498DB')
-    icono = request.session.get('icono_actual', 'fas fa-globe')
-    
-    return render(request, 'inventario/percheron_buscador.html', {
-        'canal': canal,
-        'color_actual': color,
-        'icono_actual': icono
-    })
-
-@login_required
-def percheron_consulta_rapida(request):
-    canal = request.session.get('canal_activo', 'Web')
-    color = request.session.get('color_actual', '#3498DB')
-    icono = request.session.get('icono_actual', 'fas fa-globe')
-    
-    return render(request, 'inventario/percheron_consulta_rapida.html', {
-        'canal': canal,
-        'color_actual': color,
-        'icono_actual': icono
-    })
-
-@login_required
-def percheron_costos_general(request):
-    canal = request.session.get('canal_activo', 'Web')
-    color = request.session.get('color_actual', '#3498DB')
-    icono = request.session.get('icono_actual', 'fas fa-globe')
-    
-    return render(request, 'inventario/percheron_costos_general.html', {
-        'canal': canal,
-        'color_actual': color,
-        'icono_actual': icono
+    return render(request, 'inventario/percheron_Ingresos.html', {
+        'canal': canal, 'color_actual': color, 'icono_actual': icono, 'movimientos': movimientos_in
     })
 
 @login_required
@@ -130,18 +63,117 @@ def percheron_registros(request):
     canal = request.session.get('canal_activo', 'Web')
     color = request.session.get('color_actual', '#3498DB')
     icono = request.session.get('icono_actual', 'fas fa-globe')
-    
-    # Jalamos TODOS los movimientos reales ordenados por fecha de la BD
     movimientos = MovimientoPercheron.objects.all()
     
-    return render(request, 'inventario/percheron_registros.html', {
-        'canal': canal,
-        'color_actual': color,
-        'icono_actual': icono,
-        'movimientos': movimientos
+    return render(request, 'inventario/percheron_Registros.html', {
+        'canal': canal, 'color_actual': color, 'icono_actual': icono, 'movimientos': movimientos
     })
 
-# NUEVA FUNCIÓN PARA GUARDAR LOS DATOS DE LA TABLA ESTILO EXCEL
+@login_required
+def percheron_modelos(request):
+    canal = request.session.get('canal_activo', 'Web')
+    color = request.session.get('color_actual', '#3498DB')
+    icono = request.session.get('icono_actual', 'fas fa-globe')
+    
+    return render(request, 'inventario/percheron_Modelos.html', {
+        'canal': canal, 'color_actual': color, 'icono_actual': icono
+    })
+
+# =========================================================
+# 4. SECCIÓN PERCHERÓN: PLATAFORMAS ESPECÍFICAS
+# =========================================================
+@login_required
+def percheron_mercadolibre(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'inventario/percheron_MercadoLibre.html', {'canal': canal})
+
+@login_required
+def percheron_mercadolibre_junior(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'inventario/percheron_MercadoLibre_Junior.html', {'canal': canal})
+
+@login_required
+def percheron_falabella(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'inventario/percheron_Falabella.html', {'canal': canal})
+
+@login_required
+def percheron_creditienda(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'inventario/percheron_Creditienda.html', {'canal': canal})
+
+@login_required
+def percheron_intercorp(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'inventario/percheron_Intercorp.html', {'canal': canal})
+
+@login_required
+def percheron_tiktok(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'inventario/percheron_Tiktok.html', {'canal': canal})
+
+@login_required
+def percheron_ventalibre(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'inventario/percheron_VentaLibre.html', {'canal': canal})
+
+@login_required
+def percheron_bci(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'inventario/percheron_BCI_Personal_Autorizado.html', {'canal': canal})
+
+
+# =========================================================
+# 5. APIs Y BASES DE DATOS (GUARDADO Y BÚSQUEDA)
+# =========================================================
+
+# API: Autocompletado de Productos
+def api_buscar_producto(request):
+    sku = request.GET.get('sku', '').strip()
+    if not sku:
+        return JsonResponse({'status': 'error', 'message': 'SKU vacío'})
+    try:
+        producto = Producto.objects.get(sku=sku)
+        return JsonResponse({
+            'status': 'ok',
+            'modelo': producto.modelo,
+            'titulo': producto.titulo,
+            'marca': producto.marca,
+            'codigo_ean': producto.codigo_ean,
+            'costo_soles': producto.costo_soles,
+        })
+    except Producto.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Producto no encontrado'})
+
+# API: Guardar Nuevos Productos (Para pantalla "Registros")
+def guardar_nuevos_productos(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            productos = data.get('productos', [])
+            creados, actualizados = 0, 0
+
+            for p in productos:
+                obj, created = Producto.objects.update_or_create(
+                    sku=p['sku'],
+                    defaults={
+                        'modelo': p.get('modelo', ''),
+                        'marca': p.get('marca', ''),
+                        'titulo': p.get('titulo', ''),
+                        'codigo_ean': p.get('ean', ''),
+                        'ubicacion': p.get('ubicacion', ''),
+                        'costo_dolares': p.get('costo_dolares') or 0.00,
+                        'costo_soles': p.get('costo_soles') or 0.00,
+                    }
+                )
+                if created: creados += 1
+                else: actualizados += 1
+            return JsonResponse({'status': 'ok', 'message': f'¡Éxito! {creados} creados, {actualizados} actualizados.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
+
+# API: Guardar Kardex (Ingresos/Salidas)
 @login_required
 def guardar_kardex_percheron(request):
     if request.method == 'POST':
@@ -156,11 +188,9 @@ def guardar_kardex_percheron(request):
                 modelo = fila.get('modelo', '').strip()
                 titulo = fila.get('titulo', '').strip()
                 
-                # EL TRUCO: Si la fila no tiene SKU, le inventamos uno temporal automáticamente
                 if not sku:
                     sku = f"SIN-SKU-{uuid.uuid4().hex[:6].upper()}"
                 
-                # Buscamos o creamos el producto
                 producto, creado = Producto.objects.get_or_create(
                     sku=sku,
                     defaults={
@@ -173,7 +203,6 @@ def guardar_kardex_percheron(request):
                     }
                 )
                 
-                # Si el producto ya existía, actualizamos sus datos
                 if not creado:
                     producto.modelo = modelo if modelo else producto.modelo
                     producto.marca = fila.get('marca', producto.marca)
@@ -183,17 +212,14 @@ def guardar_kardex_percheron(request):
                     producto.costo_soles = float(fila.get('costo', 0) or 0)
                     producto.save()
                 
-                # Procesamos los Movimientos (IN y OUT)
                 mov_id = fila.get('id')
                 tipo_mov = 'IN' if val_in > 0 else 'OUT'
                 cantidad_mov = val_in if val_in > 0 else val_out
                 
-                # Si no pusieron cantidades, forzamos que se guarde como un ingreso de 0
                 if cantidad_mov == 0 and not mov_id:
                      tipo_mov = 'IN'
                 
                 if mov_id:
-                    # Editando fila existente
                     try:
                         mov = MovimientoPercheron.objects.get(id=mov_id)
                         mov.producto = producto
@@ -208,7 +234,6 @@ def guardar_kardex_percheron(request):
                     except MovimientoPercheron.DoesNotExist:
                         pass
                 else:
-                    # Creando fila nueva
                     canal_activo = request.session.get('canal_activo', 'Web')
                     MovimientoPercheron.objects.create(
                         producto=producto,
@@ -229,8 +254,9 @@ def guardar_kardex_percheron(request):
             
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
 
+
 # =========================================================
-# REPORTES Y HERRAMIENTAS
+# 6. REPORTES Y HERRAMIENTAS
 # =========================================================
 @login_required
 def reporte_ventas(request):
@@ -249,7 +275,7 @@ def pantalla_carga(request):
 
 
 # =========================================================
-# 3. EL CEREBRO: Login Camaleónico
+# 7. EL CEREBRO: Login Camaleónico
 # =========================================================
 class LoginCamaleonicoView(LoginView):
     template_name = 'inventario/login.html'
@@ -301,31 +327,3 @@ class LoginCamaleonicoView(LoginView):
         self.request.session['icono_actual'] = f"{icon_prefix} {tema['icono']}"
         
         return super().form_valid(form)
-    
-    from django.http import JsonResponse
-from .models import Producto
-
-# ==========================================
-# API: AUTOCOMPLETADO DE PRODUCTOS
-# ==========================================
-def api_buscar_producto(request):
-    sku = request.GET.get('sku', '').strip()
-    
-    if not sku:
-        return JsonResponse({'status': 'error', 'message': 'SKU vacío'})
-    
-    try:
-        # Buscamos el producto en la base de datos
-        producto = Producto.objects.get(sku=sku)
-        
-        # Devolvemos un diccionario JSON con la información
-        return JsonResponse({
-            'status': 'ok',
-            'modelo': producto.modelo,
-            'titulo': producto.titulo,
-            'marca': producto.marca,
-            'codigo_ean': producto.codigo_ean,
-            'costo_soles': producto.costo_soles,
-        })
-    except Producto.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Producto no encontrado'})
