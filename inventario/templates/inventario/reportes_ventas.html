@@ -1,0 +1,28 @@
+{% extends 'inventario/dashboard_global.html' %}
+
+{% block content %}
+<div class="card" style="border-top: 4px solid #6366f1; padding: 20px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+        <h2 style="margin: 0; color: #2c3e50;">
+            <i class="fas fa-chart-line" style="color: #6366f1;"></i> Centro de Reportes - {{ canal }}
+        </h2>
+        <button style="background-color: #6366f1; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-download"></i> Exportar Data
+        </button>
+    </div>
+    
+    <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 30px;">
+        Módulo de análisis de ventas, consolidado de facturación y rendimiento métrico exclusivo para el canal <strong>{{ canal }}</strong>.
+    </p>
+
+    <div style="text-align: center; padding: 60px 20px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px;">
+        <i class="fas fa-cogs fa-4x" style="color: #94a3b8; margin-bottom: 20px;"></i>
+        <h3 style="color: #334155; margin: 0 0 10px 0; font-size: 1.5rem;">Módulo en Preparación</h3>
+        <p style="color: #64748b; max-width: 500px; margin: 0 auto; line-height: 1.5;">
+            Estamos conectando la base de datos para generar tus tablas dinámicas e indicadores de rendimiento (KPIs). Muy pronto podrás descargar tus reportes en Excel desde aquí.
+        </p>
+    </div>
+    
+</div>
+{% endblock %}
