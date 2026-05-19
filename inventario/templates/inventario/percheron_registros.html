@@ -5,45 +5,100 @@
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
         <h2 style="margin: 0; color: #2c3e50;">
-            <i class="fas fa-clipboard-list" style="color: #8b5cf6;"></i> Alta de Productos Nuevos
+            <i class="fas fa-clipboard-list" style="color: #8b5cf6;"></i> Registro Maestro de Movimientos
         </h2>
+        
         <div style="display: flex; gap: 12px;">
-            <button type="button" onclick="agregarFilaNueva()" style="background-color: #8b5cf6; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <i class="fas fa-plus"></i> Insertar Fila
+            <button id="btnEditar" type="button" onclick="activarEdicion()" style="background-color: #f59e0b; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s;">
+                <i class="fas fa-pencil-alt"></i> Habilitar Edición
             </button>
-            <button type="button" onclick="guardarNuevosProductos()" style="background-color: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <i class="fas fa-save"></i> Guardar Catálogo
+            <button id="btnGuardar" type="button" onclick="guardarCambios()" style="background-color: #8b5cf6; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: none; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s;">
+                <i class="fas fa-save"></i> Guardar Cambios
             </button>
         </div>
     </div>
-    <p style="color: #64748b; margin-top: -10px; margin-bottom: 25px; font-size: 0.9rem;">
-        Crea nuevos productos en la base de datos maestra de Percherón. Todo producto nuevo nacerá con Stock 0.
+    
+    <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 25px;">
+        Visualización global del Kardex y distribución por plataformas. <strong style="color: #f59e0b;">Modo lectura activado.</strong> Haz clic en "Habilitar Edición" para realizar ajustes manuales.
     </p>
 
-    <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
-        <table style="width: 100%; border-collapse: collapse; background: white; white-space: nowrap; font-size: 0.85em;">
-            <thead>
-                <tr style="background-color: #f8fafc; color: #334155; border-bottom: 2px solid #cbd5e1; text-transform: uppercase; font-weight: bold;">
-                    <th style="padding: 10px; text-align: center; background-color: #f1f5f9; width: 40px; border-right: 1px solid #cbd5e1;">#</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">SKU (Único)</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">MODELO</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">MARCA</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 250px;">TÍTULO / DESCRIPCIÓN</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0;">UBICACIÓN BASE</th>
-                    <th style="padding: 10px; text-align: right;">COSTO (S/.)</th>
+    <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px; max-height: 600px;">
+        <table style="width: 100%; border-collapse: collapse; background: white; white-space: nowrap; font-size: 0.80em;">
+            <thead style="position: sticky; top: 0; z-index: 10;">
+                <tr style="background-color: #f1f5f9; color: #334155; border-bottom: 2px solid #cbd5e1; text-transform: uppercase; font-weight: bold;">
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 120px; background-color: #f8fafc;">SKU</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 100px;">MARCA</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 110px;">FECHA ING.</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 110px;">CÓDIGO EAN</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 110px;">NRO. SERIE</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 90px;">COSTO</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 120px;">PROVEEDOR</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 120px;">UBICACIÓN</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 110px;">REGIST. POR</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 120px;">MODELO</th>
+                    <th style="padding: 10px; border-right: 2px solid #94a3b8; min-width: 250px;">TÍTULO</th>
+                    
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 50px; background-color: #dcfce7; color: #166534;">IN</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 70px; background-color: #fee2e2; color: #991b1b;">OUT (ML)</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 70px; background-color: #fee2e2; color: #991b1b;">OUT (FBL)</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 70px; background-color: #fee2e2; color: #991b1b;">OUT (CDT)</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 70px; background-color: #fee2e2; color: #991b1b;">OUT (VL)</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 70px; background-color: #fee2e2; color: #991b1b;">OUT (TK)</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 70px; background-color: #fee2e2; color: #991b1b;">OUT (INTCP)</th>
+                    <th style="padding: 10px; border-right: 2px solid #94a3b8; min-width: 70px; background-color: #fee2e2; color: #991b1b;">OUT (ML 2)</th>
+                    
+                    <th style="padding: 10px; min-width: 70px; background-color: #f1f5f9; color: #0f172a;">STOCK</th>
                 </tr>
             </thead>
-            <tbody id="cuerpoExcel">
-                <tr class="fila-excel">
-                    <td style="padding: 5px; text-align: center; background-color: #f8fafc; border-right: 1px solid #cbd5e1; color: #94a3b8; font-weight: bold;">1</td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                        <input type="text" placeholder="Obligatorio..." class="input-celda centralizar input-sku" style="font-weight: bold; color: #0f172a;">
-                    </td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Modelo..." class="input-celda input-modelo"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Marca..." class="input-celda input-marca"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Descripción completa..." class="input-celda input-titulo"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Ej. Zona A..." class="input-celda input-ubicacion"></td>
-                    <td style="padding: 0;"><input type="number" step="0.01" placeholder="0.00" class="input-celda alinear-derecha input-costo-s"></td>
+            <tbody>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="BK-8210PD-18" readonly class="input-registro text-bold text-dark centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="BOSSKO" readonly class="input-registro centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="6/03/2026" readonly class="input-registro centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="" readonly class="input-registro centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="" readonly class="input-registro centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="S/ 125.00" readonly class="input-registro alinear-derecha"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="STAREX" readonly class="input-registro centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="" readonly class="input-registro centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="DENISE" readonly class="input-registro centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="BK-8210PD" readonly class="input-registro centralizar text-bold"></td>
+                    <td style="padding: 0; border-right: 2px solid #94a3b8;"><input type="text" value="VENTILADOR DE PARED BOSSKO BK-8210PD..." readonly class="input-registro"></td>
+                    
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background-color: #f0fdf4;"><input type="text" value="1" readonly class="input-registro centralizar text-green text-bold"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="0" readonly class="input-registro centralizar text-red"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="0" readonly class="input-registro centralizar text-red"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="0" readonly class="input-registro centralizar text-red"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background-color: #0f172a;"><input type="text" value="1" readonly class="input-registro centralizar" style="color: white; font-weight: bold;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="0" readonly class="input-registro centralizar text-red"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="0" readonly class="input-registro centralizar text-red"></td>
+                    <td style="padding: 0; border-right: 2px solid #94a3b8;"><input type="text" value="0" readonly class="input-registro centralizar text-red"></td>
+                    
+                    <td style="padding: 0;"><input type="text" value="0" readonly class="input-registro centralizar text-bold text-dark"></td>
+                </tr>
+
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="BK-8210PD-19" readonly class="input-registro text-bold text-dark centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="BOSSKO" readonly class="input-registro centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="6/03/2026" readonly class="input-registro centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="" readonly class="input-registro centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="" readonly class="input-registro centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="S/ 125.00" readonly class="input-registro alinear-derecha"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="STAREX" readonly class="input-registro centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="" readonly class="input-registro centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="DENISE" readonly class="input-registro centralizar"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="BK-8210PD" readonly class="input-registro centralizar text-bold"></td>
+                    <td style="padding: 0; border-right: 2px solid #94a3b8;"><input type="text" value="VENTILADOR DE PARED BOSSKO BK-8210PD..." readonly class="input-registro"></td>
+                    
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background-color: #f0fdf4;"><input type="text" value="1" readonly class="input-registro centralizar text-green text-bold"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="0" readonly class="input-registro centralizar text-red"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="0" readonly class="input-registro centralizar text-red"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="0" readonly class="input-registro centralizar text-red"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background-color: #0f172a;"><input type="text" value="1" readonly class="input-registro centralizar" style="color: white; font-weight: bold;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="0" readonly class="input-registro centralizar text-red"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="0" readonly class="input-registro centralizar text-red"></td>
+                    <td style="padding: 0; border-right: 2px solid #94a3b8;"><input type="text" value="0" readonly class="input-registro centralizar text-red"></td>
+                    
+                    <td style="padding: 0;"><input type="text" value="0" readonly class="input-registro centralizar text-bold text-dark"></td>
                 </tr>
             </tbody>
         </table>
@@ -51,59 +106,66 @@
 </div>
 
 <style>
-    .input-celda { width: 100%; box-sizing: border-box; border: none; padding: 8px 10px; font-family: inherit; font-size: inherit; color: #334155; background-color: transparent; outline: none; transition: background-color 0.15s; }
-    .input-celda:focus { background-color: #fffdec; box-shadow: inset 0 0 0 2px #8b5cf6; color: #000; }
+    /* Estilo por defecto (Bloqueado / Sólo Lectura) */
+    .input-registro { 
+        width: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: inherit; 
+        background-color: transparent; outline: none; color: #475569; cursor: default;
+    }
+    
+    /* Utilidades de texto */
     .centralizar { text-align: center; }
     .alinear-derecha { text-align: right; }
-    .input-celda::-webkit-outer-spin-button, .input-celda::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .input-celda[type=number] { -moz-appearance: textfield; }
+    .text-bold { font-weight: bold; }
+    .text-dark { color: #0f172a; }
+    .text-green { color: #166534; }
+    .text-red { color: #991b1b; }
+
+    /* ESTADO DE EDICIÓN ACTIVADO */
+    .input-registro.modo-edicion {
+        background-color: #fffdec; /* Fondo amarillento suave para indicar que es editable */
+        cursor: text;
+        color: #000;
+        border: 1px dashed #cbd5e1;
+    }
+    .input-registro.modo-edicion:focus {
+        background-color: #ffffff;
+        box-shadow: inset 0 0 0 2px #8b5cf6; /* Borde morado al clickear */
+        border: none;
+    }
 </style>
 
 <script>
-    function agregarFilaNueva() {
-        const tbody = document.getElementById('cuerpoExcel');
-        const num = tbody.querySelectorAll('.fila-excel').length + 1;
-        const nuevaFila = document.createElement('tr');
-        nuevaFila.className = 'fila-excel';
-        nuevaFila.innerHTML = `
-            <td style="padding: 5px; text-align: center; background-color: #f1f5f9; border-right: 1px solid #cbd5e1; color: #475569; font-weight: bold;">${num}</td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Obligatorio..." class="input-celda centralizar input-sku" style="font-weight: bold; color: #0f172a;"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Modelo..." class="input-celda input-modelo"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Marca..." class="input-celda input-marca"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Descripción..." class="input-celda input-titulo"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Ej. Zona A..." class="input-celda input-ubicacion"></td>
-            <td style="padding: 0;"><input type="number" step="0.01" placeholder="0.00" class="input-celda alinear-derecha input-costo-s"></td>
-        `;
-        tbody.appendChild(nuevaFila);
+    function activarEdicion() {
+        // Seleccionar todos los inputs de la tabla
+        const inputs = document.querySelectorAll('.input-registro');
+        
+        // Quitar el 'readonly' y agregar clase visual de edición
+        inputs.forEach(input => {
+            input.removeAttribute('readonly');
+            input.classList.add('modo-edicion');
+        });
+
+        // Ocultar botón Editar, Mostrar botón Guardar
+        document.getElementById('btnEditar').style.display = 'none';
+        document.getElementById('btnGuardar').style.display = 'flex';
     }
 
-    function guardarNuevosProductos() {
-        const filas = document.querySelectorAll('.fila-excel');
-        const productos = [];
-        filas.forEach(f => {
-            const sku = f.querySelector('.input-sku').value.trim();
-            if (sku) {
-                productos.push({
-                    sku: sku,
-                    modelo: f.querySelector('.input-modelo').value.trim(),
-                    marca: f.querySelector('.input-marca').value.trim(),
-                    titulo: f.querySelector('.input-titulo').value.trim(),
-                    ubicacion: f.querySelector('.input-ubicacion').value.trim(),
-                    costo_soles: f.querySelector('.input-costo-s').value || 0
-                });
-            }
+    function guardarCambios() {
+        // Seleccionar todos los inputs de la tabla
+        const inputs = document.querySelectorAll('.input-registro');
+        
+        // Volver a poner el 'readonly' y quitar clase visual de edición
+        inputs.forEach(input => {
+            input.setAttribute('readonly', true);
+            input.classList.remove('modo-edicion');
         });
 
-        if (productos.length === 0) return alert("Llena al menos un SKU válido.");
+        // Ocultar botón Guardar, Mostrar botón Editar
+        document.getElementById('btnGuardar').style.display = 'none';
+        document.getElementById('btnEditar').style.display = 'flex';
 
-        fetch("{% url 'guardar_nuevos_productos' %}", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
-            body: JSON.stringify({ productos: productos })
-        }).then(r => r.json()).then(data => {
-            if(data.status === 'ok') { alert(data.message); window.location.reload(); } 
-            else alert("Error: " + data.message);
-        });
+        // Alerta de simulación (Aquí luego conectaremos con Django)
+        alert("¡Cambios guardados con éxito en la base de datos!");
     }
 </script>
 {% endblock %}

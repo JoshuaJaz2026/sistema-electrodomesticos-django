@@ -3,35 +3,108 @@
 {% block content %}
 <div class="card" style="border-top: 4px solid #3b82f6; padding: 20px;">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
         <h2 style="margin: 0; color: #2c3e50;">
-            <i class="fas fa-tags" style="color: #3b82f6;"></i> Directorio de Modelos
+            <i class="fas fa-tags" style="color: #3b82f6;"></i> Directorio de Modelos y Disponibilidad
         </h2>
+        
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <div style="display: flex;">
+                <input type="text" placeholder="Buscar modelo o título..." style="padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 6px 0 0 6px; outline: none; font-size: 0.9rem; min-width: 250px;">
+                <button type="button" style="background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1; border-left: none; padding: 10px 15px; border-radius: 0 6px 6px 0; cursor: pointer;">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <button style="background-color: #3b82f6; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-save"></i> Guardar Cambios
+            </button>
+        </div>
     </div>
-    
-    <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">Agrupación de productos según familia y características técnicas.</p>
+
+    <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">
+        Asigna rápidamente en qué plataformas estará disponible cada modelo marcando las casillas correspondientes.
+    </p>
 
     <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
         <table style="width: 100%; border-collapse: collapse; background: white; white-space: nowrap; font-size: 0.85em;">
             <thead>
                 <tr style="background-color: #f8fafc; color: #334155; border-bottom: 2px solid #cbd5e1; text-transform: uppercase;">
-                    <th style="padding: 12px; text-align: center;">#</th>
-                    <th style="padding: 12px; text-align: left;">Marca</th>
-                    <th style="padding: 12px; text-align: left;">Modelo General</th>
-                    <th style="padding: 12px; text-align: left;">Categoría</th>
-                    <th style="padding: 12px; text-align: center;">SKUs Vinculados</th>
+                    <th style="padding: 15px 12px; text-align: left;">Modelo</th>
+                    <th style="padding: 15px 12px; text-align: left; min-width: 300px;">Título</th>
+                    <th style="padding: 15px 12px; text-align: left;">Marca</th>
+                    <th style="padding: 15px 12px; text-align: center;">Stock</th>
+                    
+                    <th style="padding: 15px 12px; text-align: center; border-left: 2px solid #e2e8f0; font-size: 0.75rem; line-height: 1.2;">Inventariado por<br>los Percherones</th>
+                    <th style="padding: 15px 12px; text-align: center; font-size: 0.75rem;">Mercado<br>Libre</th>
+                    <th style="padding: 15px 12px; text-align: center; font-size: 0.75rem;">Falabella</th>
+                    <th style="padding: 15px 12px; text-align: center; font-size: 0.75rem;">Creditienda</th>
+                    <th style="padding: 15px 12px; text-align: center; font-size: 0.75rem;">Página<br>Web</th>
                 </tr>
             </thead>
             <tbody>
                 <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 12px; text-align: center; color: #94a3b8;">1</td>
-                    <td style="padding: 12px; font-weight: bold;">SAMSUNG</td>
-                    <td style="padding: 12px;">RT29K5710S8</td>
-                    <td style="padding: 12px; color: #475569;">Refrigeración</td>
-                    <td style="padding: 12px; text-align: center;"><span style="background: #e0f2fe; color: #0284c7; padding: 4px 8px; border-radius: 12px; font-weight: bold;">3 Variantes</span></td>
+                    <td style="padding: 12px; font-weight: bold; color: #0f172a;">BK-8210PD</td>
+                    <td style="padding: 12px; color: #475569; white-space: normal;">VENTILADOR DE PARED BOSSKO BK-8210PD INCLUYE CONTROL REMOTO</td>
+                    <td style="padding: 12px; font-weight: 600; color: #334155;">BOSSKO</td>
+                    <td style="padding: 12px; text-align: center; font-weight: bold; font-size: 1.1em; color: #0f172a;">27</td>
+                    
+                    <td style="padding: 12px; text-align: center; border-left: 2px solid #e2e8f0; background-color: #f8fafc;"><input type="checkbox" class="check-moderno"></td>
+                    <td style="padding: 12px; text-align: center;"><input type="checkbox" class="check-moderno" checked></td>
+                    <td style="padding: 12px; text-align: center;"><input type="checkbox" class="check-moderno" checked></td>
+                    <td style="padding: 12px; text-align: center;"><input type="checkbox" class="check-moderno"></td>
+                    <td style="padding: 12px; text-align: center;"><input type="checkbox" class="check-moderno" checked></td>
+                </tr>
+
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px; font-weight: bold; color: #0f172a;">FZ-312IN-1</td>
+                    <td style="padding: 12px; color: #475569; white-space: normal;">Cocina de Inducción Portátil Finezza de 1 Hornilla con Panel Táctil – FZ-312 IN-1</td>
+                    <td style="padding: 12px; font-weight: 600; color: #334155;">FINEZZA</td>
+                    <td style="padding: 12px; text-align: center; font-weight: bold; font-size: 1.1em; color: #0f172a;">23</td>
+                    
+                    <td style="padding: 12px; text-align: center; border-left: 2px solid #e2e8f0; background-color: #f8fafc;"><input type="checkbox" class="check-moderno" checked></td>
+                    <td style="padding: 12px; text-align: center;"><input type="checkbox" class="check-moderno" checked></td>
+                    <td style="padding: 12px; text-align: center;"><input type="checkbox" class="check-moderno" checked></td>
+                    <td style="padding: 12px; text-align: center;"><input type="checkbox" class="check-moderno" checked></td>
+                    <td style="padding: 12px; text-align: center;"><input type="checkbox" class="check-moderno" checked></td>
+                </tr>
+
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px; font-weight: bold; color: #0f172a;">BLSTAA4961-011</td>
+                    <td style="padding: 12px; color: #475569; white-space: normal;">CUCHILLA PICAHIELO OSTER BLSTAA4961 CON ANILLO DE GOMA</td>
+                    <td style="padding: 12px; font-weight: 600; color: #334155;">OSTER</td>
+                    <td style="padding: 12px; text-align: center; font-weight: bold; font-size: 1.1em; color: #0f172a;">80</td>
+                    
+                    <td style="padding: 12px; text-align: center; border-left: 2px solid #e2e8f0; background-color: #f8fafc;"><input type="checkbox" class="check-moderno"></td>
+                    <td style="padding: 12px; text-align: center;"><input type="checkbox" class="check-moderno" checked></td>
+                    <td style="padding: 12px; text-align: center;"><input type="checkbox" class="check-moderno" checked></td>
+                    <td style="padding: 12px; text-align: center;"><input type="checkbox" class="check-moderno"></td>
+                    <td style="padding: 12px; text-align: center;"><input type="checkbox" class="check-moderno" checked></td>
                 </tr>
             </tbody>
         </table>
     </div>
 </div>
+
+<style>
+    /* Estilo para hacer los checkboxes modernos, más grandes y amigables */
+    .check-moderno {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #3b82f6; /* Color azul moderno al hacer check */
+        transition: transform 0.1s ease-in-out;
+    }
+    .check-moderno:hover {
+        transform: scale(1.15); /* Pequeño efecto al pasar el mouse */
+    }
+
+    /* Colores intercalados para las filas */
+    tbody tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+    /* Efecto Hover para toda la fila */
+    tbody tr:hover {
+        background-color: #f1f5f9;
+    }
+</style>
 {% endblock %}

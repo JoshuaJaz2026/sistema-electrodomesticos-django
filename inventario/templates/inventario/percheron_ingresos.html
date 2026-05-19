@@ -5,53 +5,156 @@
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
         <h2 style="margin: 0; color: #2c3e50;">
-            <i class="fas fa-box-open" style="color: #10b981;"></i> Control de Ingresos - Almacén Central
+            <i class="fas fa-box-open" style="color: #10b981;"></i> Registro de Ingresos - Almacén Central
         </h2>
         <div style="display: flex; gap: 12px;">
-            <button style="background-color: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer;">
-                <i class="fas fa-plus-circle"></i> Nuevo Ingreso (Kardex)
+            <button type="button" onclick="agregarFilaIngreso()" style="background-color: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-plus"></i> Nueva Fila
+            </button>
+            <button type="button" style="background-color: #059669; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-save"></i> Guardar Ingresos
             </button>
         </div>
     </div>
     
-    <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">
-        Historial de todos los productos ingresados a Percherón. Aquí se suma el stock oficial.
+    <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 25px;">
+        Registra el ingreso unitario de mercadería. Las columnas sombreadas se autocompletan y no son editables.
     </p>
 
     <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
         <table style="width: 100%; border-collapse: collapse; background: white; white-space: nowrap; font-size: 0.85em;">
             <thead>
-                <tr style="background-color: #f8fafc; color: #334155; border-bottom: 2px solid #cbd5e1; text-transform: uppercase;">
-                    <th style="padding: 12px; text-align: center;">Fecha</th>
-                    <th style="padding: 12px; text-align: left;">SKU</th>
-                    <th style="padding: 12px; text-align: left;">Producto</th>
-                    <th style="padding: 12px; text-align: center; background-color: #dcfce7; color: #166534;">Cant. (+)</th>
-                    <th style="padding: 12px; text-align: left;">Proveedor / Motivo</th>
-                    <th style="padding: 12px; text-align: left;">Usuario</th>
+                <tr style="background-color: #f8fafc; color: #334155; border-bottom: 2px solid #cbd5e1; text-transform: uppercase; font-weight: bold;">
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; background-color: #f1f5f9; min-width: 140px;">SKU <i class="fas fa-lock" style="font-size: 0.7em; color: #94a3b8;"></i></th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 120px;">MODELO</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; background-color: #f1f5f9; min-width: 300px;">TÍTULO <i class="fas fa-lock" style="font-size: 0.7em; color: #94a3b8;"></i></th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 130px;">FECHA INGRESO</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 120px;">CÓDIGO EAN</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 120px;">SERIE / N°</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; width: 100px;">COSTO UNT.</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; width: 100px;">ING. x 1und</th>
+                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 200px;">PROVEEDOR / MOTIVO</th>
+                    <th style="padding: 10px; min-width: 120px;">BY:</th>
                 </tr>
             </thead>
-            <tbody>
-                {% for mov in movimientos %}
-                <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 12px; text-align: center; color: #64748b;">{{ mov.fecha|date:"d/m/Y" }}</td>
-                    <td style="padding: 12px; font-weight: bold; color: #0f172a;">{{ mov.producto.sku }}</td>
-                    <td style="padding: 12px;">{{ mov.producto.titulo|truncatechars:40 }}</td>
-                    <td style="padding: 12px; text-align: center; font-weight: bold; color: #10b981;">+{{ mov.cantidad }}</td>
-                    <td style="padding: 12px; color: #475569;">{{ mov.proveedor_motivo|default:"Ingreso Regular" }}</td>
-                    <td style="padding: 12px;"><i class="fas fa-user-circle"></i> {{ mov.usuario.username|default:"Admin" }}</td>
+            <tbody id="cuerpoIngresos">
+                <tr class="fila-excel" style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <input type="text" value="BK-8210PD-20" readonly class="input-celda input-bloqueado centralizar font-bold">
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <input type="text" value="BK-8210PD" class="input-celda centralizar font-bold text-dark">
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <input type="text" value="VENTILADOR DE PARED BOSSKO BK-8210PD..." readonly class="input-celda input-bloqueado">
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <input type="date" value="2026-03-06" class="input-celda centralizar">
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <input type="text" placeholder="EAN..." class="input-celda centralizar">
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <input type="text" placeholder="N° Serie..." class="input-celda centralizar text-blue">
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; position: relative;">
+                        <span style="position: absolute; left: 8px; top: 8px; color: #64748b;">S/</span>
+                        <input type="number" step="0.01" value="125.00" class="input-celda alinear-derecha" style="padding-left: 25px;">
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <input type="number" value="1" class="input-celda centralizar font-bold" style="color: #10b981;">
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <input type="text" value="STAREX" class="input-celda centralizar text-dark font-bold">
+                    </td>
+                    <td style="padding: 0;">
+                        <select class="input-celda select-personalizado centralizar font-bold" style="color: #d97706;">
+                            <option value="MILAGROS">MILAGROS</option>
+                            <option value="PABLO">PABLO</option>
+                            <option value="DENISE" selected>DENISE</option>
+                            <option value="JOSHUA">JOSHUA</option>
+                            <option value="ALDO">ALDO</option>
+                            <option value="CARLOS">CARLOS</option>
+                            <option value="DAVID">DAVID</option>
+                            <option value="MISTER">MISTER</option>
+                            <option value="EDUARDO">EDUARDO</option>
+                            <option value="KEVIN">KEVIN</option>
+                        </select>
+                    </td>
                 </tr>
-                {% empty %}
-                <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 12px; text-align: center; color: #64748b;">Hoy</td>
-                    <td style="padding: 12px; font-weight: bold; color: #0f172a;">SKU-DEMO</td>
-                    <td style="padding: 12px;">Producto de prueba (Aún no hay ingresos reales)</td>
-                    <td style="padding: 12px; text-align: center; font-weight: bold; color: #10b981;">+10</td>
-                    <td style="padding: 12px; color: #475569;">Importación</td>
-                    <td style="padding: 12px;"><i class="fas fa-user-circle"></i> Sistema</td>
-                </tr>
-                {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+<style>
+    /* Estilos base de las celdas editables */
+    .input-celda { width: 100%; box-sizing: border-box; border: none; padding: 8px 10px; font-family: inherit; font-size: inherit; color: #334155; background-color: transparent; outline: none; transition: background-color 0.15s; }
+    .input-celda:focus { background-color: #ecfdf5; box-shadow: inset 0 0 0 2px #10b981; color: #000; }
+    
+    /* Estilos de las celdas bloqueadas (readonly) */
+    .input-bloqueado { background-color: #f8fafc; color: #64748b; cursor: not-allowed; }
+    .input-bloqueado:focus { box-shadow: none; background-color: #f1f5f9; }
+
+    /* Utilidades de texto */
+    .centralizar { text-align: center; }
+    .alinear-derecha { text-align: right; }
+    .font-bold { font-weight: bold; }
+    .text-dark { color: #0f172a; }
+    .text-blue { color: #2563eb; font-family: monospace; font-size: 1.1em; }
+
+    /* Quitar flechas a los inputs de tipo número */
+    .input-celda::-webkit-outer-spin-button, .input-celda::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .input-celda[type=number] { -moz-appearance: textfield; }
+
+    /* Estilo para el combobox (select) */
+    .select-personalizado { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px top 50%; background-size: 10px auto; padding-right: 25px; }
+    .select-personalizado:focus { background-color: #fffbeb; box-shadow: inset 0 0 0 2px #f59e0b; }
+</style>
+
+<script>
+    // Función para agregar nuevas filas en blanco a la tabla
+    function agregarFilaIngreso() {
+        const tbody = document.getElementById('cuerpoIngresos');
+        const opcionesCombo = `
+            <option value="MILAGROS">MILAGROS</option>
+            <option value="PABLO">PABLO</option>
+            <option value="DENISE">DENISE</option>
+            <option value="JOSHUA">JOSHUA</option>
+            <option value="ALDO">ALDO</option>
+            <option value="CARLOS">CARLOS</option>
+            <option value="DAVID">DAVID</option>
+            <option value="MISTER">MISTER</option>
+            <option value="EDUARDO">EDUARDO</option>
+            <option value="KEVIN">KEVIN</option>
+        `;
+
+        const nuevaFila = document.createElement('tr');
+        nuevaFila.className = 'fila-excel';
+        nuevaFila.style.borderBottom = '1px solid #e2e8f0';
+        
+        // Se inserta la nueva fila con los campos vacíos (el SKU y el TÍTULO siguen bloqueados)
+        nuevaFila.innerHTML = `
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Auto..." readonly class="input-celda input-bloqueado centralizar font-bold"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Modelo..." class="input-celda centralizar font-bold text-dark"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Auto completado..." readonly class="input-celda input-bloqueado"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" class="input-celda centralizar"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="EAN..." class="input-celda centralizar"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="N° Serie..." class="input-celda centralizar text-blue"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0; position: relative;">
+                <span style="position: absolute; left: 8px; top: 8px; color: #64748b;">S/</span>
+                <input type="number" step="0.01" placeholder="0.00" class="input-celda alinear-derecha" style="padding-left: 25px;">
+            </td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" value="1" class="input-celda centralizar font-bold" style="color: #10b981;"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Proveedor..." class="input-celda centralizar text-dark font-bold"></td>
+            <td style="padding: 0;">
+                <select class="input-celda select-personalizado centralizar font-bold" style="color: #d97706;">
+                    <option value="" disabled selected>Seleccione...</option>
+                    ${opcionesCombo}
+                </select>
+            </td>
+        `;
+        tbody.appendChild(nuevaFila);
+    }
+</script>
 {% endblock %}
