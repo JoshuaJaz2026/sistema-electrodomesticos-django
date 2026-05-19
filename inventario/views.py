@@ -54,7 +54,8 @@ def percheron_ingresos(request):
     icono = request.session.get('icono_actual', 'fas fa-globe')
     movimientos_in = MovimientoPercheron.objects.filter(tipo='IN')
     
-    return render(request, 'inventario/percheron_Ingresos.html', {
+    # Todo en minúsculas
+    return render(request, 'inventario/percheron_ingresos.html', {
         'canal': canal, 'color_actual': color, 'icono_actual': icono, 'movimientos': movimientos_in
     })
 
@@ -65,7 +66,7 @@ def percheron_registros(request):
     icono = request.session.get('icono_actual', 'fas fa-globe')
     movimientos = MovimientoPercheron.objects.all()
     
-    return render(request, 'inventario/percheron_Registros.html', {
+    return render(request, 'inventario/percheron_registros.html', {
         'canal': canal, 'color_actual': color, 'icono_actual': icono, 'movimientos': movimientos
     })
 
@@ -75,7 +76,7 @@ def percheron_modelos(request):
     color = request.session.get('color_actual', '#3498DB')
     icono = request.session.get('icono_actual', 'fas fa-globe')
     
-    return render(request, 'inventario/percheron_Modelos.html', {
+    return render(request, 'inventario/percheron_modelos.html', {
         'canal': canal, 'color_actual': color, 'icono_actual': icono
     })
 
@@ -85,43 +86,42 @@ def percheron_modelos(request):
 @login_required
 def percheron_mercadolibre(request):
     canal = request.session.get('canal_activo', 'Web')
-    return render(request, 'inventario/percheron_MercadoLibre.html', {'canal': canal})
+    return render(request, 'inventario/percheron_mercadolibre.html', {'canal': canal})
 
 @login_required
 def percheron_mercadolibre_junior(request):
     canal = request.session.get('canal_activo', 'Web')
-    return render(request, 'inventario/percheron_MercadoLibre_Junior.html', {'canal': canal})
+    return render(request, 'inventario/percheron_mercadolibre_junior.html', {'canal': canal})
 
 @login_required
 def percheron_falabella(request):
     canal = request.session.get('canal_activo', 'Web')
-    return render(request, 'inventario/percheron_Falabella.html', {'canal': canal})
+    return render(request, 'inventario/percheron_falabella.html', {'canal': canal})
 
 @login_required
 def percheron_creditienda(request):
     canal = request.session.get('canal_activo', 'Web')
-    return render(request, 'inventario/percheron_Creditienda.html', {'canal': canal})
+    return render(request, 'inventario/percheron_creditienda.html', {'canal': canal})
 
 @login_required
 def percheron_intercorp(request):
     canal = request.session.get('canal_activo', 'Web')
-    return render(request, 'inventario/percheron_Intercorp.html', {'canal': canal})
+    return render(request, 'inventario/percheron_intercorp.html', {'canal': canal})
 
 @login_required
 def percheron_tiktok(request):
     canal = request.session.get('canal_activo', 'Web')
-    return render(request, 'inventario/percheron_Tiktok.html', {'canal': canal})
+    return render(request, 'inventario/percheron_tiktok.html', {'canal': canal})
 
 @login_required
 def percheron_ventalibre(request):
     canal = request.session.get('canal_activo', 'Web')
-    return render(request, 'inventario/percheron_VentaLibre.html', {'canal': canal})
+    return render(request, 'inventario/percheron_ventalibre.html', {'canal': canal})
 
 @login_required
 def percheron_bci(request):
     canal = request.session.get('canal_activo', 'Web')
-    return render(request, 'inventario/percheron_BCI_Personal_Autorizado.html', {'canal': canal})
-
+    return render(request, 'inventario/percheron_bci.html', {'canal': canal})
 
 # =========================================================
 # 5. APIs Y BASES DE DATOS (GUARDADO Y BÚSQUEDA)
