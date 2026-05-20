@@ -37,7 +37,7 @@ urlpatterns = [
     path('percheron/bci/', views.percheron_bci, name='percheron_bci'),
 
     # ==========================================
-    # 5. REPORTES DE VENTAS Y HERRAMIENTAS
+    # 5. REPORTES DE VENTAS POR PLATAFORMA
     # ==========================================
     path('reportes/creditienda/', views.reporte_creditienda, name='reporte_creditienda'),
     path('reportes/falabella/', views.reporte_falabella, name='reporte_falabella'),
@@ -48,10 +48,20 @@ urlpatterns = [
     path('reportes/venta-libre/', views.reporte_ventalibre, name='reporte_ventalibre'),
     path('reportes/web/', views.reporte_web, name='reporte_web'),
 
-    path('simulador/', views.simulador_costos, name='simulador_costos'),
+    # ==========================================
+    # 6. SIMULADORES DE COSTOS POR PLATAFORMA
+    # ==========================================
+    path('simulador/creditienda/', views.simulador_creditienda, name='simulador_creditienda'),
+    path('simulador/falabella/', views.simulador_falabella, name='simulador_falabella'),
+    path('simulador/intercorp/', views.simulador_intercorp, name='simulador_intercorp'),
+    path('simulador/mercado-libre-junior/', views.simulador_mercadolibre_junior, name='simulador_mercadolibre_junior'),
+    path('simulador/mercado-libre/', views.simulador_mercadolibre, name='simulador_mercadolibre'),
+    path('simulador/tiktok/', views.simulador_tiktok, name='simulador_tiktok'),
+    path('simulador/venta-libre/', views.simulador_ventalibre, name='simulador_ventalibre'),
+    path('simulador/web/', views.simulador_web, name='simulador_web'),
     
     # ==========================================
-    # 6. APIs Y GUARDADO DE DATOS (AJAX)
+    # 7. APIs Y GUARDADO DE DATOS (AJAX)
     # ==========================================
     path('api/buscar-producto/', views.api_buscar_producto, name='api_buscar_producto'),
     path('api/guardar-productos/', views.guardar_nuevos_productos, name='guardar_nuevos_productos'),

@@ -252,7 +252,7 @@ def guardar_kardex_percheron(request):
 
 
 # =========================================================
-# 6. REPORTES DE VENTAS POR PLATAFORMA Y HERRAMIENTAS
+# 6. REPORTES DE VENTAS POR PLATAFORMA
 # =========================================================
 
 @login_required
@@ -295,10 +295,50 @@ def reporte_web(request):
     canal = request.session.get('canal_activo', 'Web')
     return render(request, 'reportes_plataformas/reporte_web.html', {'canal': canal})
 
+
+# =========================================================
+# 7. SIMULADORES DE COSTOS POR PLATAFORMA
+# =========================================================
+
 @login_required
-def simulador_costos(request):
+def simulador_mercadolibre(request):
     canal = request.session.get('canal_activo', 'Web')
-    return render(request, 'inventario/simulador_costos.html', {'canal': canal})
+    return render(request, 'simuladores_plataformas/simulador_mercadolibre.html', {'canal': canal})
+
+@login_required
+def simulador_mercadolibre_junior(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'simuladores_plataformas/simulador_mercadolibre_junior.html', {'canal': canal})
+
+@login_required
+def simulador_creditienda(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'simuladores_plataformas/simulador_creditienda.html', {'canal': canal})
+
+@login_required
+def simulador_falabella(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'simuladores_plataformas/simulador_falabella.html', {'canal': canal})
+
+@login_required
+def simulador_intercorp(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'simuladores_plataformas/simulador_intercorp.html', {'canal': canal})
+
+@login_required
+def simulador_tiktok(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'simuladores_plataformas/simulador_tiktok.html', {'canal': canal})
+
+@login_required
+def simulador_ventalibre(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'simuladores_plataformas/simulador_ventalibre.html', {'canal': canal})
+
+@login_required
+def simulador_web(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'simuladores_plataformas/simulador_web.html', {'canal': canal})
 
 @login_required
 def pantalla_carga(request):
@@ -307,7 +347,7 @@ def pantalla_carga(request):
 
 
 # =========================================================
-# 7. EL CEREBRO: Login Camaleónico
+# 8. EL CEREBRO: Login Camaleónico
 # =========================================================
 class LoginCamaleonicoView(LoginView):
     template_name = 'inventario/login.html'

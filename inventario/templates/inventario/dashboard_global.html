@@ -124,23 +124,37 @@
             
             {% if canal == 'Mercado Libre' %}
                 <a href="{% url 'reporte_mercadolibre' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+                <a href="{% url 'simulador_mercadolibre' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
+            
             {% elif canal == 'Mercado Libre - Junior' %}
                 <a href="{% url 'reporte_mercadolibre_junior' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+                <a href="{% url 'simulador_mercadolibre_junior' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
+            
             {% elif canal == 'Falabella' %}
                 <a href="{% url 'reporte_falabella' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+                <a href="{% url 'simulador_falabella' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
+            
             {% elif canal == 'Creditienda' %}
                 <a href="{% url 'reporte_creditienda' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+                <a href="{% url 'simulador_creditienda' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
+            
             {% elif canal == 'Intercorp' %}
                 <a href="{% url 'reporte_intercorp' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+                <a href="{% url 'simulador_intercorp' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
+            
             {% elif canal == 'Tik tok' or canal == 'Tiktok' %}
                 <a href="{% url 'reporte_tiktok' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+                <a href="{% url 'simulador_tiktok' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
+            
             {% elif canal == 'Venta Libre' %}
                 <a href="{% url 'reporte_ventalibre' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+                <a href="{% url 'simulador_ventalibre' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
+            
             {% else %}
                 <a href="{% url 'reporte_web' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+                <a href="{% url 'simulador_web' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
             {% endif %}
-            
-            <a href="{% url 'simulador_costos' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
+
         </nav>
     </div>
 
@@ -189,7 +203,7 @@
                 }
             });
 
-            // Función para marcar enlaces activos en el menú principal (como Mis Reportes)
+            // Función para marcar enlaces activos en el menú principal (como Mis Reportes y Simuladores)
             const mainMenuItems = document.querySelectorAll('.sidebar-menu > .menu-item');
             mainMenuItems.forEach(item => {
                 let linkPath = item.getAttribute('href');
