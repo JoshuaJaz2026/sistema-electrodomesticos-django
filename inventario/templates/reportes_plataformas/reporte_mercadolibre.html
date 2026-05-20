@@ -1,0 +1,237 @@
+{% extends 'inventario/dashboard_global.html' %}
+
+{% block content %}
+<div class="card" style="border-top: 4px solid var(--color-principal); padding: 20px; background: white; width: 100%; box-sizing: border-box;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+        <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase;">
+            <i class="{{ request.session.icono_actual }}" style="color: var(--color-principal); font-size: 1.2em;"></i> 
+            Reporte de Ventas - {{ canal }}
+        </h2>
+        
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <button type="button" style="background-color: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-file-excel"></i> Exportar
+            </button>
+            <button type="button" style="background-color: var(--color-principal); color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-save"></i> Guardar
+            </button>
+            
+            <div style="position: relative;">
+                <button type="button" onclick="togglePanelColumnas()" style="background-color: #475569; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s;">
+                    <i class="fas fa-columns"></i> Opciones de Pantalla
+                </button>
+                
+                <div id="panelPersonalizarColumnas" style="display: none; position: absolute; right: 0; top: 115%; background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 100; width: 750px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
+                        <h4 style="margin: 0; color: #1e293b; font-size: 0.95rem;">
+                            <i class="fas fa-tasks" style="color: var(--color-principal);"></i> Elementos en pantalla
+                        </h4>
+                        <button onclick="togglePanelColumnas()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2rem;">&times;</button>
+                    </div>
+                    <div id="columnCheckboxes" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; background-color: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <div>
+            <label style="display: block; font-size: 0.75rem; font-weight: bold; color: #64748b; margin-bottom: 4px;">DESDE</label>
+            <input type="date" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; box-sizing: border-box;">
+        </div>
+        <div>
+            <label style="display: block; font-size: 0.75rem; font-weight: bold; color: #64748b; margin-bottom: 4px;">HASTA</label>
+            <input type="date" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; box-sizing: border-box;">
+        </div>
+        <div>
+            <label style="display: block; font-size: 0.75rem; font-weight: bold; color: #64748b; margin-bottom: 4px;">BUSCAR ORDEN / SKU</label>
+            <input type="text" placeholder="Ej. ML-12345..." style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; box-sizing: border-box;">
+        </div>
+    </div>
+
+    <div style="overflow-x: auto; overflow-y: auto; max-height: 600px; border: 1px solid #e2e8f0; border-radius: 6px;">
+        <table id="tablaReporte" style="width: max-content; border-collapse: collapse; background: white; font-size: 0.85em; white-space: nowrap; table-layout: fixed;">
+            <thead style="position: sticky; top: 0; z-index: 10;">
+                <tr style="color: #334155; text-transform: uppercase; font-weight: bold; font-size: 0.8em; height: 40px;">
+                    <th class="th-rep" style="background-color: #f1f5f9; width: 110px;">FECHA</th>
+                    <th class="th-rep" style="background-color: #f1f5f9; width: 120px;">MES Y AÑO</th>
+                    <th class="th-rep" style="background-color: #f1f5f9; width: 140px;">NRO. ORDEN</th>
+                    <th class="th-rep" style="background-color: #f1f5f9; width: 130px;">COMPROBANTE</th>
+                    <th class="th-rep" style="background-color: #f1f5f9; width: 130px;">TIPO DE VENTA</th>
+                    <th class="th-rep" style="background-color: #e2e8f0; width: 160px;">MARCA</th>
+                    <th class="th-rep" style="background-color: #e2e8f0; width: 220px;">CATEGORIA</th>
+                    <th class="th-rep" style="background-color: #e2e8f0; width: 160px;">SKU ALMACEN</th>
+                    <th class="th-rep" style="background-color: #e2e8f0; width: 140px;">MODELO</th>
+                    <th class="th-rep" style="background-color: #e2e8f0; width: 280px;">PRODUCTO</th>
+                    <th class="th-rep" style="background-color: #e2e8f0; width: 70px;">CANT.</th>
+                    <th class="th-rep" style="background-color: #dcfce7; color: #166534; width: 100px;">PRECIO</th>
+                    <th class="th-rep" style="background-color: #dcfce7; color: #166534; width: 110px;">TOTAL V.</th>
+                    <th class="th-rep" style="background-color: #dcfce7; color: #166534; width: 130px;">%CARGO x VENTA</th>
+                    <th class="th-rep" style="background-color: #dcfce7; color: #166534; width: 100px;">URBANO</th>
+                    <th class="th-rep" style="background-color: #dcfce7; color: #166534; width: 100px;">FLEX</th>
+                    <th class="th-rep" style="background-color: #86efac; color: #14532d; width: 130px;">TOTAL PAGADO</th>
+                    <th class="th-rep" style="background-color: #fee2e2; color: #991b1b; width: 130px;">COSTO x PRODUCTO</th>
+                    <th class="th-rep" style="background-color: #fee2e2; color: #991b1b; width: 70px;">UND</th>
+                    <th class="th-rep" style="background-color: #fee2e2; color: #991b1b; width: 110px;">COSTO TOTAL</th>
+                    <th class="th-rep" style="background-color: #fee2e2; color: #991b1b; width: 150px;">COSTO ENTREGA FLEX</th>
+                    <th class="th-rep" style="background-color: #dbeafe; color: #1e40af; width: 120px;">GANANCIA</th>
+                    <th class="th-rep" style="background-color: #dbeafe; color: #1e40af; width: 130px;">RENTABILIDAD %</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 180px;">DISTRITO</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 250px;">DIRECCIÓN</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 160px;">REPARTIDOR</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 140px;">CELULAR DEL CLIENTE</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 150px; border-right: none;">MSJ DE AGRADECIMIENTO</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #e2e8f0; height: 38px;">
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="19/05/2026" class="celda-input central"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="MAYO 2026" class="celda-input central bold text-dark"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="ML-987654321" class="celda-input central bold text-blue"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="B001-000458" class="celda-input central"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <select class="celda-select central bold" style="color: var(--color-principal);">
+                            <option value="URBANO">URBANO</option><option value="FLEX" selected>FLEX</option><option value="ACUERDO">ACUERDO</option>
+                        </select>
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <select class="celda-select bold text-dark">
+                            <option value="BEHRINGER">BEHRINGER</option><option value="BGH">BGH</option><option value="BLACKLINE">BLACKLINE</option><option value="BORD">BORD</option><option value="BOSSKO">BOSSKO</option><option value="COLDEX">COLDEX</option><option value="DAJU">DAJU</option><option value="DSP">DSP</option><option value="ELECTROLUX">ELECTROLUX</option><option value="EPSON">EPSON</option><option value="EVOLUTION">EVOLUTION</option><option value="FINEZZA">FINEZZA</option><option value="FUJITEC">FUJITEC</option><option value="GAMA">GAMA</option><option value="HISENSE">HISENSE</option><option value="HYUNDAI">HYUNDAI</option><option value="ILUMI">ILUMI</option><option value="IMACO">IMACO</option><option value="IMPERIAL">IMPERIAL</option><option value="INDURAMA">INDURAMA</option><option value="JBL">JBL</option><option value="JVC">JVC</option><option value="KITCHENAID">KITCHENAID</option><option value="LG">LG</option><option value="MOTOROLA">MOTOROLA</option><option value="OSTER" selected>OSTER</option><option value="PANASONIC">PANASONIC</option><option value="PHILIPS">PHILIPS</option><option value="RECORD">RECORD</option><option value="REMINGTON">REMINGTON</option><option value="SAMSUNG">SAMSUNG</option><option value="SOLE">SOLE</option><option value="SONY">SONY</option><option value="TAURUS">TAURUS</option><option value="TCL">TCL</option><option value="TRAMONTINA">TRAMONTINA</option><option value="TREVELY">TREVELY</option><option value="VANHOFF">VANHOFF</option><option value="VISIONNER">VISIONNER</option><option value="WAHL">WAHL</option><option value="WHIRLPOOL">WHIRLPOOL</option><option value="WHITELINE">WHITELINE</option><option value="XIAOMI">XIAOMI</option><option value="YANBAL">YANBAL</option>
+                        </select>
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <select class="celda-select text-dark" style="font-size: 0.95em;">
+                            <option value="AFEITADORA">AFEITADORA</option><option value="ARROCERA">ARROCERA</option><option value="ASPIRADORA">ASPIRADORA</option><option value="AUDÍFONOS">AUDÍFONOS</option><option value="BATIDORA DE INMERSIÓN">BATIDORA DE INMERSIÓN</option><option value="BATIDORA DE MANO">BATIDORA DE MANO</option><option value="BATIDORA DE TAZÓN">BATIDORA DE TAZÓN</option><option value="BATIDORA PLANETARIA">BATIDORA PLANETARIA</option><option value="BLOQUEADOR">BLOQUEADOR</option><option value="CACEROLA">CACEROLA</option><option value="CAFETERA" selected>CAFETERA</option><option value="CALEFACTOR">CALEFACTOR</option><option value="CAMPANA">CAMPANA</option><option value="CATEGORÍA">CATEGORÍA</option><option value="CEPILLO">CEPILLO</option><option value="COCINA">COCINA</option><option value="COCINA DE INDUCCIÓN">COCINA DE INDUCCIÓN</option><option value="COCINA ELÉCTRICA">COCINA ELÉCTRICA</option><option value="COLLAR Y ARETES">COLLAR Y ARETES</option><option value="COMBO CHERRY">COMBO CHERRY</option><option value="COMBO OSTER">COMBO OSTER</option><option value="CONGELADORA">CONGELADORA</option><option value="CONTROL DE TV">CONTROL DE TV</option><option value="CUATRICOMBO">CUATRICOMBO</option><option value="CUCHILLA DE LICUADORA">CUCHILLA DE LICUADORA</option><option value="CUCHILLO">CUCHILLO</option><option value="CUIDADO PERSONAL">CUIDADO PERSONAL</option><option value="DEPILADORA">DEPILADORA</option><option value="DESHUMEDECEDOR">DESHUMEDECEDOR</option><option value="DISPENSADOR DE AGUA">DISPENSADOR DE AGUA</option><option value="ENCIMERA">ENCIMERA</option><option value="EQUIPO DE SONIDO">EQUIPO DE SONIDO</option><option value="ESPÁTULA">ESPÁTULA</option><option value="EXPRIMIDOR">EXPRIMIDOR</option><option value="EXTRACTOR DE JUGOS">EXTRACTOR DE JUGOS</option><option value="FREIDORA DE AIRE">FREIDORA DE AIRE</option><option value="FRIGOBAR">FRIGOBAR</option><option value="HERVIDOR">HERVIDOR</option><option value="HORNO CON FREIDORA">HORNO CON FREIDORA</option><option value="HORNO ELÉCTRICO">HORNO ELÉCTRICO</option><option value="IMPRESORA">IMPRESORA</option><option value="JUEGO DE OLLAS">JUEGO DE OLLAS</option><option value="LAVADORA">LAVADORA</option><option value="LAVASECA">LAVASECA</option><option value="LICUADORA">LICUADORA</option><option value="MÁQUINA DE CORTAR PELO">MÁQUINA DE CORTAR PELO</option><option value="MÁQUINA PARA HIELO">MÁQUINA PARA HIELO</option><option value="MICROONDAS">MICROONDAS</option><option value="MOLDE">MOLDE</option><option value="MOLEDOR DE CARNE">MOLEDOR DE CARNE</option><option value="MOLINILLO">MOLINILLO</option><option value="MONITOR DE ESCENARIO">MONITOR DE ESCENARIO</option><option value="MULTI OLLA">MULTI OLLA</option><option value="OLLA">OLLA</option><option value="OLLA A PRESIÓN">OLLA A PRESIÓN</option><option value="ONDULADOR">ONDULADOR</option><option value="PANIFICADORA">PANIFICADORA</option><option value="PARLANTE">PARLANTE</option><option value="PARRILLA">PARRILLA</option><option value="PERFUME">PERFUME</option><option value="PICADOR DE ALIMENTOS">PICADOR DE ALIMENTOS</option><option value="PLANCHA A VAPOR">PLANCHA A VAPOR</option><option value="PLANCHA DE CABELLO">PLANCHA DE CABELLO</option><option value="PLANCHA GRILL">PLANCHA GRILL</option><option value="PROCESADOR DE ALIMENTOS">PROCESADOR DE ALIMENTOS</option><option value="PROTECTOR SOLAR">PROTECTOR SOLAR</option><option value="REFRIGERADORA">REFRIGERADORA</option><option value="SANDWICHERA">SANDWICHERA</option><option value="SARTÉN">SARTÉN</option><option value="SARTÉN ELÉCTRICA">SARTÉN ELÉCTRICA</option><option value="SET DE CUBIERTOS">SET DE CUBIERTOS</option><option value="SET DE OLLAS">SET DE OLLAS</option><option value="SET DE PIZZA">SET DE PIZZA</option><option value="SOUNDBAR">SOUNDBAR</option><option value="SPAGUETERA">SPAGUETERA</option><option value="TABLET">TABLET</option><option value="TERMO BOMBA">TERMO BOMBA</option><option value="TERMO HERVIDOR">TERMO HERVIDOR</option><option value="TERMORADIADOR">TERMORADIADOR</option><option value="TERMOVENTILADOR">TERMOVENTILADOR</option><option value="TETERA">TETERA</option><option value="TOSTADORA">TOSTADORA</option><option value="TRICOMBO OSTER">TRICOMBO OSTER</option><option value="TV">TV</option><option value="VAPORIZADOR">VAPORIZADOR</option><option value="VAPORIZADOR DE ALIMENTOS">VAPORIZADOR DE ALIMENTOS</option><option value="VASO DE LICUADORA">VASO DE LICUADORA</option><option value="VENTILADOR">VENTILADOR</option><option value="VISICOOLER">VISICOOLER</option><option value="WAFLERA">WAFLERA</option><option value="WESTINGHOUSE">WESTINGHOUSE</option><option value="YOGURT MAKER">YOGURT MAKER</option>
+                        </select>
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="BVSTEM6801M-053" class="celda-input mono font-bold"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="BVSTEM6801M" class="celda-input central bold text-dark"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="Cafetera Oster PrimaLatte Touch..." class="celda-input"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" value="1" class="celda-input central bold"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #f0fdf4;"><input type="number" step="0.01" value="599.00" class="celda-input derecha bold text-green"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #f0fdf4;"><input type="number" step="0.01" value="599.00" class="celda-input derecha bold text-green"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #f0fdf4;"><input type="number" step="0.01" value="53.91" class="celda-input derecha text-red"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #f0fdf4;"><input type="number" step="0.01" value="0.00" class="celda-input derecha"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #f0fdf4;"><input type="number" step="0.01" value="15.00" class="celda-input derecha"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #dcfce7;"><input type="number" step="0.01" value="560.09" class="celda-input derecha bold text-green"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #fef2f2;"><input type="number" step="0.01" value="370.00" class="celda-input derecha bold text-red"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #fef2f2;"><input type="number" value="1" class="celda-input central"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #fef2f2;"><input type="number" step="0.01" value="370.00" class="celda-input derecha bold text-red"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #fef2f2;"><input type="number" step="0.01" value="12.00" class="celda-input derecha text-red"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #eff6ff;"><input type="number" step="0.01" value="178.09" class="celda-input derecha bold" style="color: #1e40af;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #eff6ff;"><input type="text" value="29.7%" class="celda-input central bold" style="color: #1e40af;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <select class="celda-select text-dark">
+                            <option value="LIMA - SAN JUAN DE LURIGANCHO" selected>LIMA - SAN JUAN DE LURIGANCHO</option>
+                            <option value="LIMA - MIRAFLORES">LIMA - MIRAFLORES</option>
+                            <option value="LIMA - SANTIAGO DE SURCO">LIMA - SANTIAGO DE SURCO</option>
+                        </select>
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="AV. PRÓCERES DE LA INDEPENDENCIA 1234" class="celda-input"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <select class="celda-select bold text-dark">
+                            <option value="JUANEKO">JUANEKO</option><option value="STEPHAN">STEPHAN</option><option value="MISTER" selected>MISTER</option><option value="RICHARD">RICHARD</option><option value="IVAN">IVAN</option><option value="DAVID">DAVID</option><option value="JOSHUA">JOSHUA</option><option value="AMÉRICO">AMÉRICO</option><option value="MARIO TALLEDO">MARIO TALLEDO</option><option value="GIANCARLO">GIANCARLO</option>
+                        </select>
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="987654321" class="celda-input central mono"></td>
+                    <td style="padding: 0; text-align: center;">
+                        <input type="checkbox" class="check-agradecimiento" checked>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    /* Cabeceras */
+    .th-rep { padding: 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; }
+    
+    /* Inputs Excel */
+    .celda-input { width: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: inherit; color: #475569; background-color: transparent; outline: none; }
+    .celda-input:focus { background-color: #fffdec; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; }
+    
+    /* Selectores */
+    .celda-select { width: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: inherit; background-color: transparent; outline: none; cursor: pointer; appearance: none; }
+    .celda-select:focus { background-color: #fffdec; box-shadow: inset 0 0 0 2px var(--color-principal); }
+
+    /* Modificadores */
+    .central { text-align: center; }
+    .derecha { text-align: right; }
+    .bold { font-weight: bold; }
+    .text-dark { color: #0f172a; }
+    .text-blue { color: #2563eb; }
+    .text-green { color: #166534; }
+    .text-red { color: #991b1b; }
+    .mono { font-family: monospace; }
+
+    /* Quitar flechas a inputs */
+    .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .celda-input[type=number] { -moz-appearance: textfield; }
+
+    /* Checkbox */
+    .check-agradecimiento { width: 18px; height: 18px; cursor: pointer; accent-color: var(--color-principal); margin-top: 10px; transition: transform 0.1s; }
+    .check-agradecimiento:hover { transform: scale(1.15); }
+    
+    /* Estilo para los checkboxes del panel de WordPress */
+    .check-opcion { width: 15px; height: 15px; accent-color: var(--color-principal); cursor: pointer; }
+</style>
+
+<script>
+    // 1. Función para mostrar/ocultar el menú tipo WordPress
+    function togglePanelColumnas() {
+        const panel = document.getElementById("panelPersonalizarColumnas");
+        panel.style.display = panel.style.display === "none" ? "block" : "none";
+    }
+
+    // 2. Lógica Automática para generar los checks y ocultar las columnas
+    document.addEventListener("DOMContentLoaded", function() {
+        const ths = document.querySelectorAll("#tablaReporte th.th-rep");
+        const container = document.getElementById("columnCheckboxes");
+        
+        ths.forEach((th, index) => {
+            // Obtener el nombre real de la columna
+            const colName = th.innerText.trim();
+            if (!colName) return;
+
+            // Crear el Label y el Checkbox
+            const label = document.createElement("label");
+            label.style.display = "flex";
+            label.style.alignItems = "center";
+            label.style.gap = "8px";
+            label.style.fontSize = "0.75rem";
+            label.style.fontWeight = "bold";
+            label.style.color = "#475569";
+            label.style.cursor = "pointer";
+            
+            const cb = document.createElement("input");
+            cb.type = "checkbox";
+            cb.checked = true; // Por defecto todas están visibles
+            cb.className = "check-opcion";
+            cb.dataset.colIndex = index + 1; // Índice de columna (1 al 28)
+            
+            // Evento cuando marcas/desmarcas la casilla
+            cb.addEventListener("change", function() {
+                const colIdx = this.dataset.colIndex;
+                const displayState = this.checked ? "" : "none";
+                
+                // Ocultar/Mostrar el Encabezado (TH)
+                const header = document.querySelector(`#tablaReporte th:nth-child(${colIdx})`);
+                if(header) header.style.display = displayState;
+                
+                // Ocultar/Mostrar todas las celdas de esa columna (TD)
+                document.querySelectorAll(`#tablaReporte tbody tr`).forEach(tr => {
+                    const cell = tr.querySelector(`td:nth-child(${colIdx})`);
+                    if(cell) cell.style.display = displayState;
+                });
+            });
+            
+            label.appendChild(cb);
+            label.appendChild(document.createTextNode(colName));
+            container.appendChild(label);
+        });
+    });
+</script>
+{% endblock %}
