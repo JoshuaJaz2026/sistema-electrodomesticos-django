@@ -37,9 +37,17 @@ urlpatterns = [
     path('percheron/bci/', views.percheron_bci, name='percheron_bci'),
 
     # ==========================================
-    # 5. REPORTES Y HERRAMIENTAS
+    # 5. REPORTES DE VENTAS Y HERRAMIENTAS
     # ==========================================
-    path('reportes/', views.reporte_ventas, name='reporte_ventas'),
+    path('reportes/creditienda/', views.reporte_creditienda, name='reporte_creditienda'),
+    path('reportes/falabella/', views.reporte_falabella, name='reporte_falabella'),
+    path('reportes/intercorp/', views.reporte_intercorp, name='reporte_intercorp'),
+    path('reportes/mercado-libre-junior/', views.reporte_mercadolibre_junior, name='reporte_mercadolibre_junior'),
+    path('reportes/mercado-libre/', views.reporte_mercadolibre, name='reporte_mercadolibre'),
+    path('reportes/tiktok/', views.reporte_tiktok, name='reporte_tiktok'),
+    path('reportes/venta-libre/', views.reporte_ventalibre, name='reporte_ventalibre'),
+    path('reportes/web/', views.reporte_web, name='reporte_web'),
+
     path('simulador/', views.simulador_costos, name='simulador_costos'),
     
     # ==========================================

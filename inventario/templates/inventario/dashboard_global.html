@@ -97,22 +97,16 @@
 
                     {% if canal == 'Mercado Libre' %}
                         <a href="{% url 'percheron_mercadolibre' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-handshake"></i> Percherón Mercado Libre</a>
-                    
                     {% elif canal == 'Mercado Libre - Junior' %}
                         <a href="{% url 'percheron_mercadolibre_junior' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-seedling"></i> Percherón ML Junior</a>
-                    
                     {% elif canal == 'Falabella' %}
                         <a href="{% url 'percheron_falabella' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-store"></i> Percherón Falabella</a>
-                    
                     {% elif canal == 'Creditienda' %}
                         <a href="{% url 'percheron_creditienda' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-credit-card"></i> Percherón Creditienda</a>
-                    
                     {% elif canal == 'Intercorp' %}
                         <a href="{% url 'percheron_intercorp' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-building"></i> Percherón Intercorp</a>
-                    
                     {% elif canal == 'Tik tok' or canal == 'Tiktok' %}
                         <a href="{% url 'percheron_tiktok' %}?canal={{ canal }}" class="submenu-item"><i class="fab fa-tiktok"></i> Percherón Tiktok</a>
-                    
                     {% elif canal == 'Venta Libre' %}
                         <a href="{% url 'percheron_ventalibre' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-shopping-cart"></i> Percherón Venta Libre</a>
                     {% endif %}
@@ -127,7 +121,25 @@
             <hr style="border: 0.5px solid #3e4f5f; margin: 10px 20px;">
             
             <div class="menu-category">Operaciones {{ canal }}</div>
-            <a href="{% url 'reporte_ventas' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+            
+            {% if canal == 'Mercado Libre' %}
+                <a href="{% url 'reporte_mercadolibre' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+            {% elif canal == 'Mercado Libre - Junior' %}
+                <a href="{% url 'reporte_mercadolibre_junior' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+            {% elif canal == 'Falabella' %}
+                <a href="{% url 'reporte_falabella' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+            {% elif canal == 'Creditienda' %}
+                <a href="{% url 'reporte_creditienda' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+            {% elif canal == 'Intercorp' %}
+                <a href="{% url 'reporte_intercorp' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+            {% elif canal == 'Tik tok' or canal == 'Tiktok' %}
+                <a href="{% url 'reporte_tiktok' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+            {% elif canal == 'Venta Libre' %}
+                <a href="{% url 'reporte_ventalibre' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+            {% else %}
+                <a href="{% url 'reporte_web' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+            {% endif %}
+            
             <a href="{% url 'simulador_costos' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
         </nav>
     </div>
@@ -155,28 +167,36 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const currentPath = window.location.pathname; 
-            const submenuItems = document.querySelectorAll('.submenu-item');
             
+            // Función para marcar enlaces activos en el submenú
+            const submenuItems = document.querySelectorAll('.submenu-item');
             submenuItems.forEach(item => {
                 let linkPath = item.getAttribute('href');
-                
-                // Verificamos si la ruta actual coincide con el href del enlace
                 if (linkPath && linkPath !== '#' && linkPath.split('?')[0] === currentPath) {
                     item.style.color = 'white';
                     item.style.borderLeftColor = 'var(--color-principal)';
                     item.style.background = '#2c3e50';
                     
-                    // Abrimos el menú padre si estamos dentro de una subsección
                     const parentMenu = item.closest('.submenu');
                     if (parentMenu) {
                         parentMenu.classList.add('open');
-                        
                         const menuHeader = parentMenu.previousElementSibling;
                         if(menuHeader) {
                             const arrow = menuHeader.querySelector('.fa-chevron-down');
                             if (arrow) arrow.classList.add('rotate');
                         }
                     }
+                }
+            });
+
+            // Función para marcar enlaces activos en el menú principal (como Mis Reportes)
+            const mainMenuItems = document.querySelectorAll('.sidebar-menu > .menu-item');
+            mainMenuItems.forEach(item => {
+                let linkPath = item.getAttribute('href');
+                if (linkPath && linkPath !== '#' && linkPath.split('?')[0] === currentPath) {
+                    item.style.color = 'white';
+                    item.style.borderLeftColor = 'var(--color-principal)';
+                    item.style.background = '#34495e';
                 }
             });
         });
