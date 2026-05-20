@@ -54,7 +54,6 @@ def percheron_ingresos(request):
     icono = request.session.get('icono_actual', 'fas fa-globe')
     movimientos_in = MovimientoPercheron.objects.filter(tipo='IN')
     
-    # Todo en minúsculas
     return render(request, 'inventario/percheron_ingresos.html', {
         'canal': canal, 'color_actual': color, 'icono_actual': icono, 'movimientos': movimientos_in
     })
@@ -127,7 +126,6 @@ def percheron_bci(request):
 # 5. APIs Y BASES DE DATOS (GUARDADO Y BÚSQUEDA)
 # =========================================================
 
-# API: Autocompletado de Productos
 def api_buscar_producto(request):
     sku = request.GET.get('sku', '').strip()
     if not sku:
@@ -145,7 +143,6 @@ def api_buscar_producto(request):
     except Producto.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Producto no encontrado'})
 
-# API: Guardar Nuevos Productos (Para pantalla "Registros")
 def guardar_nuevos_productos(request):
     if request.method == 'POST':
         try:
@@ -173,7 +170,6 @@ def guardar_nuevos_productos(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
 
-# API: Guardar Kardex (Ingresos/Salidas)
 @login_required
 def guardar_kardex_percheron(request):
     if request.method == 'POST':
@@ -256,12 +252,48 @@ def guardar_kardex_percheron(request):
 
 
 # =========================================================
-# 6. REPORTES Y HERRAMIENTAS
+# 6. REPORTES DE VENTAS POR PLATAFORMA Y HERRAMIENTAS
 # =========================================================
+
 @login_required
-def reporte_ventas(request):
+def reporte_mercadolibre(request):
     canal = request.session.get('canal_activo', 'Web')
-    return render(request, 'inventario/reportes_ventas.html', {'canal': canal})
+    return render(request, 'reportes_plataformas/reporte_mercadolibre.html', {'canal': canal})
+
+@login_required
+def reporte_mercadolibre_junior(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'reportes_plataformas/reporte_mercadolibre_junior.html', {'canal': canal})
+
+@login_required
+def reporte_creditienda(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'reportes_plataformas/reporte_creditienda.html', {'canal': canal})
+
+@login_required
+def reporte_falabella(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'reportes_plataformas/reporte_falabella.html', {'canal': canal})
+
+@login_required
+def reporte_intercorp(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'reportes_plataformas/reporte_intercorp.html', {'canal': canal})
+
+@login_required
+def reporte_tiktok(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'reportes_plataformas/reporte_tiktok.html', {'canal': canal})
+
+@login_required
+def reporte_ventalibre(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'reportes_plataformas/reporte_ventalibre.html', {'canal': canal})
+
+@login_required
+def reporte_web(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'reportes_plataformas/reporte_web.html', {'canal': canal})
 
 @login_required
 def simulador_costos(request):
