@@ -1,0 +1,226 @@
+{% extends 'inventario/dashboard_global.html' %}
+
+{% block content %}
+<div class="card" style="border-top: 4px solid var(--color-principal); padding: 20px; background: white; width: 100%; box-sizing: border-box;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+        <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase;">
+            <i class="{{ request.session.icono_actual }}" style="color: var(--color-principal); font-size: 1.2em;"></i> 
+            Reporte de Ventas - {{ canal }}
+        </h2>
+        
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <button type="button" style="background-color: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-file-excel"></i> Exportar
+            </button>
+            <button type="button" style="background-color: var(--color-principal); color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-save"></i> Guardar
+            </button>
+            
+            <div style="position: relative;">
+                <button type="button" onclick="togglePanelColumnas()" style="background-color: #475569; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s;">
+                    <i class="fas fa-columns"></i> Opciones de Pantalla
+                </button>
+                
+                <div id="panelPersonalizarColumnas" style="display: none; position: absolute; right: 0; top: 115%; background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 100; width: 750px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
+                        <h4 style="margin: 0; color: #1e293b; font-size: 0.95rem;">
+                            <i class="fas fa-tasks" style="color: var(--color-principal);"></i> Elementos en pantalla
+                        </h4>
+                        <button onclick="togglePanelColumnas()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2rem;">&times;</button>
+                    </div>
+                    <div id="columnCheckboxes" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <datalist id="lista-estados">
+        <option value="RETORNO">
+        <option value="ENTREGADO">
+        <option value="CANCELADO">
+        <option value="EN DEVOLUCIÓN">
+        <option value="PENDIENTE DE ENTREGA">
+    </datalist>
+
+    <datalist id="lista-marcas">
+        <option value="BEHRINGER"><option value="BGH"><option value="BLACKLINE"><option value="BOSSKO"><option value="ELECTROLUX"><option value="EVOLUTION"><option value="FINEZZA"><option value="FUJITEC"><option value="GAMA"><option value="HISENSE"><option value="ILUMI"><option value="IMACO"><option value="INDURAMA"><option value="JBL"><option value="JVC"><option value="LG"><option value="MORLEY"><option value="MOTOROLA"><option value="OSTER"><option value="PANASONIC"><option value="PHILIPS"><option value="RECORD"><option value="SAMSUNG"><option value="SKULLCANDY"><option value="SONY"><option value="TAURUS"><option value="TCL"><option value="TREVELY"><option value="VANHOFF">
+    </datalist>
+
+    <datalist id="lista-categorias">
+        <option value="AFEITADOR"><option value="ALISADOR"><option value="ARROCERA"><option value="AUDÍFONOS"><option value="BATIDORA DE INMERCION"><option value="BATIDORA DE MANO"><option value="BATIDORA DE TAZÓN"><option value="BATIDORA PLANETARIA"><option value="CACEROLA"><option value="CAFETERA"><option value="CALENTADOR"><option value="CEPILLO"><option value="COCINA DE INDUCCION"><option value="COCINA DE PIE"><option value="COCINA ELÉCTRICA"><option value="COLADOR"><option value="COMBO BLACK"><option value="COMBO BLACK SILVER"><option value="COMBO CHERRY"><option value="COMBO CUMBIA"><option value="COMBO OSTER"><option value="COMBOBLACK4OSTER"><option value="COMBOBLACKOSTER2"><option value="COMBOEXTRACTOR"><option value="COMBOOSTER"><option value="COMBOPOWERIMACO"><option value="COMBORED"><option value="CONGELADORA"><option value="CONTROL TV"><option value="CREPERA"><option value="CUCHILLA"><option value="DEPILADOR"><option value="DESHUMEDECEDOR"><option value="DISPENSADOR ELÉCTRICO"><option value="ESPAGUETERA"><option value="ESTUFA"><option value="EXPRIMIDOR"><option value="EXTRACTOR DE JUGOS"><option value="FREIDORA DE AIRE"><option value="FRIGOBAR"><option value="HERVIDOR"><option value="HORNO CON FREIDORA"><option value="HORNO ELÉCTRICO"><option value="JARRA"><option value="JUEGO DE OLLAS"><option value="KITOSTER1"><option value="KITOSTER2"><option value="LAVADORA"><option value="LAVASECA"><option value="LICUADORA"><option value="MICROONDAS"><option value="MINI LICUADORA"><option value="MINICOMPONENTE"><option value="MOLDES"><option value="MOLEDOR DE CARNE"><option value="MULTI OLLA"><option value="OLLA"><option value="OLLA A PRESIÓN"><option value="PANIFICADORA"><option value="PARLANTE"><option value="PARRILLA CARBÓN"><option value="PICADOR"><option value="PLANCHA A VAPOR"><option value="PLANCHA ALISADOR"><option value="PLANCHA GRILL"><option value="PLANCHA Y PARRILLA"><option value="PROCESADOR DE ALIMENTOS"><option value="REFRIGERADORA"><option value="SANDWICHERA"><option value="SARTEN"><option value="SARTÉN ELÉCTRICA"><option value="SECADORA DE CABELLO"><option value="SET DE BOWLS"><option value="SET DE CUBIERTOS"><option value="SOUNDBAR"><option value="TABLET"><option value="TAZAS"><option value="TERMO BOMBA"><option value="TERMO HERVIDOR"><option value="TERMO VENTILADOR"><option value="TERMORADIADOR"><option value="TETERA"><option value="TOSTADORA"><option value="TRICOMBO AVOCADO"><option value="TRIPACK SARTÉN"><option value="TV"><option value="VAPORIZADOR DE TELAS"><option value="VASO DE VIDRIO"><option value="VENTILADOR"><option value="VISICOOLER"><option value="WAFLERA">
+    </datalist>
+
+    <div style="overflow-x: auto; overflow-y: auto; max-height: 600px; border: 1px solid #e2e8f0; border-radius: 6px;">
+        <table id="tablaReporte" style="width: max-content; border-collapse: collapse; background: white; font-size: 0.85em; white-space: nowrap; table-layout: fixed;">
+            <thead style="position: sticky; top: 0; z-index: 10;">
+                <tr style="color: #334155; text-transform: uppercase; font-weight: bold; font-size: 0.8em; height: 40px;">
+                    <th class="th-rep" style="background-color: #f1f5f9; width: 110px;">FECHA VENTA</th>
+                    <th class="th-rep" style="background-color: #f1f5f9; width: 110px;">FECHA DESP.</th>
+                    <th class="th-rep" style="background-color: #f1f5f9; width: 120px;">MES Y AÑO</th>
+                    <th class="th-rep" style="background-color: #e0f2fe; width: 170px;">ESTADO PEDIDO</th>
+                    <th class="th-rep" style="background-color: #f1f5f9; width: 140px;">NRO. ORDEN</th>
+                    <th class="th-rep" style="background-color: #f1f5f9; width: 220px;">CLIENTE</th>
+                    <th class="th-rep" style="background-color: #f1f5f9; width: 120px;">BOLETA</th>
+                    
+                    <th class="th-rep" style="background-color: #e2e8f0; width: 160px;">MARCA</th>
+                    <th class="th-rep" style="background-color: #e2e8f0; width: 200px;">CATEGORÍA</th>
+                    <th class="th-rep" style="background-color: #e2e8f0; width: 160px;">SKU ALMACÉN</th>
+                    <th class="th-rep" style="background-color: #e2e8f0; width: 140px;">CÓDIGO</th>
+                    <th class="th-rep" style="background-color: #e2e8f0; width: 280px;">PRODUCTO</th>
+                    <th class="th-rep" style="background-color: #e2e8f0; width: 70px;">CANT.</th>
+                    
+                    <th class="th-rep" style="background-color: #dcfce7; color: #166534; width: 110px;">PRECIO VENTA</th>
+                    <th class="th-rep" style="background-color: #dcfce7; color: #166534; width: 120px;">TOTAL VENTA</th>
+                    
+                    <th class="th-rep" style="background-color: #fef2f2; color: #991b1b; width: 110px;">COMISIÓN (%)</th>
+                    <th class="th-rep" style="background-color: #fef2f2; color: #991b1b; width: 110px;">COMISIÓN (S/)</th>
+                    
+                    <th class="th-rep" style="background-color: #dcfce7; color: #166534; width: 140px;">PAGO PLATAFORMA</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 100px;">ENVÍO</th>
+                    <th class="th-rep" style="background-color: #fee2e2; color: #991b1b; width: 110px;">COSTO</th>
+                    
+                    <th class="th-rep" style="background-color: #dbeafe; color: #1e40af; width: 120px;">GANANCIA</th>
+                    <th class="th-rep" style="background-color: #dbeafe; color: #1e40af; width: 120px;">RENTABILIDAD</th>
+                    
+                    <th class="th-rep" style="background-color: #fdf4ff; width: 120px;">VENTA PAGADA</th>
+                    <th class="th-rep" style="background-color: #fdf4ff; width: 130px;">ADJUNTO BOLETA</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 130px;">FECHA VALIDACIÓN</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 140px;">NRO. OPERACIÓN</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 120px; border-right: none;">N° TELÉFONO</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #e2e8f0; height: 38px;">
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" value="2026-05-19" class="celda-input central"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" class="celda-input central"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="MAYO 2026" class="celda-input central bold text-dark"></td>
+                    
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #f0f9ff;">
+                        <input list="lista-estados" value="ENTREGADO" placeholder="Filtrar estado..." class="celda-input central bold text-blue">
+                    </td>
+                    
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="CT-889955" class="celda-input central bold" style="color: var(--color-principal);"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Nombre cliente..." class="celda-input"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="B001-..." class="celda-input central"></td>
+                    
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <input list="lista-marcas" value="OSTER" placeholder="Filtrar marca..." class="celda-input bold text-dark">
+                    </td>
+
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <input list="lista-categorias" value="CAFETERA" placeholder="Filtrar cat..." class="celda-input text-dark">
+                    </td>
+
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="BVSTEM6801M-053" class="celda-input mono font-bold"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="BVSTEM6801M" class="celda-input central bold text-dark"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="Cafetera Oster PrimaLatte Touch..." class="celda-input"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" value="1" class="celda-input central bold"></td>
+                    
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #f0fdf4;"><input type="number" step="0.01" value="599.00" class="celda-input derecha bold text-green"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #f0fdf4;"><input type="number" step="0.01" value="599.00" class="celda-input derecha bold text-green"></td>
+                    
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #fff5f5;"><input type="text" value="10%" class="celda-input central text-red"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #fff5f5;"><input type="number" step="0.01" value="59.90" class="celda-input derecha text-red"></td>
+                    
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #dcfce7;"><input type="number" step="0.01" value="539.10" class="celda-input derecha bold text-green"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" step="0.01" value="0.00" class="celda-input derecha"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #fef2f2;"><input type="number" step="0.01" value="370.00" class="celda-input derecha bold text-red"></td>
+                    
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #eff6ff;"><input type="number" step="0.01" value="169.10" class="celda-input derecha bold" style="color: #1e40af;"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #eff6ff;"><input type="text" value="28.2%" class="celda-input central bold" style="color: #1e40af;"></td>
+                    
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #fdf4ff; text-align: center;">
+                        <input type="checkbox" class="check-moderno">
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #fdf4ff; text-align: center;">
+                        <input type="checkbox" class="check-moderno">
+                    </td>
+                    
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" class="celda-input central"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Nro Operación..." class="celda-input central mono"></td>
+                    <td style="padding: 0;"><input type="text" placeholder="Celular..." class="celda-input central mono"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .th-rep { padding: 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; }
+    
+    /* Inputs y Datalist Styles */
+    .celda-input { width: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: inherit; color: #475569; background-color: transparent; outline: none; }
+    .celda-input:focus { background-color: #fffdec; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; }
+    
+    /* Input con lista desplegable en hover para que se vea que es un combo */
+    input[list]:hover { cursor: text; }
+
+    .central { text-align: center; }
+    .derecha { text-align: right; }
+    .bold { font-weight: bold; }
+    .text-dark { color: #0f172a; }
+    .text-blue { color: #2563eb; }
+    .text-green { color: #166534; }
+    .text-red { color: #991b1b; }
+    .mono { font-family: monospace; }
+
+    .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .celda-input[type=number] { -moz-appearance: textfield; }
+
+    /* Estilo Checkbox */
+    .check-moderno { width: 18px; height: 18px; cursor: pointer; accent-color: var(--color-principal); margin-top: 10px; transition: transform 0.1s; }
+    .check-moderno:hover { transform: scale(1.15); }
+    
+    .check-opcion { width: 15px; height: 15px; accent-color: var(--color-principal); cursor: pointer; }
+</style>
+
+<script>
+    function togglePanelColumnas() {
+        const panel = document.getElementById("panelPersonalizarColumnas");
+        panel.style.display = panel.style.display === "none" ? "block" : "none";
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const ths = document.querySelectorAll("#tablaReporte th.th-rep");
+        const container = document.getElementById("columnCheckboxes");
+        
+        ths.forEach((th, index) => {
+            const colName = th.innerText.trim();
+            if (!colName) return;
+
+            const label = document.createElement("label");
+            label.style.display = "flex";
+            label.style.alignItems = "center";
+            label.style.gap = "8px";
+            label.style.fontSize = "0.75rem";
+            label.style.fontWeight = "bold";
+            label.style.color = "#475569";
+            label.style.cursor = "pointer";
+            
+            const cb = document.createElement("input");
+            cb.type = "checkbox";
+            cb.checked = true; 
+            cb.className = "check-opcion";
+            cb.dataset.colIndex = index + 1; 
+            
+            cb.addEventListener("change", function() {
+                const colIdx = this.dataset.colIndex;
+                const displayState = this.checked ? "" : "none";
+                
+                const header = document.querySelector(`#tablaReporte th:nth-child(${colIdx})`);
+                if(header) header.style.display = displayState;
+                
+                document.querySelectorAll(`#tablaReporte tbody tr`).forEach(tr => {
+                    const cell = tr.querySelector(`td:nth-child(${colIdx})`);
+                    if(cell) cell.style.display = displayState;
+                });
+            });
+            
+            label.appendChild(cb);
+            label.appendChild(document.createTextNode(colName));
+            container.appendChild(label);
+        });
+    });
+</script>
+{% endblock %}
