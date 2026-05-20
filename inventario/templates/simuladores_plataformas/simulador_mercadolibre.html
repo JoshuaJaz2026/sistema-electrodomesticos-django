@@ -1,0 +1,71 @@
+{% extends 'inventario/dashboard_global.html' %}
+
+{% block content %}
+<div class="card" style="border-top: 4px solid var(--color-principal); padding: 20px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0; color: #1e293b; text-transform: uppercase;">
+            <i class="fas fa-calculator" style="color: var(--color-principal);"></i> Simulador: {{ canal }}
+        </h2>
+        <button type="button" onclick="togglePanelColumnas()" style="background-color: #475569; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer;">
+            <i class="fas fa-columns"></i> Opciones de Pantalla
+        </button>
+    </div>
+
+    <datalist id="list-itemtype"><option value="KILLER"><option value="NORMAL"><option value="SLOW"><option value="NUEVO"></datalist>
+    <datalist id="list-estado"><option value="ACTIVO"><option value="PAUSADO"></datalist>
+    <datalist id="list-tipopub"><option value="CATALOGO"><option value="TRADICIONAL"></datalist>
+    <datalist id="list-categoria">
+        <option value="MAQUINA DE CORTAR PELO"><option value="ARROCERA"><option value="AUDIFONOS"><option value="BATIDORA DE INMERSIÓN"><option value="BATIDORA DE MANO"><option value="BATIDORA DE TAZÓN"><option value="CACEROLA"><option value="CAFETERA"><option value="COCINA DE INDUCCIÓN"><option value="COCINA ELÉCTRICA"><option value="COMBO BLACK"><option value="COMBO CHERRY"><option value="COMBO OSTER"><option value="DISPENSADOR DE AGUA"><option value="EXTRACTOR DE JUGOS"><option value="FREIDORA DE AIRE"><option value="HERVIDOR ELÉCTRICO"><option value="JUEGO DE OLLAS"><option value="LAVADORA"><option value="LICUADORA"><option value="LAVASECA"><option value="MICRÓFONO"><option value="MICROONDAS"><option value="MOLEDOR DE CARNE"><option value="MOLINILLO"><option value="OLLA A PRESIÓN"><option value="PANIFICADORA"><option value="PARLANTE"><option value="SARTÉN"><option value="SET DE CUBIERTOS"><option value="SET DE OLLAS"><option value="TERMO BOMBA"><option value="TERMORADIADOR"><option value="TERMO HERVIDOR"><option value="TETERA"><option value="TRICOMBO OSTER"><option value="TV"><option value="WAFLERA ELÉCTRICA"><option value="YOGURT MAKER"><option value="SARTÉN ELÉCTRICA"><option value="VAPORIZADOR DE PRENDAS"><option value="JVC"><option value="ONDULADOR"><option value="PLANCHA GRILL"><option value="PROCESADOR DE ALIMENTOS"><option value="CUATRICOMBO OSTER"><option value="MULTI OLLA"><option value="CUCHILLA DE LICUADORA"><option value="PERFUME"><option value="OLLA DE ACERO"><option value="PARRILLA ELÉCTRICA"><option value="SANDWICHERA"><option value="HORNO CON FREIDORA DE AIRE"><option value="HORNO ELÉCTRICO"><option value="REFRIGERADORA"><option value="CONGELADORA"><option value="PARRILLA PORTÁTIL"><option value="MINICOMPONENTE"><option value="EXTRACTOR POR PRENSADO"><option value="CONTROL DE TV"><option value="SOUNDBAR"><option value="HIERRO FUNDIDO"><option value="HORNO MICROONDAS"><option value="TETERA ELÉCTRICA"><option value="BATIDORA MULTIUSOS"><option value="OLLA ANTIHADERENTE"><option value="DESHUMEDECEDOR"><option value="PLANCHA A VAPOR"><option value="FRIGOBAR"><option value="ASPIRADORA"><option value="ESPUMADERA"><option value="KIT DE ACCESORIOS"><option value="PLANCHA DE PELO"><option value="SET DE MÁQUINAS PARA CORTAR PELO"><option value="ESPÁTULA"><option value="TABLET"><option value="COMBO FINEZZA"><option value="BLOQUEADOR"><option value="PACK CUIDADO PERSONAL"><option value="AFEITADOR"><option value="BISUTERÍA"><option value="MOLDES"><option value="LUSTRADORA"><option value="BOWLS"><option value="CUIDADO PERSONAL"><option value="BATIDORA DE MANO Y PEDESTAL"><option value="SARTÉN ANTIHADERENTE"><option value="VASO"><option value="COCINA A GAS"><option value="HORNO TOSTADOR"><option value="TAPA DE LICUADORA"><option value="DEPILADORA"><option value="EXPRIMIDOR CÍTRICO"><option value="MÁQUINA PARA HACER PASTA"><option value="PLANCHA CLÁSICA"><option value="TOSTADORA"><option value="OLLA"><option value="PARRILLA Y PLANCHA"><option value="COMBO RECORD"><option value="PATINES"><option value="JARRA"><option value="ASADOR ELÉCTRICO"><option value="CARGADOR PORTATIL"><option value="AIRE ACONDICIONADO"><option value="KIT OSTER"><option value="EXHIBIDORA"><option value="CAMPANA"><option value="ESTUFA"><option value="IMPRESORA"><option value="COCINA ENCIMERA"><option value="VENTILADOR"><option value="AMPLIFICADOR"><option value="FUNDA DE PARLANTE"><option value="CEPILLO MODELADOR"><option value="ESCOBA ELECTRICA"><option value="CREEPERA"><option value="MAQUINA DE DONDAS"><option value="MAQUINA DE HIELO">
+    </datalist>
+
+    <div style="overflow-x: auto; max-height: 600px;">
+        <table id="tablaReporte" style="width: 100%; border-collapse: collapse; font-size: 0.8em; white-space: nowrap;">
+            <thead style="position: sticky; top: 0; z-index: 10; background: #f1f5f9;">
+                <tr>
+                    <th class="th-rep">ITEM TYPE</th><th class="th-rep">LINK</th><th class="th-rep">ESTADO</th><th class="th-rep">CÓD. PUB</th><th class="th-rep">TIPO</th>
+                    <th class="th-rep">CÓD. PROD</th><th class="th-rep">CATEGORIA</th><th class="th-rep">MARCA</th><th class="th-rep">PRODUCTO</th>
+                    <th class="th-rep">P. TACHADO</th><th class="th-rep">% DSCTO</th><th class="th-rep">P. VENTA</th><th class="th-rep">ENVÍO</th>
+                    <th class="th-rep">% NUEVA COM</th><th class="th-rep">COM (S/)</th><th class="th-rep">PAGO NETO</th>
+                    <th class="th-rep">COSTO</th><th class="th-rep">GANANCIA</th><th class="th-rep">RTBLD%</th><th class="th-rep">MPE</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="fila-simulador">
+                    <td><input list="list-itemtype" class="celda-input"></td>
+                    <td><input type="text" class="celda-input"></td>
+                    <td><input list="list-estado" class="celda-input"></td>
+                    <td><input type="text" class="celda-input"></td>
+                    <td><input list="list-tipopub" class="celda-input"></td>
+                    <td><input type="text" class="celda-input"></td>
+                    <td><input list="list-categoria" class="celda-input"></td>
+                    <td><input type="text" class="celda-input"></td>
+                    <td><input type="text" class="celda-input" style="width:200px;"></td>
+                    <td><input type="number" class="celda-input"></td>
+                    <td><input type="number" class="celda-input"></td>
+                    <td><input type="number" class="celda-input"></td>
+                    <td><input type="number" class="celda-input"></td>
+                    <td><input type="number" class="celda-input"></td>
+                    <td><input type="number" class="celda-input"></td>
+                    <td><input type="number" class="celda-input"></td>
+                    <td><input type="number" class="celda-input"></td>
+                    <td><input type="number" class="celda-input"></td>
+                    <td><input type="text" class="celda-input"></td>
+                    <td class="central"><input type="checkbox"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .th-rep { padding: 12px; border: 1px solid #cbd5e1; text-align: center; }
+    .celda-input { width: 100%; border: none; padding: 8px; background: transparent; }
+    .fila-simulador:hover { background: #f8fafc; }
+    .central { text-align: center; }
+</style>
+
+<script>
+    function togglePanelColumnas() { /* Lógica de ocultar columnas igual a la anterior */ }
+</script>
+{% endblock %}
