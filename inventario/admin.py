@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import Perfil, Plataforma, Categoria, Electrodomestico, Producto, MovimientoPercheron
 from import_export.admin import ImportExportModelAdmin # Librería para carga masiva
+from .models import SimulacionMercadoLibre
 
 # 1. Configuración masiva para Plataformas (Para subir muchas tiendas de golpe)
 @admin.register(Plataforma)
@@ -56,3 +57,9 @@ class MovimientoPercheronAdmin(ImportExportModelAdmin):
     list_filter = ('tipo', 'fecha', 'canal_venta', 'usuario')
     # Buscador por el SKU del producto relacionado o por documento
     search_fields = ('producto__sku', 'producto__titulo', 'documento_salida', 'proveedor_motivo')
+
+@admin.register(SimulacionMercadoLibre)
+class SimulacionMercadoLibreAdmin(admin.ModelAdmin):
+    list_display = ('producto', 'cod_publicacion', 'precio_venta', 'ganancia', 'rentabilidad_porc', 'usuario', 'fecha_registro')
+    list_filter = ('item_type', 'estado_publicacion', 'tipo_publicacion', 'mpe', 'fecha_registro')
+    search_fields = ('producto', 'cod_publicacion', 'cod_producto', 'usuario__username')

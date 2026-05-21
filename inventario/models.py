@@ -104,3 +104,48 @@ class MovimientoPercheron(models.Model):
 
     class Meta:
         ordering = ['-fecha', '-creado_en'] # Ordena del más reciente al más antiguo
+
+class SimulacionMercadoLibre(models.Model):
+    # Relación para saber quién hizo la simulación y cuándo
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='simulaciones_mercadolibre')
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+
+    # Identificadores y clasificación de la publicación
+    item_type = models.CharField(max_length=20, blank=True, null=True)  # KILLER, NORMAL, SLOW, NUEVO
+    link = models.URLField(max_length=500, blank=True, null=True)
+    estado_publicacion = models.CharField(max_length=20, blank=True, null=True)  # ACTIVO, PAUSADO
+    cod_publicacion = models.CharField(max_length=50, blank=True, null=True)
+    tipo_publicacion = models.CharField(max_length=30, blank=True, null=True)  # CATALOGO, TRADICIONAL
+    
+    # Datos del producto
+    cod_producto = models.CharField(max_length=50, blank=True, null=True)
+    categoria = models.CharField(max_length=150, blank=True, null=True)
+    marca = models.CharField(max_length=100, blank=True, null=True)
+    producto = models.CharField(max_length=255, blank=True, null=True)
+    
+    # Valores comerciales y descuentos
+    precio_tachado = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    porc_descuento = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+    precio_venta = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    # Costos operativos e impuestos de plataforma
+    costo_envio = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    porc_comision = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+    comision_soles = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    # Resultados financieros de la plataforma y costos propios
+    pago_neto = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    costo_producto = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    # Indicadores finales de éxito
+    ganancia = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    rentabilidad_porc = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+    mpe = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Simulación Mercado Libre"
+        verbose_name_plural = "Simulaciones Mercado Libre"
+        ordering = ['-fecha_registro']
+
+    def __str__(self):
+        return f"{self.producto if self.producto else 'Sin nombre'} - S/ {self.precio_venta} ({self.usuario.username})"
