@@ -62,32 +62,63 @@
                     <th class="th-rep" style="width: 70px;">MPE</th>
                 </tr>
             </thead>
+            
             <tbody>
-                <tr class="fila-simulador" style="border-bottom: 1px solid #e2e8f0;">
-                    <td class="td-cell"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype"></td>
-                    <td class="td-cell" style="display: flex; align-items: center; background: #f8fafc; height: 35px;">
-                        <input type="text" class="celda-input val-link text-blue" readonly placeholder="Link..." style="cursor: not-allowed; font-size: 0.8em; padding-right: 5px;">
-                        <a href="#" target="_blank" class="btn-link" style="display: none; padding-right: 10px; text-decoration: none;" title="Abrir"><i class="fas fa-external-link-alt"></i></a>
-                    </td>
-                    <td class="td-cell"><input list="list-estado" class="celda-input central val-estado"></td>
-                    <td class="td-cell" style="background: #fffdec;"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub" style="color: var(--color-principal);" placeholder="Ej. 123456"></td>
-                    <td class="td-cell"><input list="list-tipopub" class="celda-input central val-tipo"></td>
-                    <td class="td-cell"><input type="text" class="celda-input central mono val-codprod"></td>
-                    <td class="td-cell"><input list="list-categoria" class="celda-input val-categoria"></td>
-                    <td class="td-cell"><input type="text" class="celda-input val-marca"></td>
-                    <td class="td-cell"><input type="text" class="celda-input val-producto"></td>
-                    <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-ptachado"></td>
-                    <td class="td-cell"><input type="number" step="0.01" class="celda-input central val-dscto"></td>
-                    <td class="td-cell" style="background: #f0fdf4;"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)"></td>
-                    <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-envio" oninput="calcularFila(this)"></td>
-                    <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input central text-red val-porc-com" oninput="calcularFila(this)"></td>
-                    <td class="td-cell" style="background: #fef2f2;"><input type="text" class="celda-input derecha text-red val-com-soles" readonly tabindex="-1"></td>
-                    <td class="td-cell" style="background: #dcfce7;"><input type="text" class="celda-input derecha bold text-green val-pago-neto" readonly tabindex="-1"></td>
-                    <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input derecha text-red val-costo" oninput="calcularFila(this)"></td>
-                    <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input derecha bold val-ganancia" readonly tabindex="-1"></td>
-                    <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input central bold val-rentabilidad" readonly tabindex="-1"></td>
-                    <td class="td-cell central"><input type="checkbox" class="check-moderno val-mpe"></td>
-                </tr>
+                {% if simulaciones %}
+                    {% for sim in simulaciones %}
+                    <tr class="fila-simulador" style="border-bottom: 1px solid #e2e8f0;">
+                        <td class="td-cell"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype" value="{{ sim.item_type|default_if_none:'' }}"></td>
+                        <td class="td-cell" style="display: flex; align-items: center; background: #f8fafc; height: 35px;">
+                            <input type="text" class="celda-input val-link text-blue" readonly value="{{ sim.link|default_if_none:'' }}" style="cursor: not-allowed; font-size: 0.8em; padding-right: 5px;">
+                            <a href="{{ sim.link|default:'#' }}" target="_blank" class="btn-link" style="{% if sim.link %}display: inline-block;{% else %}display: none;{% endif %} padding-right: 10px; color: var(--color-principal); text-decoration: none;"><i class="fas fa-external-link-alt"></i></a>
+                        </td>
+                        <td class="td-cell"><input list="list-estado" class="celda-input central val-estado" value="{{ sim.estado_publicacion|default_if_none:'' }}"></td>
+                        <td class="td-cell" style="background: #fffdec;"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub" style="color: var(--color-principal);" value="{{ sim.cod_publicacion|default_if_none:'' }}"></td>
+                        <td class="td-cell"><input list="list-tipopub" class="celda-input central val-tipo" value="{{ sim.tipo_publicacion|default_if_none:'' }}"></td>
+                        <td class="td-cell"><input type="text" class="celda-input central mono val-codprod" value="{{ sim.cod_producto|default_if_none:'' }}"></td>
+                        <td class="td-cell"><input list="list-categoria" class="celda-input val-categoria" value="{{ sim.categoria|default_if_none:'' }}"></td>
+                        <td class="td-cell"><input type="text" class="celda-input val-marca" value="{{ sim.marca|default_if_none:'' }}"></td>
+                        <td class="td-cell"><input type="text" class="celda-input val-producto" value="{{ sim.producto|default_if_none:'' }}"></td>
+                        <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-ptachado" value="{{ sim.precio_tachado|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-cell"><input type="number" step="0.01" class="celda-input central val-dscto" value="{{ sim.porc_descuento|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-cell" style="background: #f0fdf4;"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)" value="{{ sim.precio_venta|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-envio" oninput="calcularFila(this)" value="{{ sim.costo_envio|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input central text-red val-porc-com" oninput="calcularFila(this)" value="{{ sim.porc_comision|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-cell" style="background: #fef2f2;"><input type="text" class="celda-input derecha text-red val-com-soles" readonly tabindex="-1" value="{{ sim.comision_soles|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-cell" style="background: #dcfce7;"><input type="text" class="celda-input derecha bold text-green val-pago-neto" readonly tabindex="-1" value="{{ sim.pago_neto|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input derecha text-red val-costo" oninput="calcularFila(this)" value="{{ sim.costo_producto|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input derecha bold val-ganancia" readonly tabindex="-1" value="{{ sim.ganancia|stringformat:'.2f'|default:'' }}" style="color: {% if sim.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
+                        <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input central bold val-rentabilidad" readonly tabindex="-1" value="{{ sim.rentabilidad_porc|stringformat:'.1f'|default:'' }}%" style="color: {% if sim.rentabilidad_porc < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
+                        <td class="td-cell central"><input type="checkbox" class="check-moderno val-mpe" {% if sim.mpe %}checked{% endif %}></td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr class="fila-simulador" style="border-bottom: 1px solid #e2e8f0;">
+                        <td class="td-cell"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype"></td>
+                        <td class="td-cell" style="display: flex; align-items: center; background: #f8fafc; height: 35px;">
+                            <input type="text" class="celda-input val-link text-blue" readonly placeholder="Link..." style="cursor: not-allowed; font-size: 0.8em; padding-right: 5px;">
+                            <a href="#" target="_blank" class="btn-link" style="display: none; padding-right: 10px; text-decoration: none;" title="Abrir"><i class="fas fa-external-link-alt"></i></a>
+                        </td>
+                        <td class="td-cell"><input list="list-estado" class="celda-input central val-estado"></td>
+                        <td class="td-cell" style="background: #fffdec;"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub" style="color: var(--color-principal);" placeholder="Ej. 123456"></td>
+                        <td class="td-cell"><input list="list-tipopub" class="celda-input central val-tipo"></td>
+                        <td class="td-cell"><input type="text" class="celda-input central mono val-codprod"></td>
+                        <td class="td-cell"><input list="list-categoria" class="celda-input val-categoria"></td>
+                        <td class="td-cell"><input type="text" class="celda-input val-marca"></td>
+                        <td class="td-cell"><input type="text" class="celda-input val-producto"></td>
+                        <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-ptachado"></td>
+                        <td class="td-cell"><input type="number" step="0.01" class="celda-input central val-dscto"></td>
+                        <td class="td-cell" style="background: #f0fdf4;"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)"></td>
+                        <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-envio" oninput="calcularFila(this)"></td>
+                        <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input central text-red val-porc-com" oninput="calcularFila(this)"></td>
+                        <td class="td-cell" style="background: #fef2f2;"><input type="text" class="celda-input derecha text-red val-com-soles" readonly tabindex="-1"></td>
+                        <td class="td-cell" style="background: #dcfce7;"><input type="text" class="celda-input derecha bold text-green val-pago-neto" readonly tabindex="-1"></td>
+                        <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input derecha text-red val-costo" oninput="calcularFila(this)"></td>
+                        <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input derecha bold val-ganancia" readonly tabindex="-1"></td>
+                        <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input central bold val-rentabilidad" readonly tabindex="-1"></td>
+                        <td class="td-cell central"><input type="checkbox" class="check-moderno val-mpe"></td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
         
@@ -114,7 +145,7 @@
 </style>
 
 <script>
-    // 1. Panel de Opciones (Ocultado por defecto para que funcione)
+    // 1. Panel de Opciones
     function togglePanelColumnas() {
         const panel = document.getElementById("panelPersonalizarColumnas");
         panel.style.display = panel.style.display === "none" ? "block" : "none";
@@ -206,7 +237,6 @@
         let datosAguardar = [];
 
         filas.forEach(fila => {
-            // Solo procesamos filas que al menos tengan el CÓDIGO PUB o PRODUCTO lleno
             const codPub = fila.querySelector('.val-codpub').value.trim();
             const producto = fila.querySelector('.val-producto').value.trim();
             
@@ -237,12 +267,10 @@
             return;
         }
 
-        // Cambiamos el estado del botón a "Cargando..."
         const textoOriginal = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
         btn.disabled = true;
 
-        // Aquí enviaremos la data a views.py (Endpoint que crearemos en Backend)
         fetch("{% url 'api_guardar_simulador' %}", {
             method: 'POST',
             headers: {
@@ -261,8 +289,7 @@
         })
         .catch(error => {
             console.error('Error:', error);
-            alert("Ruta de backend en preparación. La data se empaquetó correctamente en consola.");
-            console.log("DATA LISTA PARA BACKEND:", datosAguardar);
+            alert("Ocurrió un error en el guardado.");
         })
         .finally(() => {
             btn.innerHTML = textoOriginal;

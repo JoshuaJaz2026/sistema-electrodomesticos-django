@@ -258,16 +258,48 @@ def api_guardar_simulador(request):
             plataforma = data.get('plataforma', 'Desconocida')
             datos_simulacion = data.get('datos', [])
             
-            # Por ahora, solo imprimimos en la terminal para verificar que llegan los datos
-            print(f"--- NUEVA SIMULACIÓN DE {plataforma.upper()} ---")
-            print(f"Se recibieron {len(datos_simulacion)} filas para simular.")
+            if plataforma == 'Mercado Libre':
+                # Borramos las simulaciones anteriores del usuario para "sobrescribir" como un archivo de Excel
+                SimulacionMercadoLibre.objects.filter(usuario=request.user).delete()
+                
+                # Guardamos las nuevas filas
+                for fila in datos_simulacion:
+                    p_venta = float(fila.get('p_venta') or 0)
+                    envio = float(fila.get('envio') or 0)
+                    porc_com = float(fila.get('porc_comision') or 0)
+                    costo = float(fila.get('costo') or 0)
+                    
+                    # El backend calcula las finanzas por seguridad
+                    com_soles = p_venta * (porc_com / 100)
+                    pago_neto = p_venta - com_soles - envio
+                    ganancia = pago_neto - costo
+                    rentabilidad = (ganancia / p_venta * 100) if p_venta > 0 else 0
+
+                    SimulacionMercadoLibre.objects.create(
+                        usuario=request.user,
+                        item_type=fila.get('item_type', ''),
+                        link=fila.get('link', ''),
+                        estado_publicacion=fila.get('estado', ''),
+                        cod_publicacion=fila.get('cod_pub', ''),
+                        tipo_publicacion=fila.get('tipo', ''),
+                        cod_producto=fila.get('cod_prod', ''),
+                        categoria=fila.get('categoria', ''),
+                        marca=fila.get('marca', ''),
+                        producto=fila.get('producto', ''),
+                        precio_tachado=float(fila.get('p_tachado') or 0),
+                        porc_descuento=float(fila.get('dscto') or 0),
+                        precio_venta=p_venta,
+                        costo_envio=envio,
+                        porc_comision=porc_com,
+                        comision_soles=com_soles,
+                        pago_neto=pago_neto,
+                        costo_producto=costo,
+                        ganancia=ganancia,
+                        rentabilidad_porc=rentabilidad,
+                        mpe=fila.get('mpe', False)
+                    )
             
-            # Aquí irá la lógica futura para guardar en models.py
-            
-            return JsonResponse({
-                'status': 'ok', 
-                'message': f'Simulación de {plataforma} recibida correctamente (Backend en construcción).'
-            })
+            return JsonResponse({'status': 'ok', 'message': f'Simulación guardada exitosamente.'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
             
@@ -323,9 +355,15 @@ def reporte_web(request):
 # =========================================================
 
 @login_required
+@login_required
 def simulador_mercadolibre(request):
     canal = request.session.get('canal_activo', 'Web')
-    return render(request, 'simuladores_plataformas/simulador_mercadolibre.html', {'canal': canal})
+    # Traemos las simulaciones guardadas por este usuario específico
+    simulaciones = SimulacionMercadoLibre.objects.filter(usuario=request.user).order_by('id')
+    return render(request, 'simuladores_plataformas/simulador_mercadolibre.html', {
+        'canal': canal,
+        'simulaciones': simulaciones
+    })
 
 @login_required
 def simulador_mercadolibre_junior(request):
