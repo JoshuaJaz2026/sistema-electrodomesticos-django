@@ -8,8 +8,12 @@
             <i class="fas fa-calculator" style="color: var(--color-principal);"></i> Simulador: {{ canal }}
         </h2>
         
-        <div style="position: relative;">
-            <button type="button" onclick="togglePanelColumnas()" style="background-color: #475569; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer;">
+        <div style="display: flex; gap: 10px; position: relative;">
+            <button type="button" onclick="guardarSimulaciones()" id="btnGuardar" style="background-color: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s;">
+                <i class="fas fa-save"></i> Guardar Simulaciones
+            </button>
+
+            <button type="button" onclick="togglePanelColumnas()" style="background-color: #475569; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
                 <i class="fas fa-columns"></i> Opciones de Pantalla
             </button>
             
@@ -20,8 +24,7 @@
                     </h4>
                     <button onclick="togglePanelColumnas()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2rem;">&times;</button>
                 </div>
-                <div id="columnCheckboxes" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
-                </div>
+                <div id="columnCheckboxes" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;"></div>
             </div>
         </div>
     </div>
@@ -61,77 +64,57 @@
             </thead>
             <tbody>
                 <tr class="fila-simulador" style="border-bottom: 1px solid #e2e8f0;">
-                    <td class="td-cell"><input list="list-itemtype" class="celda-input central bold text-dark"></td>
-                    
+                    <td class="td-cell"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype"></td>
                     <td class="td-cell" style="display: flex; align-items: center; background: #f8fafc; height: 35px;">
                         <input type="text" class="celda-input val-link text-blue" readonly placeholder="Link..." style="cursor: not-allowed; font-size: 0.8em; padding-right: 5px;">
-                        <a href="#" target="_blank" class="btn-link" style="display: none; padding-right: 10px; text-decoration: none;" title="Abrir">
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
+                        <a href="#" target="_blank" class="btn-link" style="display: none; padding-right: 10px; text-decoration: none;" title="Abrir"><i class="fas fa-external-link-alt"></i></a>
                     </td>
-
-                    <td class="td-cell"><input list="list-estado" class="celda-input central"></td>
-                    
-                    <td class="td-cell" style="background: #fffdec;">
-                        <input type="text" oninput="generarLink(this)" class="celda-input central bold" style="color: var(--color-principal);" placeholder="Ej. 123456">
-                    </td>
-                    
-                    <td class="td-cell"><input list="list-tipopub" class="celda-input central"></td>
-                    <td class="td-cell"><input type="text" class="celda-input central mono"></td>
-                    <td class="td-cell"><input list="list-categoria" class="celda-input"></td>
-                    <td class="td-cell"><input type="text" class="celda-input"></td>
-                    <td class="td-cell"><input type="text" class="celda-input"></td>
-                    
-                    <td class="td-cell"><input type="number" class="celda-input derecha"></td>
-                    <td class="td-cell"><input type="number" class="celda-input central"></td>
-                    
+                    <td class="td-cell"><input list="list-estado" class="celda-input central val-estado"></td>
+                    <td class="td-cell" style="background: #fffdec;"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub" style="color: var(--color-principal);" placeholder="Ej. 123456"></td>
+                    <td class="td-cell"><input list="list-tipopub" class="celda-input central val-tipo"></td>
+                    <td class="td-cell"><input type="text" class="celda-input central mono val-codprod"></td>
+                    <td class="td-cell"><input list="list-categoria" class="celda-input val-categoria"></td>
+                    <td class="td-cell"><input type="text" class="celda-input val-marca"></td>
+                    <td class="td-cell"><input type="text" class="celda-input val-producto"></td>
+                    <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-ptachado"></td>
+                    <td class="td-cell"><input type="number" step="0.01" class="celda-input central val-dscto"></td>
                     <td class="td-cell" style="background: #f0fdf4;"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)"></td>
                     <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-envio" oninput="calcularFila(this)"></td>
                     <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input central text-red val-porc-com" oninput="calcularFila(this)"></td>
-                    
                     <td class="td-cell" style="background: #fef2f2;"><input type="text" class="celda-input derecha text-red val-com-soles" readonly tabindex="-1"></td>
                     <td class="td-cell" style="background: #dcfce7;"><input type="text" class="celda-input derecha bold text-green val-pago-neto" readonly tabindex="-1"></td>
-                    
                     <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input derecha text-red val-costo" oninput="calcularFila(this)"></td>
-                    
                     <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input derecha bold val-ganancia" readonly tabindex="-1"></td>
                     <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input central bold val-rentabilidad" readonly tabindex="-1"></td>
-                    
-                    <td class="td-cell central"><input type="checkbox" class="check-moderno"></td>
+                    <td class="td-cell central"><input type="checkbox" class="check-moderno val-mpe"></td>
                 </tr>
             </tbody>
         </table>
+        
+        <button type="button" onclick="agregarFila()" style="margin: 15px; padding: 8px 15px; background-color: #f1f5f9; color: #475569; border: 1px dashed #cbd5e1; border-radius: 6px; cursor: pointer; font-weight: bold;">
+            <i class="fas fa-plus"></i> Agregar nueva fila
+        </button>
     </div>
 </div>
 
 <style>
     .th-rep { padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold; }
     .td-cell { padding: 0; border-right: 1px solid #e2e8f0; }
-    
     .celda-input { width: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: inherit; color: #475569; background: transparent; outline: none; }
     .celda-input:not([readonly]):focus { background-color: #fffdec; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; }
     input[list]:hover { cursor: text; }
-
     .fila-simulador:hover { background: #f8fafc; }
-    
-    .central { text-align: center; }
-    .derecha { text-align: right; }
-    .bold { font-weight: bold; }
-    .text-dark { color: #0f172a; }
-    .text-blue { color: #2563eb; }
-    .text-green { color: #166534; }
-    .text-red { color: #991b1b; }
+    .central { text-align: center; } .derecha { text-align: right; } .bold { font-weight: bold; }
+    .text-dark { color: #0f172a; } .text-blue { color: #2563eb; } .text-green { color: #166534; } .text-red { color: #991b1b; }
     .mono { font-family: monospace; }
-
     .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .celda-input[type=number] { -moz-appearance: textfield; }
-    
     .check-moderno { width: 16px; height: 16px; cursor: pointer; accent-color: var(--color-principal); margin-top: 5px; }
     .check-opcion { width: 15px; height: 15px; accent-color: var(--color-principal); cursor: pointer; }
 </style>
 
 <script>
-    // 1. Lógica para el Panel de Opciones de Pantalla (WordPress Style)
+    // 1. Panel de Opciones (Ocultado por defecto para que funcione)
     function togglePanelColumnas() {
         const panel = document.getElementById("panelPersonalizarColumnas");
         panel.style.display = panel.style.display === "none" ? "block" : "none";
@@ -140,18 +123,14 @@
     document.addEventListener("DOMContentLoaded", function() {
         const ths = document.querySelectorAll("#tablaReporte th.th-rep");
         const container = document.getElementById("columnCheckboxes");
-        
         ths.forEach((th, index) => {
             const colName = th.innerText.trim();
             if (!colName) return;
-
             const label = document.createElement("label");
             label.style.display = "flex"; label.style.alignItems = "center"; label.style.gap = "8px";
             label.style.fontSize = "0.75rem"; label.style.fontWeight = "bold"; label.style.color = "#475569"; label.style.cursor = "pointer";
-            
             const cb = document.createElement("input");
             cb.type = "checkbox"; cb.checked = true; cb.className = "check-opcion"; cb.dataset.colIndex = index + 1;
-            
             cb.addEventListener("change", function() {
                 const colIdx = this.dataset.colIndex;
                 const displayState = this.checked ? "" : "none";
@@ -162,18 +141,16 @@
                     if(cell) cell.style.display = displayState;
                 });
             });
-            
             label.appendChild(cb); label.appendChild(document.createTextNode(colName)); container.appendChild(label);
         });
     });
 
-    // 2. Lógica de Concatenación de Enlaces
+    // 2. Lógica Concatenación
     function generarLink(inputCodigo) {
         const fila = inputCodigo.closest('tr');
         let codigo = inputCodigo.value.trim().replace(/^MPE-?/i, '');
         const inputLink = fila.querySelector('.val-link');
         const botonLink = fila.querySelector('.btn-link');
-        
         if (codigo !== '') {
             const urlCompleta = `http://articulo.mercadolibre.com.pe/MPE-${codigo}`;
             inputLink.value = urlCompleta;
@@ -181,39 +158,116 @@
             botonLink.style.display = 'inline-block';
             botonLink.style.color = 'var(--color-principal)';
         } else {
-            inputLink.value = '';
-            botonLink.href = '#';
-            botonLink.style.display = 'none';
+            inputLink.value = ''; botonLink.href = '#'; botonLink.style.display = 'none';
         }
     }
 
-    // 3. Lógica de Cálculos Financieros Automáticos
+    // 3. Cálculos Financieros
     function calcularFila(elemento) {
         const fila = elemento.closest('tr');
-        
-        // Obtener valores numéricos (o 0 si están vacíos)
         const pVenta = parseFloat(fila.querySelector('.val-venta').value) || 0;
         const envio = parseFloat(fila.querySelector('.val-envio').value) || 0;
         const porcCom = parseFloat(fila.querySelector('.val-porc-com').value) || 0;
         const costo = parseFloat(fila.querySelector('.val-costo').value) || 0;
 
-        // Cálculos
         const comSoles = pVenta * (porcCom / 100);
         const pagoNeto = pVenta - comSoles - envio;
         const ganancia = pagoNeto - costo;
         const rentabilidad = pVenta > 0 ? (ganancia / pVenta) * 100 : 0;
 
-        // Asignar resultados a las celdas de solo lectura
         fila.querySelector('.val-com-soles').value = comSoles.toFixed(2);
         fila.querySelector('.val-pago-neto').value = pagoNeto.toFixed(2);
-        
         const inputGanancia = fila.querySelector('.val-ganancia');
         inputGanancia.value = ganancia.toFixed(2);
-        inputGanancia.style.color = ganancia < 0 ? '#dc2626' : '#1e40af'; // Rojo si pierde, azul si gana
-        
+        inputGanancia.style.color = ganancia < 0 ? '#dc2626' : '#1e40af';
         const inputRentabilidad = fila.querySelector('.val-rentabilidad');
         inputRentabilidad.value = rentabilidad.toFixed(1) + '%';
         inputRentabilidad.style.color = rentabilidad < 0 ? '#dc2626' : '#1e40af';
+    }
+
+    // 4. Agregar nueva Fila
+    function agregarFila() {
+        const tbody = document.querySelector('#tablaReporte tbody');
+        const primeraFila = tbody.querySelector('tr');
+        const nuevaFila = primeraFila.cloneNode(true);
+        // Limpiar inputs
+        nuevaFila.querySelectorAll('input:not([type="checkbox"])').forEach(input => input.value = '');
+        nuevaFila.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        nuevaFila.querySelector('.btn-link').style.display = 'none';
+        nuevaFila.querySelector('.val-ganancia').style.color = '#475569';
+        nuevaFila.querySelector('.val-rentabilidad').style.color = '#475569';
+        tbody.appendChild(nuevaFila);
+    }
+
+    // 5. El "Cerebro" de Guardado AJAX
+    function guardarSimulaciones() {
+        const btn = document.getElementById('btnGuardar');
+        const filas = document.querySelectorAll('.fila-simulador');
+        let datosAguardar = [];
+
+        filas.forEach(fila => {
+            // Solo procesamos filas que al menos tengan el CÓDIGO PUB o PRODUCTO lleno
+            const codPub = fila.querySelector('.val-codpub').value.trim();
+            const producto = fila.querySelector('.val-producto').value.trim();
+            
+            if (codPub !== '' || producto !== '') {
+                datosAguardar.push({
+                    item_type: fila.querySelector('.val-itemtype').value,
+                    link: fila.querySelector('.val-link').value,
+                    estado: fila.querySelector('.val-estado').value,
+                    cod_pub: codPub,
+                    tipo: fila.querySelector('.val-tipo').value,
+                    cod_prod: fila.querySelector('.val-codprod').value,
+                    categoria: fila.querySelector('.val-categoria').value,
+                    marca: fila.querySelector('.val-marca').value,
+                    producto: producto,
+                    p_tachado: fila.querySelector('.val-ptachado').value || 0,
+                    dscto: fila.querySelector('.val-dscto').value || 0,
+                    p_venta: fila.querySelector('.val-venta').value || 0,
+                    envio: fila.querySelector('.val-envio').value || 0,
+                    porc_comision: fila.querySelector('.val-porc-com').value || 0,
+                    costo: fila.querySelector('.val-costo').value || 0,
+                    mpe: fila.querySelector('.val-mpe').checked
+                });
+            }
+        });
+
+        if (datosAguardar.length === 0) {
+            alert("No hay datos llenos para guardar.");
+            return;
+        }
+
+        // Cambiamos el estado del botón a "Cargando..."
+        const textoOriginal = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        btn.disabled = true;
+
+        // Aquí enviaremos la data a views.py (Endpoint que crearemos en Backend)
+        fetch("{% url 'api_guardar_simulador' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ plataforma: 'Mercado Libre', datos: datosAguardar })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === 'ok') {
+                alert("¡Simulación guardada con éxito en la Base de Datos!");
+            } else {
+                alert("Error al guardar: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Ruta de backend en preparación. La data se empaquetó correctamente en consola.");
+            console.log("DATA LISTA PARA BACKEND:", datosAguardar);
+        })
+        .finally(() => {
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+        });
     }
 </script>
 {% endblock %}
