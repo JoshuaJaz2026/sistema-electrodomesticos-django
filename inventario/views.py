@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
-from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron
+from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre
 
 # =========================================================
 # 1. EL PRE-LOGIN (Portal público)
