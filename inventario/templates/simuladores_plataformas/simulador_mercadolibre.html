@@ -54,8 +54,8 @@
                     <th class="th-rep" style="width: 180px;">CATEGORIA</th>
                     <th class="th-rep" style="width: 140px;">MARCA</th>
                     <th class="th-rep" style="width: 250px;">PRODUCTO</th>
-                    <th class="th-rep" style="width: 100px;">P. TACHADO</th>
-                    <th class="th-rep" style="width: 90px;">% DSCTO</th>
+                    <th class="th-rep" style="width: 100px; background: #f8fafc;">P. TACHADO</th>
+                    <th class="th-rep" style="width: 90px; color: #475569;">% DSCTO</th>
                     <th class="th-rep" style="width: 110px; background: #dcfce7; color: #166534;">P. VENTA</th>
                     <th class="th-rep" style="width: 100px;">ENVÍO</th>
                     <th class="th-rep" style="width: 100px; background: #fee2e2; color: #991b1b;">% NUEVA COM</th>
@@ -83,8 +83,11 @@
                         <td class="td-cell"><input list="list-categoria" class="celda-input val-categoria" value="{{ sim.categoria|default_if_none:'' }}"></td>
                         <td class="td-cell"><input list="list-marca" class="celda-input val-marca" value="{{ sim.marca|default_if_none:'' }}"></td>
                         <td class="td-cell"><input type="text" class="celda-input val-producto" value="{{ sim.producto|default_if_none:'' }}"></td>
-                        <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-ptachado" value="{{ sim.precio_tachado|stringformat:'.2f'|default:'' }}"></td>
-                        <td class="td-cell"><input type="number" step="0.01" class="celda-input central val-dscto" value="{{ sim.porc_descuento|stringformat:'.2f'|default:'' }}"></td>
+                        
+                        <td class="td-cell" style="background: #f8fafc;"><input type="text" class="celda-input derecha bold val-ptachado" readonly tabindex="-1" value="{{ sim.precio_tachado|stringformat:'.2f'|default:'' }}" style="color: #64748b;"></td>
+                        
+                        <td class="td-cell"><input type="number" step="0.01" class="celda-input central bold val-dscto" oninput="calcularFila(this)" value="{{ sim.porc_descuento|stringformat:'.2f'|default:'' }}"></td>
+                        
                         <td class="td-cell" style="background: #f0fdf4;"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)" value="{{ sim.precio_venta|stringformat:'.2f'|default:'' }}"></td>
                         <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-envio" oninput="calcularFila(this)" value="{{ sim.costo_envio|stringformat:'.2f'|default:'' }}"></td>
                         <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input central text-red val-porc-com" oninput="calcularFila(this)" value="{{ sim.porc_comision|stringformat:'.2f'|default:'' }}"></td>
@@ -110,8 +113,10 @@
                         <td class="td-cell"><input list="list-categoria" class="celda-input val-categoria"></td>
                         <td class="td-cell"><input list="list-marca" class="celda-input val-marca"></td>
                         <td class="td-cell"><input type="text" class="celda-input val-producto"></td>
-                        <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-ptachado"></td>
-                        <td class="td-cell"><input type="number" step="0.01" class="celda-input central val-dscto"></td>
+                        
+                        <td class="td-cell" style="background: #f8fafc;"><input type="text" class="celda-input derecha bold val-ptachado" readonly tabindex="-1" style="color: #64748b;"></td>
+                        <td class="td-cell"><input type="number" step="0.01" class="celda-input central bold val-dscto" oninput="calcularFila(this)"></td>
+                        
                         <td class="td-cell" style="background: #f0fdf4;"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)"></td>
                         <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-envio" oninput="calcularFila(this)"></td>
                         <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input central text-red val-porc-com" oninput="calcularFila(this)"></td>
@@ -197,13 +202,25 @@
         }
     }
 
-    // 3. Cálculos Financieros
+    // 3. Cálculos Financieros y Precio Tachado
     function calcularFila(elemento) {
         const fila = elemento.closest('tr');
         const pVenta = parseFloat(fila.querySelector('.val-venta').value) || 0;
+        const dscto = parseFloat(fila.querySelector('.val-dscto').value) || 0;
         const envio = parseFloat(fila.querySelector('.val-envio').value) || 0;
         const porcCom = parseFloat(fila.querySelector('.val-porc-com').value) || 0;
         const costo = parseFloat(fila.querySelector('.val-costo').value) || 0;
+
+        // Fórmula Precio Tachado = Precio de Venta / ((100 - % Descuento) / 100)
+        let pTachado = '';
+        if (pVenta > 0) {
+            if (dscto >= 0 && dscto < 100) {
+                pTachado = (pVenta / ((100 - dscto) / 100)).toFixed(2);
+            } else {
+                pTachado = pVenta.toFixed(2); // Si descuento es 0, Precio Tachado = Precio Venta
+            }
+        }
+        fila.querySelector('.val-ptachado').value = pTachado;
 
         const comSoles = pVenta * (porcCom / 100);
         const pagoNeto = pVenta - comSoles - envio;
