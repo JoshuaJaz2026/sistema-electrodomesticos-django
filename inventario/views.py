@@ -1,7 +1,8 @@
 import json
 import uuid
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre
@@ -259,17 +260,13 @@ def api_guardar_simulador(request):
             datos_simulacion = data.get('datos', [])
             
             if plataforma == 'Mercado Libre':
-                # Borramos las simulaciones anteriores del usuario para "sobrescribir" como un archivo de Excel
                 SimulacionMercadoLibre.objects.filter(usuario=request.user).delete()
-                
-                # Guardamos las nuevas filas
                 for fila in datos_simulacion:
                     p_venta = float(fila.get('p_venta') or 0)
                     envio = float(fila.get('envio') or 0)
                     porc_com = float(fila.get('porc_comision') or 0)
                     costo = float(fila.get('costo') or 0)
                     
-                    # El backend calcula las finanzas por seguridad
                     com_soles = p_venta * (porc_com / 100)
                     pago_neto = p_venta - com_soles - envio
                     ganancia = pago_neto - costo
@@ -351,19 +348,28 @@ def reporte_web(request):
 
 
 # =========================================================
-# 7. SIMULADORES DE COSTOS POR PLATAFORMA
+# 7. SIMULADORES Y REFERENCIAS
 # =========================================================
 
 @login_required
-@login_required
 def simulador_mercadolibre(request):
     canal = request.session.get('canal_activo', 'Web')
-    # Traemos las simulaciones guardadas por este usuario específico
     simulaciones = SimulacionMercadoLibre.objects.filter(usuario=request.user).order_by('id')
     return render(request, 'simuladores_plataformas/simulador_mercadolibre.html', {
-        'canal': canal,
-        'simulaciones': simulaciones
+        'canal': canal, 'simulaciones': simulaciones
     })
+
+@login_required
+def referencia_comisiones(request):
+    canal = request.session.get('canal_activo', 'Web')
+    return render(request, 'inventario/referencia_comisiones.html', {'canal': canal})
+
+@login_required
+def guardar_comisiones(request):
+    if request.method == 'POST':
+        messages.success(request, "Las comisiones han sido actualizadas.")
+        return redirect('referencia_comisiones')
+    return redirect('referencia_comisiones')
 
 @login_required
 def simulador_mercadolibre_junior(request):
@@ -432,7 +438,6 @@ class LoginCamaleonicoView(LoginView):
         tema_actual = self.estilos.get(canal, self.estilos["Web"])
         context['nombre_canal'] = canal
         context['color_principal'] = tema_actual['color']
-        
         icon_prefix = "fab" if "tiktok" in tema_actual['icono'] else "fas"
         context['icono_canal'] = f"{icon_prefix} {tema_actual['icono']}"
         return context
@@ -454,7 +459,6 @@ class LoginCamaleonicoView(LoginView):
         tema = self.estilos.get(canal_solicitado, self.estilos["Web"])
         self.request.session['canal_activo'] = canal_solicitado
         self.request.session['color_actual'] = tema['color']
-        
         icon_prefix = "fab" if "tiktok" in tema['icono'] else "fas"
         self.request.session['icono_actual'] = f"{icon_prefix} {tema['icono']}"
         

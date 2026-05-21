@@ -149,3 +149,8 @@ class SimulacionMercadoLibre(models.Model):
 
     def __str__(self):
         return f"{self.producto if self.producto else 'Sin nombre'} - S/ {self.precio_venta} ({self.usuario.username})"
+    
+class Comision(models.Model):
+    sub_categoria = models.CharField(max_length=100)
+    categoria = models.CharField(max_length=100)
+    porcentaje = models.DecimalField(max_digits=5, decimal_places=2)

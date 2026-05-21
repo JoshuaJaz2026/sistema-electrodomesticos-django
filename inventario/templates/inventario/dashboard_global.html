@@ -27,7 +27,7 @@
         .menu-item:hover { background: #34495e; color: white; border-left: 4px solid var(--color-principal); }
         .menu-item i:first-child { margin-right: 15px; width: 20px; text-align: center; }
 
-        /* Estilos Submenú (ANIMADO) */
+        /* Estilos Submenú */
         .submenu {
             max-height: 0;
             overflow: hidden;
@@ -37,9 +37,7 @@
             margin: 0;
             transition: max-height 0.4s ease-in-out; 
         }
-        
-        .submenu.open { max-height: 600px; } /* Aumentado por si hay más opciones */
-
+        .submenu.open { max-height: 600px; }
         .submenu-item {
             padding: 10px 25px 10px 50px;
             display: flex;
@@ -52,7 +50,6 @@
         }
         .submenu-item:hover { color: white; background: #2c3e50; }
         .submenu-item i { margin-right: 10px; font-size: 0.8em; width: 15px; text-align: center; }
-        
         .rotate { transform: rotate(180deg); transition: transform 0.3s ease; }
         
         /* Contenido Principal */
@@ -63,7 +60,6 @@
         }
         .container { padding: 30px; overflow-y: auto; flex: 1; }
         .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        
         .btn-logout { background: #e74c3c; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-size: 0.9em; }
         .btn-logout:hover { background: #c0392b; }
     </style>
@@ -88,7 +84,6 @@
                 </div>
                 
                 <div class="submenu" id="percheron-menu">
-                    
                     <a href="{% url 'percheron_ingresos' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-box-open"></i> Ingresos</a>
                     <a href="{% url 'percheron_registros' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-clipboard-list"></i> Registros</a>
                     <a href="{% url 'percheron_modelos' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-tags"></i> Modelos</a>
@@ -122,13 +117,12 @@
             
             <div class="menu-category">Operaciones {{ canal }}</div>
             
-            {% if canal == 'Mercado Libre' %}
-                <a href="{% url 'reporte_mercadolibre' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
-                <a href="{% url 'simulador_mercadolibre' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
-            
-            {% elif canal == 'Mercado Libre - Junior' %}
-                <a href="{% url 'reporte_mercadolibre_junior' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
-                <a href="{% url 'simulador_mercadolibre_junior' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
+            {% if canal == 'Mercado Libre' or canal == 'Mercado Libre - Junior' %}
+                <a href="{% if canal == 'Mercado Libre' %}{% url 'reporte_mercadolibre' %}{% else %}{% url 'reporte_mercadolibre_junior' %}{% endif %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+                <a href="{% if canal == 'Mercado Libre' %}{% url 'simulador_mercadolibre' %}{% else %}{% url 'simulador_mercadolibre_junior' %}{% endif %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
+                <a href="{% url 'referencia_comisiones' %}?canal={{ canal }}" class="menu-item" style="font-size: 0.85em; padding-left: 45px; color: #94a3b8;">
+                    <i class="fas fa-list-ul"></i> Referencia Marca y Categ
+                </a>
             
             {% elif canal == 'Falabella' %}
                 <a href="{% url 'reporte_falabella' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
@@ -163,12 +157,10 @@
             <span>Sesión activa en: <strong style="color: var(--color-principal)">{{ canal }}</strong></span>
             <div>
                 <span style="margin-right: 15px;"><i class="fas fa-user-circle"></i> {{ user.username|upper }}</span>
-                
                 <form method="post" action="{% url 'logout' %}" style="display:inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn-logout" style="border:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Salir</button>
                 </form>
-                
             </div>
         </header>
 
@@ -182,7 +174,6 @@
         document.addEventListener("DOMContentLoaded", function() {
             const currentPath = window.location.pathname; 
             
-            // Función para marcar enlaces activos en el submenú
             const submenuItems = document.querySelectorAll('.submenu-item');
             submenuItems.forEach(item => {
                 let linkPath = item.getAttribute('href');
@@ -190,7 +181,6 @@
                     item.style.color = 'white';
                     item.style.borderLeftColor = 'var(--color-principal)';
                     item.style.background = '#2c3e50';
-                    
                     const parentMenu = item.closest('.submenu');
                     if (parentMenu) {
                         parentMenu.classList.add('open');
@@ -203,7 +193,6 @@
                 }
             });
 
-            // Función para marcar enlaces activos en el menú principal (como Mis Reportes y Simuladores)
             const mainMenuItems = document.querySelectorAll('.sidebar-menu > .menu-item');
             mainMenuItems.forEach(item => {
                 let linkPath = item.getAttribute('href');
@@ -218,7 +207,6 @@
         function toggleMenu(menuId, arrowId) {
             const menu = document.getElementById(menuId);
             const arrow = document.getElementById(arrowId);
-            
             if (menu.classList.contains('open')) {
                 menu.classList.remove('open');
                 arrow.classList.remove('rotate');

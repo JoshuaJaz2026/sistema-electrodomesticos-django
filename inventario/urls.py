@@ -67,4 +67,7 @@ urlpatterns = [
     path('api/guardar-productos/', views.guardar_nuevos_productos, name='guardar_nuevos_productos'),
     path('api/guardar-kardex/', views.guardar_kardex_percheron, name='guardar_kardex_percheron'),
     path('api/guardar-simulador/', views.api_guardar_simulador, name='api_guardar_simulador'),
+
+    path('referencia-comisiones/', views.referencia_comisiones, name='referencia_comisiones'),
+    path('guardar-comisiones/', views.guardar_comisiones, name='guardar_comisiones'), # <--- ESTA FALTA
 ]
