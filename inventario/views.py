@@ -250,6 +250,28 @@ def guardar_kardex_percheron(request):
             
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
 
+@login_required
+def api_guardar_simulador(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            plataforma = data.get('plataforma', 'Desconocida')
+            datos_simulacion = data.get('datos', [])
+            
+            # Por ahora, solo imprimimos en la terminal para verificar que llegan los datos
+            print(f"--- NUEVA SIMULACIÓN DE {plataforma.upper()} ---")
+            print(f"Se recibieron {len(datos_simulacion)} filas para simular.")
+            
+            # Aquí irá la lógica futura para guardar en models.py
+            
+            return JsonResponse({
+                'status': 'ok', 
+                'message': f'Simulación de {plataforma} recibida correctamente (Backend en construcción).'
+            })
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
 
 # =========================================================
 # 6. REPORTES DE VENTAS POR PLATAFORMA
