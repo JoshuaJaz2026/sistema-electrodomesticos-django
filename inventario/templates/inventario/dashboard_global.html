@@ -121,9 +121,7 @@
                 <a href="{% if canal == 'Mercado Libre' %}{% url 'reporte_mercadolibre' %}{% else %}{% url 'reporte_mercadolibre_junior' %}{% endif %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
                 <a href="{% if canal == 'Mercado Libre' %}{% url 'simulador_mercadolibre' %}{% else %}{% url 'simulador_mercadolibre_junior' %}{% endif %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
                 <a href="{% url 'referencia_comisiones' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-list-ul"></i> Referencia Marca y Categ</a>
-                <a href="{% url 'referencia_costos' %}" style="display: block; padding: 10px 15px; color: #cbd5e1; text-decoration: none;">
-    <i class="fas fa-dollar-sign" style="width: 20px;"></i> Costos Referenciales
-</a>
+                <a href="{% url 'referencia_costos' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-dollar-sign"></i> Costos Referenciales</a>
             
             {% elif canal == 'Falabella' %}
                 <a href="{% url 'reporte_falabella' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
