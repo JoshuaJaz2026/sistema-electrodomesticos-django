@@ -156,9 +156,11 @@ class Comision(models.Model):
     porcentaje = models.DecimalField(max_digits=5, decimal_places=2)
 
 class ReferenciaComision(models.Model):
-    sub_categoria = models.CharField(max_length=200, blank=True, null=True)
-    categoria = models.CharField(max_length=200, unique=True) # unique=True evita duplicados
+    # AQUÍ PONEMOS EL UNIQUE=TRUE
+    sub_categoria = models.CharField(max_length=200, unique=True) 
+    # Y AQUÍ SE LO QUITAMOS
+    categoria = models.CharField(max_length=200, blank=True, null=True) 
     comision = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
 
     def __str__(self):
-        return f"{self.categoria} - {self.comision}%"
+        return f"{self.sub_categoria} - {self.comision}%"

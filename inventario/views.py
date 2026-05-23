@@ -396,12 +396,12 @@ def guardar_comisiones_masivas(request):
                 except ValueError:
                     comision_num = 0.0
 
-                if categoria:
-                    # Ahora SÍ guardamos en la base de datos real
+                # AHORA BUSCAMOS POR SUB_CATEGORIA
+                if sub_categoria:
                     ReferenciaComision.objects.update_or_create(
-                        categoria=categoria,
+                        sub_categoria=sub_categoria,
                         defaults={
-                            'sub_categoria': sub_categoria, 
+                            'categoria': categoria, 
                             'comision': comision_num
                         }
                     )
