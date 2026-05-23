@@ -49,7 +49,7 @@ urlpatterns = [
     path('reportes/web/', views.reporte_web, name='reporte_web'),
 
     # ==========================================
-    # 6. SIMULADORES DE COSTOS POR PLATAFORMA
+    # 6. SIMULADORES DE COSTOS Y REFERENCIAS
     # ==========================================
     path('simulador/creditienda/', views.simulador_creditienda, name='simulador_creditienda'),
     path('simulador/falabella/', views.simulador_falabella, name='simulador_falabella'),
@@ -60,6 +60,8 @@ urlpatterns = [
     path('simulador/venta-libre/', views.simulador_ventalibre, name='simulador_ventalibre'),
     path('simulador/web/', views.simulador_web, name='simulador_web'),
     
+    path('referencia-comisiones/', views.referencia_comisiones, name='referencia_comisiones'),
+
     # ==========================================
     # 7. APIs Y GUARDADO DE DATOS (AJAX)
     # ==========================================
@@ -67,7 +69,8 @@ urlpatterns = [
     path('api/guardar-productos/', views.guardar_nuevos_productos, name='guardar_nuevos_productos'),
     path('api/guardar-kardex/', views.guardar_kardex_percheron, name='guardar_kardex_percheron'),
     path('api/guardar-simulador/', views.api_guardar_simulador, name='api_guardar_simulador'),
-
-    path('referencia-comisiones/', views.referencia_comisiones, name='referencia_comisiones'),
-    path('guardar-comisiones/', views.guardar_comisiones, name='guardar_comisiones'), # <--- ESTA FALTA
+    
+    # Rutas para el guardado de comisiones (manual y por archivo CSV)
+    path('guardar-comisiones/', views.guardar_comisiones, name='guardar_comisiones'),
+    path('guardar-comisiones-masivas/', views.guardar_comisiones_masivas, name='guardar_comisiones_masivas'), 
 ]

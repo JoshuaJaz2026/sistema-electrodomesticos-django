@@ -372,6 +372,38 @@ def guardar_comisiones(request):
     return redirect('referencia_comisiones')
 
 @login_required
+def guardar_comisiones_masivas(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            filas_referencia = data.get('referencias', [])
+            
+            # Iteramos por el CSV procesado desde el Front-End
+            for fila in filas_referencia:
+                sub_categoria = fila.get('SUB CATEGORÍA', '').strip()
+                categoria = fila.get('CATEGORÍA', '').strip()
+                
+                # Formateamos el porcentaje para asegurar que se guarde como número
+                comision_texto = str(fila.get('COMISIÓN', '0')).replace('%', '').replace(',', '.').strip()
+                comision_num = float(comision_texto) if comision_texto else 0.0
+
+                if categoria:
+                    # NOTA: Cuando tengas tu modelo (ej. ReferenciaComision), aquí irá el código de guardado:
+                    # ReferenciaComision.objects.update_or_create(
+                    #     categoria=categoria,
+                    #     defaults={'sub_categoria': sub_categoria, 'comision': comision_num}
+                    # )
+                    pass
+                    
+            return JsonResponse({'status': 'ok', 'message': f'Se procesaron {len(filas_referencia)} categorías con éxito.'})
+        
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
+
+@login_required
 def simulador_mercadolibre_junior(request):
     canal = request.session.get('canal_activo', 'Web')
     return render(request, 'simuladores_plataformas/simulador_mercadolibre_junior.html', {'canal': canal})

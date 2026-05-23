@@ -2,21 +2,28 @@
 
 {% block content %}
 <div class="card" style="max-width: 900px; margin: auto; border-top: 4px solid var(--color-principal);">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0; color: #1e293b; text-transform: uppercase;">
+            <i class="fas fa-list-ul" style="color: var(--color-principal);"></i> Referencia: MARCA Y CATEG
+        </h2>
+        
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="buscador" onkeyup="filtrarTabla()" placeholder="Buscar categoría..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; width: 200px;">
+            
+            <a href="{% static 'plantillas/plantilla_referencia_comisiones.csv' %}" download class="btn" style="background: #3b82f6; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+                <i class="fas fa-download"></i> Bajar Plantilla
+            </a>
+
+            <input type="file" id="csvComisiones" accept=".csv" style="display: none;">
+            <button type="button" onclick="document.getElementById('csvComisiones').click()" style="background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                <i class="fas fa-upload"></i> Importar Masivo
+            </button>
+        </div>
+    </div>
+    
     <form method="POST" action="{% url 'guardar_comisiones' %}">
         {% csrf_token %}
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="margin: 0; color: #1e293b; text-transform: uppercase;">
-                <i class="fas fa-list-ul" style="color: var(--color-principal);"></i> Referencia: MARCA Y CATEG
-            </h2>
-            <div style="display: flex; gap: 10px;">
-                <input type="text" id="buscador" onkeyup="filtrarTabla()" placeholder="Buscar categoría..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; width: 200px;">
-                <button type="submit" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">
-                    <i class="fas fa-save"></i> Guardar Cambios
-                </button>
-            </div>
-        </div>
-        
         <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
             <table id="tablaComisiones" style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
                 <thead style="background: #f8fafc; position: sticky; top: 0;">
@@ -34,26 +41,25 @@
                             <input type="number" name="comision_batidora" value="12.5" step="0.1" style="width: 70px; padding: 5px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px;">
                         </td>
                     </tr>
-                    <tr>
-                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">Línea Blanca</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">REFRIGERADORA</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">
-                            <input type="number" name="comision_refri" value="9.5" step="0.1" style="width: 70px; padding: 5px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px;">
-                        </td>
-                    </tr>
                 </tbody>
             </table>
+        </div>
+        <div style="text-align: right; margin-top: 15px;">
+            <button type="submit" style="background: var(--color-principal); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                <i class="fas fa-save"></i> Guardar Modificaciones
+            </button>
         </div>
     </form>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script>
+    // Buscador
     function filtrarTabla() {
         const input = document.getElementById("buscador");
         const filter = input.value.toUpperCase();
         const table = document.getElementById("tablaComisiones");
         const tr = table.getElementsByTagName("tr");
-
         for (let i = 1; i < tr.length; i++) {
             const td = tr[i].getElementsByTagName("td")[1]; 
             if (td) {
@@ -61,6 +67,53 @@
                 tr[i].style.display = txtValue.toUpperCase().indexOf(filter) > -1 ? "" : "none";
             }
         }
+    }
+
+    // Importador Masivo CSV
+    document.getElementById('csvComisiones').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Leer y convertir el CSV
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                // Las cabeceras del CSV deben ser exactas: "SUB CATEGORIA", "CATEGORIA", "COMISION"
+                // Enviamos los datos al backend
+                enviarComisionesMasivas(results.data);
+            }
+        });
+    });
+
+    function enviarComisionesMasivas(datos) {
+        // Validación rápida para asegurarse de que las columnas correctas existen
+        if (datos.length > 0 && !('CATEGORÍA' in datos[0] && 'COMISIÓN' in datos[0])) {
+            alert("Error: Asegúrate de que las cabeceras del CSV sean exactamente: SUB CATEGORÍA, CATEGORÍA, COMISIÓN");
+            return;
+        }
+
+        fetch("{% url 'guardar_comisiones_masivas' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ referencias: datos })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                alert('¡Datos importados correctamente!');
+                window.location.reload(); // Recargar para mostrar los nuevos datos en la tabla
+            } else {
+                alert('Error al importar: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Hubo un error:", error);
+            alert("Ocurrió un error en la conexión al servidor.");
+        });
     }
 </script>
 {% endblock %}
