@@ -357,11 +357,8 @@ def simulador_mercadolibre(request):
     canal = request.session.get('canal_activo', 'Web')
     simulaciones = SimulacionMercadoLibre.objects.filter(usuario=request.user).order_by('id')
     
-    # Jalamos todas las comisiones de referencia que subiste en la otra sección
+    # 1. MAPA DE COMISIONES
     comisiones_ref = ReferenciaComision.objects.all()
-    
-    # Creamos un diccionario de búsqueda rápida (Key: Nombre de Categoría, Value: Porcentaje)
-    # Lo estandarizamos a mayúsculas y sin espacios para asegurar coincidencias exactas
     mapa_comisiones = {}
     for ref in comisiones_ref:
         if ref.sub_categoria:
@@ -369,20 +366,32 @@ def simulador_mercadolibre(request):
         if ref.categoria and ref.categoria.upper().strip() not in mapa_comisiones:
             mapa_comisiones[ref.categoria.upper().strip()] = float(ref.comision)
 
-    # Convertimos el mapa a JSON para que JavaScript pueda usarlo en tiempo real al importar archivos
+    # 2. MAPA DE COSTOS (NUEVO)
+    costos_ref = ReferenciaCosto.objects.all()
+    mapa_costos = {}
+    for ref in costos_ref:
+        if ref.codigo:
+            # Jalamos el COSTO U. ($ ► S/.) que es costo_u_soles
+            mapa_costos[ref.codigo.upper().strip()] = float(ref.costo_u_soles)
+
     import json
     mapa_comisiones_json = json.dumps(mapa_comisiones)
+    mapa_costos_json = json.dumps(mapa_costos)
     
-    # Cruzamos los datos en Python para las filas que ya están guardadas en la base de datos
+    # Pre-cruzamos los datos para las filas que ya están guardadas
     for sim in simulaciones:
         cat_buscar = sim.categoria.upper().strip() if sim.categoria else ""
-        # Buscamos la categoría del simulador dentro de nuestro mapa de referencias
         sim.nueva_comision_ref = mapa_comisiones.get(cat_buscar, 0.00)
+        
+        # Cruzamos el costo actualizado si el código coincide
+        cod_buscar = sim.cod_producto.upper().strip() if sim.cod_producto else ""
+        sim.nuevo_costo_ref = mapa_costos.get(cod_buscar, float(sim.costo_producto or 0.00))
         
     return render(request, 'simuladores_plataformas/simulador_mercadolibre.html', {
         'canal': canal, 
         'simulaciones': simulaciones,
-        'mapa_comisiones_json': mapa_comisiones_json
+        'mapa_comisiones_json': mapa_comisiones_json,
+        'mapa_costos_json': mapa_costos_json
     })
 
 @login_required
