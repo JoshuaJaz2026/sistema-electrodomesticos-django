@@ -74,4 +74,5 @@ urlpatterns = [
     path('guardar-comisiones/', views.guardar_comisiones, name='guardar_comisiones'),
     path('guardar-comisiones-masivas/', views.guardar_comisiones_masivas, name='guardar_comisiones_masivas'), 
     path('descargar-plantilla-comisiones/', views.descargar_plantilla_comisiones, name='descargar_plantilla_comisiones'),
+    path('eliminar-comisiones-masivas/', views.eliminar_comisiones_masivas, name='eliminar_comisiones_masivas'),
 ]

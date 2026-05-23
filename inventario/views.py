@@ -530,3 +530,15 @@ class LoginCamaleonicoView(LoginView):
         self.request.session['icono_actual'] = f"{icon_prefix} {tema['icono']}"
         
         return super().form_valid(form)
+    
+@login_required
+def eliminar_comisiones_masivas(request):
+    if request.method == 'POST':
+        try:
+            # Esto borra absolutamente todos los registros de la tabla
+            ReferenciaComision.objects.all().delete()
+            return JsonResponse({'status': 'ok', 'message': 'Todas las referencias han sido eliminadas correctamente.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
