@@ -366,13 +366,13 @@ def simulador_mercadolibre(request):
         if ref.categoria and ref.categoria.upper().strip() not in mapa_comisiones:
             mapa_comisiones[ref.categoria.upper().strip()] = float(ref.comision)
 
-    # 2. MAPA DE COSTOS (NUEVO)
+    # 2. MAPA DE COSTOS (CORREGIDO)
     costos_ref = ReferenciaCosto.objects.all()
     mapa_costos = {}
     for ref in costos_ref:
         if ref.codigo:
-            # Jalamos el COSTO U. ($ ► S/.) que es costo_u_soles
-            mapa_costos[ref.codigo.upper().strip()] = float(ref.costo_u_soles)
+            # AHORA SÍ: Jalamos el valor de la columna COSTO CERO
+            mapa_costos[ref.codigo.upper().strip()] = float(ref.costo_cero)
 
     import json
     mapa_comisiones_json = json.dumps(mapa_comisiones)
@@ -383,7 +383,6 @@ def simulador_mercadolibre(request):
         cat_buscar = sim.categoria.upper().strip() if sim.categoria else ""
         sim.nueva_comision_ref = mapa_comisiones.get(cat_buscar, 0.00)
         
-        # Cruzamos el costo actualizado si el código coincide
         cod_buscar = sim.cod_producto.upper().strip() if sim.cod_producto else ""
         sim.nuevo_costo_ref = mapa_costos.get(cod_buscar, float(sim.costo_producto or 0.00))
         
