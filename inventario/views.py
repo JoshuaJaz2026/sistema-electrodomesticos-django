@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
-from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre
+from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision
 import csv
 from django.http import HttpResponse
 
@@ -364,7 +364,12 @@ def simulador_mercadolibre(request):
 @login_required
 def referencia_comisiones(request):
     canal = request.session.get('canal_activo', 'Web')
-    return render(request, 'inventario/referencia_comisiones.html', {'canal': canal})
+    # Jalamos todas las comisiones de la base de datos, ordenadas por categoría
+    comisiones = ReferenciaComision.objects.all().order_by('categoria')
+    return render(request, 'inventario/referencia_comisiones.html', {
+        'canal': canal, 
+        'comisiones': comisiones
+    })
 
 @login_required
 def guardar_comisiones(request):
@@ -380,22 +385,26 @@ def guardar_comisiones_masivas(request):
             data = json.loads(request.body)
             filas_referencia = data.get('referencias', [])
             
-            # Iteramos por el CSV procesado desde el Front-End
             for fila in filas_referencia:
                 sub_categoria = fila.get('SUB CATEGORÍA', '').strip()
                 categoria = fila.get('CATEGORÍA', '').strip()
                 
-                # Formateamos el porcentaje para asegurar que se guarde como número
+                # Limpiamos el porcentaje para convertirlo en número
                 comision_texto = str(fila.get('COMISIÓN', '0')).replace('%', '').replace(',', '.').strip()
-                comision_num = float(comision_texto) if comision_texto else 0.0
+                try:
+                    comision_num = float(comision_texto) if comision_texto else 0.0
+                except ValueError:
+                    comision_num = 0.0
 
                 if categoria:
-                    # NOTA: Cuando tengas tu modelo (ej. ReferenciaComision), aquí irá el código de guardado:
-                    # ReferenciaComision.objects.update_or_create(
-                    #     categoria=categoria,
-                    #     defaults={'sub_categoria': sub_categoria, 'comision': comision_num}
-                    # )
-                    pass
+                    # Ahora SÍ guardamos en la base de datos real
+                    ReferenciaComision.objects.update_or_create(
+                        categoria=categoria,
+                        defaults={
+                            'sub_categoria': sub_categoria, 
+                            'comision': comision_num
+                        }
+                    )
                     
             return JsonResponse({'status': 'ok', 'message': f'Se procesaron {len(filas_referencia)} categorías con éxito.'})
         
