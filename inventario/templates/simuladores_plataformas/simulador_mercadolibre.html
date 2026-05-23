@@ -217,7 +217,6 @@
         calcularFila(inputCat);
     }
 
-    // Actualizada para resetear a 0.00 si se borra o no encuentra el código
     function buscarCosto(inputCodProd) {
         const fila = inputCodProd.closest('tr');
         const codigoSeleccionado = inputCodProd.value.toUpperCase().trim();
@@ -306,7 +305,9 @@
         const comSoles = pVenta * (porcCom / 100);
         const pagoNeto = pVenta - comSoles - envio;
         const ganancia = pagoNeto - costo;
-        const rentabilidad = pVenta > 0 ? (ganancia / pVenta) * 100 : 0;
+        
+        // AQUÍ ESTÁ EL CAMBIO DE LA FÓRMULA (Ganancia / Costo)
+        const rentabilidad = costo > 0 ? (ganancia / costo) * 100 : 0;
 
         fila.querySelector('.val-com-soles').value = comSoles.toFixed(2);
         fila.querySelector('.val-pago-neto').value = pagoNeto.toFixed(2);
