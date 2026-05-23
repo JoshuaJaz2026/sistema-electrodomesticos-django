@@ -101,8 +101,8 @@
                         <td class="td-cell" style="background: #dcfce7;"><input type="text" class="celda-input derecha bold text-green val-pago-neto" readonly tabindex="-1" value="{{ sim.pago_neto|stringformat:'.2f'|default:'' }}"></td>
                         
                         <td class="td-cell" style="background: #fff5f5;">
-                            <input type="number" step="0.01" class="celda-input derecha text-red val-costo" oninput="calcularFila(this)" 
-                            value="{{ sim.nuevo_costo_ref|stringformat:'.2f'|default:sim.costo_producto|stringformat:'.2f' }}">
+                            <input type="number" step="0.01" class="celda-input derecha text-red val-costo" readonly tabindex="-1" 
+                            value="{% if sim.nuevo_costo_ref %}{{ sim.nuevo_costo_ref|stringformat:'.2f' }}{% elif sim.costo_producto %}{{ sim.costo_producto|stringformat:'.2f' }}{% else %}0.00{% endif %}">
                         </td>
                         
                         <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input derecha bold val-ganancia" readonly tabindex="-1" value="{{ sim.ganancia|stringformat:'.2f'|default:'' }}" style="color: {% if sim.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
@@ -139,7 +139,11 @@
                         
                         <td class="td-cell" style="background: #fef2f2;"><input type="text" class="celda-input derecha text-red val-com-soles" readonly tabindex="-1"></td>
                         <td class="td-cell" style="background: #dcfce7;"><input type="text" class="celda-input derecha bold text-green val-pago-neto" readonly tabindex="-1"></td>
-                        <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input derecha text-red val-costo" oninput="calcularFila(this)"></td>
+                        
+                        <td class="td-cell" style="background: #fff5f5;">
+                            <input type="number" step="0.01" class="celda-input derecha text-red val-costo" readonly tabindex="-1" value="0.00">
+                        </td>
+                        
                         <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input derecha bold val-ganancia" readonly tabindex="-1"></td>
                         <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input central bold val-rentabilidad" readonly tabindex="-1"></td>
                         <td class="td-cell central"><input type="checkbox" class="check-moderno val-mpe"></td>
@@ -151,6 +155,31 @@
         <button type="button" onclick="agregarFila()" style="margin: 15px; padding: 8px 15px; background-color: #f1f5f9; color: #475569; border: 1px dashed #cbd5e1; border-radius: 6px; cursor: pointer; font-weight: bold;">
             <i class="fas fa-plus"></i> Agregar nueva fila
         </button>
+    </div>
+</div>
+
+<div style="margin-top: 40px; padding: 20px; background: #fff; border-radius: 8px; border: 1px solid #e2e8f0;">
+    <h3 style="margin-top: 0; color: #1e293b; font-size: 1.1rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+        <i class="fas fa-percentage" style="color: var(--color-principal);"></i> Referencia: MARCA Y CATEG
+    </h3>
+    
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+            <thead style="background: #f8fafc;">
+                <tr>
+                    <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">SUB CATEGORÍA</th>
+                    <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">CATEGORÍA</th>
+                    <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: center; width: 150px;">COMISIÓN (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #e2e8f0;">Electrodomésticos</td>
+                    <td style="padding: 8px; border: 1px solid #e2e8f0;">BATIDORA DE MANO</td>
+                    <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: bold; color: #1e40af;">12.5%</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -171,7 +200,6 @@
 </style>
 
 <script>
-    // Se reciben ambos diccionarios (mapas) desde Python
     const mapaComisiones = {{ mapa_comisiones_json|safe|default:"{}" }};
     const mapaCostos = {{ mapa_costos_json|safe|default:"{}" }};
 
@@ -189,7 +217,7 @@
         calcularFila(inputCat);
     }
 
-    // NUEVO: Función para buscar y autocompletar el costo en base al SKU (CÓD. PROD)
+    // Actualizada para resetear a 0.00 si se borra o no encuentra el código
     function buscarCosto(inputCodProd) {
         const fila = inputCodProd.closest('tr');
         const codigoSeleccionado = inputCodProd.value.toUpperCase().trim();
@@ -197,6 +225,8 @@
         
         if (codigoSeleccionado && mapaCostos[codigoSeleccionado] !== undefined) {
             inputCosto.value = mapaCostos[codigoSeleccionado].toFixed(2);
+        } else {
+            inputCosto.value = '0.00';
         }
         
         calcularFila(inputCodProd);
