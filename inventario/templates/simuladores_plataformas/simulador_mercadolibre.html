@@ -106,7 +106,9 @@
                         </td>
                         
                         <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input derecha bold val-ganancia" readonly tabindex="-1" value="{{ sim.ganancia|stringformat:'.2f'|default:'' }}" style="color: {% if sim.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
-                        <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input central bold val-rentabilidad" readonly tabindex="-1" value="{{ sim.rentabilidad_porc|stringformat:'.1f'|default:'' }}%" style="color: {% if sim.rentabilidad_porc < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
+                        
+                        <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input central bold val-rentabilidad" readonly tabindex="-1" value="{{ sim.rentabilidad_porc|stringformat:'.2f'|default:'' }}%" style="color: {% if sim.rentabilidad_porc < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
+                        
                         <td class="td-cell central"><input type="checkbox" class="check-moderno val-mpe" {% if sim.mpe %}checked{% endif %}></td>
                     </tr>
                     {% endfor %}
@@ -162,7 +164,6 @@
     <h3 style="margin-top: 0; color: #1e293b; font-size: 1.1rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
         <i class="fas fa-percentage" style="color: var(--color-principal);"></i> Referencia: MARCA Y CATEG
     </h3>
-    
     <div style="overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
             <thead style="background: #f8fafc;">
@@ -306,7 +307,7 @@
         const pagoNeto = pVenta - comSoles - envio;
         const ganancia = pagoNeto - costo;
         
-        // AQUÍ ESTÁ EL CAMBIO DE LA FÓRMULA (Ganancia / Costo)
+        // CÁLCULO DE RENTABILIDAD CON DOS DECIMALES
         const rentabilidad = costo > 0 ? (ganancia / costo) * 100 : 0;
 
         fila.querySelector('.val-com-soles').value = comSoles.toFixed(2);
@@ -314,8 +315,9 @@
         const inputGanancia = fila.querySelector('.val-ganancia');
         inputGanancia.value = ganancia.toFixed(2);
         inputGanancia.style.color = ganancia < 0 ? '#dc2626' : '#1e40af';
+        
         const inputRentabilidad = fila.querySelector('.val-rentabilidad');
-        inputRentabilidad.value = rentabilidad.toFixed(1) + '%';
+        inputRentabilidad.value = rentabilidad.toFixed(2) + '%';
         inputRentabilidad.style.color = rentabilidad < 0 ? '#dc2626' : '#1e40af';
     }
 
