@@ -80,7 +80,9 @@
                         <td class="td-cell" style="background: #fffdec;"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub" style="color: var(--color-principal);" value="{{ sim.cod_publicacion|default_if_none:'' }}"></td>
                         <td class="td-cell"><input list="list-tipopub" class="celda-input central val-tipo" value="{{ sim.tipo_publicacion|default_if_none:'' }}"></td>
                         <td class="td-cell"><input type="text" class="celda-input central mono val-codprod" value="{{ sim.cod_producto|default_if_none:'' }}"></td>
-                        <td class="td-cell"><input list="list-categoria" class="celda-input val-categoria" value="{{ sim.categoria|default_if_none:'' }}"></td>
+                        
+                        <td class="td-cell"><input list="list-categoria" class="celda-input val-categoria" oninput="buscarComision(this)" value="{{ sim.categoria|default_if_none:'' }}"></td>
+                        
                         <td class="td-cell"><input list="list-marca" class="celda-input val-marca" value="{{ sim.marca|default_if_none:'' }}"></td>
                         <td class="td-cell"><input type="text" class="celda-input val-producto" value="{{ sim.producto|default_if_none:'' }}"></td>
                         
@@ -90,7 +92,7 @@
                         
                         <td class="td-cell" style="background: #f0fdf4;"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)" value="{{ sim.precio_venta|stringformat:'.2f'|default:'' }}"></td>
                         <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-envio" oninput="calcularFila(this)" value="{{ sim.costo_envio|stringformat:'.2f'|default:'' }}"></td>
-                        <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input central text-red val-porc-com" oninput="calcularFila(this)" value="{{ sim.porc_comision|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input central text-red val-porc-com" readonly tabindex="-1" value="{{ sim.nueva_comision_ref|stringformat:'.2f'|default:sim.porc_comision|stringformat:'.2f' }}"></td>
                         <td class="td-cell" style="background: #fef2f2;"><input type="text" class="celda-input derecha text-red val-com-soles" readonly tabindex="-1" value="{{ sim.comision_soles|stringformat:'.2f'|default:'' }}"></td>
                         <td class="td-cell" style="background: #dcfce7;"><input type="text" class="celda-input derecha bold text-green val-pago-neto" readonly tabindex="-1" value="{{ sim.pago_neto|stringformat:'.2f'|default:'' }}"></td>
                         <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input derecha text-red val-costo" oninput="calcularFila(this)" value="{{ sim.costo_producto|stringformat:'.2f'|default:'' }}"></td>
@@ -110,7 +112,9 @@
                         <td class="td-cell" style="background: #fffdec;"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub" style="color: var(--color-principal);" placeholder="Ej. 123456"></td>
                         <td class="td-cell"><input list="list-tipopub" class="celda-input central val-tipo"></td>
                         <td class="td-cell"><input type="text" class="celda-input central mono val-codprod"></td>
-                        <td class="td-cell"><input list="list-categoria" class="celda-input val-categoria"></td>
+                        
+                        <td class="td-cell"><input list="list-categoria" class="celda-input val-categoria" oninput="buscarComision(this)"></td>
+                        
                         <td class="td-cell"><input list="list-marca" class="celda-input val-marca"></td>
                         <td class="td-cell"><input type="text" class="celda-input val-producto"></td>
                         
@@ -119,7 +123,7 @@
                         
                         <td class="td-cell" style="background: #f0fdf4;"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)"></td>
                         <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-envio" oninput="calcularFila(this)"></td>
-                        <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input central text-red val-porc-com" oninput="calcularFila(this)"></td>
+                        <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input central text-red val-porc-com" readonly tabindex="-1"></td>
                         <td class="td-cell" style="background: #fef2f2;"><input type="text" class="celda-input derecha text-red val-com-soles" readonly tabindex="-1"></td>
                         <td class="td-cell" style="background: #dcfce7;"><input type="text" class="celda-input derecha bold text-green val-pago-neto" readonly tabindex="-1"></td>
                         <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input derecha text-red val-costo" oninput="calcularFila(this)"></td>
@@ -134,6 +138,31 @@
         <button type="button" onclick="agregarFila()" style="margin: 15px; padding: 8px 15px; background-color: #f1f5f9; color: #475569; border: 1px dashed #cbd5e1; border-radius: 6px; cursor: pointer; font-weight: bold;">
             <i class="fas fa-plus"></i> Agregar nueva fila
         </button>
+    </div>
+</div>
+
+<div style="margin-top: 40px; padding: 20px; background: #fff; border-radius: 8px; border: 1px solid #e2e8f0;">
+    <h3 style="margin-top: 0; color: #1e293b; font-size: 1.1rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+        <i class="fas fa-percentage" style="color: var(--color-principal);"></i> Referencia: MARCA Y CATEG
+    </h3>
+    
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+            <thead style="background: #f8fafc;">
+                <tr>
+                    <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">SUB CATEGORÍA</th>
+                    <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">CATEGORÍA</th>
+                    <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: center; width: 150px;">COMISIÓN (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #e2e8f0;">Electrodomésticos</td>
+                    <td style="padding: 8px; border: 1px solid #e2e8f0;">BATIDORA DE MANO</td>
+                    <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: bold; color: #1e40af;">12.5%</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -154,6 +183,24 @@
 </style>
 
 <script>
+    // Leemos el mapa de comisiones desde Django
+    const mapaComisiones = {{ mapa_comisiones_json|safe|default:"{}" }};
+
+    function buscarComision(inputCat) {
+        const fila = inputCat.closest('tr');
+        const categoriaSeleccionada = inputCat.value.toUpperCase().trim();
+        const inputComision = fila.querySelector('.val-porc-com');
+        
+        if (categoriaSeleccionada && mapaComisiones[categoriaSeleccionada] !== undefined) {
+            inputComision.value = mapaComisiones[categoriaSeleccionada].toFixed(2);
+        } else {
+            inputComision.value = '0.00';
+        }
+        
+        // Recalculamos la fila con la nueva comisión
+        calcularFila(inputCat);
+    }
+
     // 1. Panel de Opciones
     function togglePanelColumnas() {
         const panel = document.getElementById("panelPersonalizarColumnas");
@@ -211,13 +258,12 @@
         const porcCom = parseFloat(fila.querySelector('.val-porc-com').value) || 0;
         const costo = parseFloat(fila.querySelector('.val-costo').value) || 0;
 
-        // Fórmula Precio Tachado = Precio de Venta / ((100 - % Descuento) / 100)
         let pTachado = '';
         if (pVenta > 0) {
             if (dscto >= 0 && dscto < 100) {
                 pTachado = (pVenta / ((100 - dscto) / 100)).toFixed(2);
             } else {
-                pTachado = pVenta.toFixed(2); // Si descuento es 0, Precio Tachado = Precio Venta
+                pTachado = pVenta.toFixed(2);
             }
         }
         fila.querySelector('.val-ptachado').value = pTachado;
@@ -242,7 +288,6 @@
         const tbody = document.querySelector('#tablaReporte tbody');
         const primeraFila = tbody.querySelector('tr');
         const nuevaFila = primeraFila.cloneNode(true);
-        // Limpiar inputs
         nuevaFila.querySelectorAll('input:not([type="checkbox"])').forEach(input => input.value = '');
         nuevaFila.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
         nuevaFila.querySelector('.btn-link').style.display = 'none';
@@ -317,41 +362,5 @@
             btn.disabled = false;
         });
     }
-</script>
-<button type="button" onclick="agregarFila()" style="margin: 15px; padding: 8px 15px; background-color: #f1f5f9; color: #475569; border: 1px dashed #cbd5e1; border-radius: 6px; cursor: pointer; font-weight: bold;">
-            <i class="fas fa-plus"></i> Agregar nueva fila
-        </button>
-    </div>
-
-    <div style="margin-top: 40px; padding: 20px; background: #fff; border-radius: 8px; border: 1px solid #e2e8f0;">
-        <h3 style="margin-top: 0; color: #1e293b; font-size: 1.1rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
-            <i class="fas fa-percentage" style="color: var(--color-principal);"></i> Referencia: MARCA Y CATEG
-        </h3>
-        
-        <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
-                <thead style="background: #f8fafc;">
-                    <tr>
-                        <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">SUB CATEGORÍA</th>
-                        <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">CATEGORÍA</th>
-                        <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: center; width: 150px;">COMISIÓN (%)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e2e8f0;">Electrodomésticos</td>
-                        <td style="padding: 8px; border: 1px solid #e2e8f0;">BATIDORA DE MANO</td>
-                        <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: bold; color: #1e40af;">12.5%</td>
-                    </tr>
-                    </tbody>
-            </table>
-        </div>
-    </div>
-    </div> <style>
-    /* ... tus estilos existentes ... */
-</style>
-
-<script>
-    /* ... tus scripts existentes ... */
 </script>
 {% endblock %}

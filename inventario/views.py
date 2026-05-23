@@ -356,8 +356,33 @@ def reporte_web(request):
 def simulador_mercadolibre(request):
     canal = request.session.get('canal_activo', 'Web')
     simulaciones = SimulacionMercadoLibre.objects.filter(usuario=request.user).order_by('id')
+    
+    # Jalamos todas las comisiones de referencia que subiste en la otra sección
+    comisiones_ref = ReferenciaComision.objects.all()
+    
+    # Creamos un diccionario de búsqueda rápida (Key: Nombre de Categoría, Value: Porcentaje)
+    # Lo estandarizamos a mayúsculas y sin espacios para asegurar coincidencias exactas
+    mapa_comisiones = {}
+    for ref in comisiones_ref:
+        if ref.sub_categoria:
+            mapa_comisiones[ref.sub_categoria.upper().strip()] = float(ref.comision)
+        if ref.categoria and ref.categoria.upper().strip() not in mapa_comisiones:
+            mapa_comisiones[ref.categoria.upper().strip()] = float(ref.comision)
+
+    # Convertimos el mapa a JSON para que JavaScript pueda usarlo en tiempo real al importar archivos
+    import json
+    mapa_comisiones_json = json.dumps(mapa_comisiones)
+    
+    # Cruzamos los datos en Python para las filas que ya están guardadas en la base de datos
+    for sim in simulaciones:
+        cat_buscar = sim.categoria.upper().strip() if sim.categoria else ""
+        # Buscamos la categoría del simulador dentro de nuestro mapa de referencias
+        sim.nueva_comision_ref = mapa_comisiones.get(cat_buscar, 0.00)
+        
     return render(request, 'simuladores_plataformas/simulador_mercadolibre.html', {
-        'canal': canal, 'simulaciones': simulaciones
+        'canal': canal, 
+        'simulaciones': simulaciones,
+        'mapa_comisiones_json': mapa_comisiones_json
     })
 
 @login_required
