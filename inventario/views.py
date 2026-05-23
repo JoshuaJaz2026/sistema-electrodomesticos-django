@@ -6,6 +6,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre
+import csv
+from django.http import HttpResponse
 
 # =========================================================
 # 1. EL PRE-LOGIN (Portal público)
@@ -408,14 +410,14 @@ from django.http import HttpResponse
 
 @login_required
 def descargar_plantilla_comisiones(request):
-    # Configuramos la respuesta para que el navegador sepa que es un archivo descargable
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="plantilla_referencia_comisiones.csv"'
     
-    # Esto es un truco (BOM) para que Excel lea los tildes (Categoría, Comisión) sin problemas
+    # Truco (BOM) para que Excel lea los tildes sin problemas
     response.write('\ufeff'.encode('utf8'))
     
-    writer = csv.writer(response)
+    # EL SECRETO: Agregamos delimiter=';' para que Excel en español lo separe en columnas
+    writer = csv.writer(response, delimiter=';')
     
     # Escribimos las cabeceras exactas
     writer.writerow(['SUB CATEGORÍA', 'CATEGORÍA', 'COMISIÓN'])
