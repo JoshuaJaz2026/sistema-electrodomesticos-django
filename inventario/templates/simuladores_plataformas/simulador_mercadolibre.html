@@ -109,7 +109,7 @@
                         
                         <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input central bold val-rentabilidad" readonly tabindex="-1" value="{{ sim.rentabilidad_porc|stringformat:'.2f'|default:'' }}%" style="color: {% if sim.rentabilidad_porc < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
                         
-                        <td class="td-cell central"><input type="checkbox" class="check-moderno val-mpe" {% if sim.mpe %}checked{% endif %}></td>
+                        <td class="td-cell central"><input type="text" class="celda-input central bold val-mpe" readonly tabindex="-1" style="background: #f1f5f9; cursor: not-allowed;" value="{% if sim.mpe %}MPE-{{ sim.cod_producto }}{% endif %}"></td>
                     </tr>
                     {% endfor %}
                 {% else %}
@@ -148,7 +148,7 @@
                         
                         <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input derecha bold val-ganancia" readonly tabindex="-1"></td>
                         <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input central bold val-rentabilidad" readonly tabindex="-1"></td>
-                        <td class="td-cell central"><input type="checkbox" class="check-moderno val-mpe"></td>
+                        <td class="td-cell central"><input type="text" class="celda-input central bold val-mpe" readonly tabindex="-1" style="background: #f1f5f9; cursor: not-allowed;"></td>
                     </tr>
                 {% endif %}
             </tbody>
@@ -214,7 +214,6 @@
         } else {
             inputComision.value = '0.00';
         }
-        
         calcularFila(inputCat);
     }
 
@@ -222,13 +221,15 @@
         const fila = inputCodProd.closest('tr');
         const codigoSeleccionado = inputCodProd.value.toUpperCase().trim();
         const inputCosto = fila.querySelector('.val-costo');
+        const inputMPE = fila.querySelector('.val-mpe');
         
         if (codigoSeleccionado && mapaCostos[codigoSeleccionado] !== undefined) {
             inputCosto.value = mapaCostos[codigoSeleccionado].toFixed(2);
+            inputMPE.value = 'MPE-' + codigoSeleccionado;
         } else {
             inputCosto.value = '0.00';
+            inputMPE.value = '';
         }
-        
         calcularFila(inputCodProd);
     }
 
@@ -263,9 +264,7 @@
 
         document.querySelectorAll('.fila-simulador').forEach(fila => {
             const inputVenta = fila.querySelector('.val-venta');
-            if (inputVenta) {
-                calcularFila(inputVenta);
-            }
+            if (inputVenta) calcularFila(inputVenta);
         });
     });
 
@@ -306,12 +305,11 @@
         const comSoles = pVenta * (porcCom / 100);
         const pagoNeto = pVenta - comSoles - envio;
         const ganancia = pagoNeto - costo;
-        
-        // CÁLCULO DE RENTABILIDAD CON DOS DECIMALES
         const rentabilidad = costo > 0 ? (ganancia / costo) * 100 : 0;
 
         fila.querySelector('.val-com-soles').value = comSoles.toFixed(2);
         fila.querySelector('.val-pago-neto').value = pagoNeto.toFixed(2);
+        
         const inputGanancia = fila.querySelector('.val-ganancia');
         inputGanancia.value = ganancia.toFixed(2);
         inputGanancia.style.color = ganancia < 0 ? '#dc2626' : '#1e40af';
@@ -326,7 +324,6 @@
         const primeraFila = tbody.querySelector('tr');
         const nuevaFila = primeraFila.cloneNode(true);
         nuevaFila.querySelectorAll('input:not([type="checkbox"])').forEach(input => input.value = '');
-        nuevaFila.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
         nuevaFila.querySelector('.btn-link').style.display = 'none';
         nuevaFila.querySelector('.val-ganancia').style.color = '#475569';
         nuevaFila.querySelector('.val-rentabilidad').style.color = '#475569';
@@ -359,7 +356,7 @@
                     envio: fila.querySelector('.val-envio').value || 0,
                     porc_comision: fila.querySelector('.val-porc-com').value || 0,
                     costo: fila.querySelector('.val-costo').value || 0,
-                    mpe: fila.querySelector('.val-mpe').checked
+                    mpe: fila.querySelector('.val-mpe').value !== ''
                 });
             }
         });
