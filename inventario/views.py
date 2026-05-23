@@ -403,6 +403,30 @@ def guardar_comisiones_masivas(request):
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
 
 
+import csv
+from django.http import HttpResponse
+
+@login_required
+def descargar_plantilla_comisiones(request):
+    # Configuramos la respuesta para que el navegador sepa que es un archivo descargable
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="plantilla_referencia_comisiones.csv"'
+    
+    # Esto es un truco (BOM) para que Excel lea los tildes (Categoría, Comisión) sin problemas
+    response.write('\ufeff'.encode('utf8'))
+    
+    writer = csv.writer(response)
+    
+    # Escribimos las cabeceras exactas
+    writer.writerow(['SUB CATEGORÍA', 'CATEGORÍA', 'COMISIÓN'])
+    
+    # Escribimos unos ejemplos
+    writer.writerow(['Electrodomésticos', 'BATIDORA DE MANO', '12.5%'])
+    writer.writerow(['Línea Blanca', 'REFRIGERADORA', '9.5%'])
+    writer.writerow(['Audio y Video', 'TELEVISOR', '11.0%'])
+    
+    return response
+
 @login_required
 def simulador_mercadolibre_junior(request):
     canal = request.session.get('canal_activo', 'Web')

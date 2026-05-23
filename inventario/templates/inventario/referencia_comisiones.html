@@ -12,9 +12,9 @@
         <div style="display: flex; gap: 10px;">
             <input type="text" id="buscador" onkeyup="filtrarTabla()" placeholder="Buscar categoría..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; width: 200px;">
             
-            <a href="{% static 'plantillas/plantilla_referencia_comisiones.csv' %}" download class="btn" style="background: #3b82f6; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-weight: bold;">
-                <i class="fas fa-download"></i> Bajar Plantilla
-            </a>
+            <a href="{% url 'descargar_plantilla_comisiones' %}" class="btn" style="background: #3b82f6; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+    <i class="fas fa-download"></i> Bajar Plantilla
+</a>
 
             <input type="file" id="csvComisiones" accept=".csv" style="display: none;">
             <button type="button" onclick="document.getElementById('csvComisiones').click()" style="background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
