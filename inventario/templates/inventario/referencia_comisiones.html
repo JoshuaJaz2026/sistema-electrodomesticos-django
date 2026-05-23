@@ -4,12 +4,12 @@
 {% block content %}
 <div class="card" style="max-width: 900px; margin: auto; border-top: 4px solid var(--color-principal);">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
         <h2 style="margin: 0; color: #1e293b; text-transform: uppercase;">
             <i class="fas fa-list-ul" style="color: var(--color-principal);"></i> Referencia: MARCA Y CATEG
         </h2>
         
-        <div style="display: flex; gap: 10px;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
             <input type="text" id="buscador" onkeyup="filtrarTabla()" placeholder="Buscar categoría..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; width: 200px;">
             
             <a href="{% url 'descargar_plantilla_comisiones' %}" class="btn" style="background: #3b82f6; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-weight: bold;">
@@ -24,10 +24,14 @@
             <button type="button" onclick="document.getElementById('csvComisiones').click()" style="background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
                 <i class="fas fa-upload"></i> Importar Masivo
             </button>
+
+            <button type="button" onclick="guardarDatosPendientes()" style="background: #f59e0b; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                <i class="fas fa-save"></i> Guardar Modificaciones
+            </button>
         </div>
     </div>
     
-    <form method="POST" action="{% url 'guardar_comisiones' %}">
+    <form method="POST" action="{% url 'guardar_comisiones' %}" id="formComisiones">
         {% csrf_token %}
         <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
             <table id="tablaComisiones" style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
@@ -57,16 +61,13 @@
                 </tbody>
             </table>
         </div>
-        <div style="text-align: right; margin-top: 15px;">
-            <button type="submit" style="background: var(--color-principal); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">
-                <i class="fas fa-save"></i> Guardar Modificaciones
-            </button>
-        </div>
     </form>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script>
+    let datosPendientes = [];
+
     // Buscador
     function filtrarTabla() {
         const input = document.getElementById("buscador");
@@ -82,54 +83,81 @@
         }
     }
 
-    // Importador Masivo CSV
+    // Leer CSV y Previsualizar en amarillo
     document.getElementById('csvComisiones').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Leer y convertir el CSV
         Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
-                // Las cabeceras del CSV deben ser exactas: "SUB CATEGORIA", "CATEGORIA", "COMISION"
-                // Enviamos los datos al backend
-                enviarComisionesMasivas(results.data);
+                if (results.data.length > 0 && !('CATEGORÍA' in results.data[0] && 'COMISIÓN' in results.data[0])) {
+                    alert("Error: Asegúrate de que las cabeceras del CSV sean exactamente: SUB CATEGORÍA, CATEGORÍA, COMISIÓN");
+                    return;
+                }
+                
+                datosPendientes = results.data;
+                const tbody = document.querySelector("#tablaComisiones tbody");
+                tbody.innerHTML = ""; 
+
+                datosPendientes.forEach(item => {
+                    const tr = document.createElement("tr");
+                    tr.style.backgroundColor = "#fffbeb"; // Vista previa amarilla
+                    
+                    let comisionStr = String(item['COMISIÓN']).replace('%', '').replace(',', '.').strip();
+                    let comisionNum = parseFloat(comisionStr);
+                    if (isNaN(comisionNum)) comisionNum = 0.00;
+
+                    tr.innerHTML = `
+                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">${item['SUB CATEGORÍA'] || ''}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">${item['CATEGORÍA'] || ''}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">
+                            <input type="number" value="${comisionNum.toFixed(2)}" step="0.1" style="width: 70px; padding: 5px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px;" readonly>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById('csvComisiones').value = "";
+                alert("Vista previa generada. ¡No olvides hacer clic en 'Guardar Modificaciones' para subir esto a la Base de Datos!");
             }
         });
     });
 
-    function enviarComisionesMasivas(datos) {
-        // Validación rápida para asegurarse de que las columnas correctas existen
-        if (datos.length > 0 && !('CATEGORÍA' in datos[0] && 'COMISIÓN' in datos[0])) {
-            alert("Error: Asegúrate de que las cabeceras del CSV sean exactamente: SUB CATEGORÍA, CATEGORÍA, COMISIÓN");
-            return;
+    // Guardar (Masivo o Manual)
+    function guardarDatosPendientes() {
+        // Si hay datos en memoria, significa que subió un CSV
+        if (datosPendientes.length > 0) {
+            fetch("{% url 'guardar_comisiones_masivas' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ referencias: datosPendientes })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    alert('¡Éxito! ' + data.message);
+                    datosPendientes = [];
+                    window.location.reload(); 
+                } else {
+                    alert('Error al importar: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Hubo un error:", error);
+                alert("Ocurrió un error en la conexión al servidor.");
+            });
+        } else {
+            // Si no hay datos en memoria, significa que hizo un cambio manual en los inputs
+            document.getElementById('formComisiones').submit();
         }
-
-        fetch("{% url 'guardar_comisiones_masivas' %}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({ referencias: datos })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'ok') {
-                alert('¡Datos importados correctamente!');
-                window.location.reload(); // Recargar para mostrar los nuevos datos en la tabla
-            } else {
-                alert('Error al importar: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error("Hubo un error:", error);
-            alert("Ocurrió un error en la conexión al servidor.");
-        });
     }
 
-    // Función para Borrar Todas las Comisiones
+    // Borrar Todo
     function eliminarTodasLasComisiones() {
         if(confirm("⚠️ ¿Estás seguro de que deseas eliminar TODAS las referencias de la base de datos? Esta acción no se puede deshacer.")) {
             fetch("{% url 'eliminar_comisiones_masivas' %}", {

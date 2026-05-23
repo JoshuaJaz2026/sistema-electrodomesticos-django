@@ -2,15 +2,15 @@
 {% load static %}
 
 {% block content %}
-<div class="card" style="max-width: 1000px; margin: auto; border-top: 4px solid var(--color-principal);">
+<div class="card" style="max-width: 1100px; margin: auto; border-top: 4px solid var(--color-principal);">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
         <h2 style="margin: 0; color: #1e293b; text-transform: uppercase;">
             <i class="fas fa-dollar-sign" style="color: var(--color-principal);"></i> Referencia: COSTOS
         </h2>
         
-        <div style="display: flex; gap: 10px;">
-            <input type="text" id="buscador" onkeyup="filtrarTabla()" placeholder="Buscar producto o código..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; width: 220px;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+            <input type="text" id="buscador" onkeyup="filtrarTabla()" placeholder="Buscar producto o código..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; width: 200px;">
             
             <a href="{% url 'descargar_plantilla_costos' %}" class="btn" style="background: #3b82f6; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-weight: bold;">
                 <i class="fas fa-download"></i> Bajar Plantilla
@@ -23,6 +23,10 @@
             <input type="file" id="csvCostos" accept=".csv" style="display: none;">
             <button type="button" onclick="document.getElementById('csvCostos').click()" style="background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
                 <i class="fas fa-upload"></i> Importar Masivo
+            </button>
+
+            <button type="button" onclick="guardarDatosPendientes()" style="background: #f59e0b; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                <i class="fas fa-save"></i> Guardar Modificaciones
             </button>
         </div>
     </div>
@@ -48,9 +52,9 @@
                     <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">S/. {{ item.costo_u_soles|stringformat:'.2f' }}</td>
                 </tr>
                 {% empty %}
-                <tr>
+                <tr id="fila-vacia">
                     <td colspan="5" style="padding: 20px; text-align: center; color: #64748b;">
-                        No hay costos registrados. ¡Sube tu plantilla CSV para comenzar!
+                        No hay costos registrados en la base de datos. ¡Sube tu plantilla CSV para comenzar!
                     </td>
                 </tr>
                 {% endfor %}
@@ -61,6 +65,9 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script>
+    // Variable global para guardar los datos en pausa antes de mandarlos a la base de datos
+    let datosPendientes = [];
+
     // Buscador (busca por código o por producto)
     function filtrarTabla() {
         const input = document.getElementById("buscador");
@@ -82,7 +89,7 @@
         }
     }
 
-    // Importador Masivo CSV
+    // PASO 1: Leer CSV y Previsualizar (No sube a la base de datos aún)
     document.getElementById('csvCostos').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -95,27 +102,63 @@
                     alert("Error: Asegúrate de usar la plantilla correcta (CÓDIGO, PRODUCTO, COSTO CERO...).");
                     return;
                 }
-                enviarCostosMasivos(results.data);
+                
+                // Guardamos los datos en la memoria del navegador
+                datosPendientes = results.data;
+                
+                // Borramos la tabla actual y dibujamos la vista previa
+                const tbody = document.querySelector("#tablaCostos tbody");
+                tbody.innerHTML = ""; 
+
+                datosPendientes.forEach(item => {
+                    const tr = document.createElement("tr");
+                    tr.style.backgroundColor = "#fffbeb"; // Un color amarillo clarito para indicar que es una vista previa
+                    
+                    const formatNum = (val) => {
+                        let num = parseFloat(String(val).replace('$', '').replace('S/.', '').replace(',', '.'));
+                        return isNaN(num) ? "0.00" : num.toFixed(2);
+                    };
+
+                    tr.innerHTML = `
+                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">${item['CÓDIGO']}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">${item['PRODUCTO'] || ''}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">${formatNum(item['COSTO CERO'])}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">$${formatNum(item['COSTO U. ($)'])}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">S/. ${formatNum(item['COSTO U. ($ ► S/.)'])}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                // Limpiamos el input para que permita volver a subir el mismo archivo si se desea
+                document.getElementById('csvCostos').value = "";
+                alert("Vista previa generada. ¡No olvides hacer clic en 'Guardar Modificaciones' para subir esto a la Base de Datos!");
             }
         });
     });
 
-    function enviarCostosMasivos(datos) {
+    // PASO 2: Enviar los datos pendientes a la Base de Datos
+    function guardarDatosPendientes() {
+        if (datosPendientes.length === 0) {
+            alert("No has importado ningún archivo nuevo. Usa el botón 'Importar Masivo' primero.");
+            return;
+        }
+
         fetch("{% url 'guardar_costos_masivos' %}", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': '{{ csrf_token }}'
             },
-            body: JSON.stringify({ referencias: datos })
+            body: JSON.stringify({ referencias: datosPendientes })
         })
         .then(response => response.json())
         .then(data => {
             if (data.status === 'ok') {
                 alert('¡Éxito! ' + data.message);
-                window.location.reload(); 
+                datosPendientes = []; // Vaciamos la memoria
+                window.location.reload(); // Recargamos para ver los datos ya guardados oficialmente
             } else {
-                alert('Error al importar: ' + data.message);
+                alert('Error al guardar: ' + data.message);
             }
         })
         .catch(error => {
@@ -126,7 +169,7 @@
 
     // Función para Borrar Todo
     function eliminarTodosLosCostos() {
-        if(confirm("⚠️ ¿Estás seguro de que deseas eliminar TODOS los costos? Esta acción no se puede deshacer.")) {
+        if(confirm("⚠️ ¿Estás seguro de que deseas eliminar TODOS los costos de la base de datos? Esta acción no se puede deshacer.")) {
             fetch("{% url 'eliminar_costos_masivos' %}", {
                 method: 'POST',
                 headers: {
