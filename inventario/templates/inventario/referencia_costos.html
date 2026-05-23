@@ -1,0 +1,152 @@
+{% extends 'inventario/dashboard_global.html' %}
+{% load static %}
+
+{% block content %}
+<div class="card" style="max-width: 1000px; margin: auto; border-top: 4px solid var(--color-principal);">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0; color: #1e293b; text-transform: uppercase;">
+            <i class="fas fa-dollar-sign" style="color: var(--color-principal);"></i> Referencia: COSTOS
+        </h2>
+        
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="buscador" onkeyup="filtrarTabla()" placeholder="Buscar producto o código..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; width: 220px;">
+            
+            <a href="{% url 'descargar_plantilla_costos' %}" class="btn" style="background: #3b82f6; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+                <i class="fas fa-download"></i> Bajar Plantilla
+            </a>
+
+            <button type="button" onclick="eliminarTodosLosCostos()" style="background: #ef4444; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                <i class="fas fa-trash-alt"></i> Borrar Todo
+            </button>
+
+            <input type="file" id="csvCostos" accept=".csv" style="display: none;">
+            <button type="button" onclick="document.getElementById('csvCostos').click()" style="background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                <i class="fas fa-upload"></i> Importar Masivo
+            </button>
+        </div>
+    </div>
+    
+    <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <table id="tablaCostos" style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+            <thead style="background: #f8fafc; position: sticky; top: 0;">
+                <tr>
+                    <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: left;">CÓDIGO</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: left;">PRODUCTO</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: center;">COSTO CERO</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: center;">COSTO U. ($)</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: center;">COSTO U. ($ ► S/.)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in costos %}
+                <tr>
+                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">{{ item.codigo }}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">{{ item.producto }}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">{{ item.costo_cero|stringformat:'.2f' }}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">${{ item.costo_u_dolares|stringformat:'.2f' }}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">S/. {{ item.costo_u_soles|stringformat:'.2f' }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="padding: 20px; text-align: center; color: #64748b;">
+                        No hay costos registrados. ¡Sube tu plantilla CSV para comenzar!
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+<script>
+    // Buscador (busca por código o por producto)
+    function filtrarTabla() {
+        const input = document.getElementById("buscador");
+        const filter = input.value.toUpperCase();
+        const table = document.getElementById("tablaCostos");
+        const tr = table.getElementsByTagName("tr");
+        for (let i = 1; i < tr.length; i++) {
+            const tdCodigo = tr[i].getElementsByTagName("td")[0]; 
+            const tdProducto = tr[i].getElementsByTagName("td")[1]; 
+            if (tdCodigo || tdProducto) {
+                const txtCodigo = tdCodigo.textContent || tdCodigo.innerText;
+                const txtProducto = tdProducto.textContent || tdProducto.innerText;
+                if (txtCodigo.toUpperCase().indexOf(filter) > -1 || txtProducto.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+
+    // Importador Masivo CSV
+    document.getElementById('csvCostos').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                if (results.data.length > 0 && !('CÓDIGO' in results.data[0] && 'PRODUCTO' in results.data[0])) {
+                    alert("Error: Asegúrate de usar la plantilla correcta (CÓDIGO, PRODUCTO, COSTO CERO...).");
+                    return;
+                }
+                enviarCostosMasivos(results.data);
+            }
+        });
+    });
+
+    function enviarCostosMasivos(datos) {
+        fetch("{% url 'guardar_costos_masivos' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ referencias: datos })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                alert('¡Éxito! ' + data.message);
+                window.location.reload(); 
+            } else {
+                alert('Error al importar: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Ocurrió un error en la conexión al servidor.");
+        });
+    }
+
+    // Función para Borrar Todo
+    function eliminarTodosLosCostos() {
+        if(confirm("⚠️ ¿Estás seguro de que deseas eliminar TODOS los costos? Esta acción no se puede deshacer.")) {
+            fetch("{% url 'eliminar_costos_masivos' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    alert('✅ ' + data.message);
+                    window.location.reload(); 
+                } else {
+                    alert('❌ Error al eliminar: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        }
+    }
+</script>
+{% endblock %}

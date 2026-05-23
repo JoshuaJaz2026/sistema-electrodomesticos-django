@@ -164,3 +164,13 @@ class ReferenciaComision(models.Model):
 
     def __str__(self):
         return f"{self.sub_categoria} - {self.comision}%"
+    
+class ReferenciaCosto(models.Model):
+    codigo = models.CharField(max_length=100, unique=True)
+    producto = models.CharField(max_length=255, blank=True, null=True)
+    costo_cero = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    costo_u_dolares = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    costo_u_soles = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f"{self.codigo} - {self.producto}"

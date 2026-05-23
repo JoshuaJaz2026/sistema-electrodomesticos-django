@@ -1,13 +1,12 @@
 import json
 import uuid
-from django.http import JsonResponse
+import csv
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
-from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision
-import csv
-from django.http import HttpResponse
+from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto
 
 # =========================================================
 # 1. EL PRE-LOGIN (Portal público)
@@ -364,7 +363,6 @@ def simulador_mercadolibre(request):
 @login_required
 def referencia_comisiones(request):
     canal = request.session.get('canal_activo', 'Web')
-    # Jalamos todas las comisiones de la base de datos, ordenadas por categoría
     comisiones = ReferenciaComision.objects.all().order_by('categoria')
     return render(request, 'inventario/referencia_comisiones.html', {
         'canal': canal, 
@@ -389,14 +387,12 @@ def guardar_comisiones_masivas(request):
                 sub_categoria = fila.get('SUB CATEGORÍA', '').strip()
                 categoria = fila.get('CATEGORÍA', '').strip()
                 
-                # Limpiamos el porcentaje para convertirlo en número
                 comision_texto = str(fila.get('COMISIÓN', '0')).replace('%', '').replace(',', '.').strip()
                 try:
                     comision_num = float(comision_texto) if comision_texto else 0.0
                 except ValueError:
                     comision_num = 0.0
 
-                # AHORA BUSCAMOS POR SUB_CATEGORIA
                 if sub_categoria:
                     ReferenciaComision.objects.update_or_create(
                         sub_categoria=sub_categoria,
@@ -413,30 +409,104 @@ def guardar_comisiones_masivas(request):
             
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
 
-
-import csv
-from django.http import HttpResponse
-
 @login_required
 def descargar_plantilla_comisiones(request):
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="plantilla_referencia_comisiones.csv"'
     
-    # Truco (BOM) para que Excel lea los tildes sin problemas
     response.write('\ufeff'.encode('utf8'))
     
-    # EL SECRETO: Agregamos delimiter=';' para que Excel en español lo separe en columnas
     writer = csv.writer(response, delimiter=';')
     
-    # Escribimos las cabeceras exactas
     writer.writerow(['SUB CATEGORÍA', 'CATEGORÍA', 'COMISIÓN'])
     
-    # Escribimos unos ejemplos
     writer.writerow(['Electrodomésticos', 'BATIDORA DE MANO', '12.5%'])
     writer.writerow(['Línea Blanca', 'REFRIGERADORA', '9.5%'])
     writer.writerow(['Audio y Video', 'TELEVISOR', '11.0%'])
     
     return response
+
+@login_required
+def eliminar_comisiones_masivas(request):
+    if request.method == 'POST':
+        try:
+            ReferenciaComision.objects.all().delete()
+            return JsonResponse({'status': 'ok', 'message': 'Todas las referencias han sido eliminadas correctamente.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
+# ---------------------------------------------------------
+# NUEVAS FUNCIONES: REFERENCIA DE COSTOS
+# ---------------------------------------------------------
+@login_required
+def referencia_costos(request):
+    canal = request.session.get('canal_activo', 'Web')
+    costos = ReferenciaCosto.objects.all().order_by('codigo')
+    return render(request, 'inventario/referencia_costos.html', {'canal': canal, 'costos': costos})
+
+@login_required
+def descargar_plantilla_costos(request):
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="plantilla_referencia_costos.csv"'
+    response.write('\ufeff'.encode('utf8'))
+    
+    writer = csv.writer(response, delimiter=';')
+    writer.writerow(['CÓDIGO', 'PRODUCTO', 'COSTO CERO', 'COSTO U. ($)', 'COSTO U. ($ ► S/.)'])
+    writer.writerow(['SKU-001', 'EJEMPLO BATIDORA', '10.50', '12.00', '45.60'])
+    
+    return response
+
+@login_required
+def guardar_costos_masivos(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            filas_costos = data.get('referencias', [])
+            
+            for fila in filas_costos:
+                codigo = fila.get('CÓDIGO', '').strip()
+                producto = fila.get('PRODUCTO', '').strip()
+                
+                # Función para limpiar números de cualquier símbolo de moneda
+                def limpiar_numero(valor):
+                    texto = str(valor).replace('$', '').replace('S/.', '').replace(',', '.').strip()
+                    try:
+                        return float(texto) if texto else 0.0
+                    except ValueError:
+                        return 0.0
+
+                c_cero = limpiar_numero(fila.get('COSTO CERO', 0))
+                c_dolares = limpiar_numero(fila.get('COSTO U. ($)', 0))
+                c_soles = limpiar_numero(fila.get('COSTO U. ($ ► S/.)', 0))
+
+                if codigo:
+                    ReferenciaCosto.objects.update_or_create(
+                        codigo=codigo,
+                        defaults={
+                            'producto': producto, 
+                            'costo_cero': c_cero,
+                            'costo_u_dolares': c_dolares,
+                            'costo_u_soles': c_soles
+                        }
+                    )
+                    
+            return JsonResponse({'status': 'ok', 'message': f'Se procesaron {len(filas_costos)} costos con éxito.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
+@login_required
+def eliminar_costos_masivos(request):
+    if request.method == 'POST':
+        try:
+            ReferenciaCosto.objects.all().delete()
+            return JsonResponse({'status': 'ok', 'message': 'Todos los costos han sido eliminados correctamente.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
 
 @login_required
 def simulador_mercadolibre_junior(request):
@@ -530,15 +600,3 @@ class LoginCamaleonicoView(LoginView):
         self.request.session['icono_actual'] = f"{icon_prefix} {tema['icono']}"
         
         return super().form_valid(form)
-    
-@login_required
-def eliminar_comisiones_masivas(request):
-    if request.method == 'POST':
-        try:
-            # Esto borra absolutamente todos los registros de la tabla
-            ReferenciaComision.objects.all().delete()
-            return JsonResponse({'status': 'ok', 'message': 'Todas las referencias han sido eliminadas correctamente.'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-            
-    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)

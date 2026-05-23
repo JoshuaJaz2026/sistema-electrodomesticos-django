@@ -75,4 +75,10 @@ urlpatterns = [
     path('guardar-comisiones-masivas/', views.guardar_comisiones_masivas, name='guardar_comisiones_masivas'), 
     path('descargar-plantilla-comisiones/', views.descargar_plantilla_comisiones, name='descargar_plantilla_comisiones'),
     path('eliminar-comisiones-masivas/', views.eliminar_comisiones_masivas, name='eliminar_comisiones_masivas'),
+
+    # Rutas para Referencia de Costos
+    path('referencia-costos/', views.referencia_costos, name='referencia_costos'),
+    path('descargar-plantilla-costos/', views.descargar_plantilla_costos, name='descargar_plantilla_costos'),
+    path('guardar-costos-masivos/', views.guardar_costos_masivos, name='guardar_costos_masivos'), 
+    path('eliminar-costos-masivos/', views.eliminar_costos_masivos, name='eliminar_costos_masivos'),
 ]
