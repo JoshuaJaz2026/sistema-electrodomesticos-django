@@ -133,43 +133,38 @@
 </div>
 
 <style>
-    /* Estilos dinámicos estilo Excel */
-    #tablaReporte { width: auto; table-layout: auto; border-collapse: collapse; }
-    .th-rep { padding: 8px 12px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold; white-space: nowrap; }
-    .td-cell { padding: 0; border: 1px solid #e2e8f0; }
+    /* CSS OPTIMIZADO PARA AUTO-AJUSTE ESTILO EXCEL */
+    .th-rep { padding: 8px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold; white-space: nowrap; }
+    .td-cell { padding: 0; border-right: 1px solid #e2e8f0; }
     
     .celda-input { 
         width: 100%; 
+        box-sizing: border-box; 
         border: none; 
-        padding: 6px 8px; 
+        padding: 8px 6px; 
         font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important; 
         font-size: 13px; 
         color: #475569; 
         background: transparent; 
         outline: none; 
-        box-sizing: border-box; 
+        field-sizing: content; /* Propiedad moderna: el input crece según su contenido */
     }
     
-    .val-producto { width: 250px; }
-    .val-link { width: 180px; }
-    .val-categoria { width: 160px; }
-    .val-marca { width: 100px; }
-    /* AQUI AMPLIAMOS LA COLUMNA MPE PARA QUE ENTRE MPE + EL NUMERO */
-    .val-mpe { width: 160px; min-width: 160px; }
-    .val-codpub, .val-codprod { width: 100px; }
-    .val-venta, .val-costo, .val-ganancia { width: 80px; }
-    .val-dscto, .val-porc-com { width: 60px; }
+    /* Configuración de anchos mínimos */
+    .val-producto { min-width: 250px; }
+    .val-link { min-width: 180px; }
+    .val-categoria { min-width: 160px; }
+    .val-marca { min-width: 100px; }
+    .val-mpe { min-width: 130px; }
+    .val-codpub, .val-codprod { min-width: 100px; }
+    .val-venta, .val-costo, .val-ganancia, .val-ptachado, .val-pago-neto { min-width: 80px; }
+    .val-dscto, .val-porc-com { min-width: 60px; }
 
     .celda-input:not([readonly]):focus { background-color: #fffdec; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; }
     input[list]:hover { cursor: text; }
     .fila-simulador:hover { background: #f8fafc; }
-    .central { text-align: center; } 
-    .derecha { text-align: right; } 
-    .bold { font-weight: bold; }
-    .text-dark { color: #0f172a; } 
-    .text-blue { color: #2563eb; } 
-    .text-green { color: #166534; } 
-    .text-red { color: #991b1b; }
+    .central { text-align: center; } .derecha { text-align: right; } .bold { font-weight: bold; }
+    .text-dark { color: #0f172a; } .text-blue { color: #2563eb; } .text-green { color: #166534; } .text-red { color: #991b1b; }
     .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .celda-input[type=number] { -moz-appearance: textfield; }
     .check-moderno { width: 16px; height: 16px; cursor: pointer; accent-color: var(--color-principal); margin-top: 5px; }
@@ -196,15 +191,12 @@
         const fila = inputCodProd.closest('tr');
         const codigoSeleccionado = inputCodProd.value.trim();
         const inputCosto = fila.querySelector('.val-costo');
-        const inputMPE = fila.querySelector('.val-mpe');
         
         if (codigoSeleccionado && mapaCostos[codigoSeleccionado.toUpperCase()] !== undefined) {
             inputCosto.value = mapaCostos[codigoSeleccionado.toUpperCase()].toFixed(2);
         } else {
             inputCosto.value = '0.00';
         }
-        // Concatenación: MPE + Código (ej: MPE2055441)
-        inputMPE.value = codigoSeleccionado !== '' ? 'MPE' + codigoSeleccionado.toUpperCase() : 'MPE';
         calcularFila(inputCodProd);
     }
 
@@ -237,30 +229,41 @@
             label.appendChild(cb); label.appendChild(document.createTextNode(colName)); container.appendChild(label);
         });
 
+        // Aseguramos que al cargar, MPE se llene si hay CÓD. PUB en la fila
         document.querySelectorAll('.fila-simulador').forEach(fila => {
             const inputVenta = fila.querySelector('.val-venta');
-            const inputCodProd = fila.querySelector('.val-codprod');
+            const inputCodPub = fila.querySelector('.val-codpub');
             const inputMPE = fila.querySelector('.val-mpe');
             
-            if (inputCodProd && inputMPE && inputCodProd.value.trim() !== '') {
-                inputMPE.value = 'MPE' + inputCodProd.value.trim().toUpperCase();
+            if (inputCodPub && inputMPE) {
+                let codigo = inputCodPub.value.trim().replace(/^MPE-?/i, '');
+                if (codigo !== '') {
+                    inputMPE.value = 'MPE' + codigo;
+                } else {
+                    inputMPE.value = 'MPE';
+                }
             }
             if (inputVenta) calcularFila(inputVenta);
         });
     });
 
+    // AQUÍ ES DONDE SE CONCATENA EL MPE CUANDO EL USUARIO ESCRIBE EL CÓD. PUB
     function generarLink(inputCodigo) {
         const fila = inputCodigo.closest('tr');
         let codigo = inputCodigo.value.trim().replace(/^MPE-?/i, '');
         const inputLink = fila.querySelector('.val-link');
         const botonLink = fila.querySelector('.btn-link');
+        const inputMPE = fila.querySelector('.val-mpe');
+
         if (codigo !== '') {
             const urlCompleta = `http://articulo.mercadolibre.com.pe/MPE-${codigo}`;
             inputLink.value = urlCompleta;
             botonLink.href = urlCompleta;
             botonLink.style.display = 'inline-block';
+            if(inputMPE) inputMPE.value = 'MPE' + codigo;
         } else {
             inputLink.value = ''; botonLink.href = '#'; botonLink.style.display = 'none';
+            if(inputMPE) inputMPE.value = 'MPE';
         }
     }
 
@@ -329,13 +332,12 @@
                     envio: fila.querySelector('.val-envio').value || 0,
                     porc_comision: fila.querySelector('.val-porc-com').value || 0,
                     costo: fila.querySelector('.val-costo').value || 0,
-                    // AQUÍ ESTÁ EL FIX: ENVIAR VERDADERO/FALSO A LA BASE DE DATOS
                     mpe: fila.querySelector('.val-mpe').value.trim() !== 'MPE' && fila.querySelector('.val-mpe').value.trim() !== ''
                 });
             }
         });
 
-        if (datosAguardar.length === 0) return alert("No hay datos.");
+        if (datosAguardar.length === 0) return alert("No hay datos para guardar.");
 
         const textoOriginal = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
