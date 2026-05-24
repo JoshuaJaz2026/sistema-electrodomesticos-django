@@ -1,7 +1,9 @@
 import json
 import uuid
 import csv
-from django.http import JsonResponse, HttpResponse
+import os
+from django.http import JsonResponse, HttpResponse, FileResponse, Http404
+from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -636,7 +638,7 @@ class LoginCamaleonicoView(LoginView):
 
 def descargar_plantilla_simulador(request):
     # Ajusta esta ruta a donde realmente está tu archivo CSV
-    file_path = os.path.join(settings.BASE_DIR, 'tu_app', 'static', 'plantillas', 'plantilla_simulador_mercadolibre.csv')
+    file_path = os.path.join(settings.BASE_DIR, 'inventario', 'static', 'plantillas', 'plantilla_simulador_mercadolibre.csv')
     
     if os.path.exists(file_path):
         return FileResponse(open(file_path, 'rb'), as_attachment=True, filename='plantilla_simulador_mercadolibre.csv')
