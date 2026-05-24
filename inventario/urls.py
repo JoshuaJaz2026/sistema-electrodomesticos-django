@@ -81,4 +81,5 @@ urlpatterns = [
     path('descargar-plantilla-costos/', views.descargar_plantilla_costos, name='descargar_plantilla_costos'),
     path('guardar-costos-masivos/', views.guardar_costos_masivos, name='guardar_costos_masivos'), 
     path('eliminar-costos-masivos/', views.eliminar_costos_masivos, name='eliminar_costos_masivos'),
+    path('descargar/plantilla/', views.descargar_plantilla_simulador, name='descargar_plantilla'),
 ]

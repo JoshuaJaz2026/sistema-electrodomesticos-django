@@ -633,3 +633,13 @@ class LoginCamaleonicoView(LoginView):
         self.request.session['icono_actual'] = f"{icon_prefix} {tema['icono']}"
         
         return super().form_valid(form)
+
+def descargar_plantilla_simulador(request):
+    # Ruta absoluta al archivo
+    file_path = os.path.join(settings.BASE_DIR, 'tu_app', 'static', 'plantillas', 'plantilla_simulador.csv')
+    
+    if os.path.exists(file_path):
+        # FileResponse maneja automáticamente el tipo de contenido
+        return FileResponse(open(file_path, 'rb'), as_attachment=True, filename='plantilla_simulador.csv')
+    else:
+        raise Http404("El archivo no existe")
