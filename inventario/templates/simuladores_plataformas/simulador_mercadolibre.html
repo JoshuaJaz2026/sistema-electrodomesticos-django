@@ -4,31 +4,30 @@
 {% block content %}
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
-<div class="card reporte-container">
+<div class="card simulador-container">
     
-    <div class="reporte-header">
-        <h2 class="reporte-titulo">
-            <i class="{{ request.session.icono_actual }} icono-titulo"></i> 
-            Reporte de Ventas - {{ canal }}
+    <div class="simulador-header">
+        <h2 class="simulador-titulo">
+            <i class="fas fa-calculator icono-titulo"></i> Simulador: {{ canal }}
         </h2>
         
-        <div class="reporte-acciones">
-            <input type="file" id="fileImportExcel" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importarExcel(event)">
+        <div class="simulador-acciones">
+            <input type="file" id="fileImportExcel" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importarSimulador(event)">
             
             <button type="button" onclick="document.getElementById('fileImportExcel').click()" class="btn-accion btn-importar">
                 <i class="fas fa-file-import"></i> Importar Excel
             </button>
 
-            <a href="{% url 'descargar_plantilla' %}" class="btn-accion btn-secundario">
-    <i class="fas fa-download"></i> Descargar Plantilla
-</a>
+            <a href="{% static 'plantillas/plantilla_simulador_mercadolibre.csv' %}" download class="btn-accion btn-secundario" style="background-color: #64748b; color: white; text-decoration: none;">
+                <i class="fas fa-download"></i> Descargar Plantilla
+            </a>
 
-            <button type="button" onclick="exportarExcel()" class="btn-accion btn-exportar">
+            <button type="button" onclick="exportarSimulador()" class="btn-accion btn-exportar">
                 <i class="fas fa-file-excel"></i> Exportar
             </button>
 
-            <button type="button" id="btnGuardarReporte" onclick="guardarReporte()" class="btn-accion btn-principal">
-                <i class="fas fa-save"></i> Guardar Cambios
+            <button type="button" id="btnGuardar" onclick="guardarSimulaciones()" class="btn-accion btn-principal btn-guardar">
+                <i class="fas fa-save"></i> Guardar Simulaciones
             </button>
             
             <div style="position: relative;">
@@ -43,519 +42,215 @@
                         </h4>
                         <button onclick="togglePanelColumnas()" class="btn-cerrar-panel">&times;</button>
                     </div>
-                    <div id="columnCheckboxes" class="panel-body grid-columnas">
-                    </div>
+                    <div id="columnCheckboxes" class="panel-body grid-columnas"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="filtros-container">
-        <div>
-            <label class="label-filtro">DESDE</label>
-            <input type="date" class="input-filtro">
-        </div>
-        <div>
-            <label class="label-filtro">HASTA</label>
-            <input type="date" class="input-filtro">
-        </div>
-        <div>
-            <label class="label-filtro">BUSCAR ORDEN / SKU</label>
-            <input type="text" placeholder="Ej. ML-12345..." class="input-filtro">
-        </div>
-    </div>
+    <datalist id="list-itemtype"><option value="KILLER"><option value="NORMAL"><option value="SLOW"><option value="NUEVO"></datalist>
+    <datalist id="list-estado"><option value="ACTIVO"><option value="PAUSADO"></datalist>
+    <datalist id="list-tipopub"><option value="CATALOGO"><option value="TRADICIONAL"></datalist>
+    
+    <datalist id="list-categoria">
+        <option value="MAQUINA DE CORTAR PELO"><option value="ARROCERA"><option value="AUDIFONOS"><option value="BATIDORA DE INMERSIÓN"><option value="BATIDORA DE MANO"><option value="BATIDORA DE TAZÓN"><option value="CACEROLA"><option value="CAFETERA"><option value="COCINA DE INDUCCIÓN"><option value="COCINA ELÉCTRICA"><option value="COMBO BLACK"><option value="COMBO CHERRY"><option value="COMBO OSTER"><option value="DISPENSADOR DE AGUA"><option value="EXTRACTOR DE JUGOS"><option value="FREIDORA DE AIRE"><option value="HERVIDOR ELÉCTRICO"><option value="JUEGO DE OLLAS"><option value="LAVADORA"><option value="LICUADORA"><option value="LAVASECA"><option value="MICRÓFONO"><option value="MICROONDAS"><option value="MOLEDOR DE CARNE"><option value="MOLINILLO"><option value="OLLA A PRESIÓN"><option value="PANIFICADORA"><option value="PARLANTE"><option value="SARTÉN"><option value="SET DE CUBIERTOS"><option value="SET DE OLLAS"><option value="TERMO BOMBA"><option value="TERMORADIADOR"><option value="TERMO HERVIDOR"><option value="TETERA"><option value="TRICOMBO OSTER"><option value="TV"><option value="WAFLERA ELÉCTRICA"><option value="YOGURT MAKER"><option value="SARTÉN ELÉCTRICA"><option value="VAPORIZADOR DE PRENDAS"><option value="JVC"><option value="ONDULADOR"><option value="PLANCHA GRILL"><option value="PROCESADOR DE ALIMENTOS"><option value="CUATRICOMBO OSTER"><option value="MULTI OLLA"><option value="CUCHILLA DE LICUADORA"><option value="PERFUME"><option value="OLLA DE ACERO"><option value="PARRILLA ELÉCTRICA"><option value="SANDWICHERA"><option value="HORNO CON FREIDORA DE AIRE"><option value="HORNO ELÉCTRICO"><option value="REFRIGERADORA"><option value="CONGELADORA"><option value="PARRILLA PORTÁTIL"><option value="MINICOMPONENTE"><option value="EXTRACTOR POR PRENSADO"><option value="CONTROL DE TV"><option value="SOUNDBAR"><option value="HIERRO FUNDIDO"><option value="HORNO MICROONDAS"><option value="TETERA ELÉCTRICA"><option value="BATIDORA MULTIUSOS"><option value="OLLA ANTIHADERENTE"><option value="DESHUMEDECEDOR"><option value="PLANCHA A VAPOR"><option value="FRIGOBAR"><option value="ASPIRADORA"><option value="ESPUMADERA"><option value="KIT DE ACCESORIOS"><option value="PLANCHA DE PELO"><option value="SET DE MÁQUINAS PARA CORTAR PELO"><option value="ESPÁTULA"><option value="TABLET"><option value="COMBO FINEZZA"><option value="BLOQUEADOR"><option value="PACK CUIDADO PERSONAL"><option value="AFEITADOR"><option value="BISUTERÍA"><option value="MOLDES"><option value="LUSTRADORA"><option value="BOWLS"><option value="CUIDADO PERSONAL"><option value="BATIDORA DE MANO Y PEDESTAL"><option value="SARTÉN ANTIHADERENTE"><option value="VASO"><option value="COCINA A GAS"><option value="HORNO TOSTADOR"><option value="TAPA DE LICUADORA"><option value="DEPILADORA"><option value="EXPRIMIDOR CÍTRICO"><option value="MÁQUINA PARA HACER PASTA"><option value="PLANCHA CLÁSICA"><option value="TOSTADORA"><option value="OLLA"><option value="PARRILLA Y PLANCHA"><option value="COMBO RECORD"><option value="PATINES"><option value="JARRA"><option value="ASADOR ELÉCTRICO"><option value="CARGADOR PORTATIL"><option value="AIRE ACONDICIONADO"><option value="KIT OSTER"><option value="EXHIBIDORA"><option value="CAMPANA"><option value="ESTUFA"><option value="IMPRESORA"><option value="COCINA ENCIMERA"><option value="VENTILADOR"><option value="AMPLIFICADOR"><option value="FUNDA DE PARLANTE"><option value="CEPILLO MODELADOR"><option value="ESCOBA ELECTRICA"><option value="CREEPERA"><option value="MAQUINA DE DONDAS"><option value="MAQUINA DE HIELO">
+    </datalist>
+
+    <datalist id="list-marca">
+        <option value="WAHL"><option value="OSTER"><option value="FINEZZA"><option value="RECORD"><option value="IMACO"><option value="BOSSKO"><option value="TAURUS"><option value="LG"><option value="SAMSUNG"><option value="INDURAMA"><option value="ELECTROLUX"><option value="JBO"><option value="TREVELY"><option value="JVC"><option value="BGH"><option value="PHILIPS"><option value="FUJITEC"><option value="PANASONIC"><option value="SONY"><option value="TCL"><option value="HALION"><option value="MIRAY"><option value="EVOLUTION"><option value="YANBAL"><option value="DSP"><option value="MASTERTECH"><option value="CREST"><option value="GAMA"><option value="WHITELINE"><option value="REMINGTONE"><option value="MAGIC CLIP"><option value="ILUMI"><option value="MABE"><option value="AOC"><option value="TRAMONTINA"><option value="PREMIER"><option value="IMPERIAL"><option value="VISIONNER"><option value="SILVER CREST"><option value="BORD"><option value="EPSON"><option value="SOLE">
+    </datalist>
 
     <div class="tabla-scroll-container">
-        <table id="tablaReporte" class="tabla-reporte-moderna">
+        <table id="tablaReporte" class="tabla-simulador-moderna">
             <thead>
                 <tr>
-                    <th class="th-rep th-fecha">FECHA</th>
-                    <th class="th-rep th-mes">MES Y AÑO</th>
-                    <th class="th-rep th-orden">NRO. ORDEN</th>
-                    <th class="th-rep th-comprobante">COMPROBANTE</th>
-                    <th class="th-rep th-tipo">TIPO DE VENTA</th>
-                    <th class="th-rep th-marca">MARCA</th>
+                    <th class="th-rep th-itemtype">ITEM TYPE</th>
+                    <th class="th-rep th-link">LINK</th>
+                    <th class="th-rep th-estado">ESTADO</th>
+                    <th class="th-rep th-codpub">CÓD. PUB</th>
+                    <th class="th-rep th-tipo">TIPO</th>
+                    <th class="th-rep th-codprod">CÓD. PROD</th>
                     <th class="th-rep th-categoria">CATEGORIA</th>
-                    <th class="th-rep th-sku">SKU ALMACEN</th>
-                    <th class="th-rep th-modelo">MODELO</th>
+                    <th class="th-rep th-marca">MARCA</th>
                     <th class="th-rep th-producto">PRODUCTO</th>
-                    <th class="th-rep th-cantidad">CANT.</th>
-                    <th class="th-rep th-precio" style="background-color: #dcfce7; color: #166534;">PRECIO</th>
-                    <th class="th-rep th-totalv" style="background-color: #dcfce7; color: #166534;">TOTAL V.</th>
-                    <th class="th-rep th-porccargo" style="background-color: #dcfce7; color: #166534;">%CARGO x VENTA</th>
-                    <th class="th-rep th-urbano" style="background-color: #dcfce7; color: #166534;">URBANO</th>
-                    <th class="th-rep th-flex" style="background-color: #dcfce7; color: #166534;">FLEX</th>
-                    <th class="th-rep th-totalpagado" style="background-color: #86efac; color: #14532d;">TOTAL PAGADO</th>
-                    <th class="th-rep th-costoxprod" style="background-color: #fee2e2; color: #991b1b;">COSTO x PROD</th>
-                    <th class="th-rep th-und" style="background-color: #fee2e2; color: #991b1b;">UND</th>
-                    <th class="th-rep th-costototal" style="background-color: #fee2e2; color: #991b1b;">COSTO TOTAL</th>
-                    <th class="th-rep th-costoentrega" style="background-color: #fee2e2; color: #991b1b;">COSTO ENTREGA</th>
-                    <th class="th-rep th-ganancia" style="background-color: #dbeafe; color: #1e40af;">GANANCIA</th>
-                    <th class="th-rep th-rentabilidad" style="background-color: #dbeafe; color: #1e40af;">RENTABILIDAD %</th>
-                    <th class="th-rep th-distrito">DISTRITO</th>
-                    <th class="th-rep th-direccion">DIRECCIÓN</th>
-                    <th class="th-rep th-repartidor">REPARTIDOR</th>
-                    <th class="th-rep th-celular">CELULAR</th>
-                    <th class="th-rep th-msj">MSJ ENVIADO</th>
+                    <th class="th-rep th-ptachado" style="background: #f8fafc;">P. TACHADO</th>
+                    <th class="th-rep th-dscto" style="color: #475569;">% DSCTO</th>
+                    <th class="th-rep th-venta" style="background: #dcfce7; color: #166534;">P. VENTA</th>
+                    <th class="th-rep th-envio">ENVÍO</th>
+                    <th class="th-rep th-porccom" style="background: #fee2e2; color: #991b1b;">% NUEVA COM</th>
+                    <th class="th-rep th-comsoles" style="background: #fef2f2; color: #991b1b;">COM (S/)</th>
+                    <th class="th-rep th-pagoneto" style="background: #f0fdf4; color: #166534;">PAGO NETO</th>
+                    <th class="th-rep th-costo" style="background: #fee2e2; color: #991b1b;">COSTO</th>
+                    <th class="th-rep th-ganancia" style="background: #eff6ff; color: #1e40af;">GANANCIA</th>
+                    <th class="th-rep th-rentabilidad" style="background: #eff6ff; color: #1e40af;">RTBLD%</th>
+                    <th class="th-rep th-mpe">MPE</th>
                 </tr>
             </thead>
             <tbody>
-                <tr class="fila-reporte">
-                    <td class="td-cell">
-                        <input type="text" value="" class="celda-input central val-fecha">
-                    </td>
-                    <td class="td-cell">
-                        <input type="text" value="" class="celda-input central bold text-dark val-mes">
-                    </td>
-                    <td class="td-cell">
-                        <input type="text" value="" class="celda-input central bold text-blue val-orden">
-                    </td>
-                    <td class="td-cell">
-                        <input type="text" value="" class="celda-input central val-comprobante">
-                    </td>
-                    <td class="td-cell">
-                        <select class="celda-select central bold text-blue val-tipo">
-                            <option value="URBANO">URBANO</option>
-                            <option value="FLEX">FLEX</option>
-                            <option value="ACUERDO">ACUERDO</option>
-                        </select>
-                    </td>
-                    <td class="td-cell">
-                        <input type="text" value="" class="celda-input central val-marca">
-                    </td>
-                    <td class="td-cell">
-                        <input type="text" value="" class="celda-input val-categoria">
-                    </td>
-                    <td class="td-cell">
-                        <input type="text" value="" class="celda-input mono font-bold val-sku">
-                    </td>
-                    <td class="td-cell">
-                        <input type="text" value="" class="celda-input central bold text-dark val-modelo">
-                    </td>
-                    <td class="td-cell">
-                        <input type="text" value="" class="celda-input val-producto">
-                    </td>
-                    <td class="td-cell">
-                        <input type="number" value="" class="celda-input central bold val-cantidad">
-                    </td>
-                    <td class="td-cell" style="background: #f0fdf4;">
-                        <input type="number" step="0.01" value="" class="celda-input derecha bold text-green val-precio">
-                    </td>
-                    <td class="td-cell" style="background: #f0fdf4;">
-                        <input type="number" step="0.01" value="" class="celda-input derecha bold text-green val-totalv">
-                    </td>
-                    <td class="td-cell" style="background: #f0fdf4;">
-                        <input type="number" step="0.01" value="" class="celda-input derecha text-red val-porc-cargo">
-                    </td>
-                    <td class="td-cell" style="background: #f0fdf4;">
-                        <input type="number" step="0.01" value="" class="celda-input derecha val-urbano">
-                    </td>
-                    <td class="td-cell" style="background: #f0fdf4;">
-                        <input type="number" step="0.01" value="" class="celda-input derecha val-flex">
-                    </td>
-                    <td class="td-cell" style="background: #dcfce7;">
-                        <input type="number" step="0.01" value="" class="celda-input derecha bold text-green val-totalpagado">
-                    </td>
-                    <td class="td-cell" style="background: #fef2f2;">
-                        <input type="number" step="0.01" value="" class="celda-input derecha bold text-red val-costoxprod">
-                    </td>
-                    <td class="td-cell" style="background: #fef2f2;">
-                        <input type="number" value="" class="celda-input central val-und">
-                    </td>
-                    <td class="td-cell" style="background: #fef2f2;">
-                        <input type="number" step="0.01" value="" class="celda-input derecha bold text-red val-costototal">
-                    </td>
-                    <td class="td-cell" style="background: #fef2f2;">
-                        <input type="number" step="0.01" value="" class="celda-input derecha text-red val-costoentrega">
-                    </td>
-                    <td class="td-cell" style="background: #eff6ff;">
-                        <input type="number" step="0.01" value="" class="celda-input derecha bold text-blue val-ganancia">
-                    </td>
-                    <td class="td-cell" style="background: #eff6ff;">
-                        <input type="text" value="" class="celda-input central bold text-blue val-rentabilidad">
-                    </td>
-                    <td class="td-cell">
-                        <input type="text" value="" class="celda-input val-distrito">
-                    </td>
-                    <td class="td-cell">
-                        <input type="text" value="" class="celda-input val-direccion">
-                    </td>
-                    <td class="td-cell">
-                        <input type="text" value="" class="celda-input val-repartidor">
-                    </td>
-                    <td class="td-cell">
-                        <input type="text" value="" class="celda-input central mono val-celular">
-                    </td>
-                    <td class="td-cell" style="text-align: center;">
-                        <input type="checkbox" class="check-agradecimiento val-msj">
-                    </td>
-                </tr>
+                {% if simulaciones %}
+                    {% for sim in simulaciones %}
+                    <tr class="fila-simulador">
+                        <td class="td-cell"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype" value="{{ sim.item_type|default_if_none:'' }}"></td>
+                        <td class="td-cell td-link-container" style="background: #f8fafc;">
+                            <input type="text" class="celda-input val-link text-blue" readonly value="{{ sim.link|default_if_none:'' }}">
+                            <a href="{{ sim.link|default:'#' }}" target="_blank" class="btn-link" style="{% if sim.link %}display: inline-block;{% else %}display: none;{% endif %}"><i class="fas fa-external-link-alt"></i></a>
+                        </td>
+                        <td class="td-cell"><input list="list-estado" class="celda-input central val-estado" value="{{ sim.estado_publicacion|default_if_none:'' }}"></td>
+                        <td class="td-cell" style="background: #fffdec;"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub" style="color: var(--color-principal);" value="{{ sim.cod_publicacion|default_if_none:'' }}"></td>
+                        <td class="td-cell"><input list="list-tipopub" class="celda-input central val-tipo" value="{{ sim.tipo_publicacion|default_if_none:'' }}"></td>
+                        <td class="td-cell"><input type="text" class="celda-input central val-codprod" oninput="buscarCosto(this)" value="{{ sim.cod_producto|default_if_none:'' }}"></td>
+                        <td class="td-cell"><input list="list-categoria" class="celda-input val-categoria" oninput="buscarComision(this)" value="{{ sim.categoria|default_if_none:'' }}"></td>
+                        <td class="td-cell"><input list="list-marca" class="celda-input val-marca" value="{{ sim.marca|default_if_none:'' }}"></td>
+                        <td class="td-cell"><input type="text" class="celda-input val-producto" value="{{ sim.producto|default_if_none:'' }}"></td>
+                        <td class="td-cell" style="background: #f8fafc;"><input type="text" class="celda-input derecha bold val-ptachado" readonly tabindex="-1" value="{{ sim.precio_tachado|stringformat:'.2f'|default:'' }}" style="color: #64748b;"></td>
+                        <td class="td-cell"><input type="number" step="0.01" class="celda-input central bold val-dscto" oninput="calcularFila(this)" value="{{ sim.porc_descuento|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-cell" style="background: #f0fdf4;"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)" value="{{ sim.precio_venta|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-envio" oninput="calcularFila(this)" value="{{ sim.costo_envio|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input central text-red val-porc-com" readonly tabindex="-1" value="{% if sim.nueva_comision_ref %}{{ sim.nueva_comision_ref|stringformat:'.2f' }}{% elif sim.porc_comision %}{{ sim.porc_comision|stringformat:'.2f' }}{% else %}0.00{% endif %}"></td>
+                        <td class="td-cell" style="background: #fef2f2;"><input type="text" class="celda-input derecha text-red val-com-soles" readonly tabindex="-1" value="{{ sim.comision_soles|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-cell" style="background: #dcfce7;"><input type="text" class="celda-input derecha bold text-green val-pago-neto" readonly tabindex="-1" value="{{ sim.pago_neto|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input derecha text-red val-costo" readonly tabindex="-1" value="{% if sim.nuevo_costo_ref %}{{ sim.nuevo_costo_ref|stringformat:'.2f' }}{% elif sim.costo_producto %}{{ sim.costo_producto|stringformat:'.2f' }}{% else %}0.00{% endif %}"></td>
+                        <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input derecha bold val-ganancia" readonly tabindex="-1" value="{{ sim.ganancia|stringformat:'.2f'|default:'' }}" style="color: {% if sim.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
+                        <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input central bold val-rentabilidad" readonly tabindex="-1" value="{{ sim.rentabilidad_porc|stringformat:'.2f'|default:'' }}%" style="color: {% if sim.rentabilidad_porc < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
+                        <td class="td-cell"><input type="text" class="celda-input central bold val-mpe" readonly tabindex="-1" style="background: #f1f5f9; cursor: not-allowed;" value="{{ sim.mpe|default:'MPE' }}"></td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr class="fila-simulador">
+                        <td class="td-cell"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype"></td>
+                        <td class="td-cell td-link-container" style="background: #f8fafc;">
+                            <input type="text" class="celda-input val-link text-blue" readonly placeholder="Link..." style="cursor: not-allowed;">
+                            <a href="#" target="_blank" class="btn-link" style="display: none;"><i class="fas fa-external-link-alt"></i></a>
+                        </td>
+                        <td class="td-cell"><input list="list-estado" class="celda-input central val-estado"></td>
+                        <td class="td-cell" style="background: #fffdec;"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub" style="color: var(--color-principal);" placeholder="Ej. 123456"></td>
+                        <td class="td-cell"><input list="list-tipopub" class="celda-input central val-tipo"></td>
+                        <td class="td-cell"><input type="text" class="celda-input central val-codprod" oninput="buscarCosto(this)"></td>
+                        <td class="td-cell"><input list="list-categoria" class="celda-input val-categoria" oninput="buscarComision(this)"></td>
+                        <td class="td-cell"><input list="list-marca" class="celda-input val-marca"></td>
+                        <td class="td-cell"><input type="text" class="celda-input val-producto"></td>
+                        <td class="td-cell" style="background: #f8fafc;"><input type="text" class="celda-input derecha bold val-ptachado" readonly tabindex="-1" style="color: #64748b;"></td>
+                        <td class="td-cell"><input type="number" step="0.01" class="celda-input central bold val-dscto" oninput="calcularFila(this)"></td>
+                        <td class="td-cell" style="background: #f0fdf4;"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)"></td>
+                        <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-envio" oninput="calcularFila(this)"></td>
+                        <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input central text-red val-porc-com" readonly tabindex="-1" value="0.00"></td>
+                        <td class="td-cell" style="background: #fef2f2;"><input type="text" class="celda-input derecha text-red val-com-soles" readonly tabindex="-1"></td>
+                        <td class="td-cell" style="background: #dcfce7;"><input type="text" class="celda-input derecha bold text-green val-pago-neto" readonly tabindex="-1"></td>
+                        <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input derecha text-red val-costo" readonly tabindex="-1" value="0.00"></td>
+                        <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input derecha bold val-ganancia" readonly tabindex="-1"></td>
+                        <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input central bold val-rentabilidad" readonly tabindex="-1"></td>
+                        <td class="td-cell"><input type="text" class="celda-input central bold val-mpe" readonly tabindex="-1" style="background: #f1f5f9; cursor: not-allowed;" value="MPE"></td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
 
-    <div class="reporte-footer">
-        <button type="button" onclick="agregarFilaVacia()" class="btn-agregar-fila">
-            <i class="fas fa-plus"></i> Agregar nueva fila manualmente
+    <div class="simulador-footeracciones">
+        <button type="button" onclick="agregarFila()" class="btn-agregar-fila">
+            <i class="fas fa-plus"></i> Agregar nueva fila de simulación
         </button>
     </div>
 </div>
 
 <style>
-    /* -----------------------------------------------------------
-       DISEÑO MODERNO Y UNIFICADO
-    ----------------------------------------------------------- */
-    .reporte-container {
-        border-top: 4px solid var(--color-principal);
-        padding: 25px;
-        background-color: #fff;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
-        border-radius: 8px;
-    }
-
-    .reporte-header { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        margin-bottom: 25px; 
-        flex-wrap: wrap; 
-        gap: 15px; 
-    }
-
-    .reporte-titulo { 
-        margin: 0; 
-        color: #1e293b; 
-        text-transform: uppercase; 
-        font-size: 1.25rem; 
-        font-weight: 700; 
-        display: flex; 
-        align-items: center; 
-        gap: 10px; 
-    }
-
-    .icono-titulo { 
-        color: var(--color-principal); 
-        font-size: 1.2em; 
-    }
-
-    .reporte-acciones { 
-        display: flex; 
-        gap: 12px; 
-        align-items: center; 
-        position: relative; 
-    }
-
-    /* FILTROS SUPERIORES */
-    .filtros-container { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-        gap: 15px; 
-        margin-bottom: 20px; 
-        background-color: #f8fafc; 
-        padding: 15px; 
-        border-radius: 8px; 
-        border: 1px solid #e2e8f0; 
-    }
-
-    .label-filtro { 
-        display: block; 
-        font-size: 0.75rem; 
-        font-weight: 700; 
-        color: #64748b; 
-        margin-bottom: 4px; 
-    }
-
-    .input-filtro { 
-        width: 100%; 
-        padding: 8px 12px; 
-        border: 1px solid #cbd5e1; 
-        border-radius: 6px; 
-        outline: none; 
-        box-sizing: border-box; 
-        font-family: inherit; 
-        font-size: 0.85rem; 
-    }
-
-    .input-filtro:focus { 
-        border-color: var(--color-principal); 
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); 
-    }
-
-    /* BOTONES MODERNOS */
-    .btn-accion { 
-        border: none; 
-        padding: 10px 18px; 
-        border-radius: 6px; 
-        font-weight: 600; 
-        cursor: pointer; 
-        display: flex; 
-        align-items: center; 
-        gap: 8px; 
-        font-size: 0.85rem; 
-        transition: all 0.2s ease; 
-        font-family: inherit; 
-    }
-
-    .btn-principal { 
-        background-color: var(--color-principal); 
-        color: white; 
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-    }
-
-    .btn-principal:hover { 
-        filter: brightness(0.9); 
-        transform: translateY(-1px); 
-    }
-
-    .btn-secundario { 
-        background-color: #475569; 
-        color: white; 
-    }
-
-    .btn-secundario:hover { 
-        background-color: #334155; 
-    }
-
-    .btn-importar { 
-        background-color: #f59e0b; 
-        color: white; 
-    }
-
-    .btn-importar:hover { 
-        background-color: #d97706; 
-    }
-
-    .btn-exportar { 
-        background-color: #0ea5e9; 
-        color: white; 
-    }
-
-    .btn-exportar:hover { 
-        background-color: #0284c7; 
-    }
-
-    /* TABLA Y CELDAS AUTOMÁTICAS */
-    .tabla-scroll-container { 
-        overflow-x: auto; 
-        max-height: 650px; 
-        border: 1px solid #e2e8f0; 
-        border-radius: 8px; 
-        background-color: #fff; 
-    }
-
-    .tabla-reporte-moderna { 
-        width: auto; 
-        border-collapse: collapse; 
-        font-size: 0.8rem; 
-        white-space: nowrap; 
-    }
-
-    .tabla-reporte-moderna thead { 
-        position: sticky; 
-        top: 0; 
-        z-index: 10; 
-        background-color: #f8fafc; 
-    }
-
-    .th-rep { 
-        padding: 12px 10px; 
-        border-bottom: 2px solid #cbd5e1; 
-        border-right: 1px solid #e2e8f0; 
-        text-align: center; 
-        font-weight: 700; 
-        color: #334155; 
-        text-transform: uppercase; 
-    }
+    /* ESTILOS DEL SIMULADOR */
+    .simulador-container { border-top: 4px solid var(--color-principal); padding: 25px; background-color: #fff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important; border-radius: 8px; }
+    .simulador-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+    .simulador-titulo { margin: 0; color: #1e293b; text-transform: uppercase; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .icono-titulo { color: var(--color-principal); font-size: 1.2em; }
+    .simulador-acciones { display: flex; gap: 12px; align-items: center; position: relative; }
     
-    .fila-reporte { 
-        border-bottom: 1px solid #f1f5f9; 
-        transition: background-color 0.2s; 
-    }
+    .btn-accion { border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; transition: all 0.2s ease; font-family: inherit; }
+    .btn-principal { background-color: var(--color-principal); color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .btn-principal:hover { filter: brightness(0.9); transform: translateY(-1px); }
+    .btn-secundario { background-color: #475569; color: white; }
+    .btn-secundario:hover { background-color: #334155; }
+    .btn-importar { background-color: #f59e0b; color: white; }
+    .btn-importar:hover { background-color: #d97706; }
+    .btn-exportar { background-color: #0ea5e9; color: white; }
+    .btn-exportar:hover { background-color: #0284c7; }
 
-    .fila-reporte:hover { 
-        background-color: #f8fafc; 
-    }
+    .tabla-scroll-container { overflow-x: auto; max-height: 650px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #fff; }
+    .tabla-simulador-moderna { width: max-content; border-collapse: collapse; font-size: 0.8rem; white-space: nowrap; table-layout: fixed; }
+    .tabla-simulador-moderna thead { position: sticky; top: 0; z-index: 10; background-color: #f8fafc; }
+    .th-rep { padding: 14px 12px; border-bottom: 2px solid #e2e8f0; border-right: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; font-family: inherit; }
+    .fila-simulador { border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s ease; }
+    .fila-simulador:hover { background-color: #f8fafc; }
+    .td-cell { padding: 0; border-right: 1px solid #f1f5f9; vertical-align: middle; }
 
-    .td-cell { 
-        padding: 0; 
-        border-right: 1px solid #f1f5f9; 
-        vertical-align: middle; 
-    }
+    .celda-input { width: 100%; box-sizing: border-box; border: 2px solid transparent; padding: 10px 8px; color: #1e293b; background: transparent; outline: none; field-sizing: content; font-size: 0.85rem; font-family: inherit !important; transition: all 0.15s ease; }
+    .celda-input:not([readonly]):focus { background-color: #fff; border-color: var(--color-principal); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); color: #000; border-radius: 4px; z-index: 1; position: relative; }
+    .celda-input[readonly] { cursor: default; }
 
-    .celda-input, .celda-select { 
-        width: 100%; 
-        box-sizing: border-box; 
-        border: 2px solid transparent; 
-        padding: 8px 6px; 
-        font-family: inherit !important; 
-        font-size: 13px; 
-        color: #475569; 
-        background: transparent; 
-        outline: none; 
-        field-sizing: content; /* CRECIMIENTO AUTOMÁTICO */
-        min-width: 60px; 
-        transition: all 0.15s ease;
-    }
-    
-    .celda-input:not([readonly]):focus, .celda-select:focus { 
-        background-color: #fff; 
-        border-color: var(--color-principal); 
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); 
-        color: #000; 
-        border-radius: 4px; 
-        position: relative; 
-        z-index: 1; 
-    }
-    
-    .celda-select { 
-        cursor: pointer; 
-        appearance: auto; 
-    }
+    /* ANCHOS DE COLUMNAS DEL SIMULADOR */
+    .th-itemtype, .val-itemtype { min-width: 90px; }
+    .th-link, .val-link { min-width: 200px; }
+    .th-estado, .val-estado { min-width: 90px; }
+    .th-codpub, .val-codpub { min-width: 100px; }
+    .th-tipo, .val-tipo { min-width: 110px; }
+    .th-codprod, .val-codprod { min-width: 100px; }
+    .th-categoria, .val-categoria { min-width: 220px; }
+    .th-marca, .val-marca { min-width: 130px; }
+    .th-producto, .val-producto { min-width: 300px; }
+    .th-mpe, .val-mpe { min-width: 130px; }
+    .th-ptachado, .th-dscto, .th-venta, .th-envio, .th-porccom, .th-comsoles, .th-pagoneto, .th-costo, .th-ganancia, .th-rentabilidad { min-width: 85px; }
 
-    .check-agradecimiento { 
-        width: 18px; 
-        height: 18px; 
-        cursor: pointer; 
-        accent-color: var(--color-principal); 
-    }
+    .central { text-align: center; } .derecha { text-align: right; } .bold { font-weight: 700; }
+    .text-dark { color: #0f172a; } .text-blue { color: #2563eb; } .text-green { color: #166534; } .text-red { color: #dc2626; }
+    .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .celda-input[type=number] { -moz-appearance: textfield; }
 
-    /* ANCHOS MÍNIMOS REFERENCIALES (Para que no colapse) */
-    .th-producto, .val-producto { min-width: 250px; }
-    .th-direccion, .val-direccion { min-width: 200px; }
-    .th-categoria, .val-categoria { min-width: 150px; }
-    .th-sku, .val-sku { min-width: 120px; }
-    .th-orden, .val-orden, .th-repartidor, .val-repartidor { min-width: 110px; }
+    .td-link-container { display: flex; align-items: center; height: 41px; padding-right: 5px; }
+    .btn-link { color: var(--color-principal); text-decoration: none; font-size: 0.9rem; padding: 0 8px; transition: transform 0.2s ease; }
+    .btn-link:hover { transform: scale(1.2); }
 
-    /* MODIFICADORES */
-    .central { 
-        text-align: center; 
-    } 
-    .derecha { 
-        text-align: right; 
-    } 
-    .bold { 
-        font-weight: 700; 
-    }
-    .text-dark { 
-        color: #0f172a; 
-    } 
-    .text-blue { 
-        color: #2563eb; 
-    } 
-    .text-green { 
-        color: #166534; 
-    } 
-    .text-red { 
-        color: #dc2626; 
-    }
-    .mono { 
-        font-family: monospace; 
-    }
-    
-    .celda-input::-webkit-outer-spin-button, 
-    .celda-input::-webkit-inner-spin-button { 
-        -webkit-appearance: none; 
-        margin: 0; 
-    }
-    
-    .celda-input[type=number] { 
-        -moz-appearance: textfield; 
-    }
+    .simulador-footeracciones { margin-top: 25px; display: flex; justify-content: center; }
+    .btn-agregar-fila { background-color: #f1f5f9; color: #475569; border: 2px dashed #cbd5e1; padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; transition: all 0.2s ease; font-family: inherit; }
+    .btn-agregar-fila:hover { background-color: #e2e8f0; border-color: #94a3b8; color: #1e293b; transform: translateY(-2px); }
 
-    /* FOOTER Y PANEL */
-    .reporte-footer { 
-        margin-top: 20px; 
-        display: flex; 
-        justify-content: flex-start; 
-    }
-
-    .btn-agregar-fila { 
-        background-color: #f1f5f9; 
-        color: #475569; 
-        border: 2px dashed #cbd5e1; 
-        padding: 10px 20px; 
-        border-radius: 8px; 
-        font-weight: 600; 
-        cursor: pointer; 
-        display: flex; 
-        align-items: center; 
-        gap: 10px; 
-        font-family: inherit; 
-        transition: 0.2s; 
-    }
-
-    .btn-agregar-fila:hover { 
-        background-color: #e2e8f0; 
-        color: #1e293b; 
-    }
-    
-    .panel-columnas { 
-        display: none; 
-        position: absolute; 
-        right: 0; 
-        top: 115%; 
-        background: white; 
-        border: 1px solid #e2e8f0; 
-        border-radius: 12px; 
-        padding: 20px; 
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-        z-index: 100; 
-        width: 650px; 
-        animation: slideInDown 0.2s ease; 
-    }
-
-    .panel-header { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        border-bottom: 1px solid #f1f5f9; 
-        padding-bottom: 15px; 
-        margin-bottom: 15px; 
-    }
-
-    .panel-titulo { 
-        margin: 0; 
-        color: #1e293b; 
-        font-size: 1rem; 
-        font-weight: 700; 
-        display: flex; 
-        align-items: center; 
-        gap: 8px; 
-    }
-
-    .btn-cerrar-panel { 
-        background: none; 
-        border: none; 
-        color: #94a3b8; 
-        cursor: pointer; 
-        font-size: 1.5rem; 
-    }
-
-    .grid-columnas { 
-        display: grid; 
-        grid-template-columns: repeat(4, 1fr); 
-        gap: 12px; 
-    }
-
-    .label-columna { 
-        display: flex; 
-        align-items: center; 
-        gap: 8px; 
-        font-size: 0.8rem; 
-        font-weight: 600; 
-        color: #475569; 
-        cursor: pointer; 
-    }
-
-    @keyframes slideInDown { 
-        from { opacity: 0; transform: translateY(-10px); } 
-        to { opacity: 1; transform: translateY(0); } 
-    }
+    .panel-columnas { display: none; position: absolute; right: 0; top: 115%; background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 100; width: 650px; animation: slideInDown 0.3s ease; }
+    .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 15px; }
+    .panel-titulo { margin: 0; color: #1e293b; font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .fa-tasksTituloPanel { color: var(--color-principal); }
+    .btn-cerrar-panel { background: #f1f5f9; border: none; color: #94a3b8; cursor: pointer; font-size: 1.4rem; line-height: 1; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+    .btn-cerrar-panel:hover { background-color: #fee2e2; color: #dc2626; }
+    .grid-columnas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .label-columna { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; font-weight: 600; color: #475569; cursor: pointer; padding: 6px; border-radius: 6px; transition: background-color 0.2s ease; }
+    .label-columna:hover { background-color: #f1f5f9; color: #1e293b; }
+    .check-opcion { width: 16px; height: 16px; accent-color: var(--color-principal); cursor: pointer; }
+    @keyframes slideInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 
 <script>
-    // 1. GESTIÓN DEL PANEL DE COLUMNAS
+    const mapaComisiones = {{ mapa_comisiones_json|safe|default:"{}" }};
+    const mapaCostos = {{ mapa_costos_json|safe|default:"{}" }};
+
+    function buscarComision(inputCat) {
+        const fila = inputCat.closest('tr');
+        const categoriaSeleccionada = inputCat.value.toUpperCase().trim();
+        const inputComision = fila.querySelector('.val-porc-com');
+        if (categoriaSeleccionada && mapaComisiones[categoriaSeleccionada] !== undefined) {
+            inputComision.value = mapaComisiones[categoriaSeleccionada].toFixed(2);
+        } else {
+            inputComision.value = '0.00';
+        }
+        calcularFila(inputCat);
+    }
+
+    function buscarCosto(inputCodProd) {
+        const fila = inputCodProd.closest('tr');
+        const codigoSeleccionado = inputCodProd.value.trim();
+        const inputCosto = fila.querySelector('.val-costo');
+        
+        if (codigoSeleccionado && mapaCostos[codigoSeleccionado.toUpperCase()] !== undefined) {
+            inputCosto.value = mapaCostos[codigoSeleccionado.toUpperCase()].toFixed(2);
+        } else {
+            inputCosto.value = '0.00';
+        }
+        calcularFila(inputCodProd);
+    }
+
     function togglePanelColumnas() {
         const panel = document.getElementById("panelPersonalizarColumnas");
         panel.style.display = panel.style.display === "none" ? "block" : "none";
@@ -569,12 +264,8 @@
             if (!colName) return;
             const label = document.createElement("label");
             label.className = "label-columna";
-            
             const cb = document.createElement("input");
-            cb.type = "checkbox"; 
-            cb.checked = true; 
-            cb.dataset.colIndex = index + 1;
-            
+            cb.type = "checkbox"; cb.checked = true; cb.className = "check-opcion"; cb.dataset.colIndex = index + 1;
             cb.addEventListener("change", function() {
                 const colIdx = this.dataset.colIndex;
                 const displayState = this.checked ? "" : "none";
@@ -585,75 +276,116 @@
                     if(cell) cell.style.display = displayState;
                 });
             });
-            
-            label.appendChild(cb); 
-            label.appendChild(document.createTextNode(colName)); 
-            container.appendChild(label);
+            label.appendChild(cb); label.appendChild(document.createTextNode(colName)); container.appendChild(label);
+        });
+
+        document.querySelectorAll('.fila-simulador').forEach(fila => {
+            const inputVenta = fila.querySelector('.val-venta');
+            const inputCodPub = fila.querySelector('.val-codpub');
+            const inputMPE = fila.querySelector('.val-mpe');
+            if (inputCodPub && inputMPE) {
+                let codigo = inputCodPub.value.trim().replace(/^MPE-?/i, '');
+                if (codigo !== '') inputMPE.value = 'MPE' + codigo;
+                else inputMPE.value = 'MPE';
+            }
+            if (inputVenta) calcularFila(inputVenta);
         });
     });
 
-    // 2. AGREGAR FILA VACÍA
-    function agregarFilaVacia() {
-        const tbody = document.querySelector('#tablaReporte tbody');
-        const filaMolde = tbody.querySelector('.fila-reporte').cloneNode(true);
-        filaMolde.querySelectorAll('input, select').forEach(input => {
-            if(input.type === 'checkbox') {
-                input.checked = false;
-            } else {
-                input.value = '';
-            }
-        });
-        tbody.appendChild(filaMolde);
+    function generarLink(inputCodigo) {
+        const fila = inputCodigo.closest('tr');
+        let codigo = inputCodigo.value.trim().replace(/^MPE-?/i, '');
+        const inputLink = fila.querySelector('.val-link');
+        const botonLink = fila.querySelector('.btn-link');
+        const inputMPE = fila.querySelector('.val-mpe');
+
+        if (codigo !== '') {
+            const urlCompleta = `http://articulo.mercadolibre.com.pe/MPE-${codigo}`;
+            inputLink.value = urlCompleta;
+            botonLink.href = urlCompleta;
+            botonLink.style.display = 'inline-block';
+            if(inputMPE) inputMPE.value = 'MPE' + codigo;
+        } else {
+            inputLink.value = ''; botonLink.href = '#'; botonLink.style.display = 'none';
+            if(inputMPE) inputMPE.value = 'MPE';
+        }
     }
 
-    // 3. EXPORTAR A EXCEL (Extrae los datos de las clases "val-...")
-    function exportarExcel() {
-        const filas = document.querySelectorAll('.fila-reporte');
-        let data = [];
+    function calcularFila(elemento) {
+        const fila = elemento.closest('tr');
+        const pVenta = parseFloat(fila.querySelector('.val-venta').value) || 0;
+        const dscto = parseFloat(fila.querySelector('.val-dscto').value) || 0;
+        const envio = parseFloat(fila.querySelector('.val-envio').value) || 0;
+        const porcCom = parseFloat(fila.querySelector('.val-porc-com').value) || 0;
+        const costo = parseFloat(fila.querySelector('.val-costo').value) || 0;
+
+        let pTachado = (pVenta > 0 && dscto < 100) ? (pVenta / ((100 - dscto) / 100)).toFixed(2) : (pVenta > 0 ? pVenta.toFixed(2) : '');
+        fila.querySelector('.val-ptachado').value = pTachado;
+
+        const comSoles = pVenta * (porcCom / 100);
+        const pagoNeto = pVenta - comSoles - envio;
+        const ganancia = pagoNeto - costo;
+        const rentabilidad = costo > 0 ? (ganancia / costo) * 100 : 0;
+
+        fila.querySelector('.val-com-soles').value = comSoles.toFixed(2);
+        fila.querySelector('.val-pago-neto').value = pagoNeto.toFixed(2);
         
+        const inputGanancia = fila.querySelector('.val-ganancia');
+        inputGanancia.value = ganancia.toFixed(2);
+        inputGanancia.style.color = ganancia < 0 ? '#dc2626' : '#1e40af';
+        
+        const inputRentabilidad = fila.querySelector('.val-rentabilidad');
+        inputRentabilidad.value = rentabilidad.toFixed(2) + '%';
+        inputRentabilidad.style.color = rentabilidad < 0 ? '#dc2626' : '#1e40af';
+    }
+
+    function agregarFila() {
+        const tbody = document.querySelector('#tablaReporte tbody');
+        const primeraFila = tbody.querySelector('tr');
+        const nuevaFila = primeraFila.cloneNode(true);
+        nuevaFila.querySelectorAll('input').forEach(input => input.value = '');
+        nuevaFila.querySelector('.val-mpe').value = 'MPE';
+        nuevaFila.querySelector('.btn-link').style.display = 'none';
+        nuevaFila.querySelector('.val-ganancia').style.color = '#475569';
+        nuevaFila.querySelector('.val-rentabilidad').style.color = '#475569';
+        tbody.appendChild(nuevaFila);
+    }
+
+    function exportarSimulador() {
+        const filas = document.querySelectorAll('.fila-simulador');
+        let data = [];
         filas.forEach(fila => {
             data.push({
-                "FECHA": fila.querySelector('.val-fecha')?.value || '',
-                "MES Y AÑO": fila.querySelector('.val-mes')?.value || '',
-                "NRO. ORDEN": fila.querySelector('.val-orden')?.value || '',
-                "COMPROBANTE": fila.querySelector('.val-comprobante')?.value || '',
-                "TIPO DE VENTA": fila.querySelector('.val-tipo')?.value || '',
-                "MARCA": fila.querySelector('.val-marca')?.value || '',
+                "ITEM TYPE": fila.querySelector('.val-itemtype')?.value || '',
+                "LINK": fila.querySelector('.val-link')?.value || '',
+                "ESTADO": fila.querySelector('.val-estado')?.value || '',
+                "CÓD. PUB": fila.querySelector('.val-codpub')?.value || '',
+                "TIPO": fila.querySelector('.val-tipo')?.value || '',
+                "CÓD. PROD": fila.querySelector('.val-codprod')?.value || '',
                 "CATEGORIA": fila.querySelector('.val-categoria')?.value || '',
-                "SKU ALMACEN": fila.querySelector('.val-sku')?.value || '',
-                "MODELO": fila.querySelector('.val-modelo')?.value || '',
+                "MARCA": fila.querySelector('.val-marca')?.value || '',
                 "PRODUCTO": fila.querySelector('.val-producto')?.value || '',
-                "CANT.": fila.querySelector('.val-cantidad')?.value || '',
-                "PRECIO": fila.querySelector('.val-precio')?.value || '',
-                "TOTAL V.": fila.querySelector('.val-totalv')?.value || '',
-                "%CARGO x VENTA": fila.querySelector('.val-porc-cargo')?.value || '',
-                "URBANO": fila.querySelector('.val-urbano')?.value || '',
-                "FLEX": fila.querySelector('.val-flex')?.value || '',
-                "TOTAL PAGADO": fila.querySelector('.val-totalpagado')?.value || '',
-                "COSTO x PROD": fila.querySelector('.val-costoxprod')?.value || '',
-                "UND": fila.querySelector('.val-und')?.value || '',
-                "COSTO TOTAL": fila.querySelector('.val-costototal')?.value || '',
-                "COSTO ENTREGA": fila.querySelector('.val-costoentrega')?.value || '',
+                "P. TACHADO": fila.querySelector('.val-ptachado')?.value || '',
+                "% DSCTO": fila.querySelector('.val-dscto')?.value || '',
+                "P. VENTA": fila.querySelector('.val-venta')?.value || '',
+                "ENVÍO": fila.querySelector('.val-envio')?.value || '',
+                "% NUEVA COM": fila.querySelector('.val-porc-com')?.value || '',
+                "COM (S/)": fila.querySelector('.val-com-soles')?.value || '',
+                "PAGO NETO": fila.querySelector('.val-pago-neto')?.value || '',
+                "COSTO": fila.querySelector('.val-costo')?.value || '',
                 "GANANCIA": fila.querySelector('.val-ganancia')?.value || '',
-                "RENTABILIDAD %": fila.querySelector('.val-rentabilidad')?.value || '',
-                "DISTRITO": fila.querySelector('.val-distrito')?.value || '',
-                "DIRECCIÓN": fila.querySelector('.val-direccion')?.value || '',
-                "REPARTIDOR": fila.querySelector('.val-repartidor')?.value || '',
-                "CELULAR": fila.querySelector('.val-celular')?.value || '',
-                "MSJ ENVIADO": fila.querySelector('.val-msj')?.checked ? 'SI' : 'NO'
+                "RTBLD%": fila.querySelector('.val-rentabilidad')?.value || '',
+                "MPE": fila.querySelector('.val-mpe')?.value || ''
             });
         });
-
         if(data.length === 0) return alert("No hay datos para exportar.");
-        
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Reporte Ventas");
-        XLSX.writeFile(wb, "Reporte_MercadoLibre.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "Simulador ML");
+        XLSX.writeFile(wb, "Simulador_MercadoLibre.xlsx");
     }
 
-    // 4. IMPORTAR DESDE EXCEL
-    function importarExcel(event) {
+    function importarSimulador(event) {
         const file = event.target.files[0];
         if (!file) return;
 
@@ -662,105 +394,87 @@
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, {type: 'array'});
             const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-            // Convertimos la hoja de Excel a un arreglo JSON
             const json = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
 
             const tbody = document.querySelector('#tablaReporte tbody');
-            const filaMolde = tbody.querySelector('.fila-reporte').cloneNode(true);
-            
-            // Limpiamos la tabla para cargar los nuevos datos
+            const filaMolde = tbody.querySelector('.fila-simulador').cloneNode(true);
             tbody.innerHTML = ''; 
 
             json.forEach(row => {
                 const nuevaFila = filaMolde.cloneNode(true);
                 
-                // Mapeo inverso de los nombres de columnas del Excel hacia tus inputs
-                if (nuevaFila.querySelector('.val-fecha')) nuevaFila.querySelector('.val-fecha').value = row["FECHA"] || '';
-                if (nuevaFila.querySelector('.val-mes')) nuevaFila.querySelector('.val-mes').value = row["MES Y AÑO"] || '';
-                if (nuevaFila.querySelector('.val-orden')) nuevaFila.querySelector('.val-orden').value = row["NRO. ORDEN"] || '';
-                if (nuevaFila.querySelector('.val-comprobante')) nuevaFila.querySelector('.val-comprobante').value = row["COMPROBANTE"] || '';
-                if (nuevaFila.querySelector('.val-tipo')) nuevaFila.querySelector('.val-tipo').value = row["TIPO DE VENTA"] || '';
-                if (nuevaFila.querySelector('.val-marca')) nuevaFila.querySelector('.val-marca').value = row["MARCA"] || '';
+                if (nuevaFila.querySelector('.val-itemtype')) nuevaFila.querySelector('.val-itemtype').value = row["ITEM TYPE"] || '';
+                if (nuevaFila.querySelector('.val-link')) nuevaFila.querySelector('.val-link').value = row["LINK"] || '';
+                if (nuevaFila.querySelector('.val-estado')) nuevaFila.querySelector('.val-estado').value = row["ESTADO"] || '';
+                if (nuevaFila.querySelector('.val-codpub')) nuevaFila.querySelector('.val-codpub').value = row["CÓD. PUB"] || '';
+                if (nuevaFila.querySelector('.val-tipo')) nuevaFila.querySelector('.val-tipo').value = row["TIPO"] || '';
+                if (nuevaFila.querySelector('.val-codprod')) nuevaFila.querySelector('.val-codprod').value = row["CÓD. PROD"] || '';
                 if (nuevaFila.querySelector('.val-categoria')) nuevaFila.querySelector('.val-categoria').value = row["CATEGORIA"] || '';
-                if (nuevaFila.querySelector('.val-sku')) nuevaFila.querySelector('.val-sku').value = row["SKU ALMACEN"] || '';
-                if (nuevaFila.querySelector('.val-modelo')) nuevaFila.querySelector('.val-modelo').value = row["MODELO"] || '';
+                if (nuevaFila.querySelector('.val-marca')) nuevaFila.querySelector('.val-marca').value = row["MARCA"] || '';
                 if (nuevaFila.querySelector('.val-producto')) nuevaFila.querySelector('.val-producto').value = row["PRODUCTO"] || '';
-                if (nuevaFila.querySelector('.val-cantidad')) nuevaFila.querySelector('.val-cantidad').value = row["CANT."] || '';
-                if (nuevaFila.querySelector('.val-precio')) nuevaFila.querySelector('.val-precio').value = row["PRECIO"] || '';
-                if (nuevaFila.querySelector('.val-totalv')) nuevaFila.querySelector('.val-totalv').value = row["TOTAL V."] || '';
-                if (nuevaFila.querySelector('.val-porc-cargo')) nuevaFila.querySelector('.val-porc-cargo').value = row["%CARGO x VENTA"] || '';
-                if (nuevaFila.querySelector('.val-urbano')) nuevaFila.querySelector('.val-urbano').value = row["URBANO"] || '';
-                if (nuevaFila.querySelector('.val-flex')) nuevaFila.querySelector('.val-flex').value = row["FLEX"] || '';
-                if (nuevaFila.querySelector('.val-totalpagado')) nuevaFila.querySelector('.val-totalpagado').value = row["TOTAL PAGADO"] || '';
-                if (nuevaFila.querySelector('.val-costoxprod')) nuevaFila.querySelector('.val-costoxprod').value = row["COSTO x PROD"] || '';
-                if (nuevaFila.querySelector('.val-und')) nuevaFila.querySelector('.val-und').value = row["UND"] || '';
-                if (nuevaFila.querySelector('.val-costototal')) nuevaFila.querySelector('.val-costototal').value = row["COSTO TOTAL"] || '';
-                if (nuevaFila.querySelector('.val-costoentrega')) nuevaFila.querySelector('.val-costoentrega').value = row["COSTO ENTREGA"] || '';
+                if (nuevaFila.querySelector('.val-ptachado')) nuevaFila.querySelector('.val-ptachado').value = row["P. TACHADO"] || '';
+                if (nuevaFila.querySelector('.val-dscto')) nuevaFila.querySelector('.val-dscto').value = row["% DSCTO"] || '';
+                if (nuevaFila.querySelector('.val-venta')) nuevaFila.querySelector('.val-venta').value = row["P. VENTA"] || '';
+                if (nuevaFila.querySelector('.val-envio')) nuevaFila.querySelector('.val-envio').value = row["ENVÍO"] || '';
+                if (nuevaFila.querySelector('.val-porc-com')) nuevaFila.querySelector('.val-porc-com').value = row["% NUEVA COM"] || '';
+                if (nuevaFila.querySelector('.val-com-soles')) nuevaFila.querySelector('.val-com-soles').value = row["COM (S/)"] || '';
+                if (nuevaFila.querySelector('.val-pago-neto')) nuevaFila.querySelector('.val-pago-neto').value = row["PAGO NETO"] || '';
+                if (nuevaFila.querySelector('.val-costo')) nuevaFila.querySelector('.val-costo').value = row["COSTO"] || '';
                 if (nuevaFila.querySelector('.val-ganancia')) nuevaFila.querySelector('.val-ganancia').value = row["GANANCIA"] || '';
-                if (nuevaFila.querySelector('.val-rentabilidad')) nuevaFila.querySelector('.val-rentabilidad').value = row["RENTABILIDAD %"] || '';
-                if (nuevaFila.querySelector('.val-distrito')) nuevaFila.querySelector('.val-distrito').value = row["DISTRITO"] || '';
-                if (nuevaFila.querySelector('.val-direccion')) nuevaFila.querySelector('.val-direccion').value = row["DIRECCIÓN"] || '';
-                if (nuevaFila.querySelector('.val-repartidor')) nuevaFila.querySelector('.val-repartidor').value = row["REPARTIDOR"] || '';
-                if (nuevaFila.querySelector('.val-celular')) nuevaFila.querySelector('.val-celular').value = row["CELULAR"] || '';
-                if (nuevaFila.querySelector('.val-msj')) nuevaFila.querySelector('.val-msj').checked = (row["MSJ ENVIADO"] === 'SI');
+                if (nuevaFila.querySelector('.val-rentabilidad')) nuevaFila.querySelector('.val-rentabilidad').value = row["RTBLD%"] || '';
+                if (nuevaFila.querySelector('.val-mpe')) nuevaFila.querySelector('.val-mpe').value = row["MPE"] || '';
+
+                const inputVenta = nuevaFila.querySelector('.val-venta');
+                if(inputVenta) calcularFila(inputVenta);
+                
+                const inputLink = nuevaFila.querySelector('.val-link');
+                const botonLink = nuevaFila.querySelector('.btn-link');
+                if (inputLink && botonLink && inputLink.value.trim() !== '') {
+                    botonLink.href = inputLink.value;
+                    botonLink.style.display = 'inline-block';
+                }
 
                 tbody.appendChild(nuevaFila);
             });
             
             if(json.length === 0) tbody.appendChild(filaMolde);
-            
-            alert("✅ ¡Datos importados correctamente! Recuerda hacer clic en 'Guardar Cambios' para subirlos a la Base de Datos.");
+            alert("✅ ¡Simulación importada correctamente! Haz clic en 'Guardar Simulaciones' para subirlos a la base de datos.");
         };
         reader.readAsArrayBuffer(file);
-        event.target.value = ""; // Resetea el input para poder importar el mismo archivo de nuevo si es necesario
+        event.target.value = ""; 
     }
 
-    // 5. GUARDAR EN BASE DE DATOS (Backend)
-    function guardarReporte() {
-        const btn = document.getElementById('btnGuardarReporte');
-        const filas = document.querySelectorAll('.fila-reporte');
+    function guardarSimulaciones() {
+        const btn = document.getElementById('btnGuardar');
+        const filas = document.querySelectorAll('.fila-simulador');
         let datosAguardar = [];
 
         filas.forEach(fila => {
-            // Solo guardamos si hay una orden válida o un SKU
-            const orden = fila.querySelector('.val-orden')?.value.trim();
-            const sku = fila.querySelector('.val-sku')?.value.trim();
-            
-            if (orden !== '' || sku !== '') {
+            const codPub = fila.querySelector('.val-codpub').value.trim();
+            const producto = fila.querySelector('.val-producto').value.trim();
+            if (codPub !== '' || producto !== '') {
                 datosAguardar.push({
-                    fecha: fila.querySelector('.val-fecha')?.value,
-                    mes: fila.querySelector('.val-mes')?.value,
-                    orden: orden,
-                    comprobante: fila.querySelector('.val-comprobante')?.value,
-                    tipo: fila.querySelector('.val-tipo')?.value,
-                    marca: fila.querySelector('.val-marca')?.value,
-                    categoria: fila.querySelector('.val-categoria')?.value,
-                    sku: sku,
-                    modelo: fila.querySelector('.val-modelo')?.value,
-                    producto: fila.querySelector('.val-producto')?.value,
-                    cantidad: fila.querySelector('.val-cantidad')?.value,
-                    precio: fila.querySelector('.val-precio')?.value,
-                    totalv: fila.querySelector('.val-totalv')?.value,
-                    porc_cargo: fila.querySelector('.val-porc-cargo')?.value,
-                    urbano: fila.querySelector('.val-urbano')?.value,
-                    flex: fila.querySelector('.val-flex')?.value,
-                    totalpagado: fila.querySelector('.val-totalpagado')?.value,
-                    costoxprod: fila.querySelector('.val-costoxprod')?.value,
-                    und: fila.querySelector('.val-und')?.value,
-                    costototal: fila.querySelector('.val-costototal')?.value,
-                    costoentrega: fila.querySelector('.val-costoentrega')?.value,
-                    ganancia: fila.querySelector('.val-ganancia')?.value,
-                    rentabilidad: fila.querySelector('.val-rentabilidad')?.value,
-                    distrito: fila.querySelector('.val-distrito')?.value,
-                    direccion: fila.querySelector('.val-direccion')?.value,
-                    repartidor: fila.querySelector('.val-repartidor')?.value,
-                    celular: fila.querySelector('.val-celular')?.value,
-                    msj: fila.querySelector('.val-msj')?.checked
+                    item_type: fila.querySelector('.val-itemtype').value,
+                    link: fila.querySelector('.val-link').value,
+                    estado: fila.querySelector('.val-estado').value,
+                    cod_pub: codPub,
+                    tipo: fila.querySelector('.val-tipo').value,
+                    cod_prod: fila.querySelector('.val-codprod').value,
+                    categoria: fila.querySelector('.val-categoria').value,
+                    marca: fila.querySelector('.val-marca').value,
+                    producto: producto,
+                    p_tachado: fila.querySelector('.val-ptachado').value || 0,
+                    dscto: fila.querySelector('.val-dscto').value || 0,
+                    p_venta: fila.querySelector('.val-venta').value || 0,
+                    envio: fila.querySelector('.val-envio').value || 0,
+                    porc_comision: fila.querySelector('.val-porc-com').value || 0,
+                    costo: fila.querySelector('.val-costo').value || 0,
+                    mpe: fila.querySelector('.val-mpe').value.trim() !== 'MPE' && fila.querySelector('.val-mpe').value.trim() !== ''
                 });
             }
         });
 
-        if (datosAguardar.length === 0) return alert("No hay datos llenos para guardar.");
+        if (datosAguardar.length === 0) return alert("No hay datos para guardar.");
 
         const textoOriginal = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
@@ -769,23 +483,23 @@
         fetch("{% url 'api_guardar_simulador' %}", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
-            body: JSON.stringify({ datos: datosAguardar })
+            body: JSON.stringify({ plataforma: 'Mercado Libre', datos: datosAguardar })
         })
-        .then(res => res.json())
+        .then(response => response.json())
         .then(data => {
             if(data.status === 'ok') {
-                alert("¡Reporte guardado correctamente en la Base de Datos!");
+                alert("¡Simulación guardada con éxito en la Base de Datos!");
             } else {
-                alert("Error: " + data.message);
+                alert("Error al guardar: " + data.message);
             }
         })
-        .catch(err => {
-            console.error(err);
-            alert("Ocurrió un error al guardar.");
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Ocurrió un error en el guardado.");
         })
-        .finally(() => { 
-            btn.innerHTML = textoOriginal; 
-            btn.disabled = false; 
+        .finally(() => {
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
         });
     }
 </script>
