@@ -766,7 +766,7 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
         btn.disabled = true;
 
-        fetch("{% url 'api_guardar_reporte' %}", {
+        fetch("{% url 'api_guardar_simulador' %}", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
             body: JSON.stringify({ datos: datosAguardar })
