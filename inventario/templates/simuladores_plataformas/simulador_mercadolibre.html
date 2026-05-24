@@ -1,30 +1,30 @@
 {% extends 'inventario/dashboard_global.html' %}
 
 {% block content %}
-<div class="card" style="border-top: 4px solid var(--color-principal); padding: 20px;">
+<div class="card simulador-container">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin: 0; color: #1e293b; text-transform: uppercase;">
-            <i class="fas fa-calculator" style="color: var(--color-principal);"></i> Simulador: {{ canal }}
+    <div class="simulador-header">
+        <h2 class="simulador-titulo">
+            <i class="fas fa-calculatorTitulo"></i> Simulador: {{ canal }}
         </h2>
         
-        <div style="display: flex; gap: 10px; position: relative;">
-            <button type="button" onclick="guardarSimulaciones()" id="btnGuardar" style="background-color: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s;">
+        <div class="simulador-acciones">
+            <button type="button" onclick="guardarSimulaciones()" id="btnGuardar" class="btn-principal btn-guardar">
                 <i class="fas fa-save"></i> Guardar Simulaciones
             </button>
 
-            <button type="button" onclick="togglePanelColumnas()" style="background-color: #475569; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <button type="button" onclick="togglePanelColumnas()" class="btn-secundario btn-opciones">
                 <i class="fas fa-columns"></i> Opciones de Pantalla
             </button>
             
-            <div id="panelPersonalizarColumnas" style="display: none; position: absolute; right: 0; top: 115%; background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 100; width: 750px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
-                    <h4 style="margin: 0; color: #1e293b; font-size: 0.95rem;">
-                        <i class="fas fa-tasks" style="color: var(--color-principal);"></i> Elementos en pantalla
+            <div id="panelPersonalizarColumnas" class="panel-columnas">
+                <div class="panel-header">
+                    <h4 class="panel-titulo">
+                        <i class="fas fa-tasksTituloPanel"></i> Elementos en pantalla
                     </h4>
-                    <button onclick="togglePanelColumnas()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2rem;">&times;</button>
+                    <button onclick="togglePanelColumnas()" class="btn-cerrar-panel">&times;</button>
                 </div>
-                <div id="columnCheckboxes" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;"></div>
+                <div id="columnCheckboxes" class="panel-body grid-columnas"></div>
             </div>
         </div>
     </div>
@@ -41,40 +41,40 @@
         <option value="WAHL"><option value="OSTER"><option value="FINEZZA"><option value="RECORD"><option value="IMACO"><option value="BOSSKO"><option value="TAURUS"><option value="LG"><option value="SAMSUNG"><option value="INDURAMA"><option value="ELECTROLUX"><option value="JBO"><option value="TREVELY"><option value="JVC"><option value="BGH"><option value="PHILIPS"><option value="FUJITEC"><option value="PANASONIC"><option value="SONY"><option value="TCL"><option value="HALION"><option value="MIRAY"><option value="EVOLUTION"><option value="YANBAL"><option value="DSP"><option value="MASTERTECH"><option value="CREST"><option value="GAMA"><option value="WHITELINE"><option value="REMINGTONE"><option value="MAGIC CLIP"><option value="ILUMI"><option value="MABE"><option value="AOC"><option value="TRAMONTINA"><option value="PREMIER"><option value="IMPERIAL"><option value="VISIONNER"><option value="SILVER CREST"><option value="BORD"><option value="EPSON"><option value="SOLE">
     </datalist>
 
-    <div style="overflow-x: auto; max-height: 600px; border: 1px solid #e2e8f0; border-radius: 6px;">
-        <table id="tablaReporte" style="width: max-content; border-collapse: collapse; font-size: 0.8em; white-space: nowrap;">
-            <thead style="position: sticky; top: 0; z-index: 10; background: #f1f5f9;">
+    <div class="tabla-scroll-container">
+        <table id="tablaReporte" class="tabla-simulador-moderna">
+            <thead>
                 <tr>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold;">ITEM TYPE</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold;">LINK</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold;">ESTADO</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold;">CÓD. PUB</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold;">TIPO</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold;">CÓD. PROD</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold;">CATEGORIA</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold;">MARCA</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold;">PRODUCTO</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold; background: #f8fafc;">P. TACHADO</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold; color: #475569;">% DSCTO</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold; background: #dcfce7; color: #166534;">P. VENTA</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold;">ENVÍO</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold; background: #fee2e2; color: #991b1b;">% NUEVA COM</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold; background: #fef2f2; color: #991b1b;">COM (S/)</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold; background: #f0fdf4; color: #166534;">PAGO NETO</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold; background: #fee2e2; color: #991b1b;">COSTO</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold; background: #eff6ff; color: #1e40af;">GANANCIA</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold; background: #eff6ff; color: #1e40af;">RTBLD%</th>
-                    <th class="th-rep" style="padding: 12px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold;">MPE</th>
+                    <th class="th-rep th-itemtype">ITEM TYPE</th>
+                    <th class="th-rep th-link">LINK</th>
+                    <th class="th-rep th-estado">ESTADO</th>
+                    <th class="th-rep th-codpub">CÓD. PUB</th>
+                    <th class="th-rep th-tipo">TIPO</th>
+                    <th class="th-rep th-codprod">CÓD. PROD</th>
+                    <th class="th-rep th-categoria">CATEGORIA</th>
+                    <th class="th-rep th-marca">MARCA</th>
+                    <th class="th-rep th-producto">PRODUCTO</th>
+                    <th class="th-rep th-ptachado" style="background: #f8fafc;">P. TACHADO</th>
+                    <th class="th-rep th-dscto" style="color: #475569;">% DSCTO</th>
+                    <th class="th-rep th-venta" style="background: #dcfce7; color: #166534;">P. VENTA</th>
+                    <th class="th-rep th-envio">ENVÍO</th>
+                    <th class="th-rep th-porccom" style="background: #fee2e2; color: #991b1b;">% NUEVA COM</th>
+                    <th class="th-rep th-comsoles" style="background: #fef2f2; color: #991b1b;">COM (S/)</th>
+                    <th class="th-rep th-pagoneto" style="background: #f0fdf4; color: #166534;">PAGO NETO</th>
+                    <th class="th-rep th-costo" style="background: #fee2e2; color: #991b1b;">COSTO</th>
+                    <th class="th-rep th-ganancia" style="background: #eff6ff; color: #1e40af;">GANANCIA</th>
+                    <th class="th-rep th-rentabilidad" style="background: #eff6ff; color: #1e40af;">RTBLD%</th>
+                    <th class="th-rep th-mpe">MPE</th>
                 </tr>
             </thead>
             <tbody>
                 {% if simulaciones %}
                     {% for sim in simulaciones %}
-                    <tr class="fila-simulador" style="border-bottom: 1px solid #e2e8f0;">
+                    <tr class="fila-simulador">
                         <td class="td-cell"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype" value="{{ sim.item_type|default_if_none:'' }}"></td>
-                        <td class="td-cell" style="display: flex; align-items: center; background: #f8fafc; height: 35px;">
+                        <td class="td-cell td-link-container" style="background: #f8fafc;">
                             <input type="text" class="celda-input val-link text-blue" readonly value="{{ sim.link|default_if_none:'' }}">
-                            <a href="{{ sim.link|default:'#' }}" target="_blank" class="btn-link" style="{% if sim.link %}display: inline-block;{% else %}display: none;{% endif %} padding: 0 5px; color: var(--color-principal); text-decoration: none;"><i class="fas fa-external-link-alt"></i></a>
+                            <a href="{{ sim.link|default:'#' }}" target="_blank" class="btn-link" style="{% if sim.link %}display: inline-block;{% else %}display: none;{% endif %}"><i class="fas fa-external-link-alt"></i></a>
                         </td>
                         <td class="td-cell"><input list="list-estado" class="celda-input central val-estado" value="{{ sim.estado_publicacion|default_if_none:'' }}"></td>
                         <td class="td-cell" style="background: #fffdec;"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub" style="color: var(--color-principal);" value="{{ sim.cod_publicacion|default_if_none:'' }}"></td>
@@ -93,15 +93,15 @@
                         <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input derecha text-red val-costo" readonly tabindex="-1" value="{% if sim.nuevo_costo_ref %}{{ sim.nuevo_costo_ref|stringformat:'.2f' }}{% elif sim.costo_producto %}{{ sim.costo_producto|stringformat:'.2f' }}{% else %}0.00{% endif %}"></td>
                         <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input derecha bold val-ganancia" readonly tabindex="-1" value="{{ sim.ganancia|stringformat:'.2f'|default:'' }}" style="color: {% if sim.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
                         <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input central bold val-rentabilidad" readonly tabindex="-1" value="{{ sim.rentabilidad_porc|stringformat:'.2f'|default:'' }}%" style="color: {% if sim.rentabilidad_porc < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
-                        <td class="td-cell central"><input type="text" class="celda-input central bold val-mpe" readonly tabindex="-1" style="background: #f1f5f9; cursor: not-allowed;" value="{{ sim.mpe|default:'MPE' }}"></td>
+                        <td class="td-cell"><input type="text" class="celda-input central bold val-mpe" readonly tabindex="-1" style="background: #f1f5f9; cursor: not-allowed;" value="{{ sim.mpe|default:'MPE' }}"></td>
                     </tr>
                     {% endfor %}
                 {% else %}
-                    <tr class="fila-simulador" style="border-bottom: 1px solid #e2e8f0;">
+                    <tr class="fila-simulador">
                         <td class="td-cell"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype"></td>
-                        <td class="td-cell" style="display: flex; align-items: center; background: #f8fafc; height: 35px;">
-                            <input type="text" class="celda-input val-link text-blue" readonly placeholder="Link..." style="cursor: not-allowed; font-size: 0.8em; padding-right: 5px;">
-                            <a href="#" target="_blank" class="btn-link" style="display: none; padding-right: 10px; text-decoration: none;" title="Abrir"><i class="fas fa-external-link-alt"></i></a>
+                        <td class="td-cell td-link-container" style="background: #f8fafc;">
+                            <input type="text" class="celda-input val-link text-blue" readonly placeholder="Link..." style="cursor: not-allowed;">
+                            <a href="#" target="_blank" class="btn-link" style="display: none;"><i class="fas fa-external-link-alt"></i></a>
                         </td>
                         <td class="td-cell"><input list="list-estado" class="celda-input central val-estado"></td>
                         <td class="td-cell" style="background: #fffdec;"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub" style="color: var(--color-principal);" placeholder="Ej. 123456"></td>
@@ -120,55 +120,352 @@
                         <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input derecha text-red val-costo" readonly tabindex="-1" value="0.00"></td>
                         <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input derecha bold val-ganancia" readonly tabindex="-1"></td>
                         <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input central bold val-rentabilidad" readonly tabindex="-1"></td>
-                        <td class="td-cell central"><input type="text" class="celda-input central bold val-mpe" readonly tabindex="-1" style="background: #f1f5f9; cursor: not-allowed;" value="MPE"></td>
+                        <td class="td-cell"><input type="text" class="celda-input central bold val-mpe" readonly tabindex="-1" style="background: #f1f5f9; cursor: not-allowed;" value="MPE"></td>
                     </tr>
                 {% endif %}
             </tbody>
         </table>
-        
-        <button type="button" onclick="agregarFila()" style="margin: 15px; padding: 8px 15px; background-color: #f1f5f9; color: #475569; border: 1px dashed #cbd5e1; border-radius: 6px; cursor: pointer; font-weight: bold;">
-            <i class="fas fa-plus"></i> Agregar nueva fila
+    </div>
+
+    <div class="simulador-footeracciones">
+        <button type="button" onclick="agregarFila()" class="btn-agregar-fila">
+            <i class="fas fa-plus"></i> Agregar nueva fila de simulación
         </button>
     </div>
 </div>
 
 <style>
-    /* CSS OPTIMIZADO PARA AUTO-AJUSTE ESTILO EXCEL */
-    .th-rep { padding: 8px 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; font-weight: bold; white-space: nowrap; }
-    .td-cell { padding: 0; border-right: 1px solid #e2e8f0; }
+    /* -----------------------------------------------------------
+       ESTILOS GLOBALES Y CONTENEDOR (NUEVA ESTRUCTURA)
+    ----------------------------------------------------------- */
+    .simulador-container {
+        border-top: 4px solid var(--color-principal);
+        padding: 25px;
+        background-color: #fff;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        /* UNIFICACIÓN DE TIPOGRAFÍA PARA TODO EL PANEL */
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    }
+
+    .simulador-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .simulador-titulo {
+        margin: 0;
+        color: #1e293b;
+        text-transform: uppercase;
+        font-size: 1.25rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
     
+    .fa-calculatorTitulo { color: var(--color-principal); }
+
+    .simulador-acciones {
+        display: flex;
+        gap: 12px;
+        position: relative;
+    }
+
+    /* -----------------------------------------------------------
+       ESTILOS DE BOTONES UNIFICADOS
+    ----------------------------------------------------------- */
+    .btn-principal, .btn-secundario {
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        font-family: inherit; /* Unifica tipografía */
+    }
+
+    .btn-principal {
+        color: white;
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+    }
+    .btn-guardar { background-color: #10b981; }
+    .btn-guardar:hover { background-color: #059669; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3); }
+
+    .btn-secundario {
+        color: white;
+        background-color: #475569;
+    }
+    .btn-secundario:hover { background-color: #334155; }
+
+    /* -----------------------------------------------------------
+       ESTILOS DE LA TABLA MODERNA Y SCROLL
+    ----------------------------------------------------------- */
+    .tabla-scroll-container {
+        overflow-x: auto;
+        max-height: 650px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        background-color: #fff;
+    }
+
+    .tabla-simulador-moderna {
+        width: max-content; /* Se ajusta al contenido horizontal */
+        border-collapse: collapse;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        table-layout: fixed;
+    }
+
+    /* CABECERAS ESTILO LIMPIO */
+    .tabla-simulador-moderna thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: #f8fafc; /* Fondo gris muy claro */
+    }
+
+    .th-rep {
+        padding: 14px 12px; /* Más aire en cabeceras */
+        border-bottom: 2px solid #e2e8f0; /* Línea inferior refinada */
+        border-right: 1px solid #e2e8f0;
+        text-align: center;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-family: inherit; /* Unifica tipografía */
+    }
+
+    /* FILAS Y CELDAS ESTILO LIMPIO (Sin bordes verticales en datos) */
+    .fila-simulador {
+        border-bottom: 1px solid #f1f5f9;
+        transition: background-color 0.2s ease;
+    }
+
+    .fila-simulador:hover {
+        background-color: #f8fafc; /*zebra stripping suave */
+    }
+
+    .td-cell {
+        padding: 0;
+        border-right: 1px solid #f1f5f9; /* Bordes verticales muy suaves */
+        vertical-align: middle;
+    }
+
+    /* -----------------------------------------------------------
+       ESTILOS DE LOS INPUTS DENTRO DE CELDAS (NUEVO DISEÑO)
+    ----------------------------------------------------------- */
     .celda-input { 
         width: 100%; 
         box-sizing: border-box; 
-        border: none; 
-        padding: 8px 6px; 
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important; 
-        font-size: 13px; 
-        color: #475569; 
+        border: 2px solid transparent; /* Espacio para el borde de foco */
+        padding: 10px 8px; /* Padding uniforme y generoso */
+        color: #1e293b;
         background: transparent; 
         outline: none; 
-        field-sizing: content; /* Propiedad moderna: el input crece según su contenido */
+        field-sizing: content; /* Adaptación automática de ancho */
+        font-size: 0.85rem;
+        font-family: inherit !important; /* Unifica tipografía FORZADO */
+        transition: all 0.15s ease;
     }
-    
-    /* Configuración de anchos mínimos */
-    .val-producto { min-width: 250px; }
-    .val-link { min-width: 180px; }
-    .val-categoria { min-width: 160px; }
-    .val-marca { min-width: 100px; }
-    .val-mpe { min-width: 130px; }
-    .val-codpub, .val-codprod { min-width: 100px; }
-    .val-venta, .val-costo, .val-ganancia, .val-ptachado, .val-pago-neto { min-width: 80px; }
-    .val-dscto, .val-porc-com { min-width: 60px; }
 
-    .celda-input:not([readonly]):focus { background-color: #fffdec; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; }
-    input[list]:hover { cursor: text; }
-    .fila-simulador:hover { background: #f8fafc; }
-    .central { text-align: center; } .derecha { text-align: right; } .bold { font-weight: bold; }
-    .text-dark { color: #0f172a; } .text-blue { color: #2563eb; } .text-green { color: #166534; } .text-red { color: #991b1b; }
+    /* Efecto de foco moderno */
+    .celda-input:not([readonly]):focus { 
+        background-color: #fff; 
+        border-color: var(--color-principal);
+        box-shadow: 0 0 0 3px rgba(var(--color-principal-rgb, 37, 99, 235), 0.1); /* Sombra suave de color principal */
+        color: #000;
+        border-radius: 4px;
+        z-index: 1; /* Sube la celda en foco */
+        position: relative;
+    }
+
+    /* Estilos para celdas readonly */
+    .celda-input[readonly] {
+        cursor: default;
+    }
+
+    /* -----------------------------------------------------------
+       CONFIGURACIÓN DE ANCHOS MÍNIMOS (ESTILO EXCEL CORREGIDO)
+    ----------------------------------------------------------- */
+    /* Citas de ancho fijo para columnas clave */
+    .th-itemtype, .val-itemtype { min-width: 90px; }
+    .th-link, .val-link { min-width: 200px; }
+    .th-estado, .val-estado { min-width: 90px; }
+    .th-codpub, .val-codpub { min-width: 100px; }
+    .th-tipo, .val-tipo { min-width: 110px; }
+    .th-codprod, .val-codprod { min-width: 100px; }
+    .th-categoria, .val-categoria { min-width: 220px; }
+    .th-marca, .val-marca { min-width: 130px; }
+    .th-producto, .val-producto { min-width: 300px; }
+    .th-mpe, .val-mpe { min-width: 130px; }
+
+    /* Columnas de números (más estrechas) */
+    .th-ptachado, .th-dscto, .th-venta, .th-envio, .th-porccom, .th-comsoles, .th-pagoneto, .th-costo, .th-ganancia, .th-rentabilidad {
+        min-width: 85px;
+    }
+
+    /* -----------------------------------------------------------
+       MODIFICADORES DE TEXTO Y COLOR (RESPETADOS)
+    ----------------------------------------------------------- */
+    .central { text-align: center; } 
+    .derecha { text-align: right; } 
+    .bold { font-weight: 700; }
+    .text-dark { color: #0f172a; } 
+    .text-blue { color: #2563eb; } 
+    .text-green { color: #166534; } 
+    .text-red { color: #dc2626; } /* Rojo más vibrante y moderno */
+
+    /* Quitar flechas de inputs number */
     .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .celda-input[type=number] { -moz-appearance: textfield; }
-    .check-moderno { width: 16px; height: 16px; cursor: pointer; accent-color: var(--color-principal); margin-top: 5px; }
-    .check-opcion { width: 15px; height: 15px; accent-color: var(--color-principal); cursor: pointer; }
+
+    /* Estilos específicos para la celda de LINK */
+    .td-link-container {
+        display: flex;
+        align-items: center;
+        height: 41px; /* Ajuste para alinear con inputs */
+        padding-right: 5px;
+    }
+    
+    .btn-link { 
+        color: var(--color-principal); 
+        text-decoration: none;
+        font-size: 0.9rem;
+        padding: 0 8px;
+        transition: transform 0.2s ease;
+    }
+    .btn-link:hover { transform: scale(1.2); }
+
+    /* -----------------------------------------------------------
+       ESTILOS DEL FOOTER Y BOTÓN AGREGAR (DISEÑO LIMPIO)
+    ----------------------------------------------------------- */
+    .simulador-footeracciones {
+        margin-top: 25px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .btn-agregar-fila {
+        background-color: #f1f5f9;
+        color: #475569;
+        border: 2px dashed #cbd5e1;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        font-family: inherit;
+    }
+
+    .btn-agregar-fila:hover {
+        background-color: #e2e8f0;
+        border-color: #94a3b8;
+        color: #1e293b;
+        transform: translateY(-2px);
+    }
+
+    /* -----------------------------------------------------------
+       ESTILOS DEL PANEL DE COLUMNAS (ESTILO MODERNO)
+    ----------------------------------------------------------- */
+    .panel-columnas {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 115%;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        z-index: 100;
+        width: 650px;
+        animation: slideInDown 0.3s ease;
+    }
+
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+    }
+
+    .panel-titulo {
+        margin: 0;
+        color: #1e293b;
+        font-size: 1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .fa-tasksTituloPanel { color: var(--color-principal); }
+
+    .btn-cerrar-panel {
+        background: #f1f5f9;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        font-size: 1.4rem;
+        line-height: 1;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+    .btn-cerrar-panel:hover { background-color: #fee2e2; color: #dc2626; }
+
+    .grid-columnas {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+    }
+
+    /* Estilos para los checkboxes del panel */
+    .label-columna {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #475569;
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+    }
+    .label-columna:hover { background-color: #f1f5f9; color: #1e293b; }
+
+    .check-opcion {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--color-principal);
+        cursor: pointer;
+    }
+
+    /* Animación simple */
+    @keyframes slideInDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 </style>
 
 <script>
@@ -212,8 +509,8 @@
             const colName = th.innerText.trim();
             if (!colName) return;
             const label = document.createElement("label");
-            label.style.display = "flex"; label.style.alignItems = "center"; label.style.gap = "8px";
-            label.style.fontSize = "0.75rem"; label.style.fontWeight = "bold"; label.style.color = "#475569"; label.style.cursor = "pointer";
+            label.className = "label-columna";
+            
             const cb = document.createElement("input");
             cb.type = "checkbox"; cb.checked = true; cb.className = "check-opcion"; cb.dataset.colIndex = index + 1;
             cb.addEventListener("change", function() {
@@ -226,10 +523,12 @@
                     if(cell) cell.style.display = displayState;
                 });
             });
-            label.appendChild(cb); label.appendChild(document.createTextNode(colName)); container.appendChild(label);
+            
+            label.appendChild(cb); 
+            label.appendChild(document.createTextNode(colName)); 
+            container.appendChild(label);
         });
 
-        // Aseguramos que al cargar, MPE se llene si hay CÓD. PUB en la fila
         document.querySelectorAll('.fila-simulador').forEach(fila => {
             const inputVenta = fila.querySelector('.val-venta');
             const inputCodPub = fila.querySelector('.val-codpub');
@@ -247,7 +546,6 @@
         });
     });
 
-    // AQUÍ ES DONDE SE CONCATENA EL MPE CUANDO EL USUARIO ESCRIBE EL CÓD. PUB
     function generarLink(inputCodigo) {
         const fila = inputCodigo.closest('tr');
         let codigo = inputCodigo.value.trim().replace(/^MPE-?/i, '');
