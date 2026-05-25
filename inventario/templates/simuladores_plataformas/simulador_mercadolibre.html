@@ -401,12 +401,21 @@
         tbody.innerHTML = ''; 
 
         // NUEVA FUNCIÓN INTERNA PARA LIMPIAR SOLES, COMAS Y ESPACIOS
-        function limpiarMonto(valor) {
-            if (!valor) return '0.00';
-            // Quita "S/", "S/.", "$", espacios y comas. Deja solo números y puntos.
-            let limpio = valor.toString().replace(/[S\/$.\s]/g, '').replace(',', '.');
-            return limpio;
-        }
+        // NUEVA FUNCIÓN INTERNA SEGURA PARA LIMPIAR SOLES
+function limpiarMonto(valor) {
+    if (!valor) return '0.00';
+    
+    let texto = valor.toString();
+    
+    // 1. Quitamos "S/.", "S/", "$", espacios en blanco y comas de los miles
+    let limpio = texto.replace(/S\/\.|S\/|\$|\s|,/g, '');
+    
+    // 2. Por seguridad, lo convertimos a número decimal exacto
+    let numero = parseFloat(limpio);
+    
+    // 3. Si no es un número válido, devuelve 0.00, sino devuelve el número limpio
+    return isNaN(numero) ? '0.00' : numero.toFixed(2);
+}
 
         json.forEach(row => {
             const nuevaFila = filaMolde.cloneNode(true);
