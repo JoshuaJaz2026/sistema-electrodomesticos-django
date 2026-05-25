@@ -641,17 +641,18 @@ def descargar_plantilla_simulador(request):
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="plantilla_simulador_mercadolibre.csv"'
 
+    # Esto es crucial para que Excel abra bien los caracteres especiales
     response.write('\ufeff'.encode('utf8'))
 
     writer = csv.writer(response, delimiter=';')
 
+    # ¡AQUÍ ESTÁ LA CORRECCIÓN! 
+    # Estas son las verdaderas columnas de tu Simulador de Costos
     writer.writerow([
-        'FECHA', 'MES Y AÑO', 'NRO. ORDEN', 'COMPROBANTE', 'TIPO DE VENTA',
-        'MARCA', 'CATEGORIA', 'SKU ALMACEN', 'MODELO', 'PRODUCTO',
-        'CANT.', 'PRECIO', 'TOTAL V.', '%CARGO x VENTA', 'URBANO', 'FLEX',
-        'TOTAL PAGADO', 'COSTO x PROD', 'UND', 'COSTO TOTAL', 'COSTO ENTREGA',
-        'GANANCIA', 'RENTABILIDAD %', 'DISTRITO', 'DIRECCIÓN',
-        'REPARTIDOR', 'CELULAR', 'MSJ ENVIADO'
+        'ITEM TYPE', 'LINK', 'ESTADO', 'CÓD. PUB', 'TIPO', 
+        'CÓD. PROD', 'CATEGORIA', 'MARCA', 'PRODUCTO', 'P. TACHADO', 
+        '% DSCTO', 'P. VENTA', 'ENVÍO', '% NUEVA COM', 'COM (S/)', 
+        'PAGO NETO', 'COSTO', 'GANANCIA', 'RTBLD%', 'MPE'
     ])
 
     return response
