@@ -220,6 +220,17 @@
     .label-columna:hover { background-color: #f1f5f9; color: #1e293b; }
     .check-opcion { width: 16px; height: 16px; accent-color: var(--color-principal); cursor: pointer; }
     @keyframes slideInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* EFECTO DE SOMBREADO PARA LA FILA ACTIVA */
+    .fila-seleccionada > td {
+        background-color: #fef9c3 !important; /* Amarillo suave para no cansar la vista */
+        transition: background-color 0.1s ease;
+    }
+    
+    /* Aseguramos que las cajas de texto también se vuelvan transparentes para que dejen ver el sombreado */
+    .fila-seleccionada input {
+        background-color: transparent !important;
+    }
 </style>
 
 <script>
@@ -290,6 +301,25 @@
             }
             if (inputVenta) calcularFila(inputVenta);
         });
+
+        // --- NUEVA LÓGICA: SOMBREAR FILA AL HACER CLIC ---
+        const tbodySeleccion = document.querySelector('#tablaReporte tbody');
+        if (tbodySeleccion) {
+            tbodySeleccion.addEventListener('click', function(e) {
+                // Buscamos cuál fue la fila a la que se le hizo clic
+                const filaClickeada = e.target.closest('tr.fila-simulador');
+                
+                if (filaClickeada) {
+                    // 1. Le quitamos el sombreado a todas las filas de la tabla
+                    document.querySelectorAll('.fila-simulador').forEach(f => {
+                        f.classList.remove('fila-seleccionada');
+                    });
+                    
+                    // 2. Le ponemos el sombreado únicamente a la fila actual
+                    filaClickeada.classList.add('fila-seleccionada');
+                }
+            });
+        }
     });
 
     function generarLink(inputCodigo) {
