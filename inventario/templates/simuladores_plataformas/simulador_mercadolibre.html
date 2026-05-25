@@ -19,8 +19,8 @@
             </button>
 
             <a href="{% url 'descargar_plantilla' %}" class="btn-accion btn-secundario" style="background-color: #64748b; color: white; text-decoration: none;">
-    <i class="fas fa-download"></i> Descargar Plantilla
-</a>
+                <i class="fas fa-download"></i> Descargar Plantilla
+            </a>
 
             <button type="button" onclick="exportarSimulador()" class="btn-accion btn-exportar">
                 <i class="fas fa-file-excel"></i> Exportar
@@ -386,91 +386,98 @@
     }
 
     function importarSimulador(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+        const file = event.target.files[0];
+        if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, {type: 'array'});
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
 
-        const tbody = document.querySelector('#tablaReporte tbody');
-        const filaMolde = tbody.querySelector('.fila-simulador').cloneNode(true);
-        tbody.innerHTML = ''; 
+            const tbody = document.querySelector('#tablaReporte tbody');
+            const filaMolde = tbody.querySelector('.fila-simulador').cloneNode(true);
+            tbody.innerHTML = ''; 
 
-        // NUEVA FUNCIÓN INTERNA PARA LIMPIAR SOLES, COMAS Y ESPACIOS
-        // NUEVA FUNCIÓN INTERNA SEGURA PARA LIMPIAR SOLES
-// FUNCIÓN INTELIGENTE PARA DETECTAR Y LIMPIAR DECIMALES (CON PUNTO O COMA)
-function limpiarMonto(valor) {
-    if (!valor) return '0.00';
-    
-    let texto = valor.toString().trim();
-    
-    // 1. Quitamos "S/.", "S/", "$" y espacios en blanco
-    texto = texto.replace(/S\/\.|S\/|\$|\s/g, '');
-    
-    // 2. Identificamos cuál es el separador decimal real viendo cuál está más a la derecha
-    let posComa = texto.lastIndexOf(',');
-    let posPunto = texto.lastIndexOf('.');
-    
-    if (posComa > posPunto) {
-        // La coma es el decimal (ejemplos: 150,50 o 1.250,50)
-        // Eliminamos los puntos de millares y cambiamos la coma decimal por un punto
-        texto = texto.replace(/\./g, '').replace(',', '.');
-    } else if (posPunto > posComa) {
-        // El punto es el decimal (ejemplos: 150.50 o 1,250.50)
-        // Eliminamos las comas de millares
-        texto = texto.replace(/,/g, '');
-    } else if (posComa !== -1 && posPunto === -1) {
-        // Caso simple: solo hay comas en el texto (ejemplo: 150,50)
-        texto = texto.replace(',', '.');
+            // FUNCIÓN INTELIGENTE PARA DETECTAR Y LIMPIAR DECIMALES (CON PUNTO O COMA)
+            function limpiarMonto(valor) {
+                if (!valor) return '0.00';
+                
+                let texto = valor.toString().trim();
+                
+                // 1. Quitamos "S/.", "S/", "$" y espacios en blanco
+                texto = texto.replace(/S\/\.|S\/|\$|\s/g, '');
+                
+                // 2. Identificamos cuál es el separador decimal real viendo cuál está más a la derecha
+                let posComa = texto.lastIndexOf(',');
+                let posPunto = texto.lastIndexOf('.');
+                
+                if (posComa > posPunto) {
+                    // La coma es el decimal (ejemplos: 150,50 o 1.250,50)
+                    texto = texto.replace(/\./g, '').replace(',', '.');
+                } else if (posPunto > posComa) {
+                    // El punto es el decimal (ejemplos: 150.50 o 1,250.50)
+                    texto = texto.replace(/,/g, '');
+                } else if (posComa !== -1 && posPunto === -1) {
+                    // Caso simple: solo hay comas en el texto (ejemplo: 150,50)
+                    texto = texto.replace(',', '.');
+                }
+                
+                // 3. Convertimos a número decimal puro para el sistema
+                let numero = parseFloat(texto);
+                return isNaN(numero) ? '0.00' : numero.toFixed(2);
+            }
+
+            json.forEach(row => {
+                const nuevaFila = filaMolde.cloneNode(true);
+                
+                if (nuevaFila.querySelector('.val-itemtype')) nuevaFila.querySelector('.val-itemtype').value = row["ITEM TYPE"] || '';
+                if (nuevaFila.querySelector('.val-link')) nuevaFila.querySelector('.val-link').value = row["LINK"] || '';
+                if (nuevaFila.querySelector('.val-estado')) nuevaFila.querySelector('.val-estado').value = row["ESTADO"] || '';
+                if (nuevaFila.querySelector('.val-codpub')) nuevaFila.querySelector('.val-codpub').value = row["CÓD. PUB"] || '';
+                if (nuevaFila.querySelector('.val-tipo')) nuevaFila.querySelector('.val-tipo').value = row["TIPO"] || '';
+                if (nuevaFila.querySelector('.val-marca')) nuevaFila.querySelector('.val-marca').value = row["MARCA"] || '';
+                if (nuevaFila.querySelector('.val-producto')) nuevaFila.querySelector('.val-producto').value = row["PRODUCTO"] || '';
+                
+                // --- APLICANDO EL DISPARADOR AUTOMÁTICO DE BÚSQUEDA ---
+                const inputCodProd = nuevaFila.querySelector('.val-codprod');
+                if (inputCodProd) {
+                    inputCodProd.value = row["CÓD. PROD"] || '';
+                    buscarCosto(inputCodProd); // Busca el costo automáticamente
+                }
+
+                const inputCategoria = nuevaFila.querySelector('.val-categoria');
+                if (inputCategoria) {
+                    inputCategoria.value = row["CATEGORIA"] || '';
+                    buscarComision(inputCategoria); // Busca la comisión automáticamente
+                }
+                
+                // AQUÍ APLICAMOS LA LIMPIEZA AUTOMÁTICA A LAS COLUMNAS NUMÉRICAS
+                if (nuevaFila.querySelector('.val-ptachado')) nuevaFila.querySelector('.val-ptachado').value = limpiarMonto(row["P. TACHADO"]);
+                if (nuevaFila.querySelector('.val-dscto')) nuevaFila.querySelector('.val-dscto').value = limpiarMonto(row["% DSCTO"]);
+                if (nuevaFila.querySelector('.val-venta')) nuevaFila.querySelector('.val-venta').value = limpiarMonto(row["P. VENTA"]);
+                if (nuevaFila.querySelector('.val-envio')) nuevaFila.querySelector('.val-envio').value = limpiarMonto(row["ENVÍO"]);
+                if (nuevaFila.querySelector('.val-porc-com')) nuevaFila.querySelector('.val-porc-com').value = limpiarMonto(row["% NUEVA COM"]);
+                if (nuevaFila.querySelector('.val-com-soles')) nuevaFila.querySelector('.val-com-soles').value = limpiarMonto(row["COM (S/)"]);
+                if (nuevaFila.querySelector('.val-pago-neto')) nuevaFila.querySelector('.val-pago-neto').value = limpiarMonto(row["PAGO NETO"]);
+                if (nuevaFila.querySelector('.val-costo')) nuevaFila.querySelector('.val-costo').value = limpiarMonto(row["COSTO"]);
+                if (nuevaFila.querySelector('.val-ganancia')) nuevaFila.querySelector('.val-ganancia').value = limpiarMonto(row["GANANCIA"]);
+                if (nuevaFila.querySelector('.val-rentabilidad')) nuevaFila.querySelector('.val-rentabilidad').value = limpiarMonto(row["RTBLD%"]);
+                if (nuevaFila.querySelector('.val-mpe')) nuevaFila.querySelector('.val-mpe').value = row["MPE"] || '';
+
+                const inputVenta = nuevaFila.querySelector('.val-venta');
+                if(inputVenta) calcularFila(inputVenta);
+                
+                tbody.appendChild(nuevaFila);
+            });
+            
+            if(json.length === 0) tbody.appendChild(filaMolde);
+            alert("✅ ¡Simulación importada y montos limpiados correctamente!");
+        };
+        reader.readAsArrayBuffer(file);
+        event.target.value = ""; 
     }
-    
-    // 3. Convertimos a número decimal puro para el sistema
-    let numero = parseFloat(texto);
-    return isNaN(numero) ? '0.00' : numero.toFixed(2);
-}
-
-        json.forEach(row => {
-            const nuevaFila = filaMolde.cloneNode(true);
-            
-            if (nuevaFila.querySelector('.val-itemtype')) nuevaFila.querySelector('.val-itemtype').value = row["ITEM TYPE"] || '';
-            if (nuevaFila.querySelector('.val-link')) nuevaFila.querySelector('.val-link').value = row["LINK"] || '';
-            if (nuevaFila.querySelector('.val-estado')) nuevaFila.querySelector('.val-estado').value = row["ESTADO"] || '';
-            if (nuevaFila.querySelector('.val-codpub')) nuevaFila.querySelector('.val-codpub').value = row["CÓD. PUB"] || '';
-            if (nuevaFila.querySelector('.val-tipo')) nuevaFila.querySelector('.val-tipo').value = row["TIPO"] || '';
-            if (nuevaFila.querySelector('.val-codprod')) nuevaFila.querySelector('.val-codprod').value = row["CÓD. PROD"] || '';
-            if (nuevaFila.querySelector('.val-categoria')) nuevaFila.querySelector('.val-categoria').value = row["CATEGORIA"] || '';
-            if (nuevaFila.querySelector('.val-marca')) nuevaFila.querySelector('.val-marca').value = row["MARCA"] || '';
-            if (nuevaFila.querySelector('.val-producto')) nuevaFila.querySelector('.val-producto').value = row["PRODUCTO"] || '';
-            
-            // AQUÍ APLICAMOS LA LIMPIEZA AUTOMÁTICA A LAS COLUMNAS NUMÉRICAS
-            if (nuevaFila.querySelector('.val-ptachado')) nuevaFila.querySelector('.val-ptachado').value = limpiarMonto(row["P. TACHADO"]);
-            if (nuevaFila.querySelector('.val-dscto')) nuevaFila.querySelector('.val-dscto').value = limpiarMonto(row["% DSCTO"]);
-            if (nuevaFila.querySelector('.val-venta')) nuevaFila.querySelector('.val-venta').value = limpiarMonto(row["P. VENTA"]);
-            if (nuevaFila.querySelector('.val-envio')) nuevaFila.querySelector('.val-envio').value = limpiarMonto(row["ENVÍO"]);
-            if (nuevaFila.querySelector('.val-porc-com')) nuevaFila.querySelector('.val-porc-com').value = limpiarMonto(row["% NUEVA COM"]);
-            if (nuevaFila.querySelector('.val-com-soles')) nuevaFila.querySelector('.val-com-soles').value = limpiarMonto(row["COM (S/)"]);
-            if (nuevaFila.querySelector('.val-pago-neto')) nuevaFila.querySelector('.val-pago-neto').value = limpiarMonto(row["PAGO NETO"]);
-            if (nuevaFila.querySelector('.val-costo')) nuevaFila.querySelector('.val-costo').value = limpiarMonto(row["COSTO"]);
-            if (nuevaFila.querySelector('.val-ganancia')) nuevaFila.querySelector('.val-ganancia').value = limpiarMonto(row["GANANCIA"]);
-            if (nuevaFila.querySelector('.val-rentabilidad')) nuevaFila.querySelector('.val-rentabilidad').value = limpiarMonto(row["RTBLD%"]);
-            if (nuevaFila.querySelector('.val-mpe')) nuevaFila.querySelector('.val-mpe').value = row["MPE"] || '';
-
-            const inputVenta = nuevaFila.querySelector('.val-venta');
-            if(inputVenta) calcularFila(inputVenta);
-            
-            tbody.appendChild(nuevaFila);
-        });
-        
-        if(json.length === 0) tbody.appendChild(filaMolde);
-        alert("✅ ¡Simulación importada y montos limpiados correctamente!");
-    };
-    reader.readAsArrayBuffer(file);
-    event.target.value = ""; 
-}
 
     function guardarSimulaciones() {
         const btn = document.getElementById('btnGuardar');
