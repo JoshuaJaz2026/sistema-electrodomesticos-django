@@ -457,6 +457,13 @@
                 if (nuevaFila.querySelector('.val-mpe')) nuevaFila.querySelector('.val-mpe').value = row["MPE"] || '';
 
                 // 3. AHORA SÍ: FORZAMOS LA BÚSQUEDA PARA REEMPLAZAR LOS CEROS CON DATOS REALES DE LA BD
+                
+                // FORZAMOS LA CREACIÓN DEL LINK Y EL MPE
+                const inputCodPub = nuevaFila.querySelector('.val-codpub');
+                if (inputCodPub && inputCodPub.value.trim() !== '') {
+                    generarLink(inputCodPub); 
+                }
+
                 const inputCodProd = nuevaFila.querySelector('.val-codprod');
                 if (inputCodProd && inputCodProd.value.trim() !== '') {
                     buscarCosto(inputCodProd); // Busca costo y recalcula
@@ -470,8 +477,6 @@
                 // Por si acaso, hacemos un cálculo final con los montos de venta
                 const inputVenta = nuevaFila.querySelector('.val-venta');
                 if(inputVenta) calcularFila(inputVenta);
-                
-                tbody.appendChild(nuevaFila);
             });
             
             if(json.length === 0) tbody.appendChild(filaMolde);
