@@ -402,18 +402,34 @@
 
         // NUEVA FUNCIÓN INTERNA PARA LIMPIAR SOLES, COMAS Y ESPACIOS
         // NUEVA FUNCIÓN INTERNA SEGURA PARA LIMPIAR SOLES
+// FUNCIÓN INTELIGENTE PARA DETECTAR Y LIMPIAR DECIMALES (CON PUNTO O COMA)
 function limpiarMonto(valor) {
     if (!valor) return '0.00';
     
-    let texto = valor.toString();
+    let texto = valor.toString().trim();
     
-    // 1. Quitamos "S/.", "S/", "$", espacios en blanco y comas de los miles
-    let limpio = texto.replace(/S\/\.|S\/|\$|\s|,/g, '');
+    // 1. Quitamos "S/.", "S/", "$" y espacios en blanco
+    texto = texto.replace(/S\/\.|S\/|\$|\s/g, '');
     
-    // 2. Por seguridad, lo convertimos a número decimal exacto
-    let numero = parseFloat(limpio);
+    // 2. Identificamos cuál es el separador decimal real viendo cuál está más a la derecha
+    let posComa = texto.lastIndexOf(',');
+    let posPunto = texto.lastIndexOf('.');
     
-    // 3. Si no es un número válido, devuelve 0.00, sino devuelve el número limpio
+    if (posComa > posPunto) {
+        // La coma es el decimal (ejemplos: 150,50 o 1.250,50)
+        // Eliminamos los puntos de millares y cambiamos la coma decimal por un punto
+        texto = texto.replace(/\./g, '').replace(',', '.');
+    } else if (posPunto > posComa) {
+        // El punto es el decimal (ejemplos: 150.50 o 1,250.50)
+        // Eliminamos las comas de millares
+        texto = texto.replace(/,/g, '');
+    } else if (posComa !== -1 && posPunto === -1) {
+        // Caso simple: solo hay comas en el texto (ejemplo: 150,50)
+        texto = texto.replace(',', '.');
+    }
+    
+    // 3. Convertimos a número decimal puro para el sistema
+    let numero = parseFloat(texto);
     return isNaN(numero) ? '0.00' : numero.toFixed(2);
 }
 
