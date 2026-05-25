@@ -432,28 +432,18 @@
             json.forEach(row => {
                 const nuevaFila = filaMolde.cloneNode(true);
                 
+                // 1. PEGAMOS TODOS LOS DATOS DE TEXTO NORMAL DEL EXCEL
                 if (nuevaFila.querySelector('.val-itemtype')) nuevaFila.querySelector('.val-itemtype').value = row["ITEM TYPE"] || '';
                 if (nuevaFila.querySelector('.val-link')) nuevaFila.querySelector('.val-link').value = row["LINK"] || '';
                 if (nuevaFila.querySelector('.val-estado')) nuevaFila.querySelector('.val-estado').value = row["ESTADO"] || '';
                 if (nuevaFila.querySelector('.val-codpub')) nuevaFila.querySelector('.val-codpub').value = row["CÓD. PUB"] || '';
                 if (nuevaFila.querySelector('.val-tipo')) nuevaFila.querySelector('.val-tipo').value = row["TIPO"] || '';
+                if (nuevaFila.querySelector('.val-codprod')) nuevaFila.querySelector('.val-codprod').value = row["CÓD. PROD"] || '';
+                if (nuevaFila.querySelector('.val-categoria')) nuevaFila.querySelector('.val-categoria').value = row["CATEGORIA"] || '';
                 if (nuevaFila.querySelector('.val-marca')) nuevaFila.querySelector('.val-marca').value = row["MARCA"] || '';
                 if (nuevaFila.querySelector('.val-producto')) nuevaFila.querySelector('.val-producto').value = row["PRODUCTO"] || '';
                 
-                // --- APLICANDO EL DISPARADOR AUTOMÁTICO DE BÚSQUEDA ---
-                const inputCodProd = nuevaFila.querySelector('.val-codprod');
-                if (inputCodProd) {
-                    inputCodProd.value = row["CÓD. PROD"] || '';
-                    buscarCosto(inputCodProd); // Busca el costo automáticamente
-                }
-
-                const inputCategoria = nuevaFila.querySelector('.val-categoria');
-                if (inputCategoria) {
-                    inputCategoria.value = row["CATEGORIA"] || '';
-                    buscarComision(inputCategoria); // Busca la comisión automáticamente
-                }
-                
-                // AQUÍ APLICAMOS LA LIMPIEZA AUTOMÁTICA A LAS COLUMNAS NUMÉRICAS
+                // 2. PEGAMOS LOS MONTOS DEL EXCEL (Esto jalará los 0.00 si la celda está vacía en Excel)
                 if (nuevaFila.querySelector('.val-ptachado')) nuevaFila.querySelector('.val-ptachado').value = limpiarMonto(row["P. TACHADO"]);
                 if (nuevaFila.querySelector('.val-dscto')) nuevaFila.querySelector('.val-dscto').value = limpiarMonto(row["% DSCTO"]);
                 if (nuevaFila.querySelector('.val-venta')) nuevaFila.querySelector('.val-venta').value = limpiarMonto(row["P. VENTA"]);
@@ -466,6 +456,18 @@
                 if (nuevaFila.querySelector('.val-rentabilidad')) nuevaFila.querySelector('.val-rentabilidad').value = limpiarMonto(row["RTBLD%"]);
                 if (nuevaFila.querySelector('.val-mpe')) nuevaFila.querySelector('.val-mpe').value = row["MPE"] || '';
 
+                // 3. AHORA SÍ: FORZAMOS LA BÚSQUEDA PARA REEMPLAZAR LOS CEROS CON DATOS REALES DE LA BD
+                const inputCodProd = nuevaFila.querySelector('.val-codprod');
+                if (inputCodProd && inputCodProd.value.trim() !== '') {
+                    buscarCosto(inputCodProd); // Busca costo y recalcula
+                }
+
+                const inputCategoria = nuevaFila.querySelector('.val-categoria');
+                if (inputCategoria && inputCategoria.value.trim() !== '') {
+                    buscarComision(inputCategoria); // Busca comisión y recalcula
+                }
+
+                // Por si acaso, hacemos un cálculo final con los montos de venta
                 const inputVenta = nuevaFila.querySelector('.val-venta');
                 if(inputVenta) calcularFila(inputVenta);
                 
