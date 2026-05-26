@@ -125,12 +125,16 @@ class SimulacionMercadoLibre(models.Model):
     
     # Valores comerciales y descuentos
     precio_tachado = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    porc_descuento = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+    
+    # AMPLIADO: max_digits=10
+    porc_descuento = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     precio_venta = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     
     # Costos operativos e impuestos de plataforma
     costo_envio = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    porc_comision = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+    
+    # AMPLIADO: max_digits=10
+    porc_comision = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     comision_soles = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     
     # Resultados financieros de la plataforma y costos propios
@@ -139,7 +143,9 @@ class SimulacionMercadoLibre(models.Model):
     
     # Indicadores finales de éxito
     ganancia = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    rentabilidad_porc = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+    
+    # AMPLIADO: max_digits=10 (Este era el principal culpable del error 500)
+    rentabilidad_porc = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     mpe = models.BooleanField(default=False)
 
     class Meta:
@@ -153,14 +159,16 @@ class SimulacionMercadoLibre(models.Model):
 class Comision(models.Model):
     sub_categoria = models.CharField(max_length=100)
     categoria = models.CharField(max_length=100)
-    porcentaje = models.DecimalField(max_digits=5, decimal_places=2)
+    
+    # AMPLIADO: max_digits=10
+    porcentaje = models.DecimalField(max_digits=10, decimal_places=2)
 
 class ReferenciaComision(models.Model):
-    # AQUÍ PONEMOS EL UNIQUE=TRUE
     sub_categoria = models.CharField(max_length=200, unique=True) 
-    # Y AQUÍ SE LO QUITAMOS
     categoria = models.CharField(max_length=200, blank=True, null=True) 
-    comision = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+    
+    # AMPLIADO: max_digits=10
+    comision = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def __str__(self):
         return f"{self.sub_categoria} - {self.comision}%"
