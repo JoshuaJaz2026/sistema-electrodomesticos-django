@@ -3,6 +3,7 @@ import uuid
 import csv
 import os
 from django.http import JsonResponse, HttpResponse, FileResponse, Http404
+from django.core.paginator import Paginator
 from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -263,7 +264,8 @@ def api_guardar_simulador(request):
             datos_simulacion = data.get('datos', [])
             
             if plataforma == 'Mercado Libre':
-                SimulacionMercadoLibre.objects.filter(usuario=request.user).delete()
+                # 🚀 YA NO BORRAMOS LA BASE DE DATOS AQUÍ
+                
                 for fila in datos_simulacion:
                     p_venta = float(fila.get('p_venta') or 0)
                     envio = float(fila.get('envio') or 0)
@@ -275,31 +277,46 @@ def api_guardar_simulador(request):
                     ganancia = pago_neto - costo
                     rentabilidad = (ganancia / p_venta * 100) if p_venta > 0 else 0
 
-                    SimulacionMercadoLibre.objects.create(
-                        usuario=request.user,
-                        item_type=fila.get('item_type', ''),
-                        link=fila.get('link', ''),
-                        estado_publicacion=fila.get('estado', ''),
-                        cod_publicacion=fila.get('cod_pub', ''),
-                        tipo_publicacion=fila.get('tipo', ''),
-                        cod_producto=fila.get('cod_prod', ''),
-                        categoria=fila.get('categoria', ''),
-                        marca=fila.get('marca', ''),
-                        producto=fila.get('producto', ''),
-                        precio_tachado=float(fila.get('p_tachado') or 0),
-                        porc_descuento=float(fila.get('dscto') or 0),
-                        precio_venta=p_venta,
-                        costo_envio=envio,
-                        porc_comision=porc_com,
-                        comision_soles=com_soles,
-                        pago_neto=pago_neto,
-                        costo_producto=costo,
-                        ganancia=ganancia,
-                        rentabilidad_porc=rentabilidad,
-                        mpe=fila.get('mpe', False)
-                    )
+                    cod_pub = fila.get('cod_pub', '').strip()
+
+                    # Preparamos los datos a guardar
+                    datos_diccionario = {
+                        'item_type': fila.get('item_type', ''),
+                        'link': fila.get('link', ''),
+                        'estado_publicacion': fila.get('estado', ''),
+                        'tipo_publicacion': fila.get('tipo', ''),
+                        'cod_producto': fila.get('cod_prod', ''),
+                        'categoria': fila.get('categoria', ''),
+                        'marca': fila.get('marca', ''),
+                        'producto': fila.get('producto', ''),
+                        'precio_tachado': float(fila.get('p_tachado') or 0),
+                        'porc_descuento': float(fila.get('dscto') or 0),
+                        'precio_venta': p_venta,
+                        'costo_envio': envio,
+                        'porc_comision': porc_com,
+                        'comision_soles': com_soles,
+                        'pago_neto': pago_neto,
+                        'costo_producto': costo,
+                        'ganancia': ganancia,
+                        'rentabilidad_porc': rentabilidad,
+                        'mpe': fila.get('mpe', False)
+                    }
+
+                    # Si el producto ya existe (por código MPE), se actualiza. Si no, se crea.
+                    if cod_pub:
+                        SimulacionMercadoLibre.objects.update_or_create(
+                            usuario=request.user,
+                            cod_publicacion=cod_pub,
+                            defaults=datos_diccionario
+                        )
+                    else:
+                        SimulacionMercadoLibre.objects.create(
+                            usuario=request.user,
+                            cod_publicacion='',
+                            **datos_diccionario
+                        )
             
-            return JsonResponse({'status': 'ok', 'message': f'Simulación guardada exitosamente.'})
+            return JsonResponse({'status': 'ok', 'message': 'Simulación guardada/actualizada exitosamente.'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
             
@@ -357,7 +374,7 @@ def reporte_web(request):
 @login_required
 def simulador_mercadolibre(request):
     canal = request.session.get('canal_activo', 'Web')
-    simulaciones = SimulacionMercadoLibre.objects.filter(usuario=request.user).order_by('id')
+    simulaciones_todas = SimulacionMercadoLibre.objects.filter(usuario=request.user).order_by('id')
     
     # 1. MAPA DE COMISIONES
     comisiones_ref = ReferenciaComision.objects.all()
@@ -368,20 +385,24 @@ def simulador_mercadolibre(request):
         if ref.categoria and ref.categoria.upper().strip() not in mapa_comisiones:
             mapa_comisiones[ref.categoria.upper().strip()] = float(ref.comision)
 
-    # 2. MAPA DE COSTOS (CORREGIDO)
+    # 2. MAPA DE COSTOS
     costos_ref = ReferenciaCosto.objects.all()
     mapa_costos = {}
     for ref in costos_ref:
         if ref.codigo:
-            # AHORA SÍ: Jalamos el valor de la columna COSTO CERO
             mapa_costos[ref.codigo.upper().strip()] = float(ref.costo_cero)
 
     import json
     mapa_comisiones_json = json.dumps(mapa_comisiones)
     mapa_costos_json = json.dumps(mapa_costos)
     
-    # Pre-cruzamos los datos para las filas que ya están guardadas
-    for sim in simulaciones:
+    # 🚀 PAGINACIÓN: Dividimos la lista gigante en bloques de 50
+    paginator = Paginator(simulaciones_todas, 50) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Pre-cruzamos los datos SOLO para los 50 de esta página (Súper rápido)
+    for sim in page_obj:
         cat_buscar = sim.categoria.upper().strip() if sim.categoria else ""
         sim.nueva_comision_ref = mapa_comisiones.get(cat_buscar, 0.00)
         
@@ -390,7 +411,7 @@ def simulador_mercadolibre(request):
         
     return render(request, 'simuladores_plataformas/simulador_mercadolibre.html', {
         'canal': canal, 
-        'simulaciones': simulaciones,
+        'page_obj': page_obj, # 👈 Pasamos la página actual, no todo
         'mapa_comisiones_json': mapa_comisiones_json,
         'mapa_costos_json': mapa_costos_json
     })

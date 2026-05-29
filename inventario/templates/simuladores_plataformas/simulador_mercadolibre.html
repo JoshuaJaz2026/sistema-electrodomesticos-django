@@ -2,6 +2,11 @@
 {% load static %}
 
 {% block content %}
+
+<div id="pantalla-carga" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8fafc; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: opacity 0.3s ease;">
+    <i class="fas fa-circle-notch fa-spin" style="font-size: 3rem; color: var(--color-principal, #2563eb); margin-bottom: 15px;"></i>
+    <h3 style="color: #475569; font-family: 'Segoe UI', sans-serif; font-weight: 600;">Preparando simulador...</h3>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <div class="card simulador-container">
@@ -95,8 +100,8 @@
                 </tr>
             </thead>
             <tbody>
-                {% if simulaciones %}
-                    {% for sim in simulaciones %}
+                {% if page_obj %}
+                    {% for sim in page_obj %}
                     <tr class="fila-simulador">
                         <td class="td-cell"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype" value="{{ sim.item_type|default_if_none:'' }}"></td>
                         <td class="td-cell td-link-container" style="background: #f8fafc;">
@@ -152,6 +157,23 @@
                 {% endif %}
             </tbody>
         </table>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 12px 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <span style="color: #475569; font-weight: 600; font-size: 0.9rem;">
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        </span>
+        <div style="display: flex; gap: 8px;">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="btn-accion btn-secundario" style="text-decoration: none; padding: 6px 12px; background: #64748b;">&laquo; Primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn-accion btn-secundario" style="text-decoration: none; padding: 6px 12px;">Anterior</a>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn-accion btn-secundario" style="text-decoration: none; padding: 6px 12px;">Siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn-accion btn-secundario" style="text-decoration: none; padding: 6px 12px; background: #64748b;">Última &raquo;</a>
+            {% endif %}
+        </div>
     </div>
 
     <div class="simulador-footeracciones">
