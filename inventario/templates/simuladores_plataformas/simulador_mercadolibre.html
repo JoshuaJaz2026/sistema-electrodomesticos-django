@@ -67,9 +67,9 @@
                 <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
                 <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar por CÓD. PUB o CÓD. PROD (SKU)..." style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-family: inherit;">
             </div>
-            <button type="submit" class="btn-accion btn-principal">
-                Buscar
-            </button>
+            <button type="submit" class="btn-accion btn-principal btn-buscar-estilo">
+    Buscar
+</button>
             {% if query_search %}
             <a href="?" class="btn-accion" style="background-color: #ef4444; color: white; text-decoration: none;">
                 <i class="fas fa-times"></i> Limpiar
@@ -207,6 +207,9 @@
     .icono-titulo { color: var(--color-principal); font-size: 1.2em; }
     .simulador-acciones { display: flex; gap: 12px; align-items: center; position: relative; }
     
+    /* Separación mejorada para el buscador */
+    .btn-buscar-estilo { margin-left: 15px; } 
+
     .btn-accion { border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; transition: all 0.2s ease; font-family: inherit; }
     .btn-principal { background-color: var(--color-principal); color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .btn-principal:hover { filter: brightness(0.9); transform: translateY(-1px); }
@@ -217,9 +220,10 @@
     .btn-exportar { background-color: #0ea5e9; color: white; }
     .btn-exportar:hover { background-color: #0284c7; }
 
-    .tabla-scroll-container { overflow-x: auto; max-height: 650px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #fff; }
-    .tabla-simulador-moderna { width: max-content; border-collapse: collapse; font-size: 0.8rem; white-space: nowrap; table-layout: fixed; }
-    .tabla-simulador-moderna thead { position: sticky; top: 0; z-index: 10; background-color: #f8fafc; }
+    /* ELIMINAMOS EL SCROLL VERTICAL FIJO */
+    .tabla-scroll-container { overflow-x: auto; overflow-y: visible; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #fff; }
+    .tabla-simulador-moderna { width: 100%; border-collapse: collapse; font-size: 0.8rem; white-space: nowrap; }
+    
     .th-rep { padding: 14px 12px; border-bottom: 2px solid #e2e8f0; border-right: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; font-family: inherit; }
     .fila-simulador { border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s ease; }
     .fila-simulador:hover { background-color: #f8fafc; }
@@ -229,24 +233,20 @@
     .celda-input:not([readonly]):focus { background-color: #fff; border-color: var(--color-principal); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); color: #000; border-radius: 4px; z-index: 1; position: relative; }
     .celda-input[readonly] { cursor: default; }
 
-    /* ANCHOS DE COLUMNAS DEL SIMULADOR */
-    .th-itemtype, .val-itemtype { min-width: 90px; }
-    .th-link, .val-link { min-width: 200px; }
-    .th-estado, .val-estado { min-width: 90px; }
-    .th-codpub, .val-codpub { min-width: 100px; }
-    .th-tipo, .val-tipo { min-width: 110px; }
-    .th-codprod, .val-codprod { min-width: 100px; }
-    .th-categoria, .val-categoria { min-width: 220px; }
-    .th-marca, .val-marca { min-width: 130px; }
-    .th-producto, .val-producto { min-width: 300px; }
-    .th-mpe, .val-mpe { min-width: 130px; }
-    .th-ptachado, .th-dscto, .th-venta, .th-envio, .th-porccom, .th-comsoles, .th-pagoneto, .th-costo, .th-ganancia, .th-rentabilidad { min-width: 85px; }
+    /* Los anchos ahora serán proporcionales para que se vean mejor */
+    .th-itemtype { width: 90px; }
+    .th-link { width: 200px; }
+    .th-estado { width: 90px; }
+    .th-codpub { width: 100px; }
+    .th-tipo { width: 110px; }
+    .th-codprod { width: 100px; }
+    .th-categoria { width: 220px; }
+    .th-marca { width: 130px; }
+    .th-producto { width: 300px; }
+    .th-mpe { width: 130px; }
 
     .central { text-align: center; } .derecha { text-align: right; } .bold { font-weight: 700; }
     .text-dark { color: #0f172a; } .text-blue { color: #2563eb; } .text-green { color: #166534; } .text-red { color: #dc2626; }
-    .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .celda-input[type=number] { -moz-appearance: textfield; }
-
     .td-link-container { display: flex; align-items: center; height: 41px; padding-right: 5px; }
     .btn-link { color: var(--color-principal); text-decoration: none; font-size: 0.9rem; padding: 0 8px; transition: transform 0.2s ease; }
     .btn-link:hover { transform: scale(1.2); }
@@ -255,37 +255,20 @@
     .btn-agregar-fila { background-color: #f1f5f9; color: #475569; border: 2px dashed #cbd5e1; padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; transition: all 0.2s ease; font-family: inherit; }
     .btn-agregar-fila:hover { background-color: #e2e8f0; border-color: #94a3b8; color: #1e293b; transform: translateY(-2px); }
 
-    .panel-columnas { display: none; position: absolute; right: 0; top: 115%; background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 100; width: 650px; animation: slideInDown 0.3s ease; }
+    .panel-columnas { display: none; position: absolute; right: 0; top: 115%; background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 100; width: 650px; }
     .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 15px; }
     .panel-titulo { margin: 0; color: #1e293b; font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-    .fa-tasksTituloPanel { color: var(--color-principal); }
     .btn-cerrar-panel { background: #f1f5f9; border: none; color: #94a3b8; cursor: pointer; font-size: 1.4rem; line-height: 1; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
     .btn-cerrar-panel:hover { background-color: #fee2e2; color: #dc2626; }
     .grid-columnas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
     .label-columna { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; font-weight: 600; color: #475569; cursor: pointer; padding: 6px; border-radius: 6px; transition: background-color 0.2s ease; }
     .label-columna:hover { background-color: #f1f5f9; color: #1e293b; }
     .check-opcion { width: 16px; height: 16px; accent-color: var(--color-principal); cursor: pointer; }
-    @keyframes slideInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* EFECTO DE SOMBREADO PARA LA FILA ACTIVA */
-    .fila-seleccionada > td {
-        background-color: #fef9c3 !important; /* Amarillo suave para no cansar la vista */
-        transition: background-color 0.1s ease;
-    }
     
-    /* Aseguramos que las cajas de texto también se vuelvan transparentes para que dejen ver el sombreado */
-    .fila-seleccionada input {
-        background-color: transparent !important;
-    }
-
-    /* Animación para la barra de carga localizada */
-    @keyframes moverBarra {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(250%); }
-    }
-    .barra-animada {
-        animation: moverBarra 1.2s infinite linear;
-    }
+    .fila-seleccionada > td { background-color: #fef9c3 !important; }
+    .fila-seleccionada input { background-color: transparent !important; }
+    .barra-animada { animation: moverBarra 1.2s infinite linear; }
+    @keyframes moverBarra { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
 </style>
 
 <script>
