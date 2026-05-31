@@ -1,6 +1,7 @@
 import json
 import uuid
 import csv
+import json
 import os
 from django.http import JsonResponse, HttpResponse, FileResponse, Http404
 from django.core.paginator import Paginator
@@ -374,6 +375,8 @@ def reporte_web(request):
 @login_required
 def simulador_mercadolibre(request):
     canal = request.session.get('canal_activo', 'Web')
+    
+    # Obtenemos todas las simulaciones ordenadas (vital para que la paginación no se rompa)
     simulaciones_todas = SimulacionMercadoLibre.objects.filter(usuario=request.user).order_by('id')
     
     # 1. MAPA DE COMISIONES
@@ -392,7 +395,6 @@ def simulador_mercadolibre(request):
         if ref.codigo:
             mapa_costos[ref.codigo.upper().strip()] = float(ref.costo_cero)
 
-    import json
     mapa_comisiones_json = json.dumps(mapa_comisiones)
     mapa_costos_json = json.dumps(mapa_costos)
     
@@ -411,7 +413,7 @@ def simulador_mercadolibre(request):
         
     return render(request, 'simuladores_plataformas/simulador_mercadolibre.html', {
         'canal': canal, 
-        'page_obj': page_obj, # 👈 Pasamos la página actual, no todo
+        'page_obj': page_obj, 
         'mapa_comisiones_json': mapa_comisiones_json,
         'mapa_costos_json': mapa_costos_json
     })
