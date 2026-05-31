@@ -3,6 +3,7 @@ import uuid
 import csv
 import json
 import os
+from django.db.models import Q
 from django.http import JsonResponse, HttpResponse, FileResponse, Http404
 from django.core.paginator import Paginator
 from django.conf import settings
@@ -372,12 +373,27 @@ def reporte_web(request):
 # 7. SIMULADORES Y REFERENCIAS
 # =========================================================
 
+from django.db.models import Q
+
 @login_required
 def simulador_mercadolibre(request):
     canal = request.session.get('canal_activo', 'Web')
     
-    # Obtenemos todas las simulaciones ordenadas (vital para que la paginación no se rompa)
-    simulaciones_todas = SimulacionMercadoLibre.objects.filter(usuario=request.user).order_by('id')
+    # 1. Capturamos lo que el usuario escriba en el buscador
+    query_search = request.GET.get('q', '')
+
+    # 2. Obtenemos las simulaciones base del usuario
+    simulaciones_todas = SimulacionMercadoLibre.objects.filter(usuario=request.user)
+    
+    # 3. Aplicamos el filtro si el usuario buscó algún código (Cód. Pub o Cód. Prod)
+    if query_search:
+        simulaciones_todas = simulaciones_todas.filter(
+            Q(cod_publicacion__icontains=query_search) | 
+            Q(cod_producto__icontains=query_search)
+        )
+        
+    # 4. Ordenamos para la paginación (vital para que no se rompa al cambiar de página)
+    simulaciones_todas = simulaciones_todas.order_by('id')
     
     # 1. MAPA DE COMISIONES
     comisiones_ref = ReferenciaComision.objects.all()
@@ -398,7 +414,7 @@ def simulador_mercadolibre(request):
     mapa_comisiones_json = json.dumps(mapa_comisiones)
     mapa_costos_json = json.dumps(mapa_costos)
     
-    # 🚀 PAGINACIÓN: Dividimos la lista gigante en bloques de 50
+    # 🚀 PAGINACIÓN: Dividimos la lista (filtrada o completa) en bloques de 50
     paginator = Paginator(simulaciones_todas, 50) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -415,7 +431,8 @@ def simulador_mercadolibre(request):
         'canal': canal, 
         'page_obj': page_obj, 
         'mapa_comisiones_json': mapa_comisiones_json,
-        'mapa_costos_json': mapa_costos_json
+        'mapa_costos_json': mapa_costos_json,
+        'query_search': query_search  # Pasamos la búsqueda al HTML para mantenerla en la cajita
     })
 
 @login_required

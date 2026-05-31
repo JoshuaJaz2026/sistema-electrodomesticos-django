@@ -3,7 +3,6 @@
 
 {% block content %}
 
-
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <div class="card simulador-container">
@@ -61,6 +60,23 @@
     <datalist id="list-marca">
         <option value="WAHL"><option value="OSTER"><option value="FINEZZA"><option value="RECORD"><option value="IMACO"><option value="BOSSKO"><option value="TAURUS"><option value="LG"><option value="SAMSUNG"><option value="INDURAMA"><option value="ELECTROLUX"><option value="JBO"><option value="TREVELY"><option value="JVC"><option value="BGH"><option value="PHILIPS"><option value="FUJITEC"><option value="PANASONIC"><option value="SONY"><option value="TCL"><option value="HALION"><option value="MIRAY"><option value="EVOLUTION"><option value="YANBAL"><option value="DSP"><option value="MASTERTECH"><option value="CREST"><option value="GAMA"><option value="WHITELINE"><option value="REMINGTONE"><option value="MAGIC CLIP"><option value="ILUMI"><option value="MABE"><option value="AOC"><option value="TRAMONTINA"><option value="PREMIER"><option value="IMPERIAL"><option value="VISIONNER"><option value="SILVER CREST"><option value="BORD"><option value="EPSON"><option value="SOLE">
     </datalist>
+
+    <div style="margin-bottom: 15px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+        <form method="GET" action="" style="display: flex; gap: 10px; width: 100%; max-width: 600px;">
+            <div style="position: relative; flex-grow: 1;">
+                <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar por CÓD. PUB o CÓD. PROD (SKU)..." style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-family: inherit;">
+            </div>
+            <button type="submit" class="btn-accion btn-principal">
+                Buscar
+            </button>
+            {% if query_search %}
+            <a href="?" class="btn-accion" style="background-color: #ef4444; color: white; text-decoration: none;">
+                <i class="fas fa-times"></i> Limpiar
+            </a>
+            {% endif %}
+        </form>
+    </div>
 
     <div class="tabla-scroll-container" style="position: relative;">
         
@@ -160,16 +176,17 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 12px 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
         <span style="color: #475569; font-weight: 600; font-size: 0.9rem;">
             Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            {% if query_search %}(Resultados filtrados){% endif %}
         </span>
         <div style="display: flex; gap: 8px;">
             {% if page_obj.has_previous %}
-                <a href="?page=1" class="btn-accion btn-secundario" style="text-decoration: none; padding: 6px 12px; background: #64748b;">&laquo; Primera</a>
-                <a href="?page={{ page_obj.previous_page_number }}" class="btn-accion btn-secundario" style="text-decoration: none; padding: 6px 12px;">Anterior</a>
+                <a href="?page=1{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-accion btn-secundario" style="text-decoration: none; padding: 6px 12px; background: #64748b;">&laquo; Primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-accion btn-secundario" style="text-decoration: none; padding: 6px 12px;">Anterior</a>
             {% endif %}
 
             {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="btn-accion btn-secundario" style="text-decoration: none; padding: 6px 12px;">Siguiente</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn-accion btn-secundario" style="text-decoration: none; padding: 6px 12px; background: #64748b;">Última &raquo;</a>
+                <a href="?page={{ page_obj.next_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-accion btn-secundario" style="text-decoration: none; padding: 6px 12px;">Siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-accion btn-secundario" style="text-decoration: none; padding: 6px 12px; background: #64748b;">Última &raquo;</a>
             {% endif %}
         </div>
     </div>
