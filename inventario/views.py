@@ -518,20 +518,31 @@ def eliminar_comisiones_masivas(request):
 @login_required
 def referencia_costos(request):
     canal = request.session.get('canal_activo', 'Web')
-    costos = ReferenciaCosto.objects.all().order_by('codigo')
-    return render(request, 'inventario/referencia_costos.html', {'canal': canal, 'costos': costos})
+    
+    # 1. Capturamos lo que el usuario escriba en el buscador
+    query_search = request.GET.get('q', '')
 
-@login_required
-def descargar_plantilla_costos(request):
-    response = HttpResponse(content_type='text/csv; charset=utf-8')
-    response['Content-Disposition'] = 'attachment; filename="plantilla_referencia_costos.csv"'
-    response.write('\ufeff'.encode('utf8'))
-    
-    writer = csv.writer(response, delimiter=';')
-    writer.writerow(['CÓDIGO', 'PRODUCTO', 'COSTO CERO', 'COSTO U. ($)', 'COSTO U. ($ ► S/.)'])
-    writer.writerow(['SKU-001', 'EJEMPLO BATIDORA', '10.50', '12.00', '45.60'])
-    
-    return response
+    # 2. Obtenemos todos los costos ordenados por código
+    costos_todos = ReferenciaCosto.objects.all().order_by('codigo')
+
+    # 3. Aplicamos el filtro a la base de datos si el usuario buscó algo
+    if query_search:
+        costos_todos = costos_todos.filter(
+            Q(codigo__icontains=query_search) | 
+            Q(producto__icontains=query_search)
+        )
+
+    # 4. PAGINACIÓN: Dividimos la lista (filtrada o completa) en bloques de 50
+    paginator = Paginator(costos_todos, 50) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # 5. Pasamos 'page_obj' y 'query_search' al HTML
+    return render(request, 'inventario/referencia_costos.html', {
+        'canal': canal, 
+        'page_obj': page_obj,
+        'query_search': query_search
+    })
 
 @login_required
 def guardar_costos_masivos(request):

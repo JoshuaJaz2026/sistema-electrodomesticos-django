@@ -10,8 +10,22 @@
         </h2>
         
         <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-            <input type="text" id="buscador" onkeyup="filtrarTabla()" placeholder="Buscar producto o código..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; width: 200px; outline: none;">
             
+            <form method="GET" action="" style="display: flex; gap: 8px; align-items: center; margin-right: 15px;">
+                <div style="position: relative;">
+                    <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                    <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar por código o producto..." style="padding: 10px 10px 10px 35px; border: 1px solid #cbd5e1; border-radius: 6px; width: 230px; outline: none; font-family: inherit;">
+                </div>
+                <button type="submit" style="background: var(--color-principal); color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                    Buscar
+                </button>
+                {% if query_search %}
+                <a href="?" style="background: #ef4444; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+                    <i class="fas fa-times"></i> Limpiar
+                </a>
+                {% endif %}
+            </form>
+
             <a href="{% url 'descargar_plantilla_costos' %}" class="btn" style="background: #3b82f6; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-weight: bold;">
                 <i class="fas fa-download"></i> Bajar Plantilla
             </a>
@@ -43,42 +57,60 @@
                 </tr>
             </thead>
             <tbody>
-                {% for item in costos %}
-                <tr class="fila-simulador">
-                    <td class="td-cell" style="background: #f8fafc;">
-                        <input type="text" class="celda-input central bold text-dark val-codigo" value="{{ item.codigo }}" readonly tabindex="-1">
-                    </td>
-                    
-                    <td class="td-cell">
-                        <input type="text" class="celda-input val-producto" value="{{ item.producto|default:'' }}">
-                    </td>
-                    
-                    <td class="td-cell" style="background: #fff5f5;">
-                        <input type="number" step="0.01" class="celda-input derecha text-red val-costo-cero" value="{{ item.costo_cero|stringformat:'.2f'|default:'0.00' }}">
-                    </td>
-                    
-                    <td class="td-cell" style="background: #f0fdf4;">
-                        <input type="number" step="0.01" class="celda-input derecha text-green val-costo-usd" value="{{ item.costo_u_dolares|stringformat:'.2f'|default:'0.00' }}">
-                    </td>
-                    
-                    <td class="td-cell" style="background: #f1f5f9;">
-                        <input type="text" class="celda-input derecha bold val-costo-soles" value="S/. {{ item.costo_u_soles|stringformat:'.2f'|default:'0.00' }}" readonly tabindex="-1">
-                    </td>
-                </tr>
-                {% empty %}
-                <tr id="fila-vacia">
-                    <td colspan="5" style="padding: 20px; text-align: center; color: #64748b;">
-                        No hay costos registrados en la base de datos. ¡Sube tu plantilla CSV para comenzar!
-                    </td>
-                </tr>
-                {% endfor %}
+                {% if page_obj %}
+                    {% for item in page_obj %}
+                    <tr class="fila-simulador">
+                        <td class="td-cell" style="background: #f8fafc;">
+                            <input type="text" class="celda-input central bold text-dark val-codigo" value="{{ item.codigo }}" readonly tabindex="-1">
+                        </td>
+                        <td class="td-cell">
+                            <input type="text" class="celda-input val-producto" value="{{ item.producto|default:'' }}">
+                        </td>
+                        <td class="td-cell" style="background: #fff5f5;">
+                            <input type="number" step="0.01" class="celda-input derecha text-red val-costo-cero" value="{{ item.costo_cero|stringformat:'.2f'|default:'0.00' }}">
+                        </td>
+                        <td class="td-cell" style="background: #f0fdf4;">
+                            <input type="number" step="0.01" class="celda-input derecha text-green val-costo-usd" value="{{ item.costo_u_dolares|stringformat:'.2f'|default:'0.00' }}">
+                        </td>
+                        <td class="td-cell" style="background: #f1f5f9;">
+                            <input type="text" class="celda-input derecha bold val-costo-soles" value="S/. {{ item.costo_u_soles|stringformat:'.2f'|default:'0.00' }}" readonly tabindex="-1">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr id="fila-vacia">
+                        <td colspan="5" style="padding: 20px; text-align: center; color: #64748b;">
+                            No se encontraron costos o la tabla está vacía.
+                        </td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
+
+    {% if page_obj %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 12px 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <span style="color: #475569; font-weight: 600; font-size: 0.9rem;">
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            {% if query_search %}(Resultados filtrados){% endif %}
+        </span>
+        <div style="display: flex; gap: 8px;">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if query_search %}&q={{ query_search }}{% endif %}" style="background: #64748b; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px;">&laquo; Primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" style="background: #475569; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px;">Anterior</a>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" style="background: #475569; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px;">Siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if query_search %}&q={{ query_search }}{% endif %}" style="background: #64748b; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px;">Última &raquo;</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
 </div>
 
 <style>
-    /* Estilos copiados del simulador moderno */
     .tabla-scroll-container { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #fff; max-height: 600px; }
     .tabla-simulador-moderna { border-collapse: collapse; font-size: 0.85rem; width: 100%; }
     .th-rep { padding: 14px 12px; border-bottom: 2px solid #e2e8f0; border-right: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #475569; text-transform: uppercase; background-color: #f8fafc; }
@@ -96,39 +128,13 @@
     .text-green { color: #166534; } 
     .text-red { color: #dc2626; }
 
-    /* Ocultar flechitas de los inputs numéricos */
     .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .celda-input[type=number] { -moz-appearance: textfield; }
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script>
-    // Buscador (busca por código o por producto y lee desde los inputs)
-    function filtrarTabla() {
-        const input = document.getElementById("buscador");
-        const filter = input.value.toUpperCase();
-        const filas = document.querySelectorAll("#tablaCostos tbody tr");
-        
-        filas.forEach(fila => {
-            if(fila.id === "fila-vacia") return;
-            
-            const inputCodigo = fila.querySelector('.val-codigo');
-            const inputProducto = fila.querySelector('.val-producto');
-            
-            if (inputCodigo && inputProducto) {
-                const txtCodigo = inputCodigo.value.toUpperCase();
-                const txtProducto = inputProducto.value.toUpperCase();
-                
-                if (txtCodigo.includes(filter) || txtProducto.includes(filter)) {
-                    fila.style.display = "";
-                } else {
-                    fila.style.display = "none";
-                }
-            }
-        });
-    }
-
-    // PASO 1: Leer CSV y Previsualizar (Construye las celdas editables)
+    // IMPORTACIÓN MASIVA
     document.getElementById('csvCostos').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -148,7 +154,7 @@
                 results.data.forEach(item => {
                     const tr = document.createElement("tr");
                     tr.className = "fila-simulador";
-                    tr.style.backgroundColor = "#fffbeb"; // Fondo amarillito para vistas previas
+                    tr.style.backgroundColor = "#fffbeb"; 
                     
                     const formatNum = (val) => {
                         let num = parseFloat(String(val).replace('$', '').replace('S/.', '').replace(',', '.'));
@@ -181,7 +187,7 @@
         });
     });
 
-    // PASO 2: Enviar los datos del DOM a la Base de Datos
+    // GUARDAR MODIFICACIONES
     function guardarDatosPendientes() {
         const filas = document.querySelectorAll('.fila-simulador');
         let datosAguardar = [];
@@ -214,7 +220,6 @@
                 'Content-Type': 'application/json',
                 'X-CSRFToken': '{{ csrf_token }}'
             },
-            // El formato es exactamente el que espera tu backend gracias a las llaves que le pusimos
             body: JSON.stringify({ referencias: datosAguardar })
         })
         .then(response => response.json())
@@ -236,7 +241,7 @@
         });
     }
 
-    // Función para Borrar Todo
+    // BORRAR TODO
     function eliminarTodosLosCostos() {
         if(confirm("⚠️ ¿Estás seguro de que deseas eliminar TODOS los costos de la base de datos? Esta acción no se puede deshacer.")) {
             fetch("{% url 'eliminar_costos_masivos' %}", {
