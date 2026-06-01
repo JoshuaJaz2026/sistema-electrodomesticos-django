@@ -416,7 +416,7 @@ def simulador_mercadolibre(request):
     mapa_costos_json = json.dumps(mapa_costos)
     
     # 🚀 PAGINACIÓN: Dividimos la lista (filtrada o completa) en bloques de 50
-    paginator = Paginator(simulaciones_todas, 15) 
+    paginator = Paginator(simulaciones_todas, 10) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
