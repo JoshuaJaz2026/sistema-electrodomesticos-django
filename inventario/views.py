@@ -459,7 +459,7 @@ def referencia_comisiones(request):
     page_obj = paginator.get_page(page_number)
 
     # 5. Pasamos todo al HTML
-    return render(request, 'inventario/referencia_comisiones.html', {
+    return render(request, 'inventario/referencia_marca_categ.html', {
         'canal': canal, 
         'page_obj': page_obj,
         'query_search': query_search
