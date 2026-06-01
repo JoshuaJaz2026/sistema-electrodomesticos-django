@@ -5,6 +5,7 @@ import json
 import os
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse, FileResponse, Http404
+from django.http import HttpResponse
 from django.core.paginator import Paginator
 from django.conf import settings
 from django.shortcuts import render, redirect
@@ -705,5 +706,22 @@ def descargar_plantilla_simulador(request):
         '% DSCTO', 'P. VENTA', 'ENVÍO', '% NUEVA COM', 'COM (S/)', 
         'PAGO NETO', 'COSTO', 'GANANCIA', 'RTBLD%', 'MPE'
     ])
+
+    return response
+
+@login_required
+def descargar_plantilla_costos(request):
+    # Configuramos la respuesta para que el navegador sepa que es un archivo descargable
+    response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+    response['Content-Disposition'] = 'attachment; filename="plantilla_referencia_costos.csv"'
+
+    # Creamos el escritor CSV
+    writer = csv.writer(response)
+    
+    # Escribimos la fila principal con los títulos exactos que lee tu JavaScript
+    writer.writerow(['CÓDIGO', 'PRODUCTO', 'COSTO CERO', 'COSTO U. ($)', 'COSTO U. ($ ► S/.)'])
+    
+    # (Opcional) Agregamos una fila de ejemplo para guiar al usuario
+    writer.writerow(['SKU-EJEMPLO', 'Producto de Prueba', '10.50', '15.00', ''])
 
     return response
