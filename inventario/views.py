@@ -439,10 +439,30 @@ def simulador_mercadolibre(request):
 @login_required
 def referencia_comisiones(request):
     canal = request.session.get('canal_activo', 'Web')
-    comisiones = ReferenciaComision.objects.all().order_by('categoria')
+    
+    # 1. Buscador
+    query_search = request.GET.get('q', '')
+
+    # 2. Obtenemos todas las referencias ordenadas
+    comisiones_todas = ReferenciaComision.objects.all().order_by('id')
+
+    # 3. Aplicamos el filtro si se buscó algo
+    if query_search:
+        comisiones_todas = comisiones_todas.filter(
+            Q(sub_categoria__icontains=query_search) | 
+            Q(categoria__icontains=query_search)
+        )
+
+    # 4. Paginación de 40 en 40
+    paginator = Paginator(comisiones_todas, 40) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # 5. Pasamos todo al HTML
     return render(request, 'inventario/referencia_comisiones.html', {
         'canal': canal, 
-        'comisiones': comisiones
+        'page_obj': page_obj,
+        'query_search': query_search
     })
 
 @login_required

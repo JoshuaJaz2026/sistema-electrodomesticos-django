@@ -9,18 +9,18 @@
             <i class="fas fa-dollar-sign" style="color: var(--color-principal);"></i> Referencia: COSTOS
         </h2>
         
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex-grow: 1; justify-content: flex-end;">
             
-            <form method="GET" action="" style="display: flex; gap: 8px; align-items: center; margin-right: 15px;">
-                <div style="position: relative;">
+            <form method="GET" action="" style="display: flex; gap: 15px; align-items: center; margin-right: 15px; width: 100%; max-width: 450px;">
+                <div style="position: relative; flex-grow: 1;">
                     <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
-                    <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar por código o producto..." style="padding: 10px 10px 10px 35px; border: 1px solid #cbd5e1; border-radius: 6px; width: 230px; outline: none; font-family: inherit;">
+                    <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar por código o producto..." style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-family: inherit; box-sizing: border-box;">
                 </div>
-                <button type="submit" style="background: var(--color-principal); color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                <button type="submit" style="background: var(--color-principal); color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; flex-shrink: 0; margin-left: 5px;">
                     Buscar
                 </button>
                 {% if query_search %}
-                <a href="?" style="background: #ef4444; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+                <a href="?" style="background: #ef4444; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-weight: bold; flex-shrink: 0;">
                     <i class="fas fa-times"></i> Limpiar
                 </a>
                 {% endif %}
