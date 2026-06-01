@@ -2,16 +2,30 @@
 {% load static %}
 
 {% block content %}
-<div class="card" style="max-width: 900px; margin: auto; border-top: 4px solid var(--color-principal);">
+<div class="card" style="max-width: 1100px; margin: auto; border-top: 4px solid var(--color-principal);">
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
         <h2 style="margin: 0; color: #1e293b; text-transform: uppercase;">
             <i class="fas fa-list-ul" style="color: var(--color-principal);"></i> Referencia: MARCA Y CATEG
         </h2>
         
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-            <input type="text" id="buscador" onkeyup="filtrarTabla()" placeholder="Buscar categoría..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; width: 200px;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex-grow: 1; justify-content: flex-end;">
             
+            <form method="GET" action="" style="display: flex; gap: 15px; align-items: center; margin-right: 15px; width: 100%; max-width: 450px;">
+                <div style="position: relative; flex-grow: 1;">
+                    <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                    <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar categoría o subcategoría..." style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-family: inherit; box-sizing: border-box;">
+                </div>
+                <button type="submit" style="background: var(--color-principal); color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; flex-shrink: 0; margin-left: 5px;">
+                    Buscar
+                </button>
+                {% if query_search %}
+                <a href="?" style="background: #ef4444; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-weight: bold; flex-shrink: 0;">
+                    <i class="fas fa-times"></i> Limpiar
+                </a>
+                {% endif %}
+            </form>
+
             <a href="{% url 'descargar_plantilla_comisiones' %}" class="btn" style="background: #3b82f6; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-weight: bold;">
                 <i class="fas fa-download"></i> Bajar Plantilla
             </a>
@@ -25,65 +39,196 @@
                 <i class="fas fa-upload"></i> Importar Masivo
             </button>
 
-            <button type="button" onclick="guardarDatosPendientes()" style="background: #f59e0b; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+            <button type="button" id="btnGuardarComisiones" onclick="guardarDatosPendientes()" style="background: #f59e0b; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
                 <i class="fas fa-save"></i> Guardar Modificaciones
             </button>
         </div>
     </div>
     
-    <form method="POST" action="{% url 'guardar_comisiones' %}" id="formComisiones">
-        {% csrf_token %}
-        <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
-            <table id="tablaComisiones" style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
-                <thead style="background: #f8fafc; position: sticky; top: 0;">
-                    <tr>
-                        <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: left;">SUB CATEGORÍA</th>
-                        <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: left;">CATEGORÍA</th>
-                        <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: center;">COMISIÓN (%)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in comisiones %}
-                    <tr>
-                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">{{ item.sub_categoria }}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">{{ item.categoria }}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">
-                            <input type="number" name="comision_{{ item.id }}" value="{{ item.comision|stringformat:'.2f' }}" step="0.1" style="width: 70px; padding: 5px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px;">
+    <div class="tabla-scroll-container">
+        <table id="tablaComisiones" class="tabla-simulador-moderna" style="width: 100%;">
+            <thead style="background: #f8fafc; position: sticky; top: 0; z-index: 10;">
+                <tr>
+                    <th class="th-rep" style="width: 35%;">SUB CATEGORÍA</th>
+                    <th class="th-rep" style="width: 45%;">CATEGORÍA</th>
+                    <th class="th-rep" style="width: 20%;">COMISIÓN (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if page_obj %}
+                    {% for item in page_obj %}
+                    <tr class="fila-simulador" data-original-key="{{ item.id|default_if_none:'' }}">
+                        <td class="td-cell">
+                            <input type="text" class="celda-input val-subcat text-dark bold" value="{{ item.sub_categoria|default:'' }}" oninput="registrarCambioFila(this)">
                         </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="3" style="padding: 20px; text-align: center; color: #64748b;">
-                            No hay referencias registradas. ¡Sube tu plantilla CSV para comenzar!
+                        <td class="td-cell">
+                            <input type="text" class="celda-input val-cat" value="{{ item.categoria|default:'' }}" oninput="registrarCambioFila(this)">
+                        </td>
+                        <td class="td-cell" style="background: #f8fafc;">
+                            <input type="number" step="0.01" class="celda-input central bold text-blue val-comision" value="{{ item.comision|stringformat:'.2f'|default:'0.00' }}" oninput="registrarCambioFila(this)">
                         </td>
                     </tr>
                     {% endfor %}
-                </tbody>
-            </table>
+                {% else %}
+                    <tr id="fila-vacia" data-original-key="molde">
+                        <td colspan="3" style="padding: 20px; text-align: center; color: #64748b;">
+                            No se encontraron categorías o la tabla está vacía. ¡Agrega una nueva fila o importa tu Excel!
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 15px; display: flex; justify-content: center;">
+        <button type="button" onclick="agregarFila()" class="btn-agregar-fila">
+            <i class="fas fa-plus"></i> Agregar nueva fila
+        </button>
+    </div>
+
+    {% if page_obj %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 12px 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <span style="color: #475569; font-weight: 600; font-size: 0.9rem;">
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            {% if query_search %}(Resultados filtrados){% endif %}
+            <span id="indicador-cambios" style="color: #f59e0b; font-weight: bold; display: none; margin-left: 10px;">
+                <i class="fas fa-exclamation-circle"></i> Tienes cambios sin guardar
+            </span>
+        </span>
+        <div style="display: flex; gap: 8px;">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if query_search %}&q={{ query_search }}{% endif %}" style="background: #64748b; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px;">&laquo; Primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" style="background: #475569; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px;">Anterior</a>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" style="background: #475569; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px;">Siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if query_search %}&q={{ query_search }}{% endif %}" style="background: #64748b; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px;">Última &raquo;</a>
+            {% endif %}
         </div>
-    </form>
+    </div>
+    {% endif %}
+
 </div>
+
+<style>
+    .tabla-scroll-container { overflow-x: auto; overflow-y: visible; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #fff; max-height: 600px; }
+    .tabla-simulador-moderna { border-collapse: collapse; font-size: 0.85rem; width: 100%; }
+    .th-rep { padding: 14px 12px; border-bottom: 2px solid #e2e8f0; border-right: 1px solid #e2e8f0; text-align: left; font-weight: 700; color: #475569; text-transform: uppercase; background-color: #f8fafc; }
+    .th-rep:last-child { text-align: center; }
+    .fila-simulador { border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s ease; }
+    .fila-simulador:hover { background-color: #fef9c3 !important; }
+    .td-cell { padding: 0; border-right: 1px solid #f1f5f9; vertical-align: middle; }
+
+    .celda-input { width: 100%; box-sizing: border-box; border: 2px solid transparent; padding: 10px 12px; color: #1e293b; background: transparent; outline: none; font-size: 0.85rem; font-family: inherit; transition: all 0.15s ease; }
+    .celda-input:not([readonly]):focus { background-color: #fff; border-color: #eab308; box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1); color: #000; z-index: 1; position: relative; border-radius: 4px; }
+
+    .central { text-align: center; } 
+    .bold { font-weight: 700; }
+    .text-dark { color: #0f172a; } 
+    .text-blue { color: #2563eb; } 
+
+    .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .celda-input[type=number] { -moz-appearance: textfield; }
+
+    /* Estilo para filas editadas temporalmente */
+    .fila-editada > td { background-color: #fffbeb !important; }
+    .fila-editada > td:first-child { border-left: 4px solid #f59e0b; }
+
+    .btn-agregar-fila { background-color: #f1f5f9; color: #475569; border: 2px dashed #cbd5e1; padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; transition: all 0.2s ease; font-family: inherit; }
+    .btn-agregar-fila:hover { background-color: #e2e8f0; border-color: #94a3b8; color: #1e293b; transform: translateY(-2px); }
+</style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script>
-    let datosPendientes = [];
+    // -------------------------------------------------------------
+    // 1. EL CEREBRO DE LA MEMORIA (Persistencia de Estado)
+    // -------------------------------------------------------------
+    let memoriaComisiones = JSON.parse(localStorage.getItem('memoriaComisionesTemp')) || {};
 
-    // Buscador
-    function filtrarTabla() {
-        const input = document.getElementById("buscador");
-        const filter = input.value.toUpperCase();
-        const table = document.getElementById("tablaComisiones");
-        const tr = table.getElementsByTagName("tr");
-        for (let i = 1; i < tr.length; i++) {
-            const td = tr[i].getElementsByTagName("td")[1]; 
-            if (td) {
-                const txtValue = td.textContent || td.innerText;
-                tr[i].style.display = txtValue.toUpperCase().indexOf(filter) > -1 ? "" : "none";
-            }
+    function registrarCambioFila(elemento) {
+        const fila = elemento.closest('tr');
+        
+        // Identificador único de la fila
+        let key = fila.dataset.originalKey;
+        if (!key || key === 'molde' || key === '') {
+            key = 'temp-' + Math.random().toString(36).substr(2, 9);
+            fila.dataset.originalKey = key;
         }
+
+        const subcat = fila.querySelector('.val-subcat')?.value.trim() || '';
+        const cat = fila.querySelector('.val-cat')?.value.trim() || '';
+        const comision = parseFloat(fila.querySelector('.val-comision')?.value) || 0;
+
+        if (subcat === '' && cat === '') return; // No guardamos filas fantasma
+
+        // Guardamos el estado actual en la memoria (Las llaves deben coincidir con lo que espera el backend)
+        memoriaComisiones[key] = {
+            'SUB CATEGORÍA': subcat,
+            'CATEGORÍA': cat,
+            'COMISIÓN': comision
+        };
+
+        localStorage.setItem('memoriaComisionesTemp', JSON.stringify(memoriaComisiones));
+        
+        fila.classList.add('fila-editada');
+        document.getElementById('indicador-cambios').style.display = 'inline-block';
     }
 
-    // Leer CSV y Previsualizar en amarillo
+    // -------------------------------------------------------------
+    // 2. RESTAURAR DATOS AL CARGAR LA PÁGINA
+    // -------------------------------------------------------------
+    window.addEventListener('load', function() {
+        const filas = document.querySelectorAll('#tablaComisiones tbody .fila-simulador');
+        let hayCambiosPrevios = false;
+
+        filas.forEach(fila => {
+            const key = fila.dataset.originalKey;
+            
+            if (key && memoriaComisiones[key]) {
+                const mem = memoriaComisiones[key];
+                fila.querySelector('.val-subcat').value = mem['SUB CATEGORÍA'];
+                fila.querySelector('.val-cat').value = mem['CATEGORÍA'];
+                fila.querySelector('.val-comision').value = mem['COMISIÓN'].toFixed(2);
+                
+                fila.classList.add('fila-editada');
+                hayCambiosPrevios = true;
+            }
+        });
+
+        if (hayCambiosPrevios || Object.keys(memoriaComisiones).length > 0) {
+            const indicador = document.getElementById('indicador-cambios');
+            if(indicador) indicador.style.display = 'inline-block';
+        }
+    });
+
+    // -------------------------------------------------------------
+    // 3. AGREGAR NUEVA FILA MANUALMENTE
+    // -------------------------------------------------------------
+    function agregarFila() {
+        const tbody = document.querySelector('#tablaComisiones tbody');
+        
+        // Creamos la estructura de la nueva fila editable vacía
+        const tr = document.createElement('tr');
+        tr.className = 'fila-simulador';
+        tr.dataset.originalKey = 'temp-' + Math.random().toString(36).substr(2, 9);
+        
+        tr.innerHTML = `
+            <td class="td-cell"><input type="text" class="celda-input val-subcat text-dark bold" oninput="registrarCambioFila(this)"></td>
+            <td class="td-cell"><input type="text" class="celda-input val-cat" oninput="registrarCambioFila(this)"></td>
+            <td class="td-cell" style="background: #f8fafc;"><input type="number" step="0.01" class="celda-input central bold text-blue val-comision" value="0.00" oninput="registrarCambioFila(this)"></td>
+        `;
+        
+        // Si hay una fila de "vacia", la removemos antes de agregar
+        const filaVacia = document.getElementById('fila-vacia');
+        if (filaVacia) filaVacia.remove();
+
+        tbody.appendChild(tr);
+    }
+
+    // -------------------------------------------------------------
+    // 4. IMPORTACIÓN MASIVA CSV
+    // -------------------------------------------------------------
     document.getElementById('csvComisiones').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -93,93 +238,97 @@
             skipEmptyLines: true,
             complete: function(results) {
                 if (results.data.length > 0 && !('CATEGORÍA' in results.data[0] && 'COMISIÓN' in results.data[0])) {
-                    alert("Error: Asegúrate de que las cabeceras del CSV sean exactamente: SUB CATEGORÍA, CATEGORÍA, COMISIÓN");
+                    alert("Error: Asegúrate de usar la plantilla correcta (SUB CATEGORÍA, CATEGORÍA, COMISIÓN).");
                     return;
                 }
                 
-                datosPendientes = results.data;
-                const tbody = document.querySelector("#tablaComisiones tbody");
-                tbody.innerHTML = ""; 
-
-                datosPendientes.forEach(item => {
-                    const tr = document.createElement("tr");
-                    tr.style.backgroundColor = "#fffbeb"; // Vista previa amarilla
+                results.data.forEach(item => {
+                    const key = 'import-' + Math.random().toString(36).substr(2, 9);
+                    let comisionStr = String(item['COMISIÓN']).replace('%', '').replace(',', '.').trim();
+                    let comisionNum = parseFloat(comisionStr) || 0.00;
                     
-                    let comisionStr = String(item['COMISIÓN']).replace('%', '').replace(',', '.').strip();
-                    let comisionNum = parseFloat(comisionStr);
-                    if (isNaN(comisionNum)) comisionNum = 0.00;
-
-                    tr.innerHTML = `
-                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">${item['SUB CATEGORÍA'] || ''}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">${item['CATEGORÍA'] || ''}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">
-                            <input type="number" value="${comisionNum.toFixed(2)}" step="0.1" style="width: 70px; padding: 5px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px;" readonly>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
+                    memoriaComisiones[key] = {
+                        'SUB CATEGORÍA': item['SUB CATEGORÍA'] || '',
+                        'CATEGORÍA': item['CATEGORÍA'] || '',
+                        'COMISIÓN': comisionNum
+                    };
                 });
-
+                
+                localStorage.setItem('memoriaComisionesTemp', JSON.stringify(memoriaComisiones));
                 document.getElementById('csvComisiones').value = "";
-                alert("Vista previa generada. ¡No olvides hacer clic en 'Guardar Modificaciones' para subir esto a la Base de Datos!");
+                
+                alert("Vista previa lista. Se guardó en memoria. ¡No olvides hacer clic en 'Guardar Modificaciones'!");
+                window.location.reload();
             }
         });
     });
 
-    // Guardar (Masivo o Manual)
+    // -------------------------------------------------------------
+    // 5. GUARDAR Y LIMPIAR MEMORIA
+    // -------------------------------------------------------------
     function guardarDatosPendientes() {
-        // Si hay datos en memoria, significa que subió un CSV
-        if (datosPendientes.length > 0) {
-            fetch("{% url 'guardar_comisiones_masivas' %}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({ referencias: datosPendientes })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'ok') {
-                    alert('¡Éxito! ' + data.message);
-                    datosPendientes = [];
-                    window.location.reload(); 
-                } else {
-                    alert('Error al importar: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error("Hubo un error:", error);
-                alert("Ocurrió un error en la conexión al servidor.");
-            });
-        } else {
-            // Si no hay datos en memoria, significa que hizo un cambio manual en los inputs
-            document.getElementById('formComisiones').submit();
+        let datosAguardar = Object.values(memoriaComisiones);
+
+        if (datosAguardar.length === 0) {
+            alert("No tienes ningún cambio pendiente para guardar.");
+            return;
         }
+
+        const btn = document.getElementById('btnGuardarComisiones');
+        const textoOriginal = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        btn.disabled = true;
+
+        fetch("{% url 'guardar_comisiones_masivas' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            // Enviamos el array completo de lo que recolectamos de la memoria
+            body: JSON.stringify({ referencias: datosAguardar })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                localStorage.removeItem('memoriaComisionesTemp');
+                memoriaComisiones = {}; 
+                alert('¡Éxito! ' + data.message);
+                window.location.reload(); 
+            } else {
+                alert('Error al guardar: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Ocurrió un error en la conexión al servidor.");
+        })
+        .finally(() => {
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+        });
     }
 
-    // Borrar Todo
+    // -------------------------------------------------------------
+    // 6. BORRAR TODO
+    // -------------------------------------------------------------
     function eliminarTodasLasComisiones() {
-        if(confirm("⚠️ ¿Estás seguro de que deseas eliminar TODAS las referencias de la base de datos? Esta acción no se puede deshacer.")) {
+        if(confirm("⚠️ ¿Estás seguro de que deseas eliminar TODAS las referencias de comisiones? Esta acción no se puede deshacer.")) {
             fetch("{% url 'eliminar_comisiones_masivas' %}", {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                }
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' }
             })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'ok') {
+                    localStorage.removeItem('memoriaComisionesTemp');
                     alert('✅ ' + data.message);
                     window.location.reload(); 
                 } else {
                     alert('❌ Error al eliminar: ' + data.message);
                 }
             })
-            .catch(error => {
-                console.error("Hubo un error:", error);
-                alert("Ocurrió un error en la conexión al servidor.");
-            });
+            .catch(error => console.error("Error:", error));
         }
     }
 </script>
