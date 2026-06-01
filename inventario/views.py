@@ -332,7 +332,40 @@ def api_guardar_simulador(request):
 @login_required
 def reporte_mercadolibre(request):
     canal = request.session.get('canal_activo', 'Web')
-    return render(request, 'reportes_plataformas/reporte_mercadolibre.html', {'canal': canal})
+    
+    # 1. Capturamos los parámetros de búsqueda y fechas que vienen del HTML
+    query_search = request.GET.get('q', '')
+    fecha_inicio = request.GET.get('fecha_inicio', '')
+    fecha_fin = request.GET.get('fecha_fin', '')
+
+    # 2. Obtenemos todas las ventas ordenadas de la más reciente a la más antigua
+    # ⚠️ CAMBIA 'ReporteMercadoLibre' POR EL NOMBRE REAL DE TU MODELO DE VENTAS
+    ventas_todas = ReporteMercadoLibre.objects.all().order_by('-id')
+
+    # 3. Aplicamos el filtro de búsqueda por NRO. ORDEN o SKU
+    if query_search:
+        ventas_todas = ventas_todas.filter(
+            Q(nro_orden__icontains=query_search) | 
+            Q(sku_almacen__icontains=query_search)
+        )
+    
+    # 4. Aplicamos los filtros de fecha (desde - hasta)
+    if fecha_inicio:
+        ventas_todas = ventas_todas.filter(fecha__gte=fecha_inicio)
+    if fecha_fin:
+        ventas_todas = ventas_todas.filter(fecha__lte=fecha_fin)
+
+    # 5. PAGINACIÓN: Dividimos los resultados en bloques de 40
+    paginator = Paginator(ventas_todas, 40) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # 6. Pasamos las variables al HTML (incluyendo la ruta de tu carpeta que es reportes_plataformas)
+    return render(request, 'reportes_plataformas/reporte_mercadolibre.html', {
+        'canal': canal, 
+        'page_obj': page_obj,
+        'query_search': query_search
+    })
 
 @login_required
 def reporte_mercadolibre_junior(request):
@@ -743,5 +776,35 @@ def descargar_plantilla_costos(request):
     
     # (Opcional) Agregamos una fila de ejemplo para guiar al usuario
     writer.writerow(['SKU-EJEMPLO', 'Producto de Prueba', '10.50', '15.00', ''])
+
+    return response
+
+
+@login_required
+def descargar_plantilla_reporte_ml(request):
+    response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+    response['Content-Disposition'] = 'attachment; filename="plantilla_reportes_mercadolibre.csv"'
+
+    writer = csv.writer(response)
+    
+    # Cabeceras exactas de tu reporte
+    writer.writerow([
+        'FECHA', 'MES Y AÑO', 'NRO. ORDEN', 'COMPROBANTE', 'TIPO DE VENTA', 
+        'MARCA', 'CATEGORIA', 'SKU ALMACEN', 'MODELO', 'PRODUCTO', 
+        'CANT.', 'PRECIO', 'TOTAL V.', '%CARGO x VENTA', 'URBANO', 
+        'FLEX', 'TOTAL PAGADO', 'COSTO x PRODUCTO', 'UND', 'COSTO TOTAL', 
+        'COSTO ENTREGA FLEX', 'GANANCIA', 'RENTABILIDAD %', 'DISTRITO', 
+        'DIRECCIÓN', 'REPARTIDOR', 'CELULAR DEL CLIENTE', 'MSJ DE AGRADECIMIENTO'
+    ])
+    
+    # Fila de ejemplo (puedes borrarla si prefieres que descargue totalmente en blanco)
+    writer.writerow([
+        '15/06/2026', 'JUNIO 2026', 'ML-123456789', 'B001-00123', 'CATALOGO', 
+        'OSTER', 'LICUADORA', 'SKU-OST-001', 'MOD-123', 'Licuadora Oster Clásica', 
+        '1', '150.00', '150.00', '10.50', '0.00', 
+        '10.00', '129.50', '80.00', '1', '80.00', 
+        '10.00', '39.50', '49.37%', 'San Juan de Lurigancho', 
+        'Av. Próceres 123', 'Juan Pérez', '987654321', 'Gracias por su compra'
+    ])
 
     return response
