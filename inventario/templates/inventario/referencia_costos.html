@@ -59,18 +59,18 @@
             <tbody>
                 {% if page_obj %}
                     {% for item in page_obj %}
-                    <tr class="fila-simulador">
+                    <tr class="fila-simulador" id="fila-{{ item.codigo }}">
                         <td class="td-cell" style="background: #f8fafc;">
                             <input type="text" class="celda-input central bold text-dark val-codigo" value="{{ item.codigo }}" readonly tabindex="-1">
                         </td>
                         <td class="td-cell">
-                            <input type="text" class="celda-input val-producto" value="{{ item.producto|default:'' }}">
+                            <input type="text" class="celda-input val-producto" value="{{ item.producto|default:'' }}" oninput="registrarCambioFila(this)">
                         </td>
                         <td class="td-cell" style="background: #fff5f5;">
-                            <input type="number" step="0.01" class="celda-input derecha text-red val-costo-cero" value="{{ item.costo_cero|stringformat:'.2f'|default:'0.00' }}">
+                            <input type="number" step="0.01" class="celda-input derecha text-red val-costo-cero" value="{{ item.costo_cero|stringformat:'.2f'|default:'0.00' }}" oninput="registrarCambioFila(this)">
                         </td>
                         <td class="td-cell" style="background: #f0fdf4;">
-                            <input type="number" step="0.01" class="celda-input derecha text-green val-costo-usd" value="{{ item.costo_u_dolares|stringformat:'.2f'|default:'0.00' }}">
+                            <input type="number" step="0.01" class="celda-input derecha text-green val-costo-usd" value="{{ item.costo_u_dolares|stringformat:'.2f'|default:'0.00' }}" oninput="registrarCambioFila(this)">
                         </td>
                         <td class="td-cell" style="background: #f1f5f9;">
                             <input type="text" class="celda-input derecha bold val-costo-soles" value="S/. {{ item.costo_u_soles|stringformat:'.2f'|default:'0.00' }}" readonly tabindex="-1">
@@ -92,7 +92,9 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 12px 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
         <span style="color: #475569; font-weight: 600; font-size: 0.9rem;">
             Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-            {% if query_search %}(Resultados filtrados){% endif %}
+            <span id="indicador-cambios" style="color: #f59e0b; font-weight: bold; display: none; margin-left: 10px;">
+                <i class="fas fa-exclamation-circle"></i> Tienes cambios sin guardar
+            </span>
         </span>
         <div style="display: flex; gap: 8px;">
             {% if page_obj.has_previous %}
@@ -130,11 +132,72 @@
 
     .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .celda-input[type=number] { -moz-appearance: textfield; }
+
+    /* Estilo para filas editadas temporalmente */
+    .fila-editada { background-color: #fffbeb !important; border-left: 4px solid #f59e0b; }
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script>
-    // IMPORTACIÓN MASIVA
+    // -------------------------------------------------------------
+    // 1. EL CEREBRO DE LA MEMORIA (Persistencia de Estado)
+    // -------------------------------------------------------------
+    // Traemos los datos de la memoria del navegador. Si no hay nada, creamos un objeto vacío {}.
+    let memoriaCostos = JSON.parse(localStorage.getItem('memoriaCostosTemp')) || {};
+
+    // Esta función se activa en tiempo real CADA VEZ que escribes un número o letra
+    function registrarCambioFila(elemento) {
+        const fila = elemento.closest('tr');
+        const codigo = fila.querySelector('.val-codigo').value.trim();
+        
+        if (!codigo) return;
+
+        // Guardamos el estado actual de esa fila en la memoria
+        memoriaCostos[codigo] = {
+            'CÓDIGO': codigo,
+            'PRODUCTO': fila.querySelector('.val-producto').value.trim(),
+            'COSTO CERO': parseFloat(fila.querySelector('.val-costo-cero').value) || 0,
+            'COSTO U. ($)': parseFloat(fila.querySelector('.val-costo-usd').value) || 0
+        };
+
+        // Guardamos la memoria actualizada en el navegador
+        localStorage.setItem('memoriaCostosTemp', JSON.stringify(memoriaCostos));
+        
+        // Efectos visuales para que el usuario sepa que la editó
+        fila.classList.add('fila-editada');
+        document.getElementById('indicador-cambios').style.display = 'inline-block';
+    }
+
+    // -------------------------------------------------------------
+    // 2. AL CARGAR LA PÁGINA: Leer la memoria y restaurar datos
+    // -------------------------------------------------------------
+    window.addEventListener('load', function() {
+        const filas = document.querySelectorAll('#tablaCostos tbody .fila-simulador');
+        let hayCambiosPrevios = false;
+
+        filas.forEach(fila => {
+            const codigo = fila.querySelector('.val-codigo').value.trim();
+            
+            // Si el código de la fila existe en nuestra memoria, sobrescribimos los datos
+            if (codigo && memoriaCostos[codigo]) {
+                fila.querySelector('.val-producto').value = memoriaCostos[codigo]['PRODUCTO'];
+                fila.querySelector('.val-costo-cero').value = memoriaCostos[codigo]['COSTO CERO'];
+                fila.querySelector('.val-costo-usd').value = memoriaCostos[codigo]['COSTO U. ($)'];
+                
+                fila.classList.add('fila-editada');
+                hayCambiosPrevios = true;
+            }
+        });
+
+        // Mostramos la alerta amarilla abajo si hay cosas pendientes
+        if (hayCambiosPrevios || Object.keys(memoriaCostos).length > 0) {
+            document.getElementById('indicador-cambios').style.display = 'inline-block';
+        }
+    });
+
+    // -------------------------------------------------------------
+    // 3. IMPORTACIÓN MASIVA (También escribe en la memoria)
+    // -------------------------------------------------------------
     document.getElementById('csvCostos').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -144,68 +207,43 @@
             skipEmptyLines: true,
             complete: function(results) {
                 if (results.data.length > 0 && !('CÓDIGO' in results.data[0] && 'PRODUCTO' in results.data[0])) {
-                    alert("Error: Asegúrate de usar la plantilla correcta (CÓDIGO, PRODUCTO, COSTO CERO...).");
+                    alert("Error: Asegúrate de usar la plantilla correcta.");
                     return;
                 }
                 
-                const tbody = document.querySelector("#tablaCostos tbody");
-                tbody.innerHTML = ""; 
-
+                // Agregamos todo el Excel a la Memoria Temporal
                 results.data.forEach(item => {
-                    const tr = document.createElement("tr");
-                    tr.className = "fila-simulador";
-                    tr.style.backgroundColor = "#fffbeb"; 
-                    
-                    const formatNum = (val) => {
-                        let num = parseFloat(String(val).replace('$', '').replace('S/.', '').replace(',', '.'));
-                        return isNaN(num) ? "0.00" : num.toFixed(2);
-                    };
-
-                    tr.innerHTML = `
-                        <td class="td-cell" style="background: #f8fafc;">
-                            <input type="text" class="celda-input central bold text-dark val-codigo" value="${item['CÓDIGO']}" readonly tabindex="-1">
-                        </td>
-                        <td class="td-cell">
-                            <input type="text" class="celda-input val-producto" value="${item['PRODUCTO'] || ''}">
-                        </td>
-                        <td class="td-cell" style="background: #fff5f5;">
-                            <input type="number" step="0.01" class="celda-input derecha text-red val-costo-cero" value="${formatNum(item['COSTO CERO'])}">
-                        </td>
-                        <td class="td-cell" style="background: #f0fdf4;">
-                            <input type="number" step="0.01" class="celda-input derecha text-green val-costo-usd" value="${formatNum(item['COSTO U. ($)'])}">
-                        </td>
-                        <td class="td-cell" style="background: #f1f5f9;">
-                            <input type="text" class="celda-input derecha bold val-costo-soles" value="S/. ${formatNum(item['COSTO U. ($ ► S/.)'])}" readonly tabindex="-1">
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
+                    const codigo = item['CÓDIGO'];
+                    if (codigo) {
+                        const formatNum = (val) => parseFloat(String(val).replace(/[^0-9.-]+/g,"")) || 0;
+                        memoriaCostos[codigo] = {
+                            'CÓDIGO': codigo,
+                            'PRODUCTO': item['PRODUCTO'] || '',
+                            'COSTO CERO': formatNum(item['COSTO CERO']),
+                            'COSTO U. ($)': formatNum(item['COSTO U. ($)'])
+                        };
+                    }
                 });
-
+                
+                localStorage.setItem('memoriaCostosTemp', JSON.stringify(memoriaCostos));
                 document.getElementById('csvCostos').value = "";
-                alert("Vista previa generada. ¡Haz clic en 'Guardar Modificaciones' para subir esto a la Base de Datos!");
+                
+                // Recargamos la página para que la función "Load" dibuje la tabla actualizada
+                alert("Vista previa lista. Se guardó en memoria. ¡No olvides hacer clic en 'Guardar Modificaciones'!");
+                window.location.reload();
             }
         });
     });
 
-    // GUARDAR MODIFICACIONES
+    // -------------------------------------------------------------
+    // 4. GUARDAR EN LA BASE DE DATOS Y LIMPIAR LA MEMORIA
+    // -------------------------------------------------------------
     function guardarDatosPendientes() {
-        const filas = document.querySelectorAll('.fila-simulador');
-        let datosAguardar = [];
-
-        filas.forEach(fila => {
-            const codigo = fila.querySelector('.val-codigo').value.trim();
-            if (codigo !== '') {
-                datosAguardar.push({
-                    'CÓDIGO': codigo,
-                    'PRODUCTO': fila.querySelector('.val-producto').value.trim(),
-                    'COSTO CERO': parseFloat(fila.querySelector('.val-costo-cero').value) || 0,
-                    'COSTO U. ($)': parseFloat(fila.querySelector('.val-costo-usd').value) || 0
-                });
-            }
-        });
+        // En lugar de leer el HTML, agarramos TOOOOODA la libreta de memoria
+        let datosAguardar = Object.values(memoriaCostos);
 
         if (datosAguardar.length === 0) {
-            alert("No hay datos para guardar en la tabla.");
+            alert("No tienes ningún cambio pendiente para guardar.");
             return;
         }
 
@@ -225,6 +263,10 @@
         .then(response => response.json())
         .then(data => {
             if (data.status === 'ok') {
+                // ¡ÉXITO! Limpiamos la libreta del navegador
+                localStorage.removeItem('memoriaCostosTemp');
+                memoriaCostos = {}; 
+                
                 alert('¡Éxito! ' + data.message);
                 window.location.reload(); 
             } else {
@@ -241,28 +283,27 @@
         });
     }
 
-    // BORRAR TODO
+    // -------------------------------------------------------------
+    // 5. BORRAR TODO
+    // -------------------------------------------------------------
     function eliminarTodosLosCostos() {
-        if(confirm("⚠️ ¿Estás seguro de que deseas eliminar TODOS los costos de la base de datos? Esta acción no se puede deshacer.")) {
+        if(confirm("⚠️ ¿Estás seguro de que deseas eliminar TODOS los costos? Esta acción no se puede deshacer.")) {
             fetch("{% url 'eliminar_costos_masivos' %}", {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                }
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' }
             })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'ok') {
+                    // Si borra la BD, también borramos la memoria para que no revivan fantasmas
+                    localStorage.removeItem('memoriaCostosTemp');
                     alert('✅ ' + data.message);
                     window.location.reload(); 
                 } else {
                     alert('❌ Error al eliminar: ' + data.message);
                 }
             })
-            .catch(error => {
-                console.error("Error:", error);
-            });
+            .catch(error => console.error("Error:", error));
         }
     }
 </script>
