@@ -10,7 +10,7 @@
         </h2>
         
         <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-            <input type="text" id="buscador" onkeyup="filtrarTabla()" placeholder="Buscar producto o código..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; width: 200px;">
+            <input type="text" id="buscador" onkeyup="filtrarTabla()" placeholder="Buscar producto o código..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; width: 200px; outline: none;">
             
             <a href="{% url 'descargar_plantilla_costos' %}" class="btn" style="background: #3b82f6; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-weight: bold;">
                 <i class="fas fa-download"></i> Bajar Plantilla
@@ -25,31 +25,45 @@
                 <i class="fas fa-upload"></i> Importar Masivo
             </button>
 
-            <button type="button" onclick="guardarDatosPendientes()" style="background: #f59e0b; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+            <button type="button" id="btnGuardarCostos" onclick="guardarDatosPendientes()" style="background: #f59e0b; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
                 <i class="fas fa-save"></i> Guardar Modificaciones
             </button>
         </div>
     </div>
     
-    <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
-        <table id="tablaCostos" style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
-            <thead style="background: #f8fafc; position: sticky; top: 0;">
+    <div class="tabla-scroll-container">
+        <table id="tablaCostos" class="tabla-simulador-moderna" style="width: 100%;">
+            <thead style="background: #f8fafc; position: sticky; top: 0; z-index: 10;">
                 <tr>
-                    <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: left;">CÓDIGO</th>
-                    <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: left;">PRODUCTO</th>
-                    <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: center;">COSTO CERO</th>
-                    <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: center;">COSTO U. ($)</th>
-                    <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: center;">COSTO U. ($ ► S/.)</th>
+                    <th class="th-rep" style="width: 150px;">CÓDIGO</th>
+                    <th class="th-rep" style="min-width: 300px;">PRODUCTO</th>
+                    <th class="th-rep" style="width: 120px;">COSTO CERO</th>
+                    <th class="th-rep" style="width: 120px;">COSTO U. ($)</th>
+                    <th class="th-rep" style="width: 150px;">COSTO U. ($ ► S/.)</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in costos %}
-                <tr>
-                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">{{ item.codigo }}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">{{ item.producto }}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">{{ item.costo_cero|stringformat:'.2f' }}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">${{ item.costo_u_dolares|stringformat:'.2f' }}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">S/. {{ item.costo_u_soles|stringformat:'.2f' }}</td>
+                <tr class="fila-simulador">
+                    <td class="td-cell" style="background: #f8fafc;">
+                        <input type="text" class="celda-input central bold text-dark val-codigo" value="{{ item.codigo }}" readonly tabindex="-1">
+                    </td>
+                    
+                    <td class="td-cell">
+                        <input type="text" class="celda-input val-producto" value="{{ item.producto|default:'' }}">
+                    </td>
+                    
+                    <td class="td-cell" style="background: #fff5f5;">
+                        <input type="number" step="0.01" class="celda-input derecha text-red val-costo-cero" value="{{ item.costo_cero|stringformat:'.2f'|default:'0.00' }}">
+                    </td>
+                    
+                    <td class="td-cell" style="background: #f0fdf4;">
+                        <input type="number" step="0.01" class="celda-input derecha text-green val-costo-usd" value="{{ item.costo_u_dolares|stringformat:'.2f'|default:'0.00' }}">
+                    </td>
+                    
+                    <td class="td-cell" style="background: #f1f5f9;">
+                        <input type="text" class="celda-input derecha bold val-costo-soles" value="S/. {{ item.costo_u_soles|stringformat:'.2f'|default:'0.00' }}" readonly tabindex="-1">
+                    </td>
                 </tr>
                 {% empty %}
                 <tr id="fila-vacia">
@@ -63,33 +77,58 @@
     </div>
 </div>
 
+<style>
+    /* Estilos copiados del simulador moderno */
+    .tabla-scroll-container { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #fff; max-height: 600px; }
+    .tabla-simulador-moderna { border-collapse: collapse; font-size: 0.85rem; width: 100%; }
+    .th-rep { padding: 14px 12px; border-bottom: 2px solid #e2e8f0; border-right: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #475569; text-transform: uppercase; background-color: #f8fafc; }
+    .fila-simulador { border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s ease; }
+    .fila-simulador:hover { background-color: #fef9c3 !important; }
+    .td-cell { padding: 0; border-right: 1px solid #f1f5f9; vertical-align: middle; }
+
+    .celda-input { width: 100%; box-sizing: border-box; border: 2px solid transparent; padding: 10px 12px; color: #1e293b; background: transparent; outline: none; font-size: 0.85rem; font-family: inherit; transition: all 0.15s ease; }
+    .celda-input:not([readonly]):focus { background-color: #fff; border-color: #eab308; box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1); color: #000; z-index: 1; position: relative; border-radius: 4px; }
+
+    .central { text-align: center; } 
+    .derecha { text-align: right; } 
+    .bold { font-weight: 700; }
+    .text-dark { color: #0f172a; } 
+    .text-green { color: #166534; } 
+    .text-red { color: #dc2626; }
+
+    /* Ocultar flechitas de los inputs numéricos */
+    .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .celda-input[type=number] { -moz-appearance: textfield; }
+</style>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script>
-    // Variable global para guardar los datos en pausa antes de mandarlos a la base de datos
-    let datosPendientes = [];
-
-    // Buscador (busca por código o por producto)
+    // Buscador (busca por código o por producto y lee desde los inputs)
     function filtrarTabla() {
         const input = document.getElementById("buscador");
         const filter = input.value.toUpperCase();
-        const table = document.getElementById("tablaCostos");
-        const tr = table.getElementsByTagName("tr");
-        for (let i = 1; i < tr.length; i++) {
-            const tdCodigo = tr[i].getElementsByTagName("td")[0]; 
-            const tdProducto = tr[i].getElementsByTagName("td")[1]; 
-            if (tdCodigo || tdProducto) {
-                const txtCodigo = tdCodigo.textContent || tdCodigo.innerText;
-                const txtProducto = tdProducto.textContent || tdProducto.innerText;
-                if (txtCodigo.toUpperCase().indexOf(filter) > -1 || txtProducto.toUpperCase().indexOf(filter) > -1) {
-                    tr[i].style.display = "";
+        const filas = document.querySelectorAll("#tablaCostos tbody tr");
+        
+        filas.forEach(fila => {
+            if(fila.id === "fila-vacia") return;
+            
+            const inputCodigo = fila.querySelector('.val-codigo');
+            const inputProducto = fila.querySelector('.val-producto');
+            
+            if (inputCodigo && inputProducto) {
+                const txtCodigo = inputCodigo.value.toUpperCase();
+                const txtProducto = inputProducto.value.toUpperCase();
+                
+                if (txtCodigo.includes(filter) || txtProducto.includes(filter)) {
+                    fila.style.display = "";
                 } else {
-                    tr[i].style.display = "none";
+                    fila.style.display = "none";
                 }
             }
-        }
+        });
     }
 
-    // PASO 1: Leer CSV y Previsualizar (No sube a la base de datos aún)
+    // PASO 1: Leer CSV y Previsualizar (Construye las celdas editables)
     document.getElementById('csvCostos').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -103,16 +142,13 @@
                     return;
                 }
                 
-                // Guardamos los datos en la memoria del navegador
-                datosPendientes = results.data;
-                
-                // Borramos la tabla actual y dibujamos la vista previa
                 const tbody = document.querySelector("#tablaCostos tbody");
                 tbody.innerHTML = ""; 
 
-                datosPendientes.forEach(item => {
+                results.data.forEach(item => {
                     const tr = document.createElement("tr");
-                    tr.style.backgroundColor = "#fffbeb"; // Un color amarillo clarito para indicar que es una vista previa
+                    tr.className = "fila-simulador";
+                    tr.style.backgroundColor = "#fffbeb"; // Fondo amarillito para vistas previas
                     
                     const formatNum = (val) => {
                         let num = parseFloat(String(val).replace('$', '').replace('S/.', '').replace(',', '.'));
@@ -120,28 +156,57 @@
                     };
 
                     tr.innerHTML = `
-                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">${item['CÓDIGO']}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">${item['PRODUCTO'] || ''}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">${formatNum(item['COSTO CERO'])}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">$${formatNum(item['COSTO U. ($)'])}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">S/. ${formatNum(item['COSTO U. ($ ► S/.)'])}</td>
+                        <td class="td-cell" style="background: #f8fafc;">
+                            <input type="text" class="celda-input central bold text-dark val-codigo" value="${item['CÓDIGO']}" readonly tabindex="-1">
+                        </td>
+                        <td class="td-cell">
+                            <input type="text" class="celda-input val-producto" value="${item['PRODUCTO'] || ''}">
+                        </td>
+                        <td class="td-cell" style="background: #fff5f5;">
+                            <input type="number" step="0.01" class="celda-input derecha text-red val-costo-cero" value="${formatNum(item['COSTO CERO'])}">
+                        </td>
+                        <td class="td-cell" style="background: #f0fdf4;">
+                            <input type="number" step="0.01" class="celda-input derecha text-green val-costo-usd" value="${formatNum(item['COSTO U. ($)'])}">
+                        </td>
+                        <td class="td-cell" style="background: #f1f5f9;">
+                            <input type="text" class="celda-input derecha bold val-costo-soles" value="S/. ${formatNum(item['COSTO U. ($ ► S/.)'])}" readonly tabindex="-1">
+                        </td>
                     `;
                     tbody.appendChild(tr);
                 });
 
-                // Limpiamos el input para que permita volver a subir el mismo archivo si se desea
                 document.getElementById('csvCostos').value = "";
-                alert("Vista previa generada. ¡No olvides hacer clic en 'Guardar Modificaciones' para subir esto a la Base de Datos!");
+                alert("Vista previa generada. ¡Haz clic en 'Guardar Modificaciones' para subir esto a la Base de Datos!");
             }
         });
     });
 
-    // PASO 2: Enviar los datos pendientes a la Base de Datos
+    // PASO 2: Enviar los datos del DOM a la Base de Datos
     function guardarDatosPendientes() {
-        if (datosPendientes.length === 0) {
-            alert("No has importado ningún archivo nuevo. Usa el botón 'Importar Masivo' primero.");
+        const filas = document.querySelectorAll('.fila-simulador');
+        let datosAguardar = [];
+
+        filas.forEach(fila => {
+            const codigo = fila.querySelector('.val-codigo').value.trim();
+            if (codigo !== '') {
+                datosAguardar.push({
+                    'CÓDIGO': codigo,
+                    'PRODUCTO': fila.querySelector('.val-producto').value.trim(),
+                    'COSTO CERO': parseFloat(fila.querySelector('.val-costo-cero').value) || 0,
+                    'COSTO U. ($)': parseFloat(fila.querySelector('.val-costo-usd').value) || 0
+                });
+            }
+        });
+
+        if (datosAguardar.length === 0) {
+            alert("No hay datos para guardar en la tabla.");
             return;
         }
+
+        const btn = document.getElementById('btnGuardarCostos');
+        const textoOriginal = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        btn.disabled = true;
 
         fetch("{% url 'guardar_costos_masivos' %}", {
             method: 'POST',
@@ -149,14 +214,14 @@
                 'Content-Type': 'application/json',
                 'X-CSRFToken': '{{ csrf_token }}'
             },
-            body: JSON.stringify({ referencias: datosPendientes })
+            // El formato es exactamente el que espera tu backend gracias a las llaves que le pusimos
+            body: JSON.stringify({ referencias: datosAguardar })
         })
         .then(response => response.json())
         .then(data => {
             if (data.status === 'ok') {
                 alert('¡Éxito! ' + data.message);
-                datosPendientes = []; // Vaciamos la memoria
-                window.location.reload(); // Recargamos para ver los datos ya guardados oficialmente
+                window.location.reload(); 
             } else {
                 alert('Error al guardar: ' + data.message);
             }
@@ -164,6 +229,10 @@
         .catch(error => {
             console.error("Error:", error);
             alert("Ocurrió un error en la conexión al servidor.");
+        })
+        .finally(() => {
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
         });
     }
 
