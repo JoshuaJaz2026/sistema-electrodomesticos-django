@@ -220,6 +220,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
 <script>
+    // 1. SISTEMA DE PANEL DE COLUMNAS (WordPress Style)
     function togglePanelColumnas() {
         const panel = document.getElementById("panelPersonalizarColumnas");
         panel.style.display = panel.style.display === "none" ? "block" : "none";
@@ -255,9 +256,9 @@
         });
     });
 
+    // 2. SISTEMA DE MEMORIA TEMPORAL Y EVENTOS
     let memoriaVentas = JSON.parse(localStorage.getItem('memoriaVentasTemp')) || {};
 
-    // Restaurar datos al cargar
     window.addEventListener('load', function() {
         const filas = document.querySelectorAll('#tablaReporte tbody .fila-ventas');
         let hayCambiosPrevios = false;
@@ -267,43 +268,14 @@
             const key = fila.dataset.originalKey;
             
             if (key && memoriaVentas[key]) {
-                const mem = memoriaVentas[key];
-                fila.querySelector('.val-fecha').value = mem['FECHA'];
-                fila.querySelector('.val-mes').value = mem['MES Y AÑO'];
-                fila.querySelector('.val-orden').value = mem['NRO. ORDEN'];
-                fila.querySelector('.val-comprobante').value = mem['COMPROBANTE'];
-                fila.querySelector('.val-tipoventa').value = mem['TIPO DE VENTA'];
-                fila.querySelector('.val-marca').value = mem['MARCA'];
-                fila.querySelector('.val-categoria').value = mem['CATEGORIA'];
-                fila.querySelector('.val-sku').value = mem['SKU ALMACEN'];
-                fila.querySelector('.val-modelo').value = mem['MODELO'];
-                fila.querySelector('.val-producto').value = mem['PRODUCTO'];
-                fila.querySelector('.val-cant').value = mem['CANT.'];
-                fila.querySelector('.val-precio').value = mem['PRECIO'];
-                fila.querySelector('.val-totalv').value = mem['TOTAL V.'];
-                fila.querySelector('.val-cargoventa').value = mem['%CARGO x VENTA'];
-                fila.querySelector('.val-urbano').value = mem['URBANO'];
-                fila.querySelector('.val-flex').value = mem['FLEX'];
-                fila.querySelector('.val-totalpagado').value = mem['TOTAL PAGADO'];
-                fila.querySelector('.val-costoproducto').value = mem['COSTO x PRODUCTO'];
-                fila.querySelector('.val-und').value = mem['UND'];
-                fila.querySelector('.val-costototal').value = mem['COSTO TOTAL'];
-                fila.querySelector('.val-costoflex').value = mem['COSTO ENTREGA FLEX'];
-                fila.querySelector('.val-ganancia').value = mem['GANANCIA'];
-                fila.querySelector('.val-rentabilidad').value = mem['RENTABILIDAD %'];
-                fila.querySelector('.val-distrito').value = mem['DISTRITO'];
-                fila.querySelector('.val-direccion').value = mem['DIRECCIÓN'];
-                fila.querySelector('.val-repartidor').value = mem['REPARTIDOR'];
-                fila.querySelector('.val-celular').value = mem['CELULAR DEL CLIENTE'];
-                fila.querySelector('.val-mensaje').value = mem['MSJ DE AGRADECIMIENTO'];
-                
                 fila.classList.add('fila-editada');
                 hayCambiosPrevios = true;
             }
         });
 
         if (hayCambiosPrevios || Object.keys(memoriaVentas).length > 0) {
-            document.getElementById('indicador-cambios').style.display = 'inline-block';
+            const indicador = document.getElementById('indicador-cambios');
+            if(indicador) indicador.style.display = 'inline-block';
         }
     });
 
@@ -353,9 +325,12 @@
 
         localStorage.setItem('memoriaVentasTemp', JSON.stringify(memoriaVentas));
         fila.classList.add('fila-editada');
-        document.getElementById('indicador-cambios').style.display = 'inline-block';
+        
+        const indicador = document.getElementById('indicador-cambios');
+        if(indicador) indicador.style.display = 'inline-block';
     }
 
+    // 3. IMPORTACIÓN MASIVA DESDE CSV (CORREGIDA PARA DIBUJAR VISUALMENTE)
     document.getElementById('csvImportar').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -365,11 +340,19 @@
             skipEmptyLines: true,
             complete: function(results) {
                 if (results.data.length > 0 && !('NRO. ORDEN' in results.data[0])) {
-                    alert("Error: Asegúrate de usar la plantilla correcta.");
+                    alert("Error: Asegúrate de usar la plantilla correcta (DEBE tener la columna NRO. ORDEN).");
                     return;
                 }
                 
+                const tbody = document.querySelector("#tablaReporte tbody");
+                let filaMolde = document.getElementById('fila-molde');
+                const fragmento = document.createDocumentFragment();
+                let importadas = 0;
+
                 results.data.forEach(item => {
+                    const orden = item['NRO. ORDEN'] || '';
+                    if (!orden) return; // Si no hay orden, ignoramos la fila vacía
+                    
                     const formatNum = (val) => {
                         if (!val) return 0;
                         let num = parseFloat(String(val).replace(/[^0-9.-]+/g,""));
@@ -377,9 +360,8 @@
                     };
                     
                     const key = 'import-' + Math.random().toString(36).substr(2, 9);
-                    const orden = item['NRO. ORDEN'] || '';
-                    if (!orden) return;
                     
+                    // 1. Guardar en memoria
                     memoriaVentas[key] = {
                         'NRO. ORDEN': orden,
                         'FECHA': item['FECHA'] || '',
@@ -410,17 +392,61 @@
                         'CELULAR DEL CLIENTE': item['CELULAR DEL CLIENTE'] || '',
                         'MSJ DE AGRADECIMIENTO': item['MSJ DE AGRADECIMIENTO'] || ''
                     };
+
+                    // 2. Dibujar la fila físicamente en la pantalla
+                    const nuevaFila = filaMolde.cloneNode(true);
+                    nuevaFila.id = ""; // Le quitamos el ID molde
+                    nuevaFila.style.display = ""; // La hacemos visible
+                    nuevaFila.dataset.originalKey = key;
+                    nuevaFila.classList.add('fila-editada');
+
+                    nuevaFila.querySelector('.val-fecha').value = item['FECHA'] || '';
+                    nuevaFila.querySelector('.val-mes').value = item['MES Y AÑO'] || '';
+                    nuevaFila.querySelector('.val-orden').value = orden;
+                    nuevaFila.querySelector('.val-comprobante').value = item['COMPROBANTE'] || '';
+                    nuevaFila.querySelector('.val-tipoventa').value = item['TIPO DE VENTA'] || '';
+                    nuevaFila.querySelector('.val-marca').value = item['MARCA'] || '';
+                    nuevaFila.querySelector('.val-categoria').value = item['CATEGORIA'] || '';
+                    nuevaFila.querySelector('.val-sku').value = item['SKU ALMACEN'] || '';
+                    nuevaFila.querySelector('.val-modelo').value = item['MODELO'] || '';
+                    nuevaFila.querySelector('.val-producto').value = item['PRODUCTO'] || '';
+                    nuevaFila.querySelector('.val-cant').value = formatNum(item['CANT.']);
+                    nuevaFila.querySelector('.val-precio').value = formatNum(item['PRECIO']).toFixed(2);
+                    nuevaFila.querySelector('.val-totalv').value = formatNum(item['TOTAL V.']).toFixed(2);
+                    nuevaFila.querySelector('.val-cargoventa').value = formatNum(item['%CARGO x VENTA']).toFixed(2);
+                    nuevaFila.querySelector('.val-urbano').value = formatNum(item['URBANO']).toFixed(2);
+                    nuevaFila.querySelector('.val-flex').value = formatNum(item['FLEX']).toFixed(2);
+                    nuevaFila.querySelector('.val-totalpagado').value = formatNum(item['TOTAL PAGADO']).toFixed(2);
+                    nuevaFila.querySelector('.val-costoproducto').value = formatNum(item['COSTO x PRODUCTO']).toFixed(2);
+                    nuevaFila.querySelector('.val-und').value = formatNum(item['UND']);
+                    nuevaFila.querySelector('.val-costototal').value = formatNum(item['COSTO TOTAL']).toFixed(2);
+                    nuevaFila.querySelector('.val-costoflex').value = formatNum(item['COSTO ENTREGA FLEX']).toFixed(2);
+                    nuevaFila.querySelector('.val-ganancia').value = formatNum(item['GANANCIA']).toFixed(2);
+                    nuevaFila.querySelector('.val-rentabilidad').value = item['RENTABILIDAD %'] || '';
+                    nuevaFila.querySelector('.val-distrito').value = item['DISTRITO'] || '';
+                    nuevaFila.querySelector('.val-direccion').value = item['DIRECCIÓN'] || '';
+                    nuevaFila.querySelector('.val-repartidor').value = item['REPARTIDOR'] || '';
+                    nuevaFila.querySelector('.val-celular').value = item['CELULAR DEL CLIENTE'] || '';
+                    nuevaFila.querySelector('.val-mensaje').value = item['MSJ DE AGRADECIMIENTO'] || '';
+
+                    fragmento.appendChild(nuevaFila);
+                    importadas++;
                 });
                 
+                // Pegar todo en la tabla de golpe
+                tbody.appendChild(fragmento);
                 localStorage.setItem('memoriaVentasTemp', JSON.stringify(memoriaVentas));
-                document.getElementById('csvImportar').value = "";
+                document.getElementById('csvImportar').value = ""; // Limpiamos el input file
                 
-                alert("Vista previa lista. Se guardó en memoria. ¡No olvides hacer clic en 'Guardar Modificaciones'!");
-                window.location.reload();
+                const indicador = document.getElementById('indicador-cambios');
+                if(indicador) indicador.style.display = 'inline-block';
+
+                alert(`¡Se cargaron ${importadas} ventas en pantalla! Revisa la tabla y presiona 'Guardar Modificaciones' para subirlo a la base de datos.`);
             }
         });
     });
 
+    // 4. ENVIAR A DJANGO Y LIMPIAR
     function guardarDatosPendientes() {
         let datosAguardar = Object.values(memoriaVentas);
 
