@@ -783,10 +783,14 @@ def descargar_plantilla_costos(request):
 
 @login_required
 def descargar_plantilla_reporte_ml(request):
-    response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="plantilla_reportes_mercadolibre.csv"'
 
-    writer = csv.writer(response)
+    # Esto es crucial para que Excel abra bien los caracteres especiales como la "Ñ" y tildes
+    response.write('\ufeff'.encode('utf8'))
+    
+    # AQUÍ ESTÁ LA MAGIA: delimiter=';' fuerza a Excel a separar las celdas
+    writer = csv.writer(response, delimiter=';')
     
     # Cabeceras exactas de tu reporte
     writer.writerow([
@@ -798,7 +802,7 @@ def descargar_plantilla_reporte_ml(request):
         'DIRECCIÓN', 'REPARTIDOR', 'CELULAR DEL CLIENTE', 'MSJ DE AGRADECIMIENTO'
     ])
     
-    # Fila de ejemplo (puedes borrarla si prefieres que descargue totalmente en blanco)
+    # Fila de ejemplo
     writer.writerow([
         '15/06/2026', 'JUNIO 2026', 'ML-123456789', 'B001-00123', 'CATALOGO', 
         'OSTER', 'LICUADORA', 'SKU-OST-001', 'MOD-123', 'Licuadora Oster Clásica', 
