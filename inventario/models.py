@@ -184,17 +184,16 @@ class ReferenciaCosto(models.Model):
         return f"{self.codigo} - {self.producto}"
     
 class ReporteMercadoLibre(models.Model):
-    # Campos que coinciden con las 28 columnas de tu reporte
     fecha = models.DateField()
-    mes_anio = models.CharField(max_length=50)
-    nro_orden = models.CharField(max_length=100, unique=True) # IMPORTANTE: Unique=True para evitar duplicados
-    comprobante = models.CharField(max_length=100)
-    tipo_venta = models.CharField(max_length=100)
-    marca = models.CharField(max_length=100)
-    categoria = models.CharField(max_length=100)
-    sku_almacen = models.CharField(max_length=100)
-    modelo = models.CharField(max_length=100)
-    producto = models.CharField(max_length=255)
+    mes_anio = models.CharField(max_length=100)
+    nro_orden = models.CharField(max_length=255, unique=True)
+    comprobante = models.CharField(max_length=255)
+    tipo_venta = models.CharField(max_length=255)
+    marca = models.CharField(max_length=255)
+    categoria = models.CharField(max_length=255)
+    sku_almacen = models.CharField(max_length=255)
+    modelo = models.CharField(max_length=255)
+    producto = models.CharField(max_length=500)
     cantidad = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     precio = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     total_venta = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
@@ -207,12 +206,12 @@ class ReporteMercadoLibre(models.Model):
     costo_total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     costo_entrega_flex = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     ganancia = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    rentabilidad = models.CharField(max_length=20) # Guardado como string "49.37%"
-    distrito = models.CharField(max_length=100)
-    direccion = models.CharField(max_length=255)
-    repartidor = models.CharField(max_length=100)
-    celular = models.CharField(max_length=20)
-    mensaje = models.CharField(max_length=255, blank=True)
+    rentabilidad = models.CharField(max_length=50)
+    distrito = models.CharField(max_length=255)
+    direccion = models.CharField(max_length=500)
+    repartidor = models.CharField(max_length=255)
+    celular = models.CharField(max_length=50)
+    mensaje = models.CharField(max_length=500, blank=True)
 
     def __str__(self):
         return self.nro_orden
