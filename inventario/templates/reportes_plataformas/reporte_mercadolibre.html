@@ -434,13 +434,33 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
         btn.disabled = true;
 
-        console.log("Datos listos para enviar a Django: ", datosAguardar);
-        
-        setTimeout(() => {
-            alert("Los datos han sido validados en el frontend. Aún falta conectarlo a una ruta de views.py.");
+        fetch("{% url 'guardar_reportes_masivos_ml' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ referencias: datosAguardar })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                localStorage.removeItem('memoriaVentasTemp');
+                memoriaVentas = {}; 
+                alert(data.message);
+                window.location.reload(); 
+            } else {
+                alert('Error al guardar: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Ocurrió un error en la conexión al servidor.");
+        })
+        .finally(() => {
             btn.innerHTML = textoOriginal;
             btn.disabled = false;
-        }, 1000);
+        });
     }
 </script>
 {% endblock %}

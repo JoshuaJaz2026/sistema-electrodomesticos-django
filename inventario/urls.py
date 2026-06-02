@@ -82,4 +82,8 @@ urlpatterns = [
     path('guardar-costos-masivos/', views.guardar_costos_masivos, name='guardar_costos_masivos'), 
     path('eliminar-costos-masivos/', views.eliminar_costos_masivos, name='eliminar_costos_masivos'),
     path('descargar/plantilla/', views.descargar_plantilla_simulador, name='descargar_plantilla'),
+    
+    # Rutas para Reportes de Mercado Libre
+    path('descargar-plantilla-reporte-ml/', views.descargar_plantilla_reporte_ml, name='descargar_plantilla_reporte_ml'),
+    path('guardar-reportes-masivos-ml/', views.guardar_reportes_masivos_ml, name='guardar_reportes_masivos_ml'),
 ]

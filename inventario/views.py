@@ -3,6 +3,7 @@ import uuid
 import csv
 import json
 import os
+from datetime import datetime
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse, FileResponse, Http404
 from django.http import HttpResponse
@@ -808,3 +809,63 @@ def descargar_plantilla_reporte_ml(request):
     ])
 
     return response
+
+@login_required
+def guardar_reportes_masivos_ml(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            filas_ventas = data.get('referencias', [])
+
+            for fila in filas_ventas:
+                nro_orden = fila.get('NRO. ORDEN', '').strip()
+                if not nro_orden: 
+                    continue
+
+                # Formateo de fecha seguro (Soporta DD/MM/YYYY del Excel y YYYY-MM-DD del input type="date")
+                fecha_raw = fila.get('FECHA', '')
+                fecha_formateada = None
+                if fecha_raw:
+                    try:
+                        fecha_formateada = datetime.strptime(fecha_raw, '%d/%m/%Y').strftime('%Y-%m-%d')
+                    except ValueError:
+                        fecha_formateada = fecha_raw
+
+                # Guardamos o actualizamos (usando NRO. ORDEN como identificador único)
+                ReporteMercadoLibre.objects.update_or_create(
+                    nro_orden=nro_orden,
+                    defaults={
+                        'fecha': fecha_formateada or '2026-01-01',
+                        'mes_anio': fila.get('MES Y AÑO', ''),
+                        'comprobante': fila.get('COMPROBANTE', ''),
+                        'tipo_venta': fila.get('TIPO DE VENTA', ''),
+                        'marca': fila.get('MARCA', ''),
+                        'categoria': fila.get('CATEGORIA', ''),
+                        'sku_almacen': fila.get('SKU ALMACEN', ''),
+                        'modelo': fila.get('MODELO', ''),
+                        'producto': fila.get('PRODUCTO', ''),
+                        'cantidad': float(fila.get('CANT.', 0) or 0),
+                        'precio': float(fila.get('PRECIO', 0) or 0),
+                        'total_venta': float(fila.get('TOTAL V.', 0) or 0),
+                        'cargo_venta': float(fila.get('%CARGO x VENTA', 0) or 0),
+                        'urbano': float(fila.get('URBANO', 0) or 0),
+                        'flex': float(fila.get('FLEX', 0) or 0),
+                        'total_pagado': float(fila.get('TOTAL PAGADO', 0) or 0),
+                        'costo_producto': float(fila.get('COSTO x PRODUCTO', 0) or 0),
+                        'und': int(fila.get('UND', 0) or 0),
+                        'costo_total': float(fila.get('COSTO TOTAL', 0) or 0),
+                        'costo_entrega_flex': float(fila.get('COSTO ENTREGA FLEX', 0) or 0),
+                        'ganancia': float(fila.get('GANANCIA', 0) or 0),
+                        'rentabilidad': str(fila.get('RENTABILIDAD %', '')),
+                        'distrito': fila.get('DISTRITO', ''),
+                        'direccion': fila.get('DIRECCIÓN', ''),
+                        'repartidor': fila.get('REPARTIDOR', ''),
+                        'celular': str(fila.get('CELULAR DEL CLIENTE', '')),
+                        'mensaje': fila.get('MSJ DE AGRADECIMIENTO', ''),
+                    }
+                )
+            return JsonResponse({'status': 'ok', 'message': f'¡Éxito! Se guardaron {len(filas_ventas)} ventas en la Base de Datos.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
