@@ -815,8 +815,6 @@ def descargar_plantilla_reporte_ml(request):
     return response
 
 @login_required
-@login_required
-@login_required
 def guardar_reportes_masivos_ml(request):
     if request.method == 'POST':
         try:
@@ -828,8 +826,9 @@ def guardar_reportes_masivos_ml(request):
             if eliminadas:
                 ReporteMercadoLibre.objects.filter(id__in=eliminadas).delete()
 
-            # 2. PREPARAR TODOS LOS REGISTROS EN LA MEMORIA DE PYTHON
-            objetos_a_guardar = []
+            # 2. FILTRO ANTI-DUPLICADOS (Diccionario)
+            ventas_unicas = {}
+            
             for fila in filas_ventas:
                 nro_orden = fila.get('NRO. ORDEN', '').strip()
                 if not nro_orden: 
@@ -846,7 +845,6 @@ def guardar_reportes_masivos_ml(request):
                     except ValueError:
                         fecha_formateada = '2026-01-01'
 
-                # Minifunción segura para transformar textos vacíos a números
                 def to_float(val):
                     try:
                         return float(str(val).replace(',', '').strip() or 0)
@@ -859,7 +857,6 @@ def guardar_reportes_masivos_ml(request):
                     except ValueError:
                         return 0
 
-                # Creamos el objeto pero NO lo guardamos todavía
                 obj = ReporteMercadoLibre(
                     nro_orden=nro_orden,
                     fecha=fecha_formateada or '2026-01-01',
@@ -890,9 +887,15 @@ def guardar_reportes_masivos_ml(request):
                     celular=str(fila.get('CELULAR DEL CLIENTE', '')),
                     mensaje=fila.get('MSJ DE AGRADECIMIENTO', ''),
                 )
-                objetos_a_guardar.append(obj)
+                
+                # LA MAGIA: Si viene otro registro con el mismo NRO ORDEN, simplemente lo sobreescribe
+                # y nos asegura de mandar solo valores únicos a la base de datos
+                ventas_unicas[nro_orden] = obj
 
-            # 3. GUARDAR TODO DE GOLPE EN 1 SEGUNDO (BULK CREATE MAGIA)
+            # Extraemos la lista limpia de objetos sin duplicados
+            objetos_a_guardar = list(ventas_unicas.values())
+
+            # 3. GUARDAR TODO DE GOLPE EN 1 SEGUNDO (BULK CREATE)
             if objetos_a_guardar:
                 campos_actualizar = [
                     'fecha', 'mes_anio', 'comprobante', 'tipo_venta', 'marca',
@@ -910,7 +913,7 @@ def guardar_reportes_masivos_ml(request):
                     update_fields=campos_actualizar
                 )
             
-            return JsonResponse({'status': 'ok', 'message': f'¡Éxito! Se procesaron {len(objetos_a_guardar)} ventas al instante.'})
+            return JsonResponse({'status': 'ok', 'message': f'¡Éxito! Se procesaron {len(objetos_a_guardar)} ventas al instante y sin errores.'})
         
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
