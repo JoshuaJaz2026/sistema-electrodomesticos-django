@@ -134,7 +134,7 @@
                             </select>
                         </td>
 
-                        <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.sku_almacen|default:'' }}" class="celda-input mono font-bold val-sku" oninput="registrarCambioVenta(this)"></td>
+                        <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.sku_almacen|default:'' }}" class="celda-input central val-sku" oninput="registrarCambioVenta(this)"></td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.modelo|default:'' }}" class="celda-input central bold text-dark val-modelo" oninput="registrarCambioVenta(this)"></td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.producto|default:'' }}" class="celda-input val-producto" oninput="registrarCambioVenta(this)"></td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" value="{{ item.cantidad|default:'' }}" class="celda-input central bold val-cant" oninput="registrarCambioVenta(this)"></td>
@@ -153,7 +153,7 @@
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.distrito|default:'' }}" class="celda-input val-distrito" oninput="registrarCambioVenta(this)"></td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.direccion|default:'' }}" class="celda-input val-direccion" oninput="registrarCambioVenta(this)"></td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.repartidor|default:'' }}" class="celda-input bold text-dark val-repartidor" oninput="registrarCambioVenta(this)"></td>
-                        <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.celular|default:'' }}" class="celda-input central mono val-celular" oninput="registrarCambioVenta(this)"></td>
+                        <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.celular|default:'' }}" class="celda-input central val-celular" oninput="registrarCambioVenta(this)"></td>
                         <td style="padding: 0; text-align: center; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.mensaje|default:'' }}" class="celda-input central val-mensaje" oninput="registrarCambioVenta(this)"></td>
                         
                         <td style="padding: 0; text-align: center; vertical-align: middle;">
@@ -191,7 +191,7 @@
                         </select>
                     </td>
 
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input mono font-bold val-sku" oninput="registrarCambioVenta(this)"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input central val-sku" oninput="registrarCambioVenta(this)"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input central bold text-dark val-modelo" oninput="registrarCambioVenta(this)"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input val-producto" oninput="registrarCambioVenta(this)"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" class="celda-input central bold val-cant" oninput="registrarCambioVenta(this)"></td>
@@ -210,7 +210,7 @@
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input val-distrito" oninput="registrarCambioVenta(this)"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input val-direccion" oninput="registrarCambioVenta(this)"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input bold text-dark val-repartidor" oninput="registrarCambioVenta(this)"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input central mono val-celular" oninput="registrarCambioVenta(this)"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input central val-celular" oninput="registrarCambioVenta(this)"></td>
                     <td style="padding: 0; text-align: center; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input central val-mensaje" oninput="registrarCambioVenta(this)"></td>
                     
                     <td style="padding: 0; text-align: center; vertical-align: middle;">
@@ -249,17 +249,41 @@
 </div>
 
 <style>
-    .th-rep { padding: 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; }
-    .celda-input { width: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: inherit; color: #475569; background-color: transparent; outline: none; }
+    /* Tipografía estandarizada para toda la tabla */
+    #tablaReporte {
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    
+    .th-rep { 
+        padding: 10px; 
+        border-right: 1px solid #cbd5e1; 
+        border-bottom: 2px solid #cbd5e1; 
+        text-align: center; 
+    }
+    
+    .celda-input { 
+        width: 100%; 
+        box-sizing: border-box; 
+        border: none; 
+        padding: 10px; 
+        font-family: inherit; /* Hereda el font-family limpio de arriba */
+        font-size: 13px; /* Tamaño único y uniforme */
+        color: #475569; 
+        background-color: transparent; 
+        outline: none; 
+    }
+    
     .celda-input:focus { background-color: #fffdec; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; }
     .central { text-align: center; }
     .derecha { text-align: right; }
+    
+    /* Mantenemos la estructura de colores intacta */
     .bold { font-weight: bold; }
     .text-dark { color: #0f172a; }
     .text-blue { color: #2563eb; }
     .text-green { color: #166534; }
     .text-red { color: #991b1b; }
-    .mono { font-family: monospace; }
+    
     .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .celda-input[type=number] { -moz-appearance: textfield; }
     .check-opcion { width: 15px; height: 15px; accent-color: var(--color-principal); cursor: pointer; }
@@ -439,9 +463,6 @@
         if(indicador) indicador.style.display = 'inline-block';
     }
 
-    // =========================================================================
-    // IMPORTADOR CON TRITURADOR DE FORMATOS (Inmune al Alt+Enter)
-    // =========================================================================
     document.getElementById('csvImportar').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -450,8 +471,6 @@
             header: true,
             skipEmptyLines: true,
             transformHeader: function(header) {
-                // EL TRITURADOR DE TÍTULOS: Quita tildes, saltos de línea y símbolos.
-                // Convierte "TIPO DE \n VENTA " en "TIPODEVENTA"
                 return header.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z0-9]/g, '');
             },
             complete: function(results) {
@@ -472,7 +491,6 @@
                     selectElement.value = value;
                 };
 
-                // EL TRITURADOR DE CELDAS: Quita los saltos de línea (Alt+Enter) DENTRO de las celdas
                 const limpiarValor = (val) => {
                     if (!val) return '';
                     return String(val).replace(/[\r\n]+/g, ' ').trim();
@@ -506,7 +524,6 @@
                         mesAnioCalculado = fechaCalendario.substring(0, 7);
                     }
                     
-                    // Aquí usamos los nombres triturados: 'COMPROBANTE', 'TIPODEVENTA'
                     let comprobanteLeido = limpiarValor(item['COMPROBANTE']);
                     let tipoVentaLeido = limpiarValor(item['TIPODEVENTA']).toUpperCase();
                     let marcaLeida = limpiarValor(item['MARCA']).toUpperCase();
