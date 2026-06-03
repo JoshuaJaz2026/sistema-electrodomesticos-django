@@ -15,6 +15,10 @@
                 <i class="fas fa-download"></i> Bajar Plantilla
             </a>
 
+            <button type="button" onclick="agregarNuevaVenta()" style="background-color: #8b5cf6; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-plus"></i> Nueva Venta
+            </button>
+
             <input type="file" id="csvImportar" accept=".csv" style="display: none;">
             <button type="button" onclick="document.getElementById('csvImportar').click()" style="background-color: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 <i class="fas fa-upload"></i> Importar Masivo
@@ -97,7 +101,7 @@
                     <th class="th-rep" style="background-color: #fee2e2; color: #991b1b; width: 150px;">COSTO ENTREGA FLEX</th>
                     <th class="th-rep" style="background-color: #dbeafe; color: #1e40af; width: 120px;">GANANCIA</th>
                     <th class="th-rep" style="background-color: #dbeafe; color: #1e40af; width: 130px;">RENTABILIDAD %</th>
-                    <th class="th-rep" style="background-color: #f8fafc; width: 180px;">DISTRITO</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 220px;">UBICACIÓN (DEP/PROV/DIST)</th>
                     <th class="th-rep" style="background-color: #f8fafc; width: 250px;">DIRECCIÓN</th>
                     <th class="th-rep" style="background-color: #f8fafc; width: 160px;">REPARTIDOR</th>
                     <th class="th-rep" style="background-color: #f8fafc; width: 140px;">CELULAR DEL CLIENTE</th>
@@ -150,7 +154,7 @@
                         <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #fef2f2;"><input type="number" step="0.01" value="{{ item.costo_entrega_flex|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha text-red val-costoflex" oninput="registrarCambioVenta(this)"></td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #eff6ff;"><input type="number" step="0.01" value="{{ item.ganancia|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold val-ganancia" style="color: #1e40af;" oninput="registrarCambioVenta(this)"></td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #eff6ff;"><input type="text" value="{{ item.rentabilidad|default:'' }}" class="celda-input central bold val-rentabilidad" style="color: #1e40af;" oninput="registrarCambioVenta(this)"></td>
-                        <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.distrito|default:'' }}" class="celda-input val-distrito" oninput="registrarCambioVenta(this)"></td>
+                        <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.distrito|default:'' }}" placeholder="Dep/Prov/Dist" class="celda-input val-distrito" oninput="registrarCambioVenta(this)"></td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.direccion|default:'' }}" class="celda-input val-direccion" oninput="registrarCambioVenta(this)"></td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.repartidor|default:'' }}" class="celda-input bold text-dark val-repartidor" oninput="registrarCambioVenta(this)"></td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.celular|default:'' }}" class="celda-input central val-celular" oninput="registrarCambioVenta(this)"></td>
@@ -165,7 +169,7 @@
                     {% endfor %}
                 {% endif %}
 
-                <tr class="fila-ventas" id="fila-molde" style="{% if page_obj %}display: none;{% endif %} border-bottom: 1px solid #e2e8f0; height: 38px;">
+                <tr class="fila-ventas" id="fila-molde" style="display: none; border-bottom: 1px solid #e2e8f0; height: 38px;">
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;">
                         <input type="date" class="celda-input central val-fecha" oninput="actualizarMesAnio(this); registrarCambioVenta(this)">
                     </td>
@@ -207,7 +211,7 @@
                     <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #fef2f2;"><input type="number" step="0.01" class="celda-input derecha text-red val-costoflex" oninput="registrarCambioVenta(this)"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #eff6ff;"><input type="number" step="0.01" class="celda-input derecha bold val-ganancia" style="color: #1e40af;" oninput="registrarCambioVenta(this)"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0; background: #eff6ff;"><input type="text" class="celda-input central bold val-rentabilidad" style="color: #1e40af;" oninput="registrarCambioVenta(this)"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input val-distrito" oninput="registrarCambioVenta(this)"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Dep/Prov/Dist" class="celda-input val-distrito" oninput="registrarCambioVenta(this)"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input val-direccion" oninput="registrarCambioVenta(this)"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input bold text-dark val-repartidor" oninput="registrarCambioVenta(this)"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input central val-celular" oninput="registrarCambioVenta(this)"></td>
@@ -266,8 +270,8 @@
         box-sizing: border-box; 
         border: none; 
         padding: 10px; 
-        font-family: inherit; /* Hereda el font-family limpio de arriba */
-        font-size: 13px; /* Tamaño único y uniforme */
+        font-family: inherit;
+        font-size: 13px;
         color: #475569; 
         background-color: transparent; 
         outline: none; 
@@ -462,6 +466,27 @@
         const indicador = document.getElementById('indicador-cambios');
         if(indicador) indicador.style.display = 'inline-block';
     }
+    
+    // === NUEVA FUNCIÓN: CREAR FILA MANUALMENTE ===
+    function agregarNuevaVenta() {
+        const tbody = document.querySelector("#tablaReporte tbody");
+        const filaMolde = document.getElementById('fila-molde');
+        
+        const nuevaFila = filaMolde.cloneNode(true);
+        nuevaFila.id = ""; 
+        nuevaFila.style.display = ""; 
+        
+        const key = 'temp-' + Math.random().toString(36).substr(2, 9);
+        nuevaFila.dataset.originalKey = key;
+        nuevaFila.classList.add('fila-editada');
+        
+        tbody.insertBefore(nuevaFila, tbody.firstChild);
+        
+        const indicador = document.getElementById('indicador-cambios');
+        if(indicador) indicador.style.display = 'inline-block';
+        
+        nuevaFila.querySelector('.val-fecha').focus();
+    }
 
     document.getElementById('csvImportar').addEventListener('change', function(e) {
         const file = e.target.files[0];
@@ -555,7 +580,7 @@
                         'COSTO ENTREGA FLEX': formatNum(item['COSTOENTREGAFLEX']),
                         'GANANCIA': formatNum(item['GANANCIA']),
                         'RENTABILIDAD %': limpiarValor(item['RENTABILIDAD']),
-                        'DISTRITO': limpiarValor(item['DISTRITO']),
+                        'DISTRITO': limpiarValor(item['DISTRITO', 'UBICACION', 'DEPARTAMENTO']),
                         'DIRECCIÓN': limpiarValor(item['DIRECCION']),
                         'REPARTIDOR': limpiarValor(item['REPARTIDOR']),
                         'CELULAR DEL CLIENTE': limpiarValor(item['CELULARDELCLIENTE']),
@@ -593,7 +618,7 @@
                     nuevaFila.querySelector('.val-costoflex').value = formatNum(item['COSTOENTREGAFLEX']).toFixed(2);
                     nuevaFila.querySelector('.val-ganancia').value = formatNum(item['GANANCIA']).toFixed(2);
                     nuevaFila.querySelector('.val-rentabilidad').value = limpiarValor(item['RENTABILIDAD']);
-                    nuevaFila.querySelector('.val-distrito').value = limpiarValor(item['DISTRITO']);
+                    nuevaFila.querySelector('.val-distrito').value = limpiarValor(item['DISTRITO', 'UBICACION', 'DEPARTAMENTO']);
                     nuevaFila.querySelector('.val-direccion').value = limpiarValor(item['DIRECCION']);
                     nuevaFila.querySelector('.val-repartidor').value = limpiarValor(item['REPARTIDOR']);
                     nuevaFila.querySelector('.val-celular').value = limpiarValor(item['CELULARDELCLIENTE']);
