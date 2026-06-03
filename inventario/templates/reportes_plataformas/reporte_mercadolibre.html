@@ -305,14 +305,11 @@
         ths.forEach((th, index) => {
             const colName = th.innerText.trim();
             if (!colName) return;
-
             const label = document.createElement("label");
             label.style.display = "flex"; label.style.alignItems = "center"; label.style.gap = "8px";
             label.style.fontSize = "0.75rem"; label.style.fontWeight = "bold"; label.style.color = "#475569"; label.style.cursor = "pointer";
-            
             const cb = document.createElement("input");
             cb.type = "checkbox"; cb.checked = true; cb.className = "check-opcion"; cb.dataset.colIndex = index + 1; 
-            
             cb.addEventListener("change", function() {
                 const colIdx = this.dataset.colIndex;
                 const displayState = this.checked ? "" : "none";
@@ -323,7 +320,6 @@
                     if(cell) cell.style.display = displayState;
                 });
             });
-            
             label.appendChild(cb); label.appendChild(document.createTextNode(colName)); container.appendChild(label);
         });
     });
@@ -337,7 +333,6 @@
         const fila = inputFecha.closest('tr');
         const inputMes = fila.querySelector('.val-mes');
         const fechaSeleccionada = inputFecha.value; 
-        
         if (fechaSeleccionada && fechaSeleccionada.length >= 7) {
             inputMes.value = fechaSeleccionada.substring(0, 7);
             registrarCambioVenta(inputMes); 
@@ -355,13 +350,11 @@
 
         filas.forEach(fila => {
             if(fila.id === 'fila-molde') return;
-
             const inputFecha = fila.querySelector('.val-fecha');
             const inputMes = fila.querySelector('.val-mes');
             if (inputFecha && inputFecha.value && (!inputMes.value || inputMes.value === '')) {
                 inputMes.value = inputFecha.value.substring(0, 7);
             }
-
             const key = fila.dataset.originalKey;
             if (key && memoriaVentas[key]) {
                 fila.classList.add('fila-editada');
@@ -378,7 +371,6 @@
     function registrarCambioVenta(elemento) {
         const fila = elemento.closest('tr');
         if (fila.id === 'fila-molde') return;
-        
         let key = fila.dataset.originalKey;
         if (!key || key === '') {
             key = 'temp-' + Math.random().toString(36).substr(2, 9);
@@ -426,28 +418,20 @@
         if(indicador) indicador.style.display = 'inline-block';
     }
 
-    // === NUEVA FUNCIÓN: ELIMINAR FILA ===
     function eliminarFilaVenta(btn) {
         const fila = btn.closest('tr');
         if (fila.id === 'fila-molde') return;
-
         const key = fila.dataset.originalKey;
 
-        // Si la fila ya existía en la base de datos (no es nueva importación), la mandamos a la lista de eliminación
         if (key && !key.startsWith('temp-') && !key.startsWith('import-')) {
             if (!ventasAEliminar.includes(key)) {
                 ventasAEliminar.push(key);
             }
         }
-
-        // Si estaba en memoria porque la acabábamos de editar o importar, la quitamos
         if (memoriaVentas[key]) {
             delete memoriaVentas[key];
         }
-
-        // Borrar visualmente
         fila.remove();
-        
         localStorage.setItem('ventasAEliminarTemp', JSON.stringify(ventasAEliminar));
         localStorage.setItem('memoriaVentasTemp', JSON.stringify(memoriaVentas));
         
@@ -455,6 +439,9 @@
         if(indicador) indicador.style.display = 'inline-block';
     }
 
+    // =========================================================================
+    // IMPORTADOR CON TRITURADOR DE FORMATOS (Inmune al Alt+Enter)
+    // =========================================================================
     document.getElementById('csvImportar').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -463,20 +450,13 @@
             header: true,
             skipEmptyLines: true,
             transformHeader: function(header) {
-                return header.replace(/[\u200B-\u200D\uFEFF]/g, '').trim(); 
+                // EL TRITURADOR DE TÍTULOS: Quita tildes, saltos de línea y símbolos.
+                // Convierte "TIPO DE \n VENTA " en "TIPODEVENTA"
+                return header.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z0-9]/g, '');
             },
             complete: function(results) {
-                let dataNormalizada = results.data.map(filaOriginal => {
-                    let filaLimpia = {};
-                    Object.keys(filaOriginal).forEach(llave => {
-                        let llaveLimpia = llave.replace(/[\u200B-\u200D\uFEFF]/g, '').trim().toUpperCase();
-                        filaLimpia[llaveLimpia] = filaOriginal[llave];
-                    });
-                    return filaLimpia;
-                });
-
-                if (dataNormalizada.length > 0 && !('NRO. ORDEN' in dataNormalizada[0])) {
-                    alert("Error: Asegúrate de usar la plantilla correcta (DEBE tener la columna NRO. ORDEN).");
+                if (results.data.length > 0 && !('NROORDEN' in results.data[0])) {
+                    alert("Error: No se encontró la columna 'NRO. ORDEN'. Verifica tu Excel.");
                     return;
                 }
                 
@@ -486,28 +466,29 @@
                 let importadas = 0;
 
                 const setSelectDinamicamente = (selectElement, value) => {
-                    if (!value) {
-                        selectElement.value = "";
-                        return;
-                    }
+                    if (!value) { selectElement.value = ""; return; }
                     let exists = Array.from(selectElement.options).some(opt => opt.value === value);
-                    if (!exists) {
-                        selectElement.add(new Option(value, value));
-                    }
+                    if (!exists) { selectElement.add(new Option(value, value)); }
                     selectElement.value = value;
                 };
 
-                dataNormalizada.forEach(item => {
-                    const orden = item['NRO. ORDEN'] || '';
-                    if (!orden) return; 
-                    
-                    const formatNum = (val) => {
-                        if (!val) return 0;
-                        let num = parseFloat(String(val).replace(/[^0-9.-]+/g,""));
-                        return isNaN(num) ? 0 : num;
-                    };
+                // EL TRITURADOR DE CELDAS: Quita los saltos de línea (Alt+Enter) DENTRO de las celdas
+                const limpiarValor = (val) => {
+                    if (!val) return '';
+                    return String(val).replace(/[\r\n]+/g, ' ').trim();
+                };
 
-                    let fechaRaw = item['FECHA'] || '';
+                const formatNum = (val) => {
+                    if (!val) return 0;
+                    let num = parseFloat(limpiarValor(val).replace(/[^0-9.-]+/g,""));
+                    return isNaN(num) ? 0 : num;
+                };
+
+                results.data.forEach(item => {
+                    const orden = limpiarValor(item['NROORDEN']);
+                    if (!orden) return; 
+
+                    let fechaRaw = limpiarValor(item['FECHA']);
                     let fechaCalendario = '';
                     let partes = fechaRaw.split(/[\/\-]/); 
                     if (partes.length === 3) {
@@ -520,42 +501,48 @@
                         fechaCalendario = fechaRaw.substring(0, 10); 
                     }
 
-                    let mesAnioCalculado = item['MES Y AÑO'] || '';
+                    let mesAnioCalculado = limpiarValor(item['MESYANO']);
                     if (!mesAnioCalculado && fechaCalendario) {
                         mesAnioCalculado = fechaCalendario.substring(0, 7);
                     }
                     
+                    // Aquí usamos los nombres triturados: 'COMPROBANTE', 'TIPODEVENTA'
+                    let comprobanteLeido = limpiarValor(item['COMPROBANTE']);
+                    let tipoVentaLeido = limpiarValor(item['TIPODEVENTA']).toUpperCase();
+                    let marcaLeida = limpiarValor(item['MARCA']).toUpperCase();
+                    let categoriaLeida = limpiarValor(item['CATEGORIA']).toUpperCase();
+
                     const key = 'import-' + Math.random().toString(36).substr(2, 9);
                     
                     memoriaVentas[key] = {
                         'NRO. ORDEN': orden,
                         'FECHA': fechaCalendario,
                         'MES Y AÑO': mesAnioCalculado,
-                        'COMPROBANTE': item['COMPROBANTE'] || '',
-                        'TIPO DE VENTA': (item['TIPO DE VENTA'] || '').trim().toUpperCase(),
-                        'MARCA': (item['MARCA'] || '').trim().toUpperCase(),
-                        'CATEGORIA': (item['CATEGORIA'] || '').trim().toUpperCase(),
-                        'SKU ALMACEN': item['SKU ALMACEN'] || '',
-                        'MODELO': item['MODELO'] || '',
-                        'PRODUCTO': item['PRODUCTO'] || '',
-                        'CANT.': formatNum(item['CANT.']),
+                        'COMPROBANTE': comprobanteLeido,
+                        'TIPO DE VENTA': tipoVentaLeido,
+                        'MARCA': marcaLeida,
+                        'CATEGORIA': categoriaLeida,
+                        'SKU ALMACEN': limpiarValor(item['SKUALMACEN']),
+                        'MODELO': limpiarValor(item['MODELO']),
+                        'PRODUCTO': limpiarValor(item['PRODUCTO']),
+                        'CANT.': formatNum(item['CANT']),
                         'PRECIO': formatNum(item['PRECIO']),
-                        'TOTAL V.': formatNum(item['TOTAL V.']),
-                        '%CARGO x VENTA': formatNum(item['%CARGO x VENTA']),
+                        'TOTAL V.': formatNum(item['TOTALV']),
+                        '%CARGO x VENTA': formatNum(item['CARGOXVENTA']),
                         'URBANO': formatNum(item['URBANO']),
                         'FLEX': formatNum(item['FLEX']),
-                        'TOTAL PAGADO': formatNum(item['TOTAL PAGADO']),
-                        'COSTO x PRODUCTO': formatNum(item['COSTO x PRODUCTO']),
+                        'TOTAL PAGADO': formatNum(item['TOTALPAGADO']),
+                        'COSTO x PRODUCTO': formatNum(item['COSTOXPRODUCTO']),
                         'UND': formatNum(item['UND']),
-                        'COSTO TOTAL': formatNum(item['COSTO TOTAL']),
-                        'COSTO ENTREGA FLEX': formatNum(item['COSTO ENTREGA FLEX']),
+                        'COSTO TOTAL': formatNum(item['COSTOTOTAL']),
+                        'COSTO ENTREGA FLEX': formatNum(item['COSTOENTREGAFLEX']),
                         'GANANCIA': formatNum(item['GANANCIA']),
-                        'RENTABILIDAD %': item['RENTABILIDAD %'] || '',
-                        'DISTRITO': item['DISTRITO'] || '',
-                        'DIRECCIÓN': item['DIRECCIÓN'] || '',
-                        'REPARTIDOR': item['REPARTIDOR'] || '',
-                        'CELULAR DEL CLIENTE': item['CELULAR DEL CLIENTE'] || '',
-                        'MSJ DE AGRADECIMIENTO': item['MSJ DE AGRADECIMIENTO'] || ''
+                        'RENTABILIDAD %': limpiarValor(item['RENTABILIDAD']),
+                        'DISTRITO': limpiarValor(item['DISTRITO']),
+                        'DIRECCIÓN': limpiarValor(item['DIRECCION']),
+                        'REPARTIDOR': limpiarValor(item['REPARTIDOR']),
+                        'CELULAR DEL CLIENTE': limpiarValor(item['CELULARDELCLIENTE']),
+                        'MSJ DE AGRADECIMIENTO': limpiarValor(item['MSJDEAGRADECIMIENTO'])
                     };
 
                     const nuevaFila = filaMolde.cloneNode(true);
@@ -567,33 +554,33 @@
                     nuevaFila.querySelector('.val-fecha').value = fechaCalendario;
                     nuevaFila.querySelector('.val-mes').value = mesAnioCalculado;
                     nuevaFila.querySelector('.val-orden').value = orden;
-                    nuevaFila.querySelector('.val-comprobante').value = item['COMPROBANTE'] || '';
+                    nuevaFila.querySelector('.val-comprobante').value = comprobanteLeido;
                     
-                    setSelectDinamicamente(nuevaFila.querySelector('.val-tipoventa'), (item['TIPO DE VENTA'] || '').trim().toUpperCase());
-                    setSelectDinamicamente(nuevaFila.querySelector('.val-marca'), (item['MARCA'] || '').trim().toUpperCase());
-                    setSelectDinamicamente(nuevaFila.querySelector('.val-categoria'), (item['CATEGORIA'] || '').trim().toUpperCase());
+                    setSelectDinamicamente(nuevaFila.querySelector('.val-tipoventa'), tipoVentaLeido);
+                    setSelectDinamicamente(nuevaFila.querySelector('.val-marca'), marcaLeida);
+                    setSelectDinamicamente(nuevaFila.querySelector('.val-categoria'), categoriaLeida);
 
-                    nuevaFila.querySelector('.val-sku').value = item['SKU ALMACEN'] || '';
-                    nuevaFila.querySelector('.val-modelo').value = item['MODELO'] || '';
-                    nuevaFila.querySelector('.val-producto').value = item['PRODUCTO'] || '';
-                    nuevaFila.querySelector('.val-cant').value = formatNum(item['CANT.']);
+                    nuevaFila.querySelector('.val-sku').value = limpiarValor(item['SKUALMACEN']);
+                    nuevaFila.querySelector('.val-modelo').value = limpiarValor(item['MODELO']);
+                    nuevaFila.querySelector('.val-producto').value = limpiarValor(item['PRODUCTO']);
+                    nuevaFila.querySelector('.val-cant').value = formatNum(item['CANT']);
                     nuevaFila.querySelector('.val-precio').value = formatNum(item['PRECIO']).toFixed(2);
-                    nuevaFila.querySelector('.val-totalv').value = formatNum(item['TOTAL V.']).toFixed(2);
-                    nuevaFila.querySelector('.val-cargoventa').value = formatNum(item['%CARGO x VENTA']).toFixed(2);
+                    nuevaFila.querySelector('.val-totalv').value = formatNum(item['TOTALV']).toFixed(2);
+                    nuevaFila.querySelector('.val-cargoventa').value = formatNum(item['CARGOXVENTA']).toFixed(2);
                     nuevaFila.querySelector('.val-urbano').value = formatNum(item['URBANO']).toFixed(2);
                     nuevaFila.querySelector('.val-flex').value = formatNum(item['FLEX']).toFixed(2);
-                    nuevaFila.querySelector('.val-totalpagado').value = formatNum(item['TOTAL PAGADO']).toFixed(2);
-                    nuevaFila.querySelector('.val-costoproducto').value = formatNum(item['COSTO x PRODUCTO']).toFixed(2);
+                    nuevaFila.querySelector('.val-totalpagado').value = formatNum(item['TOTALPAGADO']).toFixed(2);
+                    nuevaFila.querySelector('.val-costoproducto').value = formatNum(item['COSTOXPRODUCTO']).toFixed(2);
                     nuevaFila.querySelector('.val-und').value = formatNum(item['UND']);
-                    nuevaFila.querySelector('.val-costototal').value = formatNum(item['COSTO TOTAL']).toFixed(2);
-                    nuevaFila.querySelector('.val-costoflex').value = formatNum(item['COSTO ENTREGA FLEX']).toFixed(2);
+                    nuevaFila.querySelector('.val-costototal').value = formatNum(item['COSTOTOTAL']).toFixed(2);
+                    nuevaFila.querySelector('.val-costoflex').value = formatNum(item['COSTOENTREGAFLEX']).toFixed(2);
                     nuevaFila.querySelector('.val-ganancia').value = formatNum(item['GANANCIA']).toFixed(2);
-                    nuevaFila.querySelector('.val-rentabilidad').value = item['RENTABILIDAD %'] || '';
-                    nuevaFila.querySelector('.val-distrito').value = item['DISTRITO'] || '';
-                    nuevaFila.querySelector('.val-direccion').value = item['DIRECCIÓN'] || '';
-                    nuevaFila.querySelector('.val-repartidor').value = item['REPARTIDOR'] || '';
-                    nuevaFila.querySelector('.val-celular').value = item['CELULAR DEL CLIENTE'] || '';
-                    nuevaFila.querySelector('.val-mensaje').value = item['MSJ DE AGRADECIMIENTO'] || '';
+                    nuevaFila.querySelector('.val-rentabilidad').value = limpiarValor(item['RENTABILIDAD']);
+                    nuevaFila.querySelector('.val-distrito').value = limpiarValor(item['DISTRITO']);
+                    nuevaFila.querySelector('.val-direccion').value = limpiarValor(item['DIRECCION']);
+                    nuevaFila.querySelector('.val-repartidor').value = limpiarValor(item['REPARTIDOR']);
+                    nuevaFila.querySelector('.val-celular').value = limpiarValor(item['CELULARDELCLIENTE']);
+                    nuevaFila.querySelector('.val-mensaje').value = limpiarValor(item['MSJDEAGRADECIMIENTO']);
 
                     fragmento.appendChild(nuevaFila);
                     importadas++;
@@ -606,7 +593,7 @@
                 const indicador = document.getElementById('indicador-cambios');
                 if(indicador) indicador.style.display = 'inline-block';
 
-                alert(`¡Se cargaron ${importadas} ventas en pantalla! Revisa la tabla y presiona 'Guardar Modificaciones' para subirlo a la base de datos.`);
+                alert(`¡Se cargaron ${importadas} ventas en pantalla! Revisa la tabla y presiona 'Guardar Modificaciones'.`);
             }
         });
     });
@@ -632,7 +619,7 @@
             },
             body: JSON.stringify({ 
                 referencias: datosAguardar,
-                eliminadas: ventasAEliminar // Mandamos la lista de IDs a borrar
+                eliminadas: ventasAEliminar 
             })
         })
         .then(response => response.json())
