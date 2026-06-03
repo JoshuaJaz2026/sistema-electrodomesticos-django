@@ -274,17 +274,13 @@
                     select.add(opt);
                 });
                 
-                // Si la BD trae un valor nuevo, lo agrega
                 if (valorActual && !encontrado) {
                     let opt = new Option(valorActual, valorActual);
                     opt.selected = true;
                     select.add(opt);
                 }
 
-                // Forzamos visualmente que la caja muestre el valor correcto
-                if (valorActual) {
-                    select.value = valorActual;
-                }
+                if (valorActual) { select.value = valorActual; }
             });
         };
 
@@ -327,7 +323,6 @@
         panel.style.display = panel.style.display === "none" ? "block" : "none";
     }
 
-    // === FUNCIÓN MÁGICA: FECHA A MES Y AÑO ===
     function actualizarMesAnio(inputFecha) {
         const fila = inputFecha.closest('tr');
         const inputMes = fila.querySelector('.val-mes');
@@ -341,7 +336,6 @@
         }
     }
 
-    // SISTEMA DE MEMORIA TEMPORAL Y EVENTOS
     let memoriaVentas = JSON.parse(localStorage.getItem('memoriaVentasTemp')) || {};
 
     window.addEventListener('load', function() {
@@ -421,7 +415,7 @@
         if(indicador) indicador.style.display = 'inline-block';
     }
 
-    // IMPORTACIÓN MASIVA DESDE CSV CON COMBO BOX INTELIGENTE Y LIMPIEZA DE ESPACIOS
+    // IMPORTACIÓN MASIVA DESDE CSV CON NORMALIZADOR EXTREMO
     document.getElementById('csvImportar').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -429,12 +423,18 @@
         Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
-            transformHeader: function(header) {
-                // ESTA LÍNEA ES EL ESCUDO: Elimina espacios ocultos de los títulos del Excel
-                return header.trim(); 
-            },
             complete: function(results) {
-                if (results.data.length > 0 && !('NRO. ORDEN' in results.data[0])) {
+                // NORMALIZADOR EXTREMO: Arregla los espacios invisibles del Excel
+                let dataNormalizada = results.data.map(filaOriginal => {
+                    let filaLimpia = {};
+                    Object.keys(filaOriginal).forEach(llave => {
+                        let llaveLimpia = llave.replace(/[\u200B-\u200D\uFEFF]/g, '').trim().toUpperCase();
+                        filaLimpia[llaveLimpia] = filaOriginal[llave];
+                    });
+                    return filaLimpia;
+                });
+
+                if (dataNormalizada.length > 0 && !('NRO. ORDEN' in dataNormalizada[0])) {
                     alert("Error: Asegúrate de usar la plantilla correcta (DEBE tener la columna NRO. ORDEN).");
                     return;
                 }
@@ -456,7 +456,7 @@
                     selectElement.value = value;
                 };
 
-                results.data.forEach(item => {
+                dataNormalizada.forEach(item => {
                     const orden = item['NRO. ORDEN'] || '';
                     if (!orden) return; 
                     
