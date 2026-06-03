@@ -814,7 +814,6 @@ def descargar_plantilla_reporte_ml(request):
 
     return response
 
-@login_required
 def guardar_reportes_masivos_ml(request):
     if request.method == 'POST':
         try:
@@ -826,7 +825,16 @@ def guardar_reportes_masivos_ml(request):
             if eliminadas:
                 ReporteMercadoLibre.objects.filter(id__in=eliminadas).delete()
 
-            # 2. FILTRO ANTI-DUPLICADOS INTELIGENTE
+            # --- 2. ESCUDO PROTECTOR DE BASE DE DATOS ---
+            # Obtenemos los números de orden del Excel que estás subiendo
+            nros_ordenes_entrantes = [f.get('NRO. ORDEN', '').strip() for f in filas_ventas if f.get('NRO. ORDEN', '').strip()]
+            
+            # Consultamos la base de datos para ver si esas órdenes YA EXISTEN
+            existentes_en_db = {
+                venta.nro_orden: venta 
+                for venta in ReporteMercadoLibre.objects.filter(nro_orden__in=nros_ordenes_entrantes)
+            }
+
             ventas_unicas = {}
             
             for fila in filas_ventas:
@@ -834,6 +842,27 @@ def guardar_reportes_masivos_ml(request):
                 if not nro_orden: 
                     continue
 
+                # --- RESCATE DE DATOS ---
+                db_obj = existentes_en_db.get(nro_orden)
+                
+                # Si el Excel viene vacío, pero tu BD ya tenía el dato, ¡Lo salvamos!
+                val_comprobante = fila.get('COMPROBANTE', '').strip()
+                if not val_comprobante and db_obj:
+                    val_comprobante = db_obj.comprobante
+
+                val_tipo_venta = fila.get('TIPO DE VENTA', '').strip()
+                if not val_tipo_venta and db_obj:
+                    val_tipo_venta = db_obj.tipo_venta
+                    
+                val_marca = fila.get('MARCA', '').strip()
+                if not val_marca and db_obj:
+                    val_marca = db_obj.marca
+                    
+                val_categoria = fila.get('CATEGORIA', '').strip()
+                if not val_categoria and db_obj:
+                    val_categoria = db_obj.categoria
+
+                # Transformaciones de Fechas y Números
                 fecha_raw = fila.get('FECHA', '')
                 fecha_formateada = None
                 if fecha_raw:
@@ -861,10 +890,10 @@ def guardar_reportes_masivos_ml(request):
                     nro_orden=nro_orden,
                     fecha=fecha_formateada or '2026-01-01',
                     mes_anio=fila.get('MES Y AÑO', ''),
-                    comprobante=fila.get('COMPROBANTE', ''),
-                    tipo_venta=fila.get('TIPO DE VENTA', ''),
-                    marca=fila.get('MARCA', ''),
-                    categoria=fila.get('CATEGORIA', ''),
+                    comprobante=val_comprobante,
+                    tipo_venta=val_tipo_venta,
+                    marca=val_marca,
+                    categoria=val_categoria,
                     sku_almacen=fila.get('SKU ALMACEN', ''),
                     modelo=fila.get('MODELO', ''),
                     producto=fila.get('PRODUCTO', ''),
@@ -888,10 +917,9 @@ def guardar_reportes_masivos_ml(request):
                     mensaje=fila.get('MSJ DE AGRADECIMIENTO', ''),
                 )
                 
-                # LA MAGIA ANTI-BORRADO:
+                # Filtro de duplicados dentro del mismo Excel
                 if nro_orden in ventas_unicas:
                     existente = ventas_unicas[nro_orden]
-                    # Si el Nro de orden se repite, rescatamos los datos importantes que la nueva fila traiga en blanco
                     existente.comprobante = existente.comprobante or obj.comprobante
                     existente.tipo_venta = existente.tipo_venta or obj.tipo_venta
                     existente.marca = existente.marca or obj.marca
@@ -902,7 +930,6 @@ def guardar_reportes_masivos_ml(request):
                 else:
                     ventas_unicas[nro_orden] = obj
 
-            # Extraemos la lista final de objetos protegidos
             objetos_a_guardar = list(ventas_unicas.values())
 
             # 3. GUARDAR TODO DE GOLPE (BULK CREATE)
@@ -923,7 +950,7 @@ def guardar_reportes_masivos_ml(request):
                     update_fields=campos_actualizar
                 )
             
-            return JsonResponse({'status': 'ok', 'message': f'¡Éxito! Se procesaron {len(objetos_a_guardar)} ventas al instante y sin errores.'})
+            return JsonResponse({'status': 'ok', 'message': f'¡Éxito! Se procesaron {len(objetos_a_guardar)} ventas de forma segura.'})
         
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
