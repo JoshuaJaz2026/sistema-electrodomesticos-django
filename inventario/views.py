@@ -815,18 +815,24 @@ def descargar_plantilla_reporte_ml(request):
     return response
 
 @login_required
+@login_required
 def guardar_reportes_masivos_ml(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             filas_ventas = data.get('referencias', [])
+            eliminadas = data.get('eliminadas', []) # Recibimos la lista de IDs a eliminar
 
+            # 1. ELIMINAR LOS REGISTROS SOLICITADOS
+            if eliminadas:
+                ReporteMercadoLibre.objects.filter(id__in=eliminadas).delete()
+
+            # 2. GUARDAR O ACTUALIZAR LOS REGISTROS RESTANTES
             for fila in filas_ventas:
                 nro_orden = fila.get('NRO. ORDEN', '').strip()
                 if not nro_orden: 
                     continue
 
-                # Formateo de fecha seguro (Soporta DD/MM/YYYY del Excel y YYYY-MM-DD del input type="date")
                 fecha_raw = fila.get('FECHA', '')
                 fecha_formateada = None
                 if fecha_raw:
@@ -835,7 +841,6 @@ def guardar_reportes_masivos_ml(request):
                     except ValueError:
                         fecha_formateada = fecha_raw
 
-                # Guardamos o actualizamos (usando NRO. ORDEN como identificador único)
                 ReporteMercadoLibre.objects.update_or_create(
                     nro_orden=nro_orden,
                     defaults={
@@ -868,7 +873,9 @@ def guardar_reportes_masivos_ml(request):
                         'mensaje': fila.get('MSJ DE AGRADECIMIENTO', ''),
                     }
                 )
-            return JsonResponse({'status': 'ok', 'message': f'¡Éxito! Se guardaron {len(filas_ventas)} ventas en la Base de Datos.'})
+            
+            return JsonResponse({'status': 'ok', 'message': f'Se guardaron {len(filas_ventas)} registros y se eliminaron {len(eliminadas)} filas.'})
+        
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
             

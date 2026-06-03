@@ -101,7 +101,8 @@
                     <th class="th-rep" style="background-color: #f8fafc; width: 250px;">DIRECCIÓN</th>
                     <th class="th-rep" style="background-color: #f8fafc; width: 160px;">REPARTIDOR</th>
                     <th class="th-rep" style="background-color: #f8fafc; width: 140px;">CELULAR DEL CLIENTE</th>
-                    <th class="th-rep" style="background-color: #f8fafc; width: 150px; border-right: none;">MSJ DE AGRADECIMIENTO</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 150px;">MSJ DE AGRADECIMIENTO</th>
+                    <th class="th-rep" style="background-color: #fef2f2; width: 60px; border-right: none;"><i class="fas fa-trash-alt" style="color: #ef4444;"></i></th>
                 </tr>
             </thead>
             <tbody>
@@ -153,7 +154,13 @@
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.direccion|default:'' }}" class="celda-input val-direccion" oninput="registrarCambioVenta(this)"></td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.repartidor|default:'' }}" class="celda-input bold text-dark val-repartidor" oninput="registrarCambioVenta(this)"></td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.celular|default:'' }}" class="celda-input central mono val-celular" oninput="registrarCambioVenta(this)"></td>
-                        <td style="padding: 0; text-align: center;"><input type="text" value="{{ item.mensaje|default:'' }}" class="celda-input central val-mensaje" oninput="registrarCambioVenta(this)"></td>
+                        <td style="padding: 0; text-align: center; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.mensaje|default:'' }}" class="celda-input central val-mensaje" oninput="registrarCambioVenta(this)"></td>
+                        
+                        <td style="padding: 0; text-align: center; vertical-align: middle;">
+                            <button type="button" onclick="eliminarFilaVenta(this)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 8px;" title="Eliminar fila">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
                     </tr>
                     {% endfor %}
                 {% endif %}
@@ -204,7 +211,13 @@
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input val-direccion" oninput="registrarCambioVenta(this)"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input bold text-dark val-repartidor" oninput="registrarCambioVenta(this)"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input central mono val-celular" oninput="registrarCambioVenta(this)"></td>
-                    <td style="padding: 0; text-align: center;"><input type="text" class="celda-input central val-mensaje" oninput="registrarCambioVenta(this)"></td>
+                    <td style="padding: 0; text-align: center; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input central val-mensaje" oninput="registrarCambioVenta(this)"></td>
+                    
+                    <td style="padding: 0; text-align: center; vertical-align: middle;">
+                        <button type="button" onclick="eliminarFilaVenta(this)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 8px;" title="Eliminar fila">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -256,13 +269,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
 <script>
-    // === LISTAS DESPLEGABLES GIGANTES ===
     const listaMarcas = ["OSTER", "BEHRINGER", "BORD", "BOSSKO", "DSP", "ELECTROLUX", "EVOLUTION", "FINEZZA", "FUJITEC", "GAMA", "IMACO", "INDURAMA", "JVC", "Kitchenaid", "LG", "PANASONIC", "PHILIPS", "RECORD", "REMINGTON", "SAMSUNG", "SOLE", "SONY", "TAURUS", "TCL", "TRAMONTINA", "TREVELY", "VISIONNER", "WAHL", "WHITELINE", "YANBAL", "BLACKLINE", "VANHOFF", "EPSON", "BGH", "MOTOROLA", "HISENSE", "ILUMI", "DAJU", "XIAOMI", "Whirlpool", "IMPERIAL", "HYUNDAI", "JBL", "COLDEX"];
     const listaCategorias = ["HORNO ELECTRICO", "AFEITADORA", "ARROCERA", "ASPIRADORA", "AUDIFONOS", "BATIDORA DE INMERSION", "BATIDORA DE MANO", "BATIDORA DE TAZÓN", "BATIDORA PLANETARIA", "BLOQUEADOR", "CACEROLA", "CAFETERA", "CAMPANA", "CATEGORIA", "CEPILLO", "COCINA", "COCINA DE INDUCCION", "COCINA ELÉCTRICA", "COLLAR Y ARETES", "COMBO CHERRY", "COMBO OSTER", "CONGELADORA", "CONTROL DE TV", "CUATRICOMBO", "CUCHILLA DE LICUADORA", "CUCHILLO", "DESHUMEDECEDOR", "DISPENSADOR DE AGUA", "EQUIPO DE SONIDO", "ESPATULA", "EXPRIMIDOR", "EXTRACTOR DE JUGOS", "FREIDORA DE AIRE", "FRIGOBAR", "HERVIDOR", "JUEGO DE OLLAS", "LAVADORA", "LAVASECA", "LICUADORA", "MAQUINA DE CORTAR PELO", "MICROONDAS", "MOLDE", "MOLEDOR DE CARNE", "MOLINILLO", "MULTI OLLA", "OLLA", "OLLA A PRESIÓN", "ONDULADOR", "PANIFICADORA", "PARLANTE", "PARRILLA", "PERFUME", "PICADOR DE ALIMENTOS", "PLANCHA A VAPOR", "PLANCHA DE CABELLO", "PLANCHA GRILL", "PROCESADOR DE ALIMENTOS", "PROTECTOR SOLAR", "REFRIGERADORA", "SANDWICHERA", "SARTEN", "SARTÉN ELÉCTRICA", "SET DE CUBIERTOS", "SET DE OLLAS", "SET DE PIZZA", "SOUNDBAR", "SPAGUETERA", "TERMO BOMBA", "TERMO HERVIDOR", "TERMORADIADOR", "TETERA", "TOSTADORA", "TRICOMBO OSTER", "TV", "VAPORIZADOR", "VAPORIZADOR DE ALIMENTOS", "VASO DE LICUADORA", "VENTILADOR", "WAFLERA", "YOGURT MAKER", "HORNO CON FREIDORA", "CUIDADO PERSONAL", "CALEFACTOR", "IMPRESORA", "MONITOR DE ESCENARIO", "DEPILADORA", "TERMOVENTILADOR", "TABLET", "VISICOOLER", "Westinghouse", "ENCIMERA", "MAQUINA PARA HIELO"];
     const listaTiposVenta = ["FLEX", "URBANO", "ACUERDO CON EL COMPRADOR"];
 
     document.addEventListener("DOMContentLoaded", function() {
-        // === GENERADOR DE COMBOS INTELIGENTES ===
         const poblarSelect = (claseSelector, listaPredeterminada) => {
             document.querySelectorAll(claseSelector).forEach(select => {
                 const valorActual = (select.getAttribute('data-valor-actual') || '').trim().toUpperCase();
@@ -288,7 +299,6 @@
         poblarSelect('.val-categoria', listaCategorias);
         poblarSelect('.val-tipoventa', listaTiposVenta);
 
-        // Configuración de visualización de columnas
         const ths = document.querySelectorAll("#tablaReporte th.th-rep");
         const container = document.getElementById("columnCheckboxes");
         
@@ -337,6 +347,7 @@
     }
 
     let memoriaVentas = JSON.parse(localStorage.getItem('memoriaVentasTemp')) || {};
+    let ventasAEliminar = JSON.parse(localStorage.getItem('ventasAEliminarTemp')) || [];
 
     window.addEventListener('load', function() {
         const filas = document.querySelectorAll('#tablaReporte tbody .fila-ventas');
@@ -358,7 +369,7 @@
             }
         });
 
-        if (hayCambiosPrevios || Object.keys(memoriaVentas).length > 0) {
+        if (hayCambiosPrevios || Object.keys(memoriaVentas).length > 0 || ventasAEliminar.length > 0) {
             const indicador = document.getElementById('indicador-cambios');
             if(indicador) indicador.style.display = 'inline-block';
         }
@@ -415,7 +426,35 @@
         if(indicador) indicador.style.display = 'inline-block';
     }
 
-    // IMPORTACIÓN MASIVA DESDE CSV CON NORMALIZADOR EXTREMO
+    // === NUEVA FUNCIÓN: ELIMINAR FILA ===
+    function eliminarFilaVenta(btn) {
+        const fila = btn.closest('tr');
+        if (fila.id === 'fila-molde') return;
+
+        const key = fila.dataset.originalKey;
+
+        // Si la fila ya existía en la base de datos (no es nueva importación), la mandamos a la lista de eliminación
+        if (key && !key.startsWith('temp-') && !key.startsWith('import-')) {
+            if (!ventasAEliminar.includes(key)) {
+                ventasAEliminar.push(key);
+            }
+        }
+
+        // Si estaba en memoria porque la acabábamos de editar o importar, la quitamos
+        if (memoriaVentas[key]) {
+            delete memoriaVentas[key];
+        }
+
+        // Borrar visualmente
+        fila.remove();
+        
+        localStorage.setItem('ventasAEliminarTemp', JSON.stringify(ventasAEliminar));
+        localStorage.setItem('memoriaVentasTemp', JSON.stringify(memoriaVentas));
+        
+        const indicador = document.getElementById('indicador-cambios');
+        if(indicador) indicador.style.display = 'inline-block';
+    }
+
     document.getElementById('csvImportar').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -423,8 +462,10 @@
         Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
+            transformHeader: function(header) {
+                return header.replace(/[\u200B-\u200D\uFEFF]/g, '').trim(); 
+            },
             complete: function(results) {
-                // NORMALIZADOR EXTREMO: Arregla los espacios invisibles del Excel
                 let dataNormalizada = results.data.map(filaOriginal => {
                     let filaLimpia = {};
                     Object.keys(filaOriginal).forEach(llave => {
@@ -570,12 +611,11 @@
         });
     });
 
-    // ENVIAR A DJANGO Y LIMPIAR
     function guardarDatosPendientes() {
         let datosAguardar = Object.values(memoriaVentas);
 
-        if (datosAguardar.length === 0) {
-            alert("No has cargado ni editado ningún reporte para guardar.");
+        if (datosAguardar.length === 0 && ventasAEliminar.length === 0) {
+            alert("No has cargado, editado ni eliminado ningún reporte para guardar.");
             return;
         }
 
@@ -590,13 +630,18 @@
                 'Content-Type': 'application/json',
                 'X-CSRFToken': '{{ csrf_token }}'
             },
-            body: JSON.stringify({ referencias: datosAguardar })
+            body: JSON.stringify({ 
+                referencias: datosAguardar,
+                eliminadas: ventasAEliminar // Mandamos la lista de IDs a borrar
+            })
         })
         .then(response => response.json())
         .then(data => {
             if (data.status === 'ok') {
                 localStorage.removeItem('memoriaVentasTemp');
+                localStorage.removeItem('ventasAEliminarTemp');
                 memoriaVentas = {}; 
+                ventasAEliminar = [];
                 alert(data.message);
                 window.location.reload(); 
             } else {
