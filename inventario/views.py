@@ -339,9 +339,9 @@ def reporte_mercadolibre(request):
     fecha_inicio = request.GET.get('fecha_inicio', '')
     fecha_fin = request.GET.get('fecha_fin', '')
 
-    # 2. Obtenemos todas las ventas ordenadas de la más reciente a la más antigua
-    # ⚠️ CAMBIA 'ReporteMercadoLibre' POR EL NOMBRE REAL DE TU MODELO DE VENTAS
-    ventas_todas = ReporteMercadoLibre.objects.all().order_by('-id')
+    # 2. Obtenemos todas las ventas ordenadas por FECHA (de la más antigua a la más nueva)
+    # y luego por ID para mantener un orden consistente en ventas del mismo día
+    ventas_todas = ReporteMercadoLibre.objects.all().order_by('fecha', 'id')
 
     # 3. Aplicamos el filtro de búsqueda por NRO. ORDEN o SKU
     if query_search:
