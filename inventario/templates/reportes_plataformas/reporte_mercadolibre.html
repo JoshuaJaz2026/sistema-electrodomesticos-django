@@ -74,12 +74,12 @@
         <table id="tablaReporte" style="width: max-content; border-collapse: collapse; background: white; font-size: 0.85em; white-space: nowrap; table-layout: fixed;">
             <thead style="position: sticky; top: 0; z-index: 10;">
                 <tr style="color: #334155; text-transform: uppercase; font-weight: bold; font-size: 0.8em; height: 40px;">
-                    <th class="th-rep" style="background-color: #f1f5f9; width: 110px;">FECHA</th>
+                    <th class="th-rep" style="background-color: #f1f5f9; width: 140px;">FECHA</th>
                     <th class="th-rep" style="background-color: #f1f5f9; width: 120px;">MES Y AÑO</th>
                     <th class="th-rep" style="background-color: #f1f5f9; width: 140px;">NRO. ORDEN</th>
                     <th class="th-rep" style="background-color: #f1f5f9; width: 130px;">COMPROBANTE</th>
-                    <th class="th-rep" style="background-color: #f1f5f9; width: 130px;">TIPO DE VENTA</th>
-                    <th class="th-rep" style="background-color: #e2e8f0; width: 160px;">MARCA</th>
+                    <th class="th-rep" style="background-color: #f1f5f9; width: 160px;">TIPO DE VENTA</th>
+                    <th class="th-rep" style="background-color: #e2e8f0; width: 180px;">MARCA</th>
                     <th class="th-rep" style="background-color: #e2e8f0; width: 220px;">CATEGORIA</th>
                     <th class="th-rep" style="background-color: #e2e8f0; width: 160px;">SKU ALMACEN</th>
                     <th class="th-rep" style="background-color: #e2e8f0; width: 140px;">MODELO</th>
@@ -108,13 +108,34 @@
                 {% if page_obj %}
                     {% for item in page_obj %}
                     <tr class="fila-ventas" data-original-key="{{ item.id }}" style="border-bottom: 1px solid #e2e8f0; height: 38px;">
-                        <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.fecha|default:'' }}" class="celda-input central val-fecha" oninput="registrarCambioVenta(this)"></td>
-                        <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.mes_anio|default:'' }}" class="celda-input central bold text-dark val-mes" oninput="registrarCambioVenta(this)"></td>
+                        <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                            <input type="date" value="{{ item.fecha|date:'Y-m-d' }}" class="celda-input central val-fecha" oninput="actualizarMesAnio(this); registrarCambioVenta(this)">
+                        </td>
+                        <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                            <input type="text" value="{{ item.mes_anio|default:'' }}" class="celda-input central bold val-mes" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #64748b;" placeholder="YYYY-MM" tabindex="-1">
+                        </td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.nro_orden|default:'' }}" class="celda-input central bold text-blue val-orden" oninput="registrarCambioVenta(this)"></td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.comprobante|default:'' }}" class="celda-input central val-comprobante" oninput="registrarCambioVenta(this)"></td>
-                        <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.tipo_venta|default:'' }}" class="celda-input central bold val-tipoventa" oninput="registrarCambioVenta(this)"></td>
-                        <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.marca|default:'' }}" class="celda-input bold text-dark val-marca" oninput="registrarCambioVenta(this)"></td>
-                        <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.categoria|default:'' }}" class="celda-input text-dark val-categoria" oninput="registrarCambioVenta(this)"></td>
+                        
+                        <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                            <select class="celda-input central bold val-tipoventa" style="cursor: pointer;" onchange="registrarCambioVenta(this)">
+                                <option value="" {% if not item.tipo_venta %}selected{% endif %}>---</option>
+                                <option value="FLEX" {% if item.tipo_venta == 'FLEX' %}selected{% endif %}>FLEX</option>
+                                <option value="URBANO" {% if item.tipo_venta == 'URBANO' %}selected{% endif %}>URBANO</option>
+                                <option value="ACUERDO CON EL COMPRADOR" {% if item.tipo_venta == 'ACUERDO CON EL COMPRADOR' %}selected{% endif %}>ACUERDO CON EL COMPRADOR</option>
+                            </select>
+                        </td>
+                        <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                            <select class="celda-input bold text-dark val-marca" data-valor-actual="{{ item.marca|default:'' }}" style="cursor: pointer;" onchange="registrarCambioVenta(this)">
+                                <option value="">---</option>
+                            </select>
+                        </td>
+                        <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                            <select class="celda-input text-dark val-categoria" data-valor-actual="{{ item.categoria|default:'' }}" style="cursor: pointer;" onchange="registrarCambioVenta(this)">
+                                <option value="">---</option>
+                            </select>
+                        </td>
+
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.sku_almacen|default:'' }}" class="celda-input mono font-bold val-sku" oninput="registrarCambioVenta(this)"></td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.modelo|default:'' }}" class="celda-input central bold text-dark val-modelo" oninput="registrarCambioVenta(this)"></td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" value="{{ item.producto|default:'' }}" class="celda-input val-producto" oninput="registrarCambioVenta(this)"></td>
@@ -141,13 +162,34 @@
                 {% endif %}
 
                 <tr class="fila-ventas" id="fila-molde" style="{% if page_obj %}display: none;{% endif %} border-bottom: 1px solid #e2e8f0; height: 38px;">
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input central val-fecha" oninput="registrarCambioVenta(this)"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input central bold text-dark val-mes" oninput="registrarCambioVenta(this)"></td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <input type="date" class="celda-input central val-fecha" oninput="actualizarMesAnio(this); registrarCambioVenta(this)">
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <input type="text" class="celda-input central bold val-mes" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #64748b;" placeholder="YYYY-MM" tabindex="-1">
+                    </td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input central bold text-blue val-orden" oninput="registrarCambioVenta(this)"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input central val-comprobante" oninput="registrarCambioVenta(this)"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input central bold val-tipoventa" oninput="registrarCambioVenta(this)"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input bold text-dark val-marca" oninput="registrarCambioVenta(this)"></td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input text-dark val-categoria" oninput="registrarCambioVenta(this)"></td>
+                    
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <select class="celda-input central bold val-tipoventa" style="cursor: pointer;" onchange="registrarCambioVenta(this)">
+                            <option value="">---</option>
+                            <option value="FLEX">FLEX</option>
+                            <option value="URBANO">URBANO</option>
+                            <option value="ACUERDO CON EL COMPRADOR">ACUERDO CON EL COMPRADOR</option>
+                        </select>
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <select class="celda-input bold text-dark val-marca" style="cursor: pointer;" onchange="registrarCambioVenta(this)">
+                            <option value="">---</option>
+                        </select>
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <select class="celda-input text-dark val-categoria" style="cursor: pointer;" onchange="registrarCambioVenta(this)">
+                            <option value="">---</option>
+                        </select>
+                    </td>
+
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input mono font-bold val-sku" oninput="registrarCambioVenta(this)"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input central bold text-dark val-modelo" oninput="registrarCambioVenta(this)"></td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" class="celda-input val-producto" oninput="registrarCambioVenta(this)"></td>
@@ -220,13 +262,35 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
 <script>
-    // 1. SISTEMA DE PANEL DE COLUMNAS (WordPress Style)
-    function togglePanelColumnas() {
-        const panel = document.getElementById("panelPersonalizarColumnas");
-        panel.style.display = panel.style.display === "none" ? "block" : "none";
-    }
+    // === LISTAS DESPLEGABLES GIGANTES ===
+    const listaMarcas = ["OSTER", "BEHRINGER", "BORD", "BOSSKO", "DSP", "ELECTROLUX", "EVOLUTION", "FINEZZA", "FUJITEC", "GAMA", "IMACO", "INDURAMA", "JVC", "Kitchenaid", "LG", "PANASONIC", "PHILIPS", "RECORD", "REMINGTON", "SAMSUNG", "SOLE", "SONY", "TAURUS", "TCL", "TRAMONTINA", "TREVELY", "VISIONNER", "WAHL", "WHITELINE", "YANBAL", "BLACKLINE", "VANHOFF", "EPSON", "BGH", "MOTOROLA", "HISENSE", "ILUMI", "DAJU", "XIAOMI", "Whirlpool", "IMPERIAL", "HYUNDAI", "JBL", "COLDEX"];
+    
+    const listaCategorias = ["HORNO ELECTRICO", "AFEITADORA", "ARROCERA", "ASPIRADORA", "AUDIFONOS", "BATIDORA DE INMERSION", "BATIDORA DE MANO", "BATIDORA DE TAZÓN", "BATIDORA PLANETARIA", "BLOQUEADOR", "CACEROLA", "CAFETERA", "CAMPANA", "CATEGORIA", "CEPILLO", "COCINA", "COCINA DE INDUCCION", "COCINA ELÉCTRICA", "COLLAR Y ARETES", "COMBO CHERRY", "COMBO OSTER", "CONGELADORA", "CONTROL DE TV", "CUATRICOMBO", "CUCHILLA DE LICUADORA", "CUCHILLO", "DESHUMEDECEDOR", "DISPENSADOR DE AGUA", "EQUIPO DE SONIDO", "ESPATULA", "EXPRIMIDOR", "EXTRACTOR DE JUGOS", "FREIDORA DE AIRE", "FRIGOBAR", "HERVIDOR", "JUEGO DE OLLAS", "LAVADORA", "LAVASECA", "LICUADORA", "MAQUINA DE CORTAR PELO", "MICROONDAS", "MOLDE", "MOLEDOR DE CARNE", "MOLINILLO", "MULTI OLLA", "OLLA", "OLLA A PRESIÓN", "ONDULADOR", "PANIFICADORA", "PARLANTE", "PARRILLA", "PERFUME", "PICADOR DE ALIMENTOS", "PLANCHA A VAPOR", "PLANCHA DE CABELLO", "PLANCHA GRILL", "PROCESADOR DE ALIMENTOS", "PROTECTOR SOLAR", "REFRIGERADORA", "SANDWICHERA", "SARTEN", "SARTÉN ELÉCTRICA", "SET DE CUBIERTOS", "SET DE OLLAS", "SET DE PIZZA", "SOUNDBAR", "SPAGUETERA", "TERMO BOMBA", "TERMO HERVIDOR", "TERMORADIADOR", "TETERA", "TOSTADORA", "TRICOMBO OSTER", "TV", "VAPORIZADOR", "VAPORIZADOR DE ALIMENTOS", "VASO DE LICUADORA", "VENTILADOR", "WAFLERA", "YOGURT MAKER", "HORNO CON FREIDORA", "CUIDADO PERSONAL", "CALEFACTOR", "IMPRESORA", "MONITOR DE ESCENARIO", "DEPILADORA", "TERMOVENTILADOR", "TABLET", "VISICOOLER", "Westinghouse", "ENCIMERA", "MAQUINA PARA HIELO"];
 
     document.addEventListener("DOMContentLoaded", function() {
+        // Llenar marcas y categorías al cargar la página
+        const marcasSelects = document.querySelectorAll('.val-marca');
+        const categoriasSelects = document.querySelectorAll('.val-categoria');
+
+        marcasSelects.forEach(select => {
+            const valorActual = select.getAttribute('data-valor-actual');
+            listaMarcas.forEach(m => {
+                let opt = new Option(m, m);
+                if (m === valorActual) opt.selected = true;
+                select.add(opt);
+            });
+        });
+
+        categoriasSelects.forEach(select => {
+            const valorActual = select.getAttribute('data-valor-actual');
+            listaCategorias.forEach(c => {
+                let opt = new Option(c, c);
+                if (c === valorActual) opt.selected = true;
+                select.add(opt);
+            });
+        });
+
+        // Configuración de visualización de columnas
         const ths = document.querySelectorAll("#tablaReporte th.th-rep");
         const container = document.getElementById("columnCheckboxes");
         
@@ -256,7 +320,26 @@
         });
     });
 
-    // 2. SISTEMA DE MEMORIA TEMPORAL Y EVENTOS
+    function togglePanelColumnas() {
+        const panel = document.getElementById("panelPersonalizarColumnas");
+        panel.style.display = panel.style.display === "none" ? "block" : "none";
+    }
+
+    // === FUNCIÓN MÁGICA: FECHA A MES Y AÑO ===
+    function actualizarMesAnio(inputFecha) {
+        const fila = inputFecha.closest('tr');
+        const inputMes = fila.querySelector('.val-mes');
+        const fechaSeleccionada = inputFecha.value; // Viene en formato YYYY-MM-DD
+        
+        if (fechaSeleccionada && fechaSeleccionada.length >= 7) {
+            inputMes.value = fechaSeleccionada.substring(0, 7);
+            registrarCambioVenta(inputMes); // Asegura que el cambio se guarde en memoria
+        } else {
+            inputMes.value = "";
+        }
+    }
+
+    // SISTEMA DE MEMORIA TEMPORAL Y EVENTOS
     let memoriaVentas = JSON.parse(localStorage.getItem('memoriaVentasTemp')) || {};
 
     window.addEventListener('load', function() {
@@ -330,7 +413,7 @@
         if(indicador) indicador.style.display = 'inline-block';
     }
 
-    // 3. IMPORTACIÓN MASIVA DESDE CSV (CORREGIDA PARA DIBUJAR VISUALMENTE)
+    // IMPORTACIÓN MASIVA DESDE CSV CON TRADUCTOR DE FECHAS
     document.getElementById('csvImportar').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -351,25 +434,44 @@
 
                 results.data.forEach(item => {
                     const orden = item['NRO. ORDEN'] || '';
-                    if (!orden) return; // Si no hay orden, ignoramos la fila vacía
+                    if (!orden) return; 
                     
                     const formatNum = (val) => {
                         if (!val) return 0;
                         let num = parseFloat(String(val).replace(/[^0-9.-]+/g,""));
                         return isNaN(num) ? 0 : num;
                     };
+
+                    // === TRADUCTOR DE FECHAS DE EXCEL (DD/MM/YYYY) AL NAVEGADOR (YYYY-MM-DD) ===
+                    let fechaRaw = item['FECHA'] || '';
+                    let fechaCalendario = '';
+                    let partes = fechaRaw.split(/[\/\-]/); // Busca separadores "/" o "-"
+                    if (partes.length === 3) {
+                        let dia = partes[0].padStart(2, '0');
+                        let mes = partes[1].padStart(2, '0');
+                        let anio = partes[2];
+                        if (anio.length === 2) anio = "20" + anio; // Si ponen 26, lo asume como 2026
+                        fechaCalendario = `${anio}-${mes}-${dia}`;
+                    } else if (fechaRaw.includes('-') && fechaRaw.indexOf('-') === 4) {
+                        fechaCalendario = fechaRaw.substring(0, 10); // Ya viene en YYYY-MM-DD
+                    }
+
+                    // Calculamos el mes si no viene en el excel
+                    let mesAnioCalculado = item['MES Y AÑO'] || '';
+                    if (!mesAnioCalculado && fechaCalendario) {
+                        mesAnioCalculado = fechaCalendario.substring(0, 7);
+                    }
                     
                     const key = 'import-' + Math.random().toString(36).substr(2, 9);
                     
-                    // 1. Guardar en memoria
                     memoriaVentas[key] = {
                         'NRO. ORDEN': orden,
-                        'FECHA': item['FECHA'] || '',
-                        'MES Y AÑO': item['MES Y AÑO'] || '',
+                        'FECHA': fechaCalendario,
+                        'MES Y AÑO': mesAnioCalculado,
                         'COMPROBANTE': item['COMPROBANTE'] || '',
-                        'TIPO DE VENTA': item['TIPO DE VENTA'] || '',
-                        'MARCA': item['MARCA'] || '',
-                        'CATEGORIA': item['CATEGORIA'] || '',
+                        'TIPO DE VENTA': (item['TIPO DE VENTA'] || '').trim().toUpperCase(),
+                        'MARCA': (item['MARCA'] || '').trim().toUpperCase(),
+                        'CATEGORIA': (item['CATEGORIA'] || '').trim().toUpperCase(),
                         'SKU ALMACEN': item['SKU ALMACEN'] || '',
                         'MODELO': item['MODELO'] || '',
                         'PRODUCTO': item['PRODUCTO'] || '',
@@ -393,20 +495,19 @@
                         'MSJ DE AGRADECIMIENTO': item['MSJ DE AGRADECIMIENTO'] || ''
                     };
 
-                    // 2. Dibujar la fila físicamente en la pantalla
                     const nuevaFila = filaMolde.cloneNode(true);
-                    nuevaFila.id = ""; // Le quitamos el ID molde
-                    nuevaFila.style.display = ""; // La hacemos visible
+                    nuevaFila.id = "";
+                    nuevaFila.style.display = "";
                     nuevaFila.dataset.originalKey = key;
                     nuevaFila.classList.add('fila-editada');
 
-                    nuevaFila.querySelector('.val-fecha').value = item['FECHA'] || '';
-                    nuevaFila.querySelector('.val-mes').value = item['MES Y AÑO'] || '';
+                    nuevaFila.querySelector('.val-fecha').value = fechaCalendario;
+                    nuevaFila.querySelector('.val-mes').value = mesAnioCalculado;
                     nuevaFila.querySelector('.val-orden').value = orden;
                     nuevaFila.querySelector('.val-comprobante').value = item['COMPROBANTE'] || '';
-                    nuevaFila.querySelector('.val-tipoventa').value = item['TIPO DE VENTA'] || '';
-                    nuevaFila.querySelector('.val-marca').value = item['MARCA'] || '';
-                    nuevaFila.querySelector('.val-categoria').value = item['CATEGORIA'] || '';
+                    nuevaFila.querySelector('.val-tipoventa').value = (item['TIPO DE VENTA'] || '').trim().toUpperCase();
+                    nuevaFila.querySelector('.val-marca').value = (item['MARCA'] || '').trim().toUpperCase();
+                    nuevaFila.querySelector('.val-categoria').value = (item['CATEGORIA'] || '').trim().toUpperCase();
                     nuevaFila.querySelector('.val-sku').value = item['SKU ALMACEN'] || '';
                     nuevaFila.querySelector('.val-modelo').value = item['MODELO'] || '';
                     nuevaFila.querySelector('.val-producto').value = item['PRODUCTO'] || '';
@@ -433,10 +534,9 @@
                     importadas++;
                 });
                 
-                // Pegar todo en la tabla de golpe
                 tbody.appendChild(fragmento);
                 localStorage.setItem('memoriaVentasTemp', JSON.stringify(memoriaVentas));
-                document.getElementById('csvImportar').value = ""; // Limpiamos el input file
+                document.getElementById('csvImportar').value = ""; 
                 
                 const indicador = document.getElementById('indicador-cambios');
                 if(indicador) indicador.style.display = 'inline-block';
@@ -446,7 +546,7 @@
         });
     });
 
-    // 4. ENVIAR A DJANGO Y LIMPIAR
+    // ENVIAR A DJANGO Y LIMPIAR
     function guardarDatosPendientes() {
         let datosAguardar = Object.values(memoriaVentas);
 
