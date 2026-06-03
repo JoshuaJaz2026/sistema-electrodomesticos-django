@@ -133,3 +133,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login'              # Si no está logueado, mándalo aquí
 LOGIN_REDIRECT_URL = 'inicio'    # Si el login es exitoso, mándalo al inventario (crearemos esta ruta luego)
 LOGOUT_REDIRECT_URL = 'selector'    # Al cerrar sesión, vuelve al login
+
+# Ampliar el límite de datos recibidos a 50 MB para permitir importaciones masivas de Excel
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
