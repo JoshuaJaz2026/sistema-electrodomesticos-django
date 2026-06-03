@@ -814,6 +814,7 @@ def descargar_plantilla_reporte_ml(request):
 
     return response
 
+@login_required
 def guardar_reportes_masivos_ml(request):
     if request.method == 'POST':
         try:
@@ -821,15 +822,25 @@ def guardar_reportes_masivos_ml(request):
             filas_ventas = data.get('referencias', [])
             eliminadas = data.get('eliminadas', [])
 
-            # 1. ELIMINAR LOS REGISTROS SOLICITADOS
             if eliminadas:
                 ReporteMercadoLibre.objects.filter(id__in=eliminadas).delete()
 
-            # --- 2. ESCUDO PROTECTOR DE BASE DE DATOS ---
-            # Obtenemos los números de orden del Excel que estás subiendo
-            nros_ordenes_entrantes = [f.get('NRO. ORDEN', '').strip() for f in filas_ventas if f.get('NRO. ORDEN', '').strip()]
+            # --- MAGIA ANTI-BORRADO Y ANTI ALT+ENTER ---
+            def get_best_val(val_antiguo, val_nuevo):
+                # Elimina saltos de linea (Alt+Enter) y limpia el texto
+                v_antiguo = str(val_antiguo or '').replace('\n', '').replace('\r', '').strip()
+                v_nuevo = str(val_nuevo or '').replace('\n', '').replace('\r', '').strip()
+                
+                # Considera vacíos los "---" o nulos
+                if v_antiguo in ['', '---', '-', 'None', 'null', 'NaN']: v_antiguo = ''
+                if v_nuevo in ['', '---', '-', 'None', 'null', 'NaN']: v_nuevo = ''
+                
+                # Si el nuevo dato es válido, lo usamos. Si viene vacío, RESCATAMOS el antiguo.
+                return v_nuevo if v_nuevo else v_antiguo
+
+            # Obtenemos los números de orden limpios
+            nros_ordenes_entrantes = [str(f.get('NRO. ORDEN', '')).replace('\n', '').strip() for f in filas_ventas if f.get('NRO. ORDEN', '').strip()]
             
-            # Consultamos la base de datos para ver si esas órdenes YA EXISTEN
             existentes_en_db = {
                 venta.nro_orden: venta 
                 for venta in ReporteMercadoLibre.objects.filter(nro_orden__in=nros_ordenes_entrantes)
@@ -838,32 +849,23 @@ def guardar_reportes_masivos_ml(request):
             ventas_unicas = {}
             
             for fila in filas_ventas:
-                nro_orden = fila.get('NRO. ORDEN', '').strip()
+                # Limpiamos el Nro de Orden por si trae un salto de línea invisible
+                nro_orden = str(fila.get('NRO. ORDEN', '')).replace('\n', '').strip()
                 if not nro_orden: 
                     continue
 
-                # --- RESCATE DE DATOS ---
                 db_obj = existentes_en_db.get(nro_orden)
                 
-                # Si el Excel viene vacío, pero tu BD ya tenía el dato, ¡Lo salvamos!
-                val_comprobante = fila.get('COMPROBANTE', '').strip()
-                if not val_comprobante and db_obj:
-                    val_comprobante = db_obj.comprobante
+                # Aplicamos la protección a tus campos clave
+                val_comprobante = get_best_val(db_obj.comprobante if db_obj else '', fila.get('COMPROBANTE', ''))
+                val_tipo_venta = get_best_val(db_obj.tipo_venta if db_obj else '', fila.get('TIPO DE VENTA', ''))
+                val_marca = get_best_val(db_obj.marca if db_obj else '', fila.get('MARCA', ''))
+                val_categoria = get_best_val(db_obj.categoria if db_obj else '', fila.get('CATEGORIA', ''))
+                val_sku = get_best_val(db_obj.sku_almacen if db_obj else '', fila.get('SKU ALMACEN', ''))
+                val_modelo = get_best_val(db_obj.modelo if db_obj else '', fila.get('MODELO', ''))
+                val_producto = get_best_val(db_obj.producto if db_obj else '', fila.get('PRODUCTO', ''))
 
-                val_tipo_venta = fila.get('TIPO DE VENTA', '').strip()
-                if not val_tipo_venta and db_obj:
-                    val_tipo_venta = db_obj.tipo_venta
-                    
-                val_marca = fila.get('MARCA', '').strip()
-                if not val_marca and db_obj:
-                    val_marca = db_obj.marca
-                    
-                val_categoria = fila.get('CATEGORIA', '').strip()
-                if not val_categoria and db_obj:
-                    val_categoria = db_obj.categoria
-
-                # Transformaciones de Fechas y Números
-                fecha_raw = fila.get('FECHA', '')
+                fecha_raw = str(fila.get('FECHA', '')).strip()
                 fecha_formateada = None
                 if fecha_raw:
                     try:
@@ -889,14 +891,14 @@ def guardar_reportes_masivos_ml(request):
                 obj = ReporteMercadoLibre(
                     nro_orden=nro_orden,
                     fecha=fecha_formateada or '2026-01-01',
-                    mes_anio=fila.get('MES Y AÑO', ''),
+                    mes_anio=fila.get('MES Y AÑO', '').strip(),
                     comprobante=val_comprobante,
                     tipo_venta=val_tipo_venta,
                     marca=val_marca,
                     categoria=val_categoria,
-                    sku_almacen=fila.get('SKU ALMACEN', ''),
-                    modelo=fila.get('MODELO', ''),
-                    producto=fila.get('PRODUCTO', ''),
+                    sku_almacen=val_sku,
+                    modelo=val_modelo,
+                    producto=val_producto,
                     cantidad=to_float(fila.get('CANT.', 0)),
                     precio=to_float(fila.get('PRECIO', 0)),
                     total_venta=to_float(fila.get('TOTAL V.', 0)),
@@ -909,30 +911,29 @@ def guardar_reportes_masivos_ml(request):
                     costo_total=to_float(fila.get('COSTO TOTAL', 0)),
                     costo_entrega_flex=to_float(fila.get('COSTO ENTREGA FLEX', 0)),
                     ganancia=to_float(fila.get('GANANCIA', 0)),
-                    rentabilidad=str(fila.get('RENTABILIDAD %', '')),
-                    distrito=fila.get('DISTRITO', ''),
-                    direccion=fila.get('DIRECCIÓN', ''),
-                    repartidor=fila.get('REPARTIDOR', ''),
-                    celular=str(fila.get('CELULAR DEL CLIENTE', '')),
-                    mensaje=fila.get('MSJ DE AGRADECIMIENTO', ''),
+                    rentabilidad=str(fila.get('RENTABILIDAD %', '')).strip(),
+                    distrito=fila.get('DISTRITO', '').strip(),
+                    direccion=fila.get('DIRECCIÓN', '').strip(),
+                    repartidor=fila.get('REPARTIDOR', '').strip(),
+                    celular=str(fila.get('CELULAR DEL CLIENTE', '')).strip(),
+                    mensaje=fila.get('MSJ DE AGRADECIMIENTO', '').strip(),
                 )
                 
-                # Filtro de duplicados dentro del mismo Excel
+                # Fusión de filas duplicadas dentro del mismo Excel
                 if nro_orden in ventas_unicas:
                     existente = ventas_unicas[nro_orden]
-                    existente.comprobante = existente.comprobante or obj.comprobante
-                    existente.tipo_venta = existente.tipo_venta or obj.tipo_venta
-                    existente.marca = existente.marca or obj.marca
-                    existente.categoria = existente.categoria or obj.categoria
-                    existente.sku_almacen = existente.sku_almacen or obj.sku_almacen
-                    existente.modelo = existente.modelo or obj.modelo
-                    existente.producto = existente.producto or obj.producto
+                    existente.comprobante = get_best_val(existente.comprobante, obj.comprobante)
+                    existente.tipo_venta = get_best_val(existente.tipo_venta, obj.tipo_venta)
+                    existente.marca = get_best_val(existente.marca, obj.marca)
+                    existente.categoria = get_best_val(existente.categoria, obj.categoria)
+                    existente.sku_almacen = get_best_val(existente.sku_almacen, obj.sku_almacen)
+                    existente.modelo = get_best_val(existente.modelo, obj.modelo)
+                    existente.producto = get_best_val(existente.producto, obj.producto)
                 else:
                     ventas_unicas[nro_orden] = obj
 
             objetos_a_guardar = list(ventas_unicas.values())
 
-            # 3. GUARDAR TODO DE GOLPE (BULK CREATE)
             if objetos_a_guardar:
                 campos_actualizar = [
                     'fecha', 'mes_anio', 'comprobante', 'tipo_venta', 'marca',
@@ -950,7 +951,7 @@ def guardar_reportes_masivos_ml(request):
                     update_fields=campos_actualizar
                 )
             
-            return JsonResponse({'status': 'ok', 'message': f'¡Éxito! Se procesaron {len(objetos_a_guardar)} ventas de forma segura.'})
+            return JsonResponse({'status': 'ok', 'message': f'¡Éxito! Se agruparon y guardaron {len(objetos_a_guardar)} ventas unificadas correctamente.'})
         
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
