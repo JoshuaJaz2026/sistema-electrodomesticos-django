@@ -274,11 +274,16 @@
                     select.add(opt);
                 });
                 
-                // Si la BD trae un valor que NO está en la lista (ej. "CATALOGO"), lo agrega dinámicamente para no borrarlo
+                // Si la BD trae un valor nuevo, lo agrega
                 if (valorActual && !encontrado) {
                     let opt = new Option(valorActual, valorActual);
                     opt.selected = true;
                     select.add(opt);
+                }
+
+                // Forzamos visualmente que la caja muestre el valor correcto
+                if (valorActual) {
+                    select.value = valorActual;
                 }
             });
         };
@@ -287,7 +292,7 @@
         poblarSelect('.val-categoria', listaCategorias);
         poblarSelect('.val-tipoventa', listaTiposVenta);
 
-        // Configuración de visualización de columnas (Personalizar Pantalla)
+        // Configuración de visualización de columnas
         const ths = document.querySelectorAll("#tablaReporte th.th-rep");
         const container = document.getElementById("columnCheckboxes");
         
@@ -346,7 +351,6 @@
         filas.forEach(fila => {
             if(fila.id === 'fila-molde') return;
 
-            // RELLENADOR AUTOMÁTICO DE 'MES Y AÑO' PARA DATOS ANTIGUOS
             const inputFecha = fila.querySelector('.val-fecha');
             const inputMes = fila.querySelector('.val-mes');
             if (inputFecha && inputFecha.value && (!inputMes.value || inputMes.value === '')) {
@@ -417,7 +421,7 @@
         if(indicador) indicador.style.display = 'inline-block';
     }
 
-    // IMPORTACIÓN MASIVA DESDE CSV CON COMBO BOX INTELIGENTE
+    // IMPORTACIÓN MASIVA DESDE CSV CON COMBO BOX INTELIGENTE Y LIMPIEZA DE ESPACIOS
     document.getElementById('csvImportar').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -425,6 +429,10 @@
         Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
+            transformHeader: function(header) {
+                // ESTA LÍNEA ES EL ESCUDO: Elimina espacios ocultos de los títulos del Excel
+                return header.trim(); 
+            },
             complete: function(results) {
                 if (results.data.length > 0 && !('NRO. ORDEN' in results.data[0])) {
                     alert("Error: Asegúrate de usar la plantilla correcta (DEBE tener la columna NRO. ORDEN).");
@@ -436,7 +444,6 @@
                 const fragmento = document.createDocumentFragment();
                 let importadas = 0;
 
-                // Función auxiliar para inyectar valores en los Selects dinámicamente
                 const setSelectDinamicamente = (selectElement, value) => {
                     if (!value) {
                         selectElement.value = "";
@@ -521,7 +528,6 @@
                     nuevaFila.querySelector('.val-orden').value = orden;
                     nuevaFila.querySelector('.val-comprobante').value = item['COMPROBANTE'] || '';
                     
-                    // USAMOS LA FUNCIÓN DINÁMICA PARA ASIGNAR VALORES AL COMBO BOX
                     setSelectDinamicamente(nuevaFila.querySelector('.val-tipoventa'), (item['TIPO DE VENTA'] || '').trim().toUpperCase());
                     setSelectDinamicamente(nuevaFila.querySelector('.val-marca'), (item['MARCA'] || '').trim().toUpperCase());
                     setSelectDinamicamente(nuevaFila.querySelector('.val-categoria'), (item['CATEGORIA'] || '').trim().toUpperCase());
