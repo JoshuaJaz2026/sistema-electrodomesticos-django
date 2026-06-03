@@ -826,7 +826,7 @@ def guardar_reportes_masivos_ml(request):
             if eliminadas:
                 ReporteMercadoLibre.objects.filter(id__in=eliminadas).delete()
 
-            # 2. FILTRO ANTI-DUPLICADOS (Diccionario)
+            # 2. FILTRO ANTI-DUPLICADOS INTELIGENTE
             ventas_unicas = {}
             
             for fila in filas_ventas:
@@ -888,14 +888,24 @@ def guardar_reportes_masivos_ml(request):
                     mensaje=fila.get('MSJ DE AGRADECIMIENTO', ''),
                 )
                 
-                # LA MAGIA: Si viene otro registro con el mismo NRO ORDEN, simplemente lo sobreescribe
-                # y nos asegura de mandar solo valores únicos a la base de datos
-                ventas_unicas[nro_orden] = obj
+                # LA MAGIA ANTI-BORRADO:
+                if nro_orden in ventas_unicas:
+                    existente = ventas_unicas[nro_orden]
+                    # Si el Nro de orden se repite, rescatamos los datos importantes que la nueva fila traiga en blanco
+                    existente.comprobante = existente.comprobante or obj.comprobante
+                    existente.tipo_venta = existente.tipo_venta or obj.tipo_venta
+                    existente.marca = existente.marca or obj.marca
+                    existente.categoria = existente.categoria or obj.categoria
+                    existente.sku_almacen = existente.sku_almacen or obj.sku_almacen
+                    existente.modelo = existente.modelo or obj.modelo
+                    existente.producto = existente.producto or obj.producto
+                else:
+                    ventas_unicas[nro_orden] = obj
 
-            # Extraemos la lista limpia de objetos sin duplicados
+            # Extraemos la lista final de objetos protegidos
             objetos_a_guardar = list(ventas_unicas.values())
 
-            # 3. GUARDAR TODO DE GOLPE EN 1 SEGUNDO (BULK CREATE)
+            # 3. GUARDAR TODO DE GOLPE (BULK CREATE)
             if objetos_a_guardar:
                 campos_actualizar = [
                     'fecha', 'mes_anio', 'comprobante', 'tipo_venta', 'marca',
