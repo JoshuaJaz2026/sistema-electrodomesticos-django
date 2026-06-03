@@ -816,18 +816,20 @@ def descargar_plantilla_reporte_ml(request):
 
 @login_required
 @login_required
+@login_required
 def guardar_reportes_masivos_ml(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             filas_ventas = data.get('referencias', [])
-            eliminadas = data.get('eliminadas', []) # Recibimos la lista de IDs a eliminar
+            eliminadas = data.get('eliminadas', [])
 
             # 1. ELIMINAR LOS REGISTROS SOLICITADOS
             if eliminadas:
                 ReporteMercadoLibre.objects.filter(id__in=eliminadas).delete()
 
-            # 2. GUARDAR O ACTUALIZAR LOS REGISTROS RESTANTES
+            # 2. PREPARAR TODOS LOS REGISTROS EN LA MEMORIA DE PYTHON
+            objetos_a_guardar = []
             for fila in filas_ventas:
                 nro_orden = fila.get('NRO. ORDEN', '').strip()
                 if not nro_orden: 
@@ -837,44 +839,78 @@ def guardar_reportes_masivos_ml(request):
                 fecha_formateada = None
                 if fecha_raw:
                     try:
-                        fecha_formateada = datetime.strptime(fecha_raw, '%d/%m/%Y').strftime('%Y-%m-%d')
+                        if '/' in fecha_raw:
+                            fecha_formateada = datetime.strptime(fecha_raw, '%d/%m/%Y').strftime('%Y-%m-%d')
+                        else:
+                            fecha_formateada = fecha_raw 
                     except ValueError:
-                        fecha_formateada = fecha_raw
+                        fecha_formateada = '2026-01-01'
 
-                ReporteMercadoLibre.objects.update_or_create(
+                # Minifunción segura para transformar textos vacíos a números
+                def to_float(val):
+                    try:
+                        return float(str(val).replace(',', '').strip() or 0)
+                    except ValueError:
+                        return 0.00
+                        
+                def to_int(val):
+                    try:
+                        return int(str(val).strip() or 0)
+                    except ValueError:
+                        return 0
+
+                # Creamos el objeto pero NO lo guardamos todavía
+                obj = ReporteMercadoLibre(
                     nro_orden=nro_orden,
-                    defaults={
-                        'fecha': fecha_formateada or '2026-01-01',
-                        'mes_anio': fila.get('MES Y AÑO', ''),
-                        'comprobante': fila.get('COMPROBANTE', ''),
-                        'tipo_venta': fila.get('TIPO DE VENTA', ''),
-                        'marca': fila.get('MARCA', ''),
-                        'categoria': fila.get('CATEGORIA', ''),
-                        'sku_almacen': fila.get('SKU ALMACEN', ''),
-                        'modelo': fila.get('MODELO', ''),
-                        'producto': fila.get('PRODUCTO', ''),
-                        'cantidad': float(fila.get('CANT.', 0) or 0),
-                        'precio': float(fila.get('PRECIO', 0) or 0),
-                        'total_venta': float(fila.get('TOTAL V.', 0) or 0),
-                        'cargo_venta': float(fila.get('%CARGO x VENTA', 0) or 0),
-                        'urbano': float(fila.get('URBANO', 0) or 0),
-                        'flex': float(fila.get('FLEX', 0) or 0),
-                        'total_pagado': float(fila.get('TOTAL PAGADO', 0) or 0),
-                        'costo_producto': float(fila.get('COSTO x PRODUCTO', 0) or 0),
-                        'und': int(fila.get('UND', 0) or 0),
-                        'costo_total': float(fila.get('COSTO TOTAL', 0) or 0),
-                        'costo_entrega_flex': float(fila.get('COSTO ENTREGA FLEX', 0) or 0),
-                        'ganancia': float(fila.get('GANANCIA', 0) or 0),
-                        'rentabilidad': str(fila.get('RENTABILIDAD %', '')),
-                        'distrito': fila.get('DISTRITO', ''),
-                        'direccion': fila.get('DIRECCIÓN', ''),
-                        'repartidor': fila.get('REPARTIDOR', ''),
-                        'celular': str(fila.get('CELULAR DEL CLIENTE', '')),
-                        'mensaje': fila.get('MSJ DE AGRADECIMIENTO', ''),
-                    }
+                    fecha=fecha_formateada or '2026-01-01',
+                    mes_anio=fila.get('MES Y AÑO', ''),
+                    comprobante=fila.get('COMPROBANTE', ''),
+                    tipo_venta=fila.get('TIPO DE VENTA', ''),
+                    marca=fila.get('MARCA', ''),
+                    categoria=fila.get('CATEGORIA', ''),
+                    sku_almacen=fila.get('SKU ALMACEN', ''),
+                    modelo=fila.get('MODELO', ''),
+                    producto=fila.get('PRODUCTO', ''),
+                    cantidad=to_float(fila.get('CANT.', 0)),
+                    precio=to_float(fila.get('PRECIO', 0)),
+                    total_venta=to_float(fila.get('TOTAL V.', 0)),
+                    cargo_venta=to_float(fila.get('%CARGO x VENTA', 0)),
+                    urbano=to_float(fila.get('URBANO', 0)),
+                    flex=to_float(fila.get('FLEX', 0)),
+                    total_pagado=to_float(fila.get('TOTAL PAGADO', 0)),
+                    costo_producto=to_float(fila.get('COSTO x PRODUCTO', 0)),
+                    und=to_int(fila.get('UND', 0)),
+                    costo_total=to_float(fila.get('COSTO TOTAL', 0)),
+                    costo_entrega_flex=to_float(fila.get('COSTO ENTREGA FLEX', 0)),
+                    ganancia=to_float(fila.get('GANANCIA', 0)),
+                    rentabilidad=str(fila.get('RENTABILIDAD %', '')),
+                    distrito=fila.get('DISTRITO', ''),
+                    direccion=fila.get('DIRECCIÓN', ''),
+                    repartidor=fila.get('REPARTIDOR', ''),
+                    celular=str(fila.get('CELULAR DEL CLIENTE', '')),
+                    mensaje=fila.get('MSJ DE AGRADECIMIENTO', ''),
+                )
+                objetos_a_guardar.append(obj)
+
+            # 3. GUARDAR TODO DE GOLPE EN 1 SEGUNDO (BULK CREATE MAGIA)
+            if objetos_a_guardar:
+                campos_actualizar = [
+                    'fecha', 'mes_anio', 'comprobante', 'tipo_venta', 'marca',
+                    'categoria', 'sku_almacen', 'modelo', 'producto', 'cantidad',
+                    'precio', 'total_venta', 'cargo_venta', 'urbano', 'flex',
+                    'total_pagado', 'costo_producto', 'und', 'costo_total',
+                    'costo_entrega_flex', 'ganancia', 'rentabilidad', 'distrito',
+                    'direccion', 'repartidor', 'celular', 'mensaje'
+                ]
+                
+                ReporteMercadoLibre.objects.bulk_create(
+                    objetos_a_guardar,
+                    update_conflicts=True,
+                    unique_fields=['nro_orden'],
+                    update_fields=campos_actualizar
                 )
             
-            return JsonResponse({'status': 'ok', 'message': f'Se guardaron {len(filas_ventas)} registros y se eliminaron {len(eliminadas)} filas.'})
+            return JsonResponse({'status': 'ok', 'message': f'¡Éxito! Se procesaron {len(objetos_a_guardar)} ventas al instante.'})
         
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
