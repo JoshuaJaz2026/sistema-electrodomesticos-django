@@ -1073,16 +1073,17 @@ def guardar_ingresos_masivos(request):
 
 @login_required
 def descargar_plantilla_ingresos(request):
-    # Creamos la respuesta para que el navegador sepa que es un archivo descargable
+    # Preparamos el archivo para descargar
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="Plantilla_Ingresos_Percheron.csv"'
     
-    # Escribimos el BOM (Byte Order Mark) para que Excel reconozca tildes y caracteres especiales (como N°)
+    # Esto asegura que Excel lea las tildes y la letra "N°" correctamente
     response.write('\ufeff'.encode('utf8'))
     
-    writer = csv.writer(response)
+    # EL TRUCO PARA EXCEL EN ESPAÑOL: Usar punto y coma (;) como separador
+    writer = csv.writer(response, delimiter=';')
     
-    # Escribimos la primera fila con los títulos exactos que lee nuestro Súper Importador
+    # Escribimos las cabeceras
     writer.writerow([
         'SKU', 
         'MODELO', 
