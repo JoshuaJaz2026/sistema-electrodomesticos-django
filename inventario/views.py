@@ -973,24 +973,27 @@ def guardar_ingresos_masivos(request):
             filas_ingresos = data.get('referencias', [])
             eliminadas = data.get('eliminadas', [])
 
+            # 1. ELIMINAR LOS REGISTROS SOLICITADOS
             if eliminadas:
-                IngresoPercheron.objects.filter(id__in=eliminadas).delete()
+                # Nos aseguramos de eliminar solo los que tienen ID real en la BD
+                ids_a_eliminar = [int(i) for i in eliminadas if str(i).isdigit()]
+                if ids_a_eliminar:
+                    IngresoPercheron.objects.filter(id__in=ids_a_eliminar).delete()
 
-            ingresos_unicos = {}
+            objetos_a_crear = []
             
+            # 2. PROCESAR DATOS
             for fila in filas_ingresos:
                 modelo = str(fila.get('MODELO') or '').strip()
                 titulo = str(fila.get('TÍTULO') or fila.get('TITULO') or '').strip()
                 codigo_ean = str(fila.get('CÓDIGO EAN') or fila.get('CODIGO EAN') or '').strip()
                 
-                # Le decimos que si viene vacío, sea "None" (Nulo) para que PostgreSQL lo acepte
                 serie_nro = str(fila.get('SERIE / N°') or fila.get('SERIE') or '').strip() or None
                 sku_leido = str(fila.get('SKU') or '').strip() or None
                 
                 proveedor_motivo = str(fila.get('PROVEEDOR / MOTIVO') or '').strip()
                 by_usuario = str(fila.get('BY:') or '').strip()
 
-                # Si no hay ni modelo, ni serie, ni título, ignoramos la fila vacía
                 if not serie_nro and not modelo and not titulo:
                     continue
 
@@ -1026,35 +1029,23 @@ def guardar_ingresos_masivos(request):
                     creado_por=by_usuario
                 )
                 
-                # Usamos la serie como llave única para actualizar, si es None, usamos un ID temporal para que pase
-                llave_diccionario = serie_nro if serie_nro else f"TEMP-{uuid.uuid4()}"
-                ingresos_unicos[llave_diccionario] = obj
+                objetos_a_crear.append(obj)
 
-            objetos_a_guardar = list(ingresos_unicos.values())
-
-            if objetos_a_guardar:
-                campos_actualizar = [
-                    'sku', 'modelo', 'titulo', 'fecha_ingreso', 'codigo_ean',
-                    'costo_unitario', 'cantidad', 'proveedor_motivo', 'creado_por'
-                ]
-                
+            # 3. GUARDADO EN MASA 
+            if objetos_a_crear:
                 with transaction.atomic():
-                    # Si la serie no es nula, intentamos hacer update_conflicts
-                    # Para simplificar y evitar colapsos con los Nulos, usaremos bulk_create directo
-                    # IMPORTANTE: Si subes la misma serie 2 veces ahora, PostgreSQL dará error si no manejamos bien el conflicto.
-                    IngresoPercheron.objects.bulk_create(
-                        objetos_a_guardar,
-                        update_conflicts=True,
-                        unique_fields=['serie_nro'],
-                        update_fields=campos_actualizar
-                    )
+                    # ¡SOLUCIÓN!: Usamos bulk_create simple sin buscar conflictos (update_conflicts=True)
+                    # porque la columna ya no es strictamente unique=True en models.py
+                    IngresoPercheron.objects.bulk_create(objetos_a_crear)
 
-            return JsonResponse({'status': 'ok', 'message': f'Guardado correctamente sin inventar datos.'})
+            return JsonResponse({'status': 'ok', 'message': f'Guardado correctamente. Se subieron {len(objetos_a_crear)} registros.'})
 
         except Exception as e:
             import traceback
             print(traceback.format_exc())
             return JsonResponse({'status': 'error', 'message': f'Error: {str(e)}'}, status=400)
+
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
 
 @login_required
 def descargar_plantilla_ingresos(request):
