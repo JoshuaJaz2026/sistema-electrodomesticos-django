@@ -969,6 +969,9 @@ def guardar_reportes_masivos_ml(request):
 def guardar_ingresos_masivos(request):
     if request.method == 'POST':
         try:
+            # Importación de emergencia por si olvidaste poner "import uuid" arriba del todo
+            import uuid 
+            
             data = json.loads(request.body)
             filas_ingresos = data.get('referencias', [])
             eliminadas = data.get('eliminadas', [])
@@ -989,7 +992,19 @@ def guardar_ingresos_masivos(request):
                 codigo_ean = str(fila.get('CÓDIGO EAN') or fila.get('CODIGO EAN') or '').strip()
                 
                 serie_nro = str(fila.get('SERIE / N°') or fila.get('SERIE') or '').strip() or None
-                sku_leido = str(fila.get('SKU') or '').strip() or None
+                
+                # =========================================================
+                # PLAN B: RESPALDO DE SKU
+                # =========================================================
+                sku_leido = str(fila.get('SKU') or '').strip()
+                
+                if not sku_leido and modelo:
+                    # Si el HTML por algún motivo no mandó el SKU, lo inventamos aquí
+                    # Le ponemos "AUTO" más 4 letras/números al azar para que no choque nunca
+                    sku_leido = f"{modelo}-AUTO{uuid.uuid4().hex[:4].upper()}"
+                elif not sku_leido:
+                    sku_leido = None
+                # =========================================================
                 
                 proveedor_motivo = str(fila.get('PROVEEDOR / MOTIVO') or '').strip()
                 by_usuario = str(fila.get('BY:') or '').strip()
@@ -1034,7 +1049,7 @@ def guardar_ingresos_masivos(request):
             # 3. GUARDADO EN MASA 
             if objetos_a_crear:
                 with transaction.atomic():
-                    # ¡SOLUCIÓN!: Usamos bulk_create simple sin buscar conflictos (update_conflicts=True)
+                    # Usamos bulk_create simple sin buscar conflictos (update_conflicts=True)
                     # porque la columna ya no es strictamente unique=True en models.py
                     IngresoPercheron.objects.bulk_create(objetos_a_crear)
 

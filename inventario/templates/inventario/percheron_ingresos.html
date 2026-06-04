@@ -31,7 +31,7 @@
     </div>
 
     <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">
-        Registra el ingreso unitario de mercadería. Las columnas sombreadas se autocompletan y no son editables.
+        Sube tu Excel con la columna SKU vacía. El sistema autogenerará el SKU basándose en tu fórmula (MODELO + N° Fila).
         <span id="indicador-cambios" style="color: #f59e0b; font-weight: bold; display: none; margin-left: 10px;">
             <i class="fas fa-exclamation-circle"></i> Tienes ingresos sin guardar
         </span>
@@ -41,7 +41,7 @@
         <table id="tablaIngresos" style="width: max-content; border-collapse: collapse; background: white; font-size: 0.85em; white-space: nowrap; table-layout: fixed;">
             <thead style="position: sticky; top: 0; z-index: 10;">
                 <tr style="color: #334155; text-transform: uppercase; font-weight: bold; font-size: 0.8em; height: 40px;">
-                    <th class="th-rep" style="background-color: #f1f5f9; width: 150px;">SKU <i class="fas fa-lock" style="color: #94a3b8; font-size: 0.8em;"></i></th>
+                    <th class="th-rep" style="background-color: #f1f5f9; width: 170px;">SKU <i class="fas fa-magic" style="color: #10b981; font-size: 0.8em;" title="Autogenerado"></i></th>
                     <th class="th-rep" style="background-color: #f8fafc; width: 160px;">MODELO</th>
                     <th class="th-rep" style="background-color: #f1f5f9; width: 280px;">TÍTULO <i class="fas fa-lock" style="color: #94a3b8; font-size: 0.8em;"></i></th>
                     <th class="th-rep" style="background-color: #f8fafc; width: 140px;">FECHA INGRESO</th>
@@ -60,7 +60,7 @@
                         <input type="text" class="celda-input central bold text-dark val-sku" readonly style="background-color: #f1f5f9; cursor: not-allowed;" tabindex="-1" oninput="registrarCambioIngreso(this)">
                     </td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                        <input type="text" class="celda-input central bold val-modelo" oninput="registrarCambioIngreso(this)">
+                        <input type="text" class="celda-input central bold val-modelo" oninput="autogenerarSKU(this); registrarCambioIngreso(this)">
                     </td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;">
                         <input type="text" class="celda-input val-titulo" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #64748b;" tabindex="-1" oninput="registrarCambioIngreso(this)">
@@ -103,7 +103,7 @@
                             <input type="text" value="{{ item.sku|default:'' }}" class="celda-input central bold text-dark val-sku" readonly style="background-color: #f1f5f9; cursor: not-allowed;" tabindex="-1" oninput="registrarCambioIngreso(this)">
                         </td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                            <input type="text" value="{{ item.modelo|default:'' }}" class="celda-input central bold val-modelo" oninput="registrarCambioIngreso(this)">
+                            <input type="text" value="{{ item.modelo|default:'' }}" class="celda-input central bold val-modelo" oninput="autogenerarSKU(this); registrarCambioIngreso(this)">
                         </td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;">
                             <input type="text" value="{{ item.titulo|default:'' }}" class="celda-input val-titulo" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #64748b;" tabindex="-1" oninput="registrarCambioIngreso(this)">
@@ -167,37 +167,15 @@
 </div>
 
 <style>
-    /* Tipografía estandarizada y limpia */
-    #tablaIngresos {
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    }
-    
-    .th-rep { 
-        padding: 10px; 
-        border-right: 1px solid #cbd5e1; 
-        border-bottom: 2px solid #cbd5e1; 
-        text-align: center; 
-    }
-    
-    .celda-input { 
-        width: 100%; 
-        box-sizing: border-box; 
-        border: none; 
-        padding: 10px; 
-        font-family: inherit;
-        font-size: 13px;
-        color: #475569; 
-        background-color: transparent; 
-        outline: none; 
-    }
-    
+    /* Tipografía estandarizada */
+    #tablaIngresos { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    .th-rep { padding: 10px; border-right: 1px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; text-align: center; }
+    .celda-input { width: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: 13px; color: #475569; background-color: transparent; outline: none; }
     .celda-input:focus { background-color: #f0fdf4; box-shadow: inset 0 0 0 2px #10b981; color: #000; }
     .central { text-align: center; }
     .derecha { text-align: right; }
-    
     .bold { font-weight: bold; }
     .text-dark { color: #0f172a; }
-    
     .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .celda-input[type=number] { -moz-appearance: textfield; }
     .fila-editada { background-color: #f8fafc !important; }
@@ -209,7 +187,6 @@
     let memoriaIngresos = JSON.parse(localStorage.getItem('memoriaIngresosTemp')) || {};
     let ingresosAEliminar = JSON.parse(localStorage.getItem('ingresosAEliminarTemp')) || [];
 
-    // === RESTAURAR VISUALMENTE FILAS EDITADAS AL RECARGAR ===
     window.addEventListener('load', function() {
         const filas = document.querySelectorAll('#tablaIngresos tbody .fila-ingresos');
         let hayCambiosPrevios = false;
@@ -229,7 +206,6 @@
         }
     });
 
-    // === AGREGAR FILA MANUAL ===
     function agregarNuevoIngreso() {
         const tbody = document.querySelector("#tablaIngresos tbody");
         const filaMolde = document.getElementById('fila-molde');
@@ -242,7 +218,6 @@
         nuevaFila.dataset.originalKey = key;
         nuevaFila.classList.add('fila-editada');
         
-        // Insertamos ABAJO para mantener el orden cronológico
         tbody.appendChild(nuevaFila);
         
         const indicador = document.getElementById('indicador-cambios');
@@ -251,7 +226,25 @@
         nuevaFila.querySelector('.val-modelo').focus();
     }
 
-    // === REGISTRAR CAMBIO MANUAL EN MEMORIA ===
+    // === FUNCIÓN QUE REEMPLAZA TU FÓRMULA DE EXCEL: =C8&"-"&FILA()+10 ===
+    function autogenerarSKU(inputModelo) {
+        const fila = inputModelo.closest('tr');
+        const inputSku = fila.querySelector('.val-sku');
+        const modelo = inputModelo.value.trim().toUpperCase();
+
+        // Solo generamos si hay un modelo y si el SKU aún está vacío
+        if (modelo !== '' && inputSku.value === '') {
+            // fila.rowIndex nos da el número de fila exacto en la tabla web
+            const indiceFila = fila.rowIndex; 
+            inputSku.value = modelo + "-" + (indiceFila + 10);
+            
+            // Registramos el cambio para que el SKU se guarde en memoria
+            registrarCambioIngreso(inputSku);
+        } else if (modelo === '') {
+            inputSku.value = '';
+        }
+    }
+
     function registrarCambioIngreso(elemento) {
         const fila = elemento.closest('tr');
         if (fila.id === 'fila-molde') return;
@@ -282,7 +275,6 @@
         if(indicador) indicador.style.display = 'inline-block';
     }
 
-    // === ELIMINAR FILA ===
     function eliminarFilaIngreso(btn) {
         const fila = btn.closest('tr');
         if (fila.id === 'fila-molde') return;
@@ -304,7 +296,6 @@
         if(indicador) indicador.style.display = 'inline-block';
     }
 
-    // === SÚPER IMPORTADOR (TRITURADOR DE FORMATOS ADAPTADO A INGRESOS) ===
     document.getElementById('csvImportar').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -313,7 +304,6 @@
             header: true,
             skipEmptyLines: true,
             transformHeader: function(header) {
-                // Triturador: convierte "FECHA INGRESO" a "FECHAINGRESO"
                 return header.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z0-9]/g, '');
             },
             complete: function(results) {
@@ -334,17 +324,26 @@
                     return isNaN(num) ? 0 : num;
                 };
                 
-                // Función Radar
                 const buscarColumna = (fila, posiblesNombres) => {
                     let llave = Object.keys(fila).find(k => posiblesNombres.some(nombre => k.includes(nombre)));
                     return llave ? limpiarValor(fila[llave]) : '';
                 };
 
-                results.data.forEach(item => {
-                    // Validamos que haya al menos un Modelo o SKU para considerar la fila válida
+                // Contamos las filas actuales en la tabla para continuar el correlativo del SKU
+                let totalFilasActuales = tbody.children.length - 1; // Le restamos el molde
+
+                results.data.forEach((item, index) => {
                     const modeloLeido = buscarColumna(item, ['MODELO']);
-                    const skuLeido = buscarColumna(item, ['SKU']);
+                    let skuLeido = buscarColumna(item, ['SKU']);
                     if (!modeloLeido && !skuLeido) return; 
+
+                    // === EL MOTOR DEL EXCEL APLICADO A LA IMPORTACIÓN ===
+                    // Si el SKU viene vacío en el Excel, lo armamos nosotros
+                    if (!skuLeido && modeloLeido) {
+                        // totalFilasActuales + index (el bucle actual) + 10 (tu fórmula base)
+                        let numeroCorrelativo = totalFilasActuales + index + 10;
+                        skuLeido = modeloLeido + "-" + numeroCorrelativo;
+                    }
 
                     let fechaRaw = buscarColumna(item, ['FECHA', 'INGRESO']);
                     let fechaCalendario = '';
@@ -410,12 +409,11 @@
                 const indicador = document.getElementById('indicador-cambios');
                 if(indicador) indicador.style.display = 'inline-block';
 
-                alert(`¡Se cargaron ${importadas} ingresos en pantalla! Revisa la tabla y presiona 'Guardar Ingresos'.`);
+                alert(`¡Se procesaron ${importadas} ingresos! El sistema autogeneró los SKUs faltantes. Revisa la tabla y presiona 'Guardar Ingresos'.`);
             }
         });
     });
 
-    // === ENVIAR A DJANGO ===
     function guardarDatosPendientes() {
         let datosAguardar = Object.values(memoriaIngresos);
 
