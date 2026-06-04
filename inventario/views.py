@@ -59,13 +59,19 @@ def inventario_magazzino(request):
 # =========================================================
 @login_required
 def percheron_ingresos(request):
-    canal = request.session.get('canal_activo', 'Web')
-    color = request.session.get('color_actual', '#3498DB')
-    icono = request.session.get('icono_actual', 'fas fa-globe')
-    movimientos_in = MovimientoPercheron.objects.filter(tipo='IN')
+    canal = request.session.get('canal_activo', 'Percheron')
     
+    # Traemos todos los ingresos, del más reciente al más antiguo
+    ingresos_lista = IngresoPercheron.objects.all().order_by('-fecha_ingreso', '-id')
+    
+    # Paginación (para que no carguen mil de golpe y se cuelgue)
+    paginator = Paginator(ingresos_lista, 50) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'inventario/percheron_ingresos.html', {
-        'canal': canal, 'color_actual': color, 'icono_actual': icono, 'movimientos': movimientos_in
+        'canal': canal,
+        'page_obj': page_obj, # Enviamos los datos como 'page_obj'
     })
 
 @login_required
