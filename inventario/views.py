@@ -1070,3 +1070,30 @@ def guardar_ingresos_masivos(request):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
+@login_required
+def descargar_plantilla_ingresos(request):
+    # Creamos la respuesta para que el navegador sepa que es un archivo descargable
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="Plantilla_Ingresos_Percheron.csv"'
+    
+    # Escribimos el BOM (Byte Order Mark) para que Excel reconozca tildes y caracteres especiales (como N°)
+    response.write('\ufeff'.encode('utf8'))
+    
+    writer = csv.writer(response)
+    
+    # Escribimos la primera fila con los títulos exactos que lee nuestro Súper Importador
+    writer.writerow([
+        'SKU', 
+        'MODELO', 
+        'TÍTULO', 
+        'FECHA INGRESO', 
+        'CÓDIGO EAN', 
+        'SERIE / N°', 
+        'COSTO UNT.', 
+        'ING. x 1 und', 
+        'PROVEEDOR / MOTIVO', 
+        'BY:'
+    ])
+    
+    return response
