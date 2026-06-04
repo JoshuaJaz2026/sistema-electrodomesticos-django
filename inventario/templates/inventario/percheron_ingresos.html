@@ -242,8 +242,8 @@
         nuevaFila.dataset.originalKey = key;
         nuevaFila.classList.add('fila-editada');
         
-        // Insertamos arriba
-        tbody.insertBefore(nuevaFila, tbody.firstChild);
+        // Insertamos ABAJO para mantener el orden cronológico
+        tbody.appendChild(nuevaFila);
         
         const indicador = document.getElementById('indicador-cambios');
         if(indicador) indicador.style.display = 'inline-block';

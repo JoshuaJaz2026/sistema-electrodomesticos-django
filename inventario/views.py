@@ -62,7 +62,7 @@ def percheron_ingresos(request):
     canal = request.session.get('canal_activo', 'Percheron')
     
     # Traemos todos los ingresos, del más reciente al más antiguo
-    ingresos_lista = IngresoPercheron.objects.all().order_by('-fecha_ingreso', '-id')
+    ingresos_lista = IngresoPercheron.objects.all().order_by('fecha_ingreso', 'id')
     
     # Paginación (para que no carguen mil de golpe y se cuelgue)
     paginator = Paginator(ingresos_lista, 50) 
