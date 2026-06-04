@@ -220,18 +220,17 @@ class ReporteMercadoLibre(models.Model):
 # 5. REGISTRO DE INGRESOS - PERCHERON
 # =========================================================
 class IngresoPercheron(models.Model):
-    # SKU único como identificador de la fila
-    sku = models.CharField(max_length=150, unique=True, verbose_name="SKU Autogenerado")
+    # CORRECCIÓN: Se quita unique=True y se permite null/blank
+    sku = models.CharField(max_length=150, blank=True, null=True, verbose_name="SKU Autogenerado")
     
     modelo = models.CharField(max_length=200, blank=True, null=True, verbose_name="Modelo")
     titulo = models.CharField(max_length=500, blank=True, null=True, verbose_name="Título")
     fecha_ingreso = models.DateField(blank=True, null=True, verbose_name="Fecha de Ingreso")
     
-    # EAN no es único, se puede repetir
     codigo_ean = models.CharField(max_length=150, blank=True, null=True, verbose_name="Código EAN")
     
-    # SERIE / N° es estrictamente único
-    serie_nro = models.CharField(max_length=200, unique=True, verbose_name="Serie / N°")
+    # CORRECCIÓN: Se quita unique=True para evitar bloqueos con filas vacías
+    serie_nro = models.CharField(max_length=200, blank=True, null=True, verbose_name="Serie / N°")
     
     costo_unitario = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Costo Unt.")
     cantidad = models.IntegerField(default=1, verbose_name="Ing. x 1 und")
@@ -239,4 +238,4 @@ class IngresoPercheron(models.Model):
     creado_por = models.CharField(max_length=150, blank=True, null=True, verbose_name="By:")
 
     def __str__(self):
-        return f"{self.sku} - {self.modelo} (Serie: {self.serie_nro})"
+        return f"{self.sku if self.sku else 'Sin SKU'} - {self.modelo} (Serie: {self.serie_nro if self.serie_nro else 'Sin Serie'})"

@@ -363,7 +363,7 @@
                     const eanLeido = buscarColumna(item, ['EAN', 'CODIGO']);
                     const serieLeido = buscarColumna(item, ['SERIE', 'NRO']);
                     const costoLeido = formatNum(buscarColumna(item, ['COSTO']));
-                    const ingLeido = formatNum(buscarColumna(item, ['ING', '1UND'])) || 1;
+                    const ingLeido = formatNum(buscarColumna(item, ['1UND', 'CANTIDAD', 'UND'])) || 1;
                     const proveedorLeido = buscarColumna(item, ['PROVEEDOR', 'MOTIVO']);
                     const byLeido = buscarColumna(item, ['BY', 'USUARIO']);
 

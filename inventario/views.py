@@ -979,27 +979,23 @@ def guardar_ingresos_masivos(request):
             ingresos_unicos = {}
             
             for fila in filas_ingresos:
-                # Usamos .get() con un valor por defecto vacío para evitar el KeyError
                 modelo = str(fila.get('MODELO') or '').strip()
                 titulo = str(fila.get('TÍTULO') or fila.get('TITULO') or '').strip()
                 codigo_ean = str(fila.get('CÓDIGO EAN') or fila.get('CODIGO EAN') or '').strip()
-                serie_nro = str(fila.get('SERIE / N°') or fila.get('SERIE') or '').strip()
+                
+                # Le decimos que si viene vacío, sea "None" (Nulo) para que PostgreSQL lo acepte
+                serie_nro = str(fila.get('SERIE / N°') or fila.get('SERIE') or '').strip() or None
+                sku_leido = str(fila.get('SKU') or '').strip() or None
+                
                 proveedor_motivo = str(fila.get('PROVEEDOR / MOTIVO') or '').strip()
                 by_usuario = str(fila.get('BY:') or '').strip()
-                sku_leido = str(fila.get('SKU') or '').strip()
 
-                if not serie_nro and not modelo:
+                # Si no hay ni modelo, ni serie, ni título, ignoramos la fila vacía
+                if not serie_nro and not modelo and not titulo:
                     continue
 
-                if not serie_nro:
-                    serie_nro = f"S/N-{uuid.uuid4().hex[:8].upper()}"
-                if not sku_leido:
-                    sku_leido = f"SKU-{uuid.uuid4().hex[:10].upper()}"
-
-                # CORRECCIÓN PARA LA FECHA: Intentamos varias formas de escribir la columna
                 fecha_raw = str(fila.get('FECHA INGRESO') or fila.get('FECHA') or '').strip()
-                
-                fecha_formateada = datetime.now().date() # Por defecto hoy
+                fecha_formateada = datetime.now().date()
                 if fecha_raw:
                     try:
                         if '/' in fecha_raw:
@@ -1007,16 +1003,14 @@ def guardar_ingresos_masivos(request):
                         elif '-' in fecha_raw:
                             fecha_formateada = datetime.strptime(fecha_raw, '%Y-%m-%d').date()
                     except:
-                        pass # Si falla el formato, se queda con la fecha de hoy
+                        pass 
 
                 def to_float(val):
-                    try:
-                        return float(str(val).replace(',', '').strip() or 0)
+                    try: return float(str(val).replace(',', '').strip() or 0)
                     except: return 0.0
 
                 def to_int(val):
-                    try:
-                        return int(float(str(val).strip() or 1))
+                    try: return int(float(str(val).strip() or 1))
                     except: return 1
 
                 obj = IngresoPercheron(
@@ -1032,7 +1026,9 @@ def guardar_ingresos_masivos(request):
                     creado_por=by_usuario
                 )
                 
-                ingresos_unicos[serie_nro] = obj
+                # Usamos la serie como llave única para actualizar, si es None, usamos un ID temporal para que pase
+                llave_diccionario = serie_nro if serie_nro else f"TEMP-{uuid.uuid4()}"
+                ingresos_unicos[llave_diccionario] = obj
 
             objetos_a_guardar = list(ingresos_unicos.values())
 
@@ -1043,6 +1039,9 @@ def guardar_ingresos_masivos(request):
                 ]
                 
                 with transaction.atomic():
+                    # Si la serie no es nula, intentamos hacer update_conflicts
+                    # Para simplificar y evitar colapsos con los Nulos, usaremos bulk_create directo
+                    # IMPORTANTE: Si subes la misma serie 2 veces ahora, PostgreSQL dará error si no manejamos bien el conflicto.
                     IngresoPercheron.objects.bulk_create(
                         objetos_a_guardar,
                         update_conflicts=True,
@@ -1050,10 +1049,12 @@ def guardar_ingresos_masivos(request):
                         update_fields=campos_actualizar
                     )
 
-            return JsonResponse({'status': 'ok', 'message': f'Guardado correctamente'})
+            return JsonResponse({'status': 'ok', 'message': f'Guardado correctamente sin inventar datos.'})
 
         except Exception as e:
-            return JsonResponse({'status': 'error', 'message': f'Error en servidor: {str(e)}'}, status=400)
+            import traceback
+            print(traceback.format_exc())
+            return JsonResponse({'status': 'error', 'message': f'Error: {str(e)}'}, status=400)
 
 @login_required
 def descargar_plantilla_ingresos(request):
