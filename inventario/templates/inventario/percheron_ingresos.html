@@ -1,160 +1,388 @@
 {% extends 'inventario/dashboard_global.html' %}
 
 {% block content %}
-<div class="card" style="border-top: 4px solid #10b981; padding: 20px;">
+<div class="card" style="border-top: 4px solid #10b981; padding: 20px; background: white; width: 100%; box-sizing: border-box;">
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-        <h2 style="margin: 0; color: #2c3e50;">
-            <i class="fas fa-box-open" style="color: #10b981;"></i> Registro de Ingresos - Almacén Central
+        <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase;">
+            <i class="fas fa-box-open" style="color: #10b981; font-size: 1.2em;"></i> 
+            Registro de Ingresos - Almacén Central
         </h2>
-        <div style="display: flex; gap: 12px;">
-            <button type="button" onclick="agregarFilaIngreso()" style="background-color: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            
+            <a href="{% url 'descargar_plantilla_ingresos' %}" style="background-color: #3b82f6; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-download"></i> Bajar Plantilla
+            </a>
+
+            <button type="button" onclick="agregarNuevoIngreso()" style="background-color: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 <i class="fas fa-plus"></i> Nueva Fila
             </button>
-            <button type="button" style="background-color: #059669; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+
+            <input type="file" id="csvImportar" accept=".csv" style="display: none;">
+            <button type="button" onclick="document.getElementById('csvImportar').click()" style="background-color: #059669; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-upload"></i> Importar Masivo
+            </button>
+
+            <button type="button" id="btnGuardarIngresos" onclick="guardarDatosPendientes()" style="background-color: #047857; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 <i class="fas fa-save"></i> Guardar Ingresos
             </button>
         </div>
     </div>
-    
-    <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 25px;">
+
+    <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">
         Registra el ingreso unitario de mercadería. Las columnas sombreadas se autocompletan y no son editables.
+        <span id="indicador-cambios" style="color: #f59e0b; font-weight: bold; display: none; margin-left: 10px;">
+            <i class="fas fa-exclamation-circle"></i> Tienes ingresos sin guardar
+        </span>
     </p>
 
-    <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
-        <table style="width: 100%; border-collapse: collapse; background: white; white-space: nowrap; font-size: 0.85em;">
-            <thead>
-                <tr style="background-color: #f8fafc; color: #334155; border-bottom: 2px solid #cbd5e1; text-transform: uppercase; font-weight: bold;">
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; background-color: #f1f5f9; min-width: 140px;">SKU <i class="fas fa-lock" style="font-size: 0.7em; color: #94a3b8;"></i></th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 120px;">MODELO</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; background-color: #f1f5f9; min-width: 300px;">TÍTULO <i class="fas fa-lock" style="font-size: 0.7em; color: #94a3b8;"></i></th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 130px;">FECHA INGRESO</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 120px;">CÓDIGO EAN</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 120px;">SERIE / N°</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; width: 100px;">COSTO UNT.</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; width: 100px;">ING. x 1und</th>
-                    <th style="padding: 10px; border-right: 1px solid #e2e8f0; min-width: 200px;">PROVEEDOR / MOTIVO</th>
-                    <th style="padding: 10px; min-width: 120px;">BY:</th>
+    <div style="overflow-x: auto; overflow-y: auto; max-height: 600px; border: 1px solid #e2e8f0; border-radius: 6px;">
+        <table id="tablaIngresos" style="width: max-content; border-collapse: collapse; background: white; font-size: 0.85em; white-space: nowrap; table-layout: fixed;">
+            <thead style="position: sticky; top: 0; z-index: 10;">
+                <tr style="color: #334155; text-transform: uppercase; font-weight: bold; font-size: 0.8em; height: 40px;">
+                    <th class="th-rep" style="background-color: #f1f5f9; width: 150px;">SKU <i class="fas fa-lock" style="color: #94a3b8; font-size: 0.8em;"></i></th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 160px;">MODELO</th>
+                    <th class="th-rep" style="background-color: #f1f5f9; width: 280px;">TÍTULO <i class="fas fa-lock" style="color: #94a3b8; font-size: 0.8em;"></i></th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 140px;">FECHA INGRESO</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 160px;">CÓDIGO EAN</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 160px;">SERIE / N°</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 120px;">COSTO UNT.</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 100px;">ING. X 1UND</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 200px;">PROVEEDOR / MOTIVO</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 120px;">BY:</th>
+                    <th class="th-rep" style="background-color: #fef2f2; width: 60px; border-right: none;"><i class="fas fa-trash-alt" style="color: #ef4444;"></i></th>
                 </tr>
             </thead>
-            <tbody id="cuerpoIngresos">
-                <tr class="fila-excel" style="border-bottom: 1px solid #e2e8f0;">
+            <tbody>
+                <tr class="fila-ingresos" id="fila-molde" style="display: none; border-bottom: 1px solid #e2e8f0; height: 38px;">
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                        <input type="text" value="BK-8210PD-20" readonly class="input-celda input-bloqueado centralizar font-bold">
-                    </td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                        <input type="text" value="BK-8210PD" class="input-celda centralizar font-bold text-dark">
+                        <input type="text" class="celda-input central bold text-dark val-sku" readonly style="background-color: #f1f5f9; cursor: not-allowed;" tabindex="-1" oninput="registrarCambioIngreso(this)">
                     </td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                        <input type="text" value="VENTILADOR DE PARED BOSSKO BK-8210PD..." readonly class="input-celda input-bloqueado">
+                        <input type="text" class="celda-input central bold val-modelo" oninput="registrarCambioIngreso(this)">
                     </td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                        <input type="date" value="2026-03-06" class="input-celda centralizar">
+                        <input type="text" class="celda-input val-titulo" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #64748b;" tabindex="-1" oninput="registrarCambioIngreso(this)">
                     </td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                        <input type="text" placeholder="EAN..." class="input-celda centralizar">
+                        <input type="date" class="celda-input central val-fecha" oninput="registrarCambioIngreso(this)">
                     </td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                        <input type="text" placeholder="N° Serie..." class="input-celda centralizar text-blue">
-                    </td>
-                    <td style="padding: 0; border-right: 1px solid #e2e8f0; position: relative;">
-                        <span style="position: absolute; left: 8px; top: 8px; color: #64748b;">S/</span>
-                        <input type="number" step="0.01" value="125.00" class="input-celda alinear-derecha" style="padding-left: 25px;">
+                        <input type="text" class="celda-input central val-ean" placeholder="EAN..." oninput="registrarCambioIngreso(this)">
                     </td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                        <input type="number" value="1" class="input-celda centralizar font-bold" style="color: #10b981;">
+                        <input type="text" class="celda-input central val-serie" placeholder="N° Serie..." oninput="registrarCambioIngreso(this)">
                     </td>
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                        <input type="text" value="STAREX" class="input-celda centralizar text-dark font-bold">
+                        <div style="display: flex; align-items: center; padding: 0 10px;">
+                            <span style="color: #64748b; margin-right: 5px;">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha val-costo" style="padding: 10px 0;" oninput="registrarCambioIngreso(this)">
+                        </div>
                     </td>
-                    <td style="padding: 0;">
-                        <select class="input-celda select-personalizado centralizar font-bold" style="color: #d97706;">
-                            <option value="MILAGROS">MILAGROS</option>
-                            <option value="PABLO">PABLO</option>
-                            <option value="DENISE" selected>DENISE</option>
-                            <option value="JOSHUA">JOSHUA</option>
-                            <option value="ALDO">ALDO</option>
-                            <option value="CARLOS">CARLOS</option>
-                            <option value="DAVID">DAVID</option>
-                            <option value="MISTER">MISTER</option>
-                            <option value="EDUARDO">EDUARDO</option>
-                            <option value="KEVIN">KEVIN</option>
-                        </select>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <input type="number" class="celda-input central bold val-ing" value="1" style="color: #10b981;" oninput="registrarCambioIngreso(this)">
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <input type="text" class="celda-input central bold text-dark val-proveedor" oninput="registrarCambioIngreso(this)">
+                    </td>
+                    <td style="padding: 0; border-right: 1px solid #e2e8f0;">
+                        <input type="text" class="celda-input central text-orange val-by" style="color: #ea580c; font-weight: bold;" oninput="registrarCambioIngreso(this)">
+                    </td>
+                    <td style="padding: 0; text-align: center; vertical-align: middle;">
+                        <button type="button" onclick="eliminarFilaIngreso(this)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 8px;" title="Eliminar fila">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </td>
                 </tr>
+                
+                {% if ingresos %}
+                    {% for item in ingresos %}
+                        {% endfor %}
+                {% endif %}
+
             </tbody>
         </table>
     </div>
 </div>
 
 <style>
-    /* Estilos base de las celdas editables */
-    .input-celda { width: 100%; box-sizing: border-box; border: none; padding: 8px 10px; font-family: inherit; font-size: inherit; color: #334155; background-color: transparent; outline: none; transition: background-color 0.15s; }
-    .input-celda:focus { background-color: #ecfdf5; box-shadow: inset 0 0 0 2px #10b981; color: #000; }
+    /* Tipografía estandarizada y limpia */
+    #tablaIngresos {
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
     
-    /* Estilos de las celdas bloqueadas (readonly) */
-    .input-bloqueado { background-color: #f8fafc; color: #64748b; cursor: not-allowed; }
-    .input-bloqueado:focus { box-shadow: none; background-color: #f1f5f9; }
-
-    /* Utilidades de texto */
-    .centralizar { text-align: center; }
-    .alinear-derecha { text-align: right; }
-    .font-bold { font-weight: bold; }
+    .th-rep { 
+        padding: 10px; 
+        border-right: 1px solid #cbd5e1; 
+        border-bottom: 2px solid #cbd5e1; 
+        text-align: center; 
+    }
+    
+    .celda-input { 
+        width: 100%; 
+        box-sizing: border-box; 
+        border: none; 
+        padding: 10px; 
+        font-family: inherit;
+        font-size: 13px;
+        color: #475569; 
+        background-color: transparent; 
+        outline: none; 
+    }
+    
+    .celda-input:focus { background-color: #f0fdf4; box-shadow: inset 0 0 0 2px #10b981; color: #000; }
+    .central { text-align: center; }
+    .derecha { text-align: right; }
+    
+    .bold { font-weight: bold; }
     .text-dark { color: #0f172a; }
-    .text-blue { color: #2563eb; font-family: monospace; font-size: 1.1em; }
-
-    /* Quitar flechas a los inputs de tipo número */
-    .input-celda::-webkit-outer-spin-button, .input-celda::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .input-celda[type=number] { -moz-appearance: textfield; }
-
-    /* Estilo para el combobox (select) */
-    .select-personalizado { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px top 50%; background-size: 10px auto; padding-right: 25px; }
-    .select-personalizado:focus { background-color: #fffbeb; box-shadow: inset 0 0 0 2px #f59e0b; }
+    
+    .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .celda-input[type=number] { -moz-appearance: textfield; }
+    .fila-editada { background-color: #f8fafc !important; }
 </style>
 
-<script>
-    // Función para agregar nuevas filas en blanco a la tabla
-    function agregarFilaIngreso() {
-        const tbody = document.getElementById('cuerpoIngresos');
-        const opcionesCombo = `
-            <option value="MILAGROS">MILAGROS</option>
-            <option value="PABLO">PABLO</option>
-            <option value="DENISE">DENISE</option>
-            <option value="JOSHUA">JOSHUA</option>
-            <option value="ALDO">ALDO</option>
-            <option value="CARLOS">CARLOS</option>
-            <option value="DAVID">DAVID</option>
-            <option value="MISTER">MISTER</option>
-            <option value="EDUARDO">EDUARDO</option>
-            <option value="KEVIN">KEVIN</option>
-        `;
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
-        const nuevaFila = document.createElement('tr');
-        nuevaFila.className = 'fila-excel';
-        nuevaFila.style.borderBottom = '1px solid #e2e8f0';
+<script>
+    let memoriaIngresos = JSON.parse(localStorage.getItem('memoriaIngresosTemp')) || {};
+    let ingresosAEliminar = JSON.parse(localStorage.getItem('ingresosAEliminarTemp')) || [];
+
+    // === AGREGAR FILA MANUAL ===
+    function agregarNuevoIngreso() {
+        const tbody = document.querySelector("#tablaIngresos tbody");
+        const filaMolde = document.getElementById('fila-molde');
         
-        // Se inserta la nueva fila con los campos vacíos (el SKU y el TÍTULO siguen bloqueados)
-        nuevaFila.innerHTML = `
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Auto..." readonly class="input-celda input-bloqueado centralizar font-bold"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Modelo..." class="input-celda centralizar font-bold text-dark"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Auto completado..." readonly class="input-celda input-bloqueado"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" class="input-celda centralizar"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="EAN..." class="input-celda centralizar"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="N° Serie..." class="input-celda centralizar text-blue"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0; position: relative;">
-                <span style="position: absolute; left: 8px; top: 8px; color: #64748b;">S/</span>
-                <input type="number" step="0.01" placeholder="0.00" class="input-celda alinear-derecha" style="padding-left: 25px;">
-            </td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="number" value="1" class="input-celda centralizar font-bold" style="color: #10b981;"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Proveedor..." class="input-celda centralizar text-dark font-bold"></td>
-            <td style="padding: 0;">
-                <select class="input-celda select-personalizado centralizar font-bold" style="color: #d97706;">
-                    <option value="" disabled selected>Seleccione...</option>
-                    ${opcionesCombo}
-                </select>
-            </td>
-        `;
-        tbody.appendChild(nuevaFila);
+        const nuevaFila = filaMolde.cloneNode(true);
+        nuevaFila.id = ""; 
+        nuevaFila.style.display = ""; 
+        
+        const key = 'temp-' + Math.random().toString(36).substr(2, 9);
+        nuevaFila.dataset.originalKey = key;
+        nuevaFila.classList.add('fila-editada');
+        
+        // Insertamos arriba
+        tbody.insertBefore(nuevaFila, tbody.firstChild);
+        
+        const indicador = document.getElementById('indicador-cambios');
+        if(indicador) indicador.style.display = 'inline-block';
+        
+        nuevaFila.querySelector('.val-modelo').focus();
+    }
+
+    // === REGISTRAR CAMBIO MANUAL EN MEMORIA ===
+    function registrarCambioIngreso(elemento) {
+        const fila = elemento.closest('tr');
+        if (fila.id === 'fila-molde') return;
+        
+        let key = fila.dataset.originalKey;
+        if (!key || key === '') {
+            key = 'temp-' + Math.random().toString(36).substr(2, 9);
+            fila.dataset.originalKey = key;
+        }
+
+        memoriaIngresos[key] = {
+            'SKU': fila.querySelector('.val-sku').value.trim(),
+            'MODELO': fila.querySelector('.val-modelo').value.trim(),
+            'TÍTULO': fila.querySelector('.val-titulo').value.trim(),
+            'FECHA INGRESO': fila.querySelector('.val-fecha').value,
+            'CÓDIGO EAN': fila.querySelector('.val-ean').value.trim(),
+            'SERIE / N°': fila.querySelector('.val-serie').value.trim(),
+            'COSTO UNT.': parseFloat(fila.querySelector('.val-costo').value) || 0,
+            'ING. x 1 und': parseFloat(fila.querySelector('.val-ing').value) || 1,
+            'PROVEEDOR / MOTIVO': fila.querySelector('.val-proveedor').value.trim(),
+            'BY:': fila.querySelector('.val-by').value.trim()
+        };
+
+        localStorage.setItem('memoriaIngresosTemp', JSON.stringify(memoriaIngresos));
+        fila.classList.add('fila-editada');
+        
+        const indicador = document.getElementById('indicador-cambios');
+        if(indicador) indicador.style.display = 'inline-block';
+    }
+
+    // === ELIMINAR FILA ===
+    function eliminarFilaIngreso(btn) {
+        const fila = btn.closest('tr');
+        if (fila.id === 'fila-molde') return;
+        const key = fila.dataset.originalKey;
+
+        if (key && !key.startsWith('temp-') && !key.startsWith('import-')) {
+            if (!ingresosAEliminar.includes(key)) {
+                ingresosAEliminar.push(key);
+            }
+        }
+        if (memoriaIngresos[key]) {
+            delete memoriaIngresos[key];
+        }
+        fila.remove();
+        localStorage.setItem('ingresosAEliminarTemp', JSON.stringify(ingresosAEliminar));
+        localStorage.setItem('memoriaIngresosTemp', JSON.stringify(memoriaIngresos));
+        
+        const indicador = document.getElementById('indicador-cambios');
+        if(indicador) indicador.style.display = 'inline-block';
+    }
+
+    // === SÚPER IMPORTADOR (TRITURADOR DE FORMATOS ADAPTADO A INGRESOS) ===
+    document.getElementById('csvImportar').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            transformHeader: function(header) {
+                // Triturador: convierte "FECHA INGRESO" a "FECHAINGRESO"
+                return header.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z0-9]/g, '');
+            },
+            complete: function(results) {
+                
+                const tbody = document.querySelector("#tablaIngresos tbody");
+                let filaMolde = document.getElementById('fila-molde');
+                const fragmento = document.createDocumentFragment();
+                let importadas = 0;
+
+                const limpiarValor = (val) => {
+                    if (!val) return '';
+                    return String(val).replace(/[\r\n]+/g, ' ').trim();
+                };
+
+                const formatNum = (val) => {
+                    if (!val) return 0;
+                    let num = parseFloat(limpiarValor(val).replace(/[^0-9.-]+/g,""));
+                    return isNaN(num) ? 0 : num;
+                };
+                
+                // Función Radar
+                const buscarColumna = (fila, posiblesNombres) => {
+                    let llave = Object.keys(fila).find(k => posiblesNombres.some(nombre => k.includes(nombre)));
+                    return llave ? limpiarValor(fila[llave]) : '';
+                };
+
+                results.data.forEach(item => {
+                    // Validamos que haya al menos un Modelo o SKU para considerar la fila válida
+                    const modeloLeido = buscarColumna(item, ['MODELO']);
+                    const skuLeido = buscarColumna(item, ['SKU']);
+                    if (!modeloLeido && !skuLeido) return; 
+
+                    let fechaRaw = buscarColumna(item, ['FECHA', 'INGRESO']);
+                    let fechaCalendario = '';
+                    let partes = fechaRaw.split(/[\/\-]/); 
+                    if (partes.length === 3) {
+                        let dia = partes[0].padStart(2, '0');
+                        let mes = partes[1].padStart(2, '0');
+                        let anio = partes[2];
+                        if (anio.length === 2) anio = "20" + anio; 
+                        fechaCalendario = `${anio}-${mes}-${dia}`;
+                    } else if (fechaRaw.includes('-') && fechaRaw.indexOf('-') === 4) {
+                        fechaCalendario = fechaRaw.substring(0, 10); 
+                    }
+
+                    const tituloLeido = buscarColumna(item, ['TITULO', 'DESC']);
+                    const eanLeido = buscarColumna(item, ['EAN', 'CODIGO']);
+                    const serieLeido = buscarColumna(item, ['SERIE', 'NRO']);
+                    const costoLeido = formatNum(buscarColumna(item, ['COSTO']));
+                    const ingLeido = formatNum(buscarColumna(item, ['ING', '1UND'])) || 1;
+                    const proveedorLeido = buscarColumna(item, ['PROVEEDOR', 'MOTIVO']);
+                    const byLeido = buscarColumna(item, ['BY', 'USUARIO']);
+
+                    const key = 'import-' + Math.random().toString(36).substr(2, 9);
+                    
+                    memoriaIngresos[key] = {
+                        'SKU': skuLeido,
+                        'MODELO': modeloLeido,
+                        'TÍTULO': tituloLeido,
+                        'FECHA INGRESO': fechaCalendario,
+                        'CÓDIGO EAN': eanLeido,
+                        'SERIE / N°': serieLeido,
+                        'COSTO UNT.': costoLeido,
+                        'ING. x 1 und': ingLeido,
+                        'PROVEEDOR / MOTIVO': proveedorLeido,
+                        'BY:': byLeido
+                    };
+
+                    const nuevaFila = filaMolde.cloneNode(true);
+                    nuevaFila.id = "";
+                    nuevaFila.style.display = "";
+                    nuevaFila.dataset.originalKey = key;
+                    nuevaFila.classList.add('fila-editada');
+
+                    nuevaFila.querySelector('.val-sku').value = skuLeido;
+                    nuevaFila.querySelector('.val-modelo').value = modeloLeido;
+                    nuevaFila.querySelector('.val-titulo').value = tituloLeido;
+                    nuevaFila.querySelector('.val-fecha').value = fechaCalendario;
+                    nuevaFila.querySelector('.val-ean').value = eanLeido;
+                    nuevaFila.querySelector('.val-serie').value = serieLeido;
+                    nuevaFila.querySelector('.val-costo').value = costoLeido > 0 ? costoLeido.toFixed(2) : '';
+                    nuevaFila.querySelector('.val-ing').value = ingLeido;
+                    nuevaFila.querySelector('.val-proveedor').value = proveedorLeido;
+                    nuevaFila.querySelector('.val-by').value = byLeido;
+
+                    fragmento.appendChild(nuevaFila);
+                    importadas++;
+                });
+                
+                tbody.appendChild(fragmento);
+                localStorage.setItem('memoriaIngresosTemp', JSON.stringify(memoriaIngresos));
+                document.getElementById('csvImportar').value = ""; 
+                
+                const indicador = document.getElementById('indicador-cambios');
+                if(indicador) indicador.style.display = 'inline-block';
+
+                alert(`¡Se cargaron ${importadas} ingresos en pantalla! Revisa la tabla y presiona 'Guardar Ingresos'.`);
+            }
+        });
+    });
+
+    // === ENVIAR A DJANGO ===
+    function guardarDatosPendientes() {
+        let datosAguardar = Object.values(memoriaIngresos);
+
+        if (datosAguardar.length === 0 && ingresosAEliminar.length === 0) {
+            alert("No has cargado, editado ni eliminado ningún ingreso para guardar.");
+            return;
+        }
+
+        const btn = document.getElementById('btnGuardarIngresos');
+        const textoOriginal = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        btn.disabled = true;
+
+        // IMPORTANTE: Asegúrate de tener una URL llamada 'guardar_ingresos_masivos' en tu urls.py 
+        // y su correspondiente función en views.py (similar a la que hicimos para ML)
+        fetch("{% url 'guardar_ingresos_masivos' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ 
+                referencias: datosAguardar,
+                eliminadas: ingresosAEliminar 
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                localStorage.removeItem('memoriaIngresosTemp');
+                localStorage.removeItem('ingresosAEliminarTemp');
+                memoriaIngresos = {}; 
+                ingresosAEliminar = [];
+                alert(data.message);
+                window.location.reload(); 
+            } else {
+                alert('Error al guardar: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Ocurrió un error en la conexión al servidor. ¿Ya creaste la función en views.py?");
+        })
+        .finally(() => {
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+        });
     }
 </script>
 {% endblock %}

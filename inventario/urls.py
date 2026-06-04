@@ -86,4 +86,5 @@ urlpatterns = [
     # Rutas para Reportes de Mercado Libre
     path('descargar-plantilla-reporte-ml/', views.descargar_plantilla_reporte_ml, name='descargar_plantilla_reporte_ml'),
     path('guardar-reportes-masivos-ml/', views.guardar_reportes_masivos_ml, name='guardar_reportes_masivos_ml'),
+    path('percheron/ingresos/guardar/', views.guardar_ingresos_masivos, name='guardar_ingresos_masivos'),
 ]

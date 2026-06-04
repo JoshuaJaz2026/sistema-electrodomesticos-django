@@ -957,3 +957,116 @@ def guardar_reportes_masivos_ml(request):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
             
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
+@login_required
+def guardar_ingresos_masivos(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            filas_ingresos = data.get('referencias', [])
+            eliminadas = data.get('eliminadas', [])
+
+            # 1. ELIMINAR LOS REGISTROS SOLICITADOS
+            if eliminadas:
+                IngresoPercheron.objects.filter(id__in=eliminadas).delete()
+
+            # 2. LIMPIEZA EXTREMA Y ENTRADA DE DATOS
+            ingresos_unicos = {}
+            
+            for fila in filas_ingresos:
+                # Extraemos y limpiamos textos de cualquier salto de línea oculto (\n o \r)
+                modelo = str(fila.get('MODELO', '')).replace('\n', '').replace('\r', '').strip()
+                titulo = str(fila.get('TÍTULO', '')).replace('\n', '').replace('\r', '').strip()
+                codigo_ean = str(fila.get('CÓDIGO EAN', '')).replace('\n', '').replace('\r', '').strip()
+                serie_nro = str(fila.get('SERIE / N°', '')).replace('\n', '').replace('\r', '').strip()
+                proveedor_motivo = str(fila.get('PROVEEDOR / MOTIVO', '')).replace('\n', '').replace('\r', '').strip()
+                by_usuario = str(fila.get('BY:', '')).replace('\n', '').replace('\r', '').strip()
+                sku_leido = str(fila.get('SKU', '')).replace('\n', '').replace('\r', '').strip()
+
+                # Validar si la fila está totalmente vacía (la saltamos)
+                if not serie_nro and not modelo and not titulo:
+                    continue
+
+                # --- AUTO-GENERADORES DE SEGURIDAD ---
+                # Si no hay serie (y es unique=True en models), generamos una temporal
+                if not serie_nro:
+                    serie_nro = f"S/N-{uuid.uuid4().hex[:8].upper()}"
+
+                # Si el SKU viene vacío desde el Excel/Frontend, le creamos uno único
+                if not sku_leido:
+                    sku_leido = f"SKU-{uuid.uuid4().hex[:10].upper()}"
+
+                # Traductor inteligente de fechas
+                fecha_raw = str(fila.get('FECHA INGRESO', '')).strip()
+                fecha_formateada = None
+                if fecha_raw:
+                    try:
+                        if '/' in fecha_raw:
+                            fecha_formateada = datetime.strptime(fecha_raw, '%d/%m/%Y').strftime('%Y-%m-%d')
+                        else:
+                            fecha_formateada = fecha_raw
+                    except ValueError:
+                        fecha_formateada = datetime.now().strftime('%Y-%m-%d')
+                else:
+                    fecha_formateada = datetime.now().strftime('%Y-%m-%d')
+
+                # Convertidores seguros de números
+                def to_float(val):
+                    try:
+                        return float(str(val).replace(',', '').strip() or 0)
+                    except ValueError:
+                        return 0.00
+
+                def to_int(val):
+                    try:
+                        return int(str(val).strip() or 0)
+                    except ValueError:
+                        return 1
+
+                # 3. CONSTRUCCIÓN DEL OBJETO
+                obj = IngresoPercheron(
+                    sku=sku_leido,
+                    modelo=modelo,
+                    titulo=titulo,
+                    fecha_ingreso=fecha_formateada,
+                    codigo_ean=codigo_ean,
+                    serie_nro=serie_nro,
+                    costo_unitario=to_float(fila.get('COSTO UNT.', 0)),
+                    cantidad=to_int(fila.get('ING. x 1 und', 1)),
+                    proveedor_motivo=proveedor_motivo,
+                    creado_por=by_usuario
+                )
+                
+                # Filtro anti-duplicados por SERIE en el mismo Excel
+                ingresos_unicos[serie_nro] = obj
+
+            objetos_a_guardar = list(ingresos_unicos.values())
+
+            # 4. GUARDADO EN MASA TURBO (BULK CREATE)
+            if objetos_a_guardar:
+                # Los campos que se actualizarán si la "Serie" ya existe en la base de datos
+                campos_actualizar = [
+                    'sku', 'modelo', 'titulo', 'fecha_ingreso', 'codigo_ean',
+                    'costo_unitario', 'cantidad', 'proveedor_motivo', 'creado_por'
+                ]
+                
+                with transaction.atomic():
+                    IngresoPercheron.objects.bulk_create(
+                        objetos_a_guardar,
+                        update_conflicts=True,
+                        unique_fields=['serie_nro'], # Usamos la serie_nro como identificador único de conflicto
+                        update_fields=campos_actualizar
+                    )
+
+            return JsonResponse({
+                'status': 'ok', 
+                'message': f'¡Éxito! Se registraron {len(objetos_a_guardar)} ingresos en el almacén.'
+            })
+
+        except Exception as e:
+            # En caso de error severo, imprimimos en consola de Render para rastrearlo
+            import traceback
+            print(traceback.format_exc())
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
