@@ -102,7 +102,7 @@ def percheron_modelos(request):
     canal = request.session.get('canal_activo', 'Percheron')
     
     # Traemos todos los productos maestros
-    productos_lista = Producto.objects.all().order_by('-id')
+    productos_lista = Producto.objects.all().order_by('id')
     
     # Paginación
     paginator = Paginator(productos_lista, 20) 
@@ -1145,7 +1145,7 @@ def exportar_modelos_excel(request):
         'INVENTARIADO POR LOS PERCHERONES', 'MERCADO LIBRE', 'FALABELLA', 'CREDITIENDA', 'PÁGINA WEB'
     ])
     
-    for p in Producto.objects.all().order_by('-id'):
+    for p in Producto.objects.all().order_by('id'):
         writer.writerow([
             p.modelo or '', 
             p.marca or '', 
