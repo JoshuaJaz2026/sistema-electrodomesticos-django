@@ -76,20 +76,20 @@ def percheron_ingresos(request):
 
 @login_required
 def percheron_registros(request):
-    # 1. Mantenemos tu lógica de diseño y sesión intacta
     canal = request.session.get('canal_activo', 'Percheron')
     color = request.session.get('color_actual', '#3498DB')
     icono = request.session.get('icono_actual', 'fas fa-globe')
     
-    # 2. Nueva lógica de datos para el Kardex Maestro
-    registros_lista = IngresoPercheron.objects.all().order_by('-fecha_ingreso', '-id')
+    # DESCONECTADO TEMPORALMENTE: 
+    # registros_lista = IngresoPercheron.objects.all().order_by('-fecha_ingreso', '-id')
     
-    # Paginación para no colapsar la pantalla
+    # Enviamos una lista vacía hasta que me des la nueva lógica
+    registros_lista = []
+    
     paginator = Paginator(registros_lista, 50) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # Enviamos todo al HTML
     return render(request, 'inventario/percheron_registros.html', {
         'canal': canal, 
         'color_actual': color, 
@@ -109,13 +109,11 @@ def percheron_modelos(request):
 
 @login_required
 def exportar_registros_excel(request):
-    # Preparamos el archivo Excel (CSV)
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="Kardex_Maestro_Registros.csv"'
-    response.write('\ufeff'.encode('utf8')) # Para que lea tildes
+    response.write('\ufeff'.encode('utf8'))
     writer = csv.writer(response, delimiter=';')
     
-    # Cabeceras exactas que solicitaste
     writer.writerow([
         'SKU', 'MARCA', 'FECHA ING', 'CÓDIGO EAN', 'NRO. SERIE', 
         'COSTO', 'PROVEEDOR', 'UBICACIÓN (DEP/PROV/DIST)', 'REGIST. POR', 
@@ -123,31 +121,11 @@ def exportar_registros_excel(request):
         'OUT (VL)', 'OUT (TK)', 'OUT (INTCP)', 'OUT (ML 2)', 'STOCK'
     ])
     
-    registros = IngresoPercheron.objects.all().order_by('-fecha_ingreso', '-id')
+    # Dejamos la exportación vacía también por ahora
+    registros = []
     
     for r in registros:
-        # Por ahora las salidas (OUT) están en 0 hasta que conectemos el módulo de Ventas
-        in_qty = r.cantidad
-        out_total = 0 
-        stock_actual = in_qty - out_total
-        
-        # Marca y Ubicación van vacíos por ahora (se conectarán luego con el Maestro de Productos)
-        writer.writerow([
-            r.sku or '', 
-            '', # MARCA
-            r.fecha_ingreso.strftime('%d/%m/%Y') if r.fecha_ingreso else '', 
-            r.codigo_ean or '', 
-            r.serie_nro or '', 
-            round(r.costo_unitario, 2) if r.costo_unitario else 0.00, 
-            r.proveedor_motivo or '', 
-            '', # UBICACIÓN
-            r.creado_por or '', 
-            r.modelo or '', 
-            r.titulo or '', 
-            in_qty, 
-            0, 0, 0, 0, 0, 0, 0, # LOS OUTS
-            stock_actual # STOCK
-        ])
+        pass
         
     return response
 
