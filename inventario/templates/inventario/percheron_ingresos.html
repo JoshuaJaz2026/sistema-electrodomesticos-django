@@ -320,7 +320,22 @@
 
                 const formatNum = (val) => {
                     if (!val) return 0;
-                    let num = parseFloat(limpiarValor(val).replace(/[^0-9.-]+/g,""));
+                    // 1. Borramos la moneda "S/." o "S/" y los espacios
+                    let texto = String(val).replace(/S\/\.?/gi, '').trim(); 
+                    
+                    // 2. Dejamos solo números, comas y puntos
+                    texto = texto.replace(/[^0-9.,-]/g, '');
+                    
+                    // 3. Si tiene formato gringo (1,250.00) borramos la coma
+                    if (texto.indexOf(',') > -1 && texto.indexOf('.') > -1) {
+                        texto = texto.replace(/,/g, '');
+                    } 
+                    // 4. Si tiene formato latino (125,00) cambiamos la coma por punto para el cálculo
+                    else if (texto.indexOf(',') > -1) {
+                        texto = texto.replace(/,/g, '.');
+                    }
+                    
+                    let num = parseFloat(texto);
                     return isNaN(num) ? 0 : num;
                 };
                 
