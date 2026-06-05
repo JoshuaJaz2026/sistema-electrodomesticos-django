@@ -1,35 +1,35 @@
 {% extends 'inventario/dashboard_global.html' %}
 
 {% block content %}
-<div class="card" style="border-top: 4px solid #3b82f6; padding: 20px; background: white; border-radius: 8px;">
+<div class="card" style="border-top: 4px solid #3b82f6; padding: 20px;">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
-        <h2 style="margin: 0; color: #1e3a8a; display: flex; align-items: center; gap: 10px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
+        <h2 style="margin: 0; color: #2c3e50;">
             <i class="fas fa-tags" style="color: #3b82f6;"></i> Directorio de Modelos y Disponibilidad
         </h2>
         
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <div style="display: flex; margin-right: 10px;">
-                <input type="text" placeholder="Buscar modelo o título..." style="padding: 9px 15px; border: 1px solid #cbd5e1; border-radius: 6px 0 0 6px; outline: none; font-size: 0.9rem; min-width: 200px;">
-                <button type="button" style="background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1; border-left: none; padding: 9px 15px; border-radius: 0 6px 6px 0; cursor: pointer;">
+        <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex;">
+                <input type="text" placeholder="Buscar modelo o título..." style="padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 6px 0 0 6px; outline: none; font-size: 0.9rem; min-width: 250px;">
+                <button type="button" style="background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1; border-left: none; padding: 10px 15px; border-radius: 0 6px 6px 0; cursor: pointer;">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
 
-            <a href="{% url 'exportar_modelos_excel' %}" style="background-color: #10b981; color: white; border: none; padding: 9px 16px; border-radius: 6px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+            <a href="{% url 'exportar_modelos_excel' %}" style="background-color: #10b981; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                 <i class="fas fa-file-excel"></i> Exportar
             </a>
             
             <input type="file" id="csvImportar" accept=".csv" style="display: none;">
-            <button onclick="document.getElementById('csvImportar').click()" style="background-color: #059669; color: white; border: none; padding: 9px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <button onclick="document.getElementById('csvImportar').click()" style="background-color: #059669; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
                 <i class="fas fa-upload"></i> Importar Masivo
             </button>
             
-            <button onclick="agregarNuevaFila()" style="background-color: #3b82f6; color: white; border: none; padding: 9px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <button onclick="agregarNuevaFila()" style="background-color: #3b82f6; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
                 <i class="fas fa-plus"></i> Nueva Fila
             </button>
 
-            <button id="btnGuardar" onclick="guardarModelos()" style="background-color: #2563eb; color: white; border: none; padding: 9px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <button id="btnGuardar" onclick="guardarModelos()" style="background-color: #2563eb; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
                 <i class="fas fa-save"></i> Guardar Cambios
             </button>
         </div>
@@ -40,56 +40,53 @@
     </p>
 
     <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
-        <table id="tablaModelos" style="width: 100%; border-collapse: collapse; white-space: nowrap; font-size: 0.85em;">
-            <thead style="background-color: #0f172a; color: white; text-transform: uppercase;">
-                <tr>
-                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: left;">MODELO <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em;"></i></th>
-                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: left; width: 140px;">MARCA <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em;"></i></th>
-                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: left; width: 180px;">CATEGORÍA <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em;"></i></th>
-                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: left; min-width: 250px;">TÍTULO <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em;"></i></th>
+        <table id="tablaModelos" style="width: 100%; border-collapse: collapse; background: white; white-space: nowrap; font-size: 0.85em;">
+            <thead>
+                <tr style="background-color: #0f172a; color: white; border-bottom: 2px solid #cbd5e1; text-transform: uppercase;">
+                    <th style="padding: 15px 12px; text-align: left; border-bottom: 2px solid #1e293b;">Modelo <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em;"></i></th>
+                    <th style="padding: 15px 12px; text-align: left; border-bottom: 2px solid #1e293b; width: 140px;">Marca <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em;"></i></th>
+                    <th style="padding: 15px 12px; text-align: left; border-bottom: 2px solid #1e293b; width: 180px;">Categoría <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em;"></i></th>
+                    <th style="padding: 15px 12px; text-align: left; border-bottom: 2px solid #1e293b; min-width: 300px;">Título <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em;"></i></th>
+                    <th style="padding: 15px 12px; text-align: center; border-bottom: 2px solid #1e293b; background-color: #1e3a8a;">Stock <i class="fas fa-lock"></i></th>
                     
-                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: center; background-color: #1e3a8a;">STOCK <i class="fas fa-lock"></i></th>
-                    
-                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: center; background-color: #eab308; color: black; font-size: 0.75rem; line-height: 1.2;">INVENTARIADO POR<br>LOS PERCHERONES</th>
-                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: center; background-color: #fde047; color: black; font-size: 0.75rem;">MERCADO<br>LIBRE</th>
-                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: center; background-color: #a3e635; color: black; font-size: 0.75rem;">FALABELLA</th>
-                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: center; background-color: #3b82f6; color: white; font-size: 0.75rem;">CREDITIENDA</th>
-                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: center; background-color: #8b5cf6; color: white; font-size: 0.75rem;">PÁGINA<br>WEB</th>
+                    <th style="padding: 15px 12px; text-align: center; border-left: 2px solid #e2e8f0; background-color: #000000; color: #eab308; font-size: 0.75rem; line-height: 1.2;">Inventariado por<br>los Percherones</th>
+                    <th style="padding: 15px 12px; text-align: center; background-color: #fde047; color: black; font-size: 0.75rem;">Mercado<br>Libre</th>
+                    <th style="padding: 15px 12px; text-align: center; background-color: #a3e635; color: black; font-size: 0.75rem;">Falabella</th>
+                    <th style="padding: 15px 12px; text-align: center; background-color: #3b82f6; color: white; font-size: 0.75rem;">Creditienda</th>
+                    <th style="padding: 15px 12px; text-align: center; background-color: #8b5cf6; color: white; font-size: 0.75rem;">Página<br>Web</th>
                 </tr>
             </thead>
             <tbody>
-                <tr id="fila-molde" class="fila-modelo" style="display: none; border-bottom: 1px solid #e2e8f0; background-color: white;">
+                <tr id="fila-molde" class="fila-modelo" style="display: none; border-bottom: 1px solid #e2e8f0;">
                     <td style="padding: 8px;"><input type="text" class="input-limpio text-bold val-modelo" placeholder="Modelo..."></td>
                     <td style="padding: 8px;"><input type="text" list="lista-marcas" class="input-limpio val-marca" placeholder="Elegir Marca..."></td>
                     <td style="padding: 8px;"><input type="text" list="lista-categorias" class="input-limpio val-categoria" placeholder="Elegir Categoría..."></td>
-                    
                     <td style="padding: 8px;"><input type="text" class="input-limpio val-titulo" placeholder="Descripción..."></td>
                     <td style="padding: 8px; background-color: #eff6ff;"><input type="text" value="0" readonly class="input-limpio central text-bold text-blue" style="cursor: not-allowed;"></td>
-                    <td style="padding: 8px; text-align: center; border-left: 2px solid #e2e8f0;"><input type="checkbox" class="check-moderno val-inv"></td>
-                    <td style="padding: 8px; text-align: center;"><input type="checkbox" class="check-moderno val-ml"></td>
-                    <td style="padding: 8px; text-align: center;"><input type="checkbox" class="check-moderno val-fbl"></td>
-                    <td style="padding: 8px; text-align: center;"><input type="checkbox" class="check-moderno val-cdt"></td>
-                    <td style="padding: 8px; text-align: center;"><input type="checkbox" class="check-moderno val-web"></td>
+                    
+                    <td style="padding: 8px; text-align: center; border-left: 2px solid #e2e8f0; transition: 0.3s;" class="celda-paint"><input type="checkbox" class="check-moderno val-inv" onchange="pintarCelda(this, 'bg-inv')"></td>
+                    <td style="padding: 8px; text-align: center; transition: 0.3s;" class="celda-paint"><input type="checkbox" class="check-moderno val-ml" onchange="pintarCelda(this, 'bg-ml')"></td>
+                    <td style="padding: 8px; text-align: center; transition: 0.3s;" class="celda-paint"><input type="checkbox" class="check-moderno val-fbl" onchange="pintarCelda(this, 'bg-fbl')"></td>
+                    <td style="padding: 8px; text-align: center; transition: 0.3s;" class="celda-paint"><input type="checkbox" class="check-moderno val-cdt" onchange="pintarCelda(this, 'bg-cdt')"></td>
+                    <td style="padding: 8px; text-align: center; transition: 0.3s;" class="celda-paint"><input type="checkbox" class="check-moderno val-web" onchange="pintarCelda(this, 'bg-web')"></td>
                 </tr>
 
                 {% for item in page_obj %}
                 <tr class="fila-modelo" style="border-bottom: 1px solid #e2e8f0; background-color: white;">
                     <td style="padding: 8px;"><input type="text" value="{{ item.modelo|default:'' }}" class="input-limpio text-bold val-modelo"></td>
-                    
                     <td style="padding: 8px;"><input type="text" list="lista-marcas" value="{{ item.marca|default:'' }}" class="input-limpio val-marca" placeholder="Marca..."></td>
                     <td style="padding: 8px;"><input type="text" list="lista-categorias" value="{{ item.categoria|default:'' }}" class="input-limpio val-categoria" placeholder="Categoría..."></td>
-                    
                     <td style="padding: 8px;"><input type="text" value="{{ item.titulo|default:'' }}" class="input-limpio val-titulo"></td>
                     
                     <td style="padding: 8px; background-color: #eff6ff;">
                         <input type="text" value="{{ item.stock_actual }}" readonly class="input-limpio central text-bold text-blue" style="cursor: not-allowed;">
                     </td>
                     
-                    <td style="padding: 8px; text-align: center; border-left: 2px solid #e2e8f0;"><input type="checkbox" class="check-moderno val-inv" {% if item.activo_intercorp %}checked{% endif %}></td>
-                    <td style="padding: 8px; text-align: center;"><input type="checkbox" class="check-moderno val-ml" {% if item.activo_ml %}checked{% endif %}></td>
-                    <td style="padding: 8px; text-align: center;"><input type="checkbox" class="check-moderno val-fbl" {% if item.activo_falabella %}checked{% endif %}></td>
-                    <td style="padding: 8px; text-align: center;"><input type="checkbox" class="check-moderno val-cdt" {% if item.activo_creditienda %}checked{% endif %}></td>
-                    <td style="padding: 8px; text-align: center;"><input type="checkbox" class="check-moderno val-web" {% if item.activo_web %}checked{% endif %}></td>
+                    <td style="padding: 8px; text-align: center; border-left: 2px solid #e2e8f0; transition: 0.3s;" class="celda-paint"><input type="checkbox" class="check-moderno val-inv" onchange="pintarCelda(this, 'bg-inv')" {% if item.activo_intercorp %}checked{% endif %}></td>
+                    <td style="padding: 8px; text-align: center; transition: 0.3s;" class="celda-paint"><input type="checkbox" class="check-moderno val-ml" onchange="pintarCelda(this, 'bg-ml')" {% if item.activo_ml %}checked{% endif %}></td>
+                    <td style="padding: 8px; text-align: center; transition: 0.3s;" class="celda-paint"><input type="checkbox" class="check-moderno val-fbl" onchange="pintarCelda(this, 'bg-fbl')" {% if item.activo_falabella %}checked{% endif %}></td>
+                    <td style="padding: 8px; text-align: center; transition: 0.3s;" class="celda-paint"><input type="checkbox" class="check-moderno val-cdt" onchange="pintarCelda(this, 'bg-cdt')" {% if item.activo_creditienda %}checked{% endif %}></td>
+                    <td style="padding: 8px; text-align: center; transition: 0.3s;" class="celda-paint"><input type="checkbox" class="check-moderno val-web" onchange="pintarCelda(this, 'bg-web')" {% if item.activo_web %}checked{% endif %}></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -192,10 +189,36 @@
     .check-moderno { width: 18px; height: 18px; cursor: pointer; accent-color: #3b82f6; transition: 0.1s;}
     .check-moderno:hover { transform: scale(1.15); }
     tbody tr:hover { background-color: #f1f5f9 !important; }
+
+    /* Clases de colores para pintar la celda */
+    .bg-inv { background-color: #000000 !important; }
+    .bg-ml { background-color: #fde047 !important; }
+    .bg-fbl { background-color: #a3e635 !important; }
+    .bg-cdt { background-color: #3b82f6 !important; }
+    .bg-web { background-color: #8b5cf6 !important; }
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script>
+    // === FUNCIÓN PARA PINTAR CELDAS ===
+    function pintarCelda(checkbox, claseCss) {
+        const td = checkbox.closest('td');
+        if (checkbox.checked) {
+            td.classList.add(claseCss);
+        } else {
+            td.classList.remove(claseCss);
+        }
+    }
+
+    // Al cargar la página, pintamos las celdas que ya vienen marcadas desde la Base de Datos
+    window.addEventListener('load', () => {
+        document.querySelectorAll('.val-inv').forEach(cb => pintarCelda(cb, 'bg-inv'));
+        document.querySelectorAll('.val-ml').forEach(cb => pintarCelda(cb, 'bg-ml'));
+        document.querySelectorAll('.val-fbl').forEach(cb => pintarCelda(cb, 'bg-fbl'));
+        document.querySelectorAll('.val-cdt').forEach(cb => pintarCelda(cb, 'bg-cdt'));
+        document.querySelectorAll('.val-web').forEach(cb => pintarCelda(cb, 'bg-web'));
+    });
+
     function agregarNuevaFila() {
         const tbody = document.querySelector("#tablaModelos tbody");
         const molde = document.getElementById('fila-molde');
@@ -206,7 +229,7 @@
         nueva.querySelector('.val-modelo').focus();
     }
 
-    // === IMPORTADOR DE EXCEL (LEE TRUE/FALSE) ===
+    // === IMPORTADOR DE EXCEL (A PRUEBA DE BALAS) ===
     document.getElementById('csvImportar').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -214,14 +237,14 @@
         Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
-            transformHeader: h => h.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim(),
+            // Truco: Quitamos TODOS los espacios y símbolos de las cabeceras para el emparejamiento
+            transformHeader: h => h.normalize("NFD").replace(/[^a-zA-Z0-9]/g, "").toUpperCase(),
             complete: function(results) {
                 const tbody = document.querySelector("#tablaModelos tbody");
                 const molde = document.getElementById('fila-molde');
                 const fragmento = document.createDocumentFragment();
                 let agregados = 0;
 
-                // Ahora detecta "TRUE" (y algunas variables por seguridad)
                 const checkValor = (val) => {
                     let v = String(val || '').trim().toUpperCase();
                     return v === 'TRUE' || v === 'SI' || v === 'X';
@@ -234,19 +257,32 @@
                     const nueva = molde.cloneNode(true);
                     nueva.id = "";
                     nueva.style.display = "";
-                    nueva.style.backgroundColor = "#fffbeb"; 
 
                     nueva.querySelector('.val-modelo').value = modelo;
                     nueva.querySelector('.val-marca').value = item['MARCA'] || '';
                     nueva.querySelector('.val-categoria').value = item['CATEGORIA'] || '';
                     nueva.querySelector('.val-titulo').value = item['TITULO'] || '';
                     
-                    // Activamos casillas según el TRUE/FALSE del excel
-                    nueva.querySelector('.val-inv').checked = checkValor(item['INVENTARIADOPORLOSPERCHERONES'] || item['INVENTARIADO']);
-                    nueva.querySelector('.val-ml').checked = checkValor(item['MERCADOLIBRE'] || item['MERCADO LIBRE']);
-                    nueva.querySelector('.val-fbl').checked = checkValor(item['FALABELLA']);
-                    nueva.querySelector('.val-cdt').checked = checkValor(item['CREDITIENDA']);
-                    nueva.querySelector('.val-web').checked = checkValor(item['PAGINAWEB'] || item['WEB']);
+                    // Activamos casillas según el TRUE del excel y las pintamos!
+                    const cbInv = nueva.querySelector('.val-inv');
+                    cbInv.checked = checkValor(item['INVENTARIADOPORLOSPERCHERONES'] || item['INVENTARIADO']);
+                    pintarCelda(cbInv, 'bg-inv');
+
+                    const cbMl = nueva.querySelector('.val-ml');
+                    cbMl.checked = checkValor(item['MERCADOLIBRE']);
+                    pintarCelda(cbMl, 'bg-ml');
+
+                    const cbFbl = nueva.querySelector('.val-fbl');
+                    cbFbl.checked = checkValor(item['FALABELLA']);
+                    pintarCelda(cbFbl, 'bg-fbl');
+
+                    const cbCdt = nueva.querySelector('.val-cdt');
+                    cbCdt.checked = checkValor(item['CREDITIENDA']);
+                    pintarCelda(cbCdt, 'bg-cdt');
+
+                    const cbWeb = nueva.querySelector('.val-web');
+                    cbWeb.checked = checkValor(item['PAGINAWEB']);
+                    pintarCelda(cbWeb, 'bg-web');
 
                     fragmento.appendChild(nueva);
                     agregados++;
@@ -254,7 +290,7 @@
 
                 tbody.insertBefore(fragmento, tbody.firstChild);
                 document.getElementById('csvImportar').value = ""; 
-                alert(`¡Cargados ${agregados} modelos! Las casillas con TRUE fueron marcadas. Revisa y presiona Guardar Cambios.`);
+                alert(`¡Cargados ${agregados} modelos! Las casillas con TRUE se marcaron y pintaron automáticamente.`);
             }
         });
     });
