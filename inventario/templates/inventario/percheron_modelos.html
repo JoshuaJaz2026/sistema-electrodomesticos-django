@@ -96,7 +96,26 @@
         </table>
     </div>
 
+    {% if page_obj %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 12px 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <span style="color: #475569; font-weight: 600; font-size: 0.9rem;">
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        </span>
+        <div style="display: flex; gap: 8px;">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" style="background: #3b82f6; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem;">&laquo; Primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}" style="background: #60a5fa; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem;">Anterior</a>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" style="background: #60a5fa; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem;">Siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" style="background: #3b82f6; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem;">Última &raquo;</a>
+            {% endif %}
+        </div>
     </div>
+    {% endif %}
+
+</div>
 
 <datalist id="lista-marcas">
     <option value="A&G"><option value="ALEXA"><option value="ASTRID"><option value="BEHRINGER">
