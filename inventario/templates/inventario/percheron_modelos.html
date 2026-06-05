@@ -1,171 +1,182 @@
 {% extends 'inventario/dashboard_global.html' %}
 
 {% block content %}
-<div class="card" style="border-top: 4px solid #3b82f6; padding: 20px;">
+<div class="card" style="border-top: 4px solid #3b82f6; padding: 20px; background: white; border-radius: 8px;">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
-        <h2 style="margin: 0; color: #2c3e50;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
+        <h2 style="margin: 0; color: #1e3a8a; display: flex; align-items: center; gap: 10px;">
             <i class="fas fa-tags" style="color: #3b82f6;"></i> Directorio de Modelos y Disponibilidad
         </h2>
         
-        <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-            <!-- Buscador visual (Se conectará a backend en el futuro) -->
-            <div style="display: flex;">
-                <input type="text" placeholder="Buscar modelo o título..." style="padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 6px 0 0 6px; outline: none; font-size: 0.9rem; min-width: 250px;">
-                <button type="button" style="background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1; border-left: none; padding: 10px 15px; border-radius: 0 6px 6px 0; cursor: pointer;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <div style="display: flex; margin-right: 10px;">
+                <input type="text" placeholder="Buscar modelo o título..." style="padding: 9px 15px; border: 1px solid #cbd5e1; border-radius: 6px 0 0 6px; outline: none; font-size: 0.9rem; min-width: 200px;">
+                <button type="button" style="background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1; border-left: none; padding: 9px 15px; border-radius: 0 6px 6px 0; cursor: pointer;">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
 
-            <!-- Botones de Acción -->
-            <a href="{% url 'exportar_modelos_excel' %}" style="background-color: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 6px; font-size: 0.9rem;">
+            <a href="{% url 'exportar_modelos_excel' %}" style="background-color: #10b981; color: white; border: none; padding: 9px 16px; border-radius: 6px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                 <i class="fas fa-file-excel"></i> Exportar
             </a>
             
             <input type="file" id="csvImportar" accept=".csv" style="display: none;">
-            <button onclick="document.getElementById('csvImportar').click()" style="background-color: #059669; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.9rem;">
+            <button onclick="document.getElementById('csvImportar').click()" style="background-color: #059669; color: white; border: none; padding: 9px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
                 <i class="fas fa-upload"></i> Importar Masivo
             </button>
             
-            <button onclick="agregarNuevaFila()" style="background-color: #3b82f6; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.9rem;">
+            <button onclick="agregarNuevaFila()" style="background-color: #3b82f6; color: white; border: none; padding: 9px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
                 <i class="fas fa-plus"></i> Nueva Fila
             </button>
 
-            <button id="btnGuardar" onclick="guardarModelos()" style="background-color: #2563eb; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <button id="btnGuardar" onclick="guardarModelos()" style="background-color: #2563eb; color: white; border: none; padding: 9px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
                 <i class="fas fa-save"></i> Guardar Cambios
             </button>
         </div>
     </div>
 
     <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">
-        Asigna rápidamente en qué plataformas estará disponible cada modelo marcando las casillas. <strong style="color: #b91c1c;">La columna STOCK es de solo lectura.</strong>
+        Las columnas Marca y Categoría tienen un buscador desplegable (Combo Box). <strong style="color: #b91c1c;">La columna STOCK es de solo lectura.</strong>
     </p>
 
     <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
-        <table id="tablaModelos" style="width: 100%; border-collapse: collapse; background: white; white-space: nowrap; font-size: 0.85em;">
-            <thead>
-                <tr style="background-color: #f8fafc; color: #334155; border-bottom: 2px solid #cbd5e1; text-transform: uppercase;">
-                    <th style="padding: 15px 12px; text-align: left;">Modelo</th>
-                    <th style="padding: 15px 12px; text-align: left; min-width: 300px;">Título</th>
-                    <th style="padding: 15px 12px; text-align: left;">Marca</th>
-                    <th style="padding: 15px 12px; text-align: center;">Stock</th>
+        <table id="tablaModelos" style="width: 100%; border-collapse: collapse; white-space: nowrap; font-size: 0.85em;">
+            <thead style="background-color: #0f172a; color: white; text-transform: uppercase;">
+                <tr>
+                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: left;">MODELO <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em;"></i></th>
+                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: left; width: 140px;">MARCA <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em;"></i></th>
+                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: left; width: 180px;">CATEGORÍA <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em;"></i></th>
+                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: left; min-width: 250px;">TÍTULO <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em;"></i></th>
                     
-                    <th style="padding: 15px 12px; text-align: center; border-left: 2px solid #e2e8f0; font-size: 0.75rem; line-height: 1.2;">Inventariado por<br>los Percherones</th>
-                    <th style="padding: 15px 12px; text-align: center; font-size: 0.75rem;">Mercado<br>Libre</th>
-                    <th style="padding: 15px 12px; text-align: center; font-size: 0.75rem;">Falabella</th>
-                    <th style="padding: 15px 12px; text-align: center; font-size: 0.75rem;">Creditienda</th>
-                    <th style="padding: 15px 12px; text-align: center; font-size: 0.75rem;">Página<br>Web</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: center; background-color: #1e3a8a;">STOCK <i class="fas fa-lock"></i></th>
+                    
+                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: center; background-color: #eab308; color: black; font-size: 0.75rem; line-height: 1.2;">INVENTARIADO POR<br>LOS PERCHERONES</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: center; background-color: #fde047; color: black; font-size: 0.75rem;">MERCADO<br>LIBRE</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: center; background-color: #a3e635; color: black; font-size: 0.75rem;">FALABELLA</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: center; background-color: #3b82f6; color: white; font-size: 0.75rem;">CREDITIENDA</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #1e293b; text-align: center; background-color: #8b5cf6; color: white; font-size: 0.75rem;">PÁGINA<br>WEB</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Fila Molde (Oculta para agregar nuevos) -->
-                <tr id="fila-molde" class="fila-modelo" style="display: none; border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 8px;"><input type="text" class="input-limpio val-modelo" style="font-weight: bold; color: #0f172a;" placeholder="Modelo..."></td>
-                    <td style="padding: 8px;"><input type="text" class="input-limpio val-titulo" style="color: #475569;" placeholder="Título / Descripción..."></td>
-                    <td style="padding: 8px;"><input type="text" class="input-limpio val-marca" style="font-weight: 600; color: #334155;" placeholder="Marca..."></td>
-                    <td style="padding: 8px; text-align: center; font-weight: bold; font-size: 1.1em; color: #0f172a; background-color: #f8fafc;">0</td>
+                <tr id="fila-molde" class="fila-modelo" style="display: none; border-bottom: 1px solid #e2e8f0; background-color: white;">
+                    <td style="padding: 8px;"><input type="text" class="input-limpio text-bold val-modelo" placeholder="Modelo..."></td>
+                    <td style="padding: 8px;"><input type="text" list="lista-marcas" class="input-limpio val-marca" placeholder="Elegir Marca..."></td>
+                    <td style="padding: 8px;"><input type="text" list="lista-categorias" class="input-limpio val-categoria" placeholder="Elegir Categoría..."></td>
                     
-                    <td style="padding: 12px; text-align: center; border-left: 2px solid #e2e8f0; background-color: #f8fafc;"><input type="checkbox" class="check-moderno val-inv"></td>
-                    <td style="padding: 12px; text-align: center;"><input type="checkbox" class="check-moderno val-ml"></td>
-                    <td style="padding: 12px; text-align: center;"><input type="checkbox" class="check-moderno val-fbl"></td>
-                    <td style="padding: 12px; text-align: center;"><input type="checkbox" class="check-moderno val-cdt"></td>
-                    <td style="padding: 12px; text-align: center;"><input type="checkbox" class="check-moderno val-web"></td>
+                    <td style="padding: 8px;"><input type="text" class="input-limpio val-titulo" placeholder="Descripción..."></td>
+                    <td style="padding: 8px; background-color: #eff6ff;"><input type="text" value="0" readonly class="input-limpio central text-bold text-blue" style="cursor: not-allowed;"></td>
+                    <td style="padding: 8px; text-align: center; border-left: 2px solid #e2e8f0;"><input type="checkbox" class="check-moderno val-inv"></td>
+                    <td style="padding: 8px; text-align: center;"><input type="checkbox" class="check-moderno val-ml"></td>
+                    <td style="padding: 8px; text-align: center;"><input type="checkbox" class="check-moderno val-fbl"></td>
+                    <td style="padding: 8px; text-align: center;"><input type="checkbox" class="check-moderno val-cdt"></td>
+                    <td style="padding: 8px; text-align: center;"><input type="checkbox" class="check-moderno val-web"></td>
                 </tr>
 
-                <!-- Filas Dinámicas desde la Base de Datos -->
                 {% for item in page_obj %}
-                <tr class="fila-modelo" style="border-bottom: 1px solid #e2e8f0;">
-                    <!-- Inputs invisibles para edición rápida -->
-                    <td style="padding: 8px;"><input type="text" value="{{ item.modelo|default:'' }}" class="input-limpio val-modelo" style="font-weight: bold; color: #0f172a;"></td>
-                    <td style="padding: 8px;"><input type="text" value="{{ item.titulo|default:'' }}" class="input-limpio val-titulo" style="color: #475569; width: 100%; min-width: 280px;"></td>
-                    <td style="padding: 8px;"><input type="text" value="{{ item.marca|default:'' }}" class="input-limpio val-marca" style="font-weight: 600; color: #334155;"></td>
+                <tr class="fila-modelo" style="border-bottom: 1px solid #e2e8f0; background-color: white;">
+                    <td style="padding: 8px;"><input type="text" value="{{ item.modelo|default:'' }}" class="input-limpio text-bold val-modelo"></td>
                     
-                    <!-- Stock de Solo Lectura -->
-                    <td style="padding: 12px; text-align: center; font-weight: bold; font-size: 1.1em; color: #0f172a; background-color: #f8fafc;">{{ item.stock_actual }}</td>
+                    <td style="padding: 8px;"><input type="text" list="lista-marcas" value="{{ item.marca|default:'' }}" class="input-limpio val-marca" placeholder="Marca..."></td>
+                    <td style="padding: 8px;"><input type="text" list="lista-categorias" value="{{ item.categoria|default:'' }}" class="input-limpio val-categoria" placeholder="Categoría..."></td>
                     
-                    <!-- Casillas (Checkboxes) -->
-                    <td style="padding: 12px; text-align: center; border-left: 2px solid #e2e8f0; background-color: #f8fafc;">
-                        <input type="checkbox" class="check-moderno val-inv" {% if item.activo_intercorp %}checked{% endif %}>
+                    <td style="padding: 8px;"><input type="text" value="{{ item.titulo|default:'' }}" class="input-limpio val-titulo"></td>
+                    
+                    <td style="padding: 8px; background-color: #eff6ff;">
+                        <input type="text" value="{{ item.stock_actual }}" readonly class="input-limpio central text-bold text-blue" style="cursor: not-allowed;">
                     </td>
-                    <td style="padding: 12px; text-align: center;">
-                        <input type="checkbox" class="check-moderno val-ml" {% if item.activo_ml %}checked{% endif %}>
-                    </td>
-                    <td style="padding: 12px; text-align: center;">
-                        <input type="checkbox" class="check-moderno val-fbl" {% if item.activo_falabella %}checked{% endif %}>
-                    </td>
-                    <td style="padding: 12px; text-align: center;">
-                        <input type="checkbox" class="check-moderno val-cdt" {% if item.activo_creditienda %}checked{% endif %}>
-                    </td>
-                    <td style="padding: 12px; text-align: center;">
-                        <input type="checkbox" class="check-moderno val-web" {% if item.activo_web %}checked{% endif %}>
-                    </td>
+                    
+                    <td style="padding: 8px; text-align: center; border-left: 2px solid #e2e8f0;"><input type="checkbox" class="check-moderno val-inv" {% if item.activo_intercorp %}checked{% endif %}></td>
+                    <td style="padding: 8px; text-align: center;"><input type="checkbox" class="check-moderno val-ml" {% if item.activo_ml %}checked{% endif %}></td>
+                    <td style="padding: 8px; text-align: center;"><input type="checkbox" class="check-moderno val-fbl" {% if item.activo_falabella %}checked{% endif %}></td>
+                    <td style="padding: 8px; text-align: center;"><input type="checkbox" class="check-moderno val-cdt" {% if item.activo_creditienda %}checked{% endif %}></td>
+                    <td style="padding: 8px; text-align: center;"><input type="checkbox" class="check-moderno val-web" {% if item.activo_web %}checked{% endif %}></td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
-    <!-- Paginación -->
-    {% if page_obj %}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 12px 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-        <span style="color: #475569; font-weight: 600; font-size: 0.9rem;">
-            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-        </span>
-        <div style="display: flex; gap: 8px;">
-            {% if page_obj.has_previous %}
-                <a href="?page=1" style="background: #3b82f6; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem;">&laquo; Primera</a>
-                <a href="?page={{ page_obj.previous_page_number }}" style="background: #60a5fa; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem;">Anterior</a>
-            {% endif %}
-
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" style="background: #60a5fa; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem;">Siguiente</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}" style="background: #3b82f6; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem;">Última &raquo;</a>
-            {% endif %}
-        </div>
     </div>
-    {% endif %}
 
-</div>
+<datalist id="lista-marcas">
+    <option value="A&G"><option value="ALEXA"><option value="ASTRID"><option value="BEHRINGER">
+    <option value="BGH"><option value="BLACK + DECKER"><option value="BLACKLINE"><option value="BLOPACK">
+    <option value="BORD"><option value="BOSSKO"><option value="CANON"><option value="COLDEX">
+    <option value="DAJU"><option value="DSP"><option value="EKIPAR"><option value="ELECTROLUX">
+    <option value="EPSON"><option value="EVOLUTION"><option value="FINEZZA"><option value="FUJITEC">
+    <option value="GAMA"><option value="HISENSE"><option value="HYUNDAI"><option value="I-RUN">
+    <option value="ILUMI"><option value="ILUMIA"><option value="IMACO"><option value="IMPERIAL">
+    <option value="INDURAMA"><option value="JBL"><option value="JVC"><option value="LG">
+    <option value="LIBERO"><option value="LUISSANT"><option value="MABE"><option value="MICRONICS">
+    <option value="MIDEA"><option value="MIRAY"><option value="MOTOROLA"><option value="OSTER">
+    <option value="PANASONIC"><option value="PHILIPS"><option value="PREMIER"><option value="PREMIUM">
+    <option value="RECORD"><option value="REMINGTON"><option value="RUBBERMAID"><option value="S/N MARCA">
+    <option value="SAMSUNG"><option value="SHARP"><option value="SILVER CREST"><option value="SIN MARCA">
+    <option value="SKULL CANDY"><option value="SOLE"><option value="SONY"><option value="TAURUS">
+    <option value="TCL"><option value="TRAMONTINA"><option value="TREVELY"><option value="VANHOFF">
+    <option value="VENTUS"><option value="VISIONNER"><option value="WAHL"><option value="WHIRLPOOL">
+    <option value="XIAOMI">
+</datalist>
+
+<datalist id="lista-categorias">
+    <option value="TELEVISOR"><option value="AFEITADOR"><option value="AIRE ACONDICIONADO"><option value="ALISADOR-ONDULADOR">
+    <option value="AMPLIFICADOR"><option value="ARROCERA"><option value="ASADOR ELÉCTRICO"><option value="ASPIRADORA">
+    <option value="AUDIFONOS"><option value="BATIDORA DE INMERSIÓN"><option value="BATIDORA DE MANO">
+    <option value="BATIDORA DE MANO Y PEDESTAL"><option value="BATIDORA DE TAZÓN"><option value="BATIDORA MULTIUSOS">
+    <option value="BISUTERÍA"><option value="BLOQUEADOR"><option value="BOWLS"><option value="CACEROLA">
+    <option value="CAFETERA"><option value="CALEFACTOR"><option value="CAMPANA"><option value="CARGADOR PORTATIL">
+    <option value="CEPILLO MODELADOR"><option value="COCINA A GAS"><option value="COCINA DE INDUCCIÓN">
+    <option value="COCINA ELÉCTRICA"><option value="COCINA ENCIMERA"><option value="COMBO BLACK"><option value="COMBO CHERRY">
+    <option value="COMBO FINEZZA"><option value="COMBO GAMA"><option value="COMBO IMACO"><option value="COMBO OSTER">
+    <option value="COMBO RECORD"><option value="CONGELADORA"><option value="CONTROL DE TV"><option value="CREEPERA">
+    <option value="CUATRICOMBO OSTER"><option value="CUCHILLA DE LICUADORA"><option value="CUIDADO PERSONAL">
+    <option value="DEPILADORA"><option value="DESHUMEDECEDOR"><option value="DISPENSADOR DE AGUA"><option value="ENFRIADOR DE AIRE">
+    <option value="ESCOBA ELECTRICA"><option value="ESPÁTULA"><option value="ESPUMADERA"><option value="ESTUFA">
+    <option value="EXHIBIDORA"><option value="EXPRIMIDOR CÍTRICO"><option value="EXTRACTOR DE JUGOS">
+    <option value="EXTRACTOR POR PRENSADO"><option value="FREIDORA DE AIRE"><option value="FRIGOBAR">
+    <option value="FUNDA DE PARLANTE"><option value="HERVIDOR ELÉCTRICO"><option value="HIERRO FUNDIDO">
+    <option value="HORNO CON FREIDORA DE AIRE"><option value="HORNO ELÉCTRICO"><option value="HORNO MICROONDAS">
+    <option value="HORNO TOSTADOR"><option value="IMPRESORA"><option value="JARRA"><option value="JARRA ELÉCTRICA">
+    <option value="JUEGO DE OLLAS"><option value="KIT DE ACCESORIOS"><option value="KIT OSTER"><option value="LAVADORA">
+    <option value="LAVASECA"><option value="LICUADORA"><option value="LUSTRADORA"><option value="MAQUINA DE AFEITAR">
+    <option value="MAQUINA DE CORTAR PELO"><option value="MAQUINA DE DONDAS"><option value="MAQUINA DE HIELO">
+    <option value="MÁQUINA PARA HACER PASTA"><option value="MICRÓFONO"><option value="MICROONDAS">
+    <option value="MINICOMPONENTE"><option value="MOLDES"><option value="MOLEDOR DE CARNE"><option value="MOLINILLO">
+    <option value="MULTI OLLA"><option value="OLLA"><option value="OLLA A PRESIÓN"><option value="OLLA ANTIHADERENTE">
+    <option value="OLLA DE ACERO"><option value="PACK CUIDADO PERSONAL"><option value="PANIFICADORA"><option value="PARLANTE">
+    <option value="PARRILLA ELÉCTRICA"><option value="PARRILLA PORTÁTIL"><option value="PARRILLA Y PLANCHA">
+    <option value="PERFUME"><option value="PLANCHA A VAPOR"><option value="PLANCHA CLÁSICA"><option value="PLANCHA DE PELO">
+    <option value="PLANCHA GRILL"><option value="PROCESADOR DE ALIMENTOS"><option value="PURIFICADOR">
+    <option value="REFRIGERADORA"><option value="SANDWICHERA"><option value="SARTÉN"><option value="SARTÉN ANTIHADERENTE">
+    <option value="SARTÉN ELÉCTRICA"><option value="SET DE COLADORES"><option value="SET DE CUBIERTOS">
+    <option value="SET DE MÁQUINAS PARA CORTAR PELO"><option value="SET DE OLLAS"><option value="SOUNDBAR">
+    <option value="TABLET"><option value="TAPA DE LICUADORA"><option value="TERMO BOMBA"><option value="TERMO HERVIDOR">
+    <option value="TERMORADIADOR"><option value="TERMOVENTILADOR"><option value="TETERA"><option value="TETERA ELÉCTRICA">
+    <option value="TOSTADORA"><option value="TRICOMBO OSTER"><option value="TRICOMBO OSTER 2"><option value="VAPORERA ELÉCTRICA">
+    <option value="VAPORIZADOR DE PRENDAS"><option value="VASO DE LICUADORA"><option value="VENTILADOR">
+    <option value="WAFLERA ELÉCTRICA"><option value="YOGURT MAKER"><option value="MONITOR"><option value="SISTEMA DE AUDIO">
+    <option value="BATIDORA PLANETARIA"><option value="VASO"><option value="MINIJARRA"><option value="ROSCA PARA VASO">
+    <option value="BASE DE VASO"><option value="GOMA"><option value="ACOPLE"><option value="BATIDORA ORBITAL">
+    <option value="CALENTADOR"><option value="OLLA DE ALUMINIO"><option value="JUEGO DE UTENSILIOS"><option value="COLADOR">
+    <option value="VISICOOLER"><option value="PLANCHA SECA"><option value="PICA TODO"><option value="VAPORERA DE ACERO">
+    <option value="SPAGUETERA"><option value="SECADOR"><option value="VAPORIZADOR DE ALIMENTOS"><option value="RASURADORA">
+    <option value="BATIDORA DE PEDESTAL"><option value="MAQUINA PARA HACER HELADO"><option value="TAPER"><option value="TACHO">
+    <option value="SECADORA DE CABELLO"><option value="SET DE TAZAS"><option value="RACK"><option value="TOMATODO"><option value="RIZADOR DE CABELLO">
+</datalist>
 
 <style>
-    /* Estilo para los inputs invisibles (parecen texto normal hasta que haces clic) */
-    .input-limpio {
-        width: 100%;
-        border: 1px solid transparent;
-        background: transparent;
-        padding: 4px 8px;
-        font-family: inherit;
-        font-size: inherit;
-        border-radius: 4px;
-        transition: 0.2s;
-        outline: none;
-    }
-    .input-limpio:focus {
-        border: 1px solid #3b82f6;
-        background: #ffffff;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-    }
-
-    /* Estilo para hacer los checkboxes modernos */
-    .check-moderno {
-        width: 18px;
-        height: 18px;
-        cursor: pointer;
-        accent-color: #3b82f6; 
-        transition: transform 0.1s ease-in-out;
-    }
-    .check-moderno:hover {
-        transform: scale(1.15); 
-    }
-
-    /* Efectos de fila */
-    tbody tr:nth-child(even) { background-color: #f8fafc; }
-    tbody tr:hover { background-color: #f1f5f9; }
+    .input-limpio { width: 100%; box-sizing: border-box; border: 1px solid transparent; padding: 6px; font-family: inherit; outline: none; background: transparent; transition: 0.2s; border-radius: 4px;}
+    .input-limpio:focus:not([readonly]) { border: 1px solid #3b82f6; background: #f8fafc; }
+    .central { text-align: center; }
+    .text-bold { font-weight: bold; }
+    .text-blue { color: #1e40af; }
+    .check-moderno { width: 18px; height: 18px; cursor: pointer; accent-color: #3b82f6; transition: 0.1s;}
+    .check-moderno:hover { transform: scale(1.15); }
+    tbody tr:hover { background-color: #f1f5f9 !important; }
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script>
-    // === AGREGAR NUEVA FILA MANUAL ===
     function agregarNuevaFila() {
         const tbody = document.querySelector("#tablaModelos tbody");
         const molde = document.getElementById('fila-molde');
@@ -176,7 +187,7 @@
         nueva.querySelector('.val-modelo').focus();
     }
 
-    // === SÚPER IMPORTADOR CON DETECCIÓN DE CHECKBOX ===
+    // === IMPORTADOR DE EXCEL (LEE TRUE/FALSE) ===
     document.getElementById('csvImportar').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -191,9 +202,10 @@
                 const fragmento = document.createDocumentFragment();
                 let agregados = 0;
 
+                // Ahora detecta "TRUE" (y algunas variables por seguridad)
                 const checkValor = (val) => {
                     let v = String(val || '').trim().toUpperCase();
-                    return ['SI', 'TRUE', '1', 'YES', 'X'].includes(v);
+                    return v === 'TRUE' || v === 'SI' || v === 'X';
                 };
 
                 results.data.forEach(item => {
@@ -203,18 +215,19 @@
                     const nueva = molde.cloneNode(true);
                     nueva.id = "";
                     nueva.style.display = "";
-                    nueva.style.backgroundColor = "#fffbeb"; // Resaltado temporal
+                    nueva.style.backgroundColor = "#fffbeb"; 
 
                     nueva.querySelector('.val-modelo').value = modelo;
-                    nueva.querySelector('.val-titulo').value = item['TITULO'] || '';
                     nueva.querySelector('.val-marca').value = item['MARCA'] || '';
+                    nueva.querySelector('.val-categoria').value = item['CATEGORIA'] || '';
+                    nueva.querySelector('.val-titulo').value = item['TITULO'] || '';
                     
-                    // Activamos los checks si el Excel dice "SI", "X" o "TRUE"
-                    nueva.querySelector('.val-inv').checked = checkValor(item['INVENTARIADO']);
+                    // Activamos casillas según el TRUE/FALSE del excel
+                    nueva.querySelector('.val-inv').checked = checkValor(item['INVENTARIADOPORLOSPERCHERONES'] || item['INVENTARIADO']);
                     nueva.querySelector('.val-ml').checked = checkValor(item['MERCADOLIBRE'] || item['MERCADO LIBRE']);
                     nueva.querySelector('.val-fbl').checked = checkValor(item['FALABELLA']);
                     nueva.querySelector('.val-cdt').checked = checkValor(item['CREDITIENDA']);
-                    nueva.querySelector('.val-web').checked = checkValor(item['PAGINAWEB'] || item['PÁGINA WEB'] || item['WEB']);
+                    nueva.querySelector('.val-web').checked = checkValor(item['PAGINAWEB'] || item['WEB']);
 
                     fragmento.appendChild(nueva);
                     agregados++;
@@ -222,12 +235,12 @@
 
                 tbody.insertBefore(fragmento, tbody.firstChild);
                 document.getElementById('csvImportar').value = ""; 
-                alert(`¡Se cargaron ${agregados} modelos desde el Excel en pantalla! Revisa y presiona Guardar Cambios.`);
+                alert(`¡Cargados ${agregados} modelos! Las casillas con TRUE fueron marcadas. Revisa y presiona Guardar Cambios.`);
             }
         });
     });
 
-    // === GUARDAR TODO A DJANGO ===
+    // === GUARDAR A LA BASE DE DATOS ===
     function guardarModelos() {
         const filas = document.querySelectorAll('.fila-modelo:not(#fila-molde)');
         let datos = [];
@@ -238,31 +251,30 @@
 
             datos.push({
                 'MODELO': modelo,
-                'TÍTULO': fila.querySelector('.val-titulo').value.trim(),
                 'MARCA': fila.querySelector('.val-marca').value.trim(),
-                'INVENTARIADO': fila.querySelector('.val-inv').checked ? 'SI' : 'NO',
-                'MERCADO LIBRE': fila.querySelector('.val-ml').checked ? 'SI' : 'NO',
-                'FALABELLA': fila.querySelector('.val-fbl').checked ? 'SI' : 'NO',
-                'CREDITIENDA': fila.querySelector('.val-cdt').checked ? 'SI' : 'NO',
-                'PÁGINA WEB': fila.querySelector('.val-web').checked ? 'SI' : 'NO'
+                'CATEGORÍA': fila.querySelector('.val-categoria').value.trim(),
+                'TÍTULO': fila.querySelector('.val-titulo').value.trim(),
+                // Enviamos TRUE o FALSE al servidor
+                'INVENTARIADO POR LOS PERCHERONES': fila.querySelector('.val-inv').checked ? 'TRUE' : 'FALSE',
+                'MERCADO LIBRE': fila.querySelector('.val-ml').checked ? 'TRUE' : 'FALSE',
+                'FALABELLA': fila.querySelector('.val-fbl').checked ? 'TRUE' : 'FALSE',
+                'CREDITIENDA': fila.querySelector('.val-cdt').checked ? 'TRUE' : 'FALSE',
+                'PÁGINA WEB': fila.querySelector('.val-web').checked ? 'TRUE' : 'FALSE'
             });
         });
 
         if (datos.length === 0) {
-            alert("No hay datos válidos para guardar."); return;
+            alert("No hay datos para guardar."); return;
         }
 
         const btn = document.getElementById('btnGuardar');
-        const originalText = btn.innerHTML;
+        const text = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
         btn.disabled = true;
 
         fetch("{% url 'guardar_modelos_masivos' %}", {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
             body: JSON.stringify({ referencias: datos })
         })
         .then(res => res.json())
@@ -274,11 +286,8 @@
                 alert("Error: " + data.message);
             }
         })
-        .catch(err => alert("Ocurrió un error de conexión."))
-        .finally(() => {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        });
+        .catch(err => alert("Ocurrió un error."))
+        .finally(() => { btn.innerHTML = text; btn.disabled = false; });
     }
 </script>
 {% endblock %}

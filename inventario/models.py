@@ -45,6 +45,7 @@ class Producto(models.Model):
     sku = models.CharField(max_length=50, unique=True, verbose_name="SKU")
     modelo = models.CharField(max_length=100, verbose_name="Modelo")
     marca = models.CharField(max_length=100, blank=True, null=True, verbose_name="Marca")
+    categoria = models.CharField(max_length=150, blank=True, null=True, verbose_name="Categoría")
     titulo = models.CharField(max_length=255, verbose_name="Título / Descripción")
     codigo_ean = models.CharField(max_length=100, blank=True, null=True, verbose_name="Código EAN")
     ubicacion = models.CharField(max_length=100, blank=True, null=True, verbose_name="Ubicación Base")

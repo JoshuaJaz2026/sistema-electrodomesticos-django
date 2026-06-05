@@ -1139,22 +1139,24 @@ def exportar_modelos_excel(request):
     response.write('\ufeff'.encode('utf8'))
     
     writer = csv.writer(response, delimiter=';')
+    # NUEVO ORDEN DE COLUMNAS EXACTO
     writer.writerow([
-        'MODELO', 'TÍTULO', 'MARCA', 'STOCK', 
-        'INVENTARIADO', 'MERCADO LIBRE', 'FALABELLA', 'CREDITIENDA', 'PÁGINA WEB'
+        'MODELO', 'MARCA', 'CATEGORÍA', 'TÍTULO', 'STOCK', 
+        'INVENTARIADO POR LOS PERCHERONES', 'MERCADO LIBRE', 'FALABELLA', 'CREDITIENDA', 'PÁGINA WEB'
     ])
     
     for p in Producto.objects.all().order_by('-id'):
         writer.writerow([
             p.modelo or '', 
-            p.titulo or '', 
             p.marca or '', 
-            p.stock_actual, # Esto es de solo lectura, se calcula solo
-            'SI' if p.activo_intercorp else 'NO',
-            'SI' if p.activo_ml else 'NO',
-            'SI' if p.activo_falabella else 'NO',
-            'SI' if p.activo_creditienda else 'NO',
-            'SI' if p.activo_web else 'NO'
+            p.categoria or '', 
+            p.titulo or '', 
+            p.stock_actual, # Bloqueado, solo lectura
+            'TRUE' if p.activo_intercorp else 'FALSE',
+            'TRUE' if p.activo_ml else 'FALSE',
+            'TRUE' if p.activo_falabella else 'FALSE',
+            'TRUE' if p.activo_creditienda else 'FALSE',
+            'TRUE' if p.activo_web else 'FALSE'
         ])
         
     return response
@@ -1169,7 +1171,6 @@ def guardar_modelos_masivos(request):
             objetos_a_actualizar = []
             objetos_a_crear = []
             
-            # Buscamos todos los modelos existentes para no ir a la BD uno por uno
             modelos_existentes = {p.modelo: p for p in Producto.objects.all() if p.modelo}
 
             for fila in filas:
@@ -1179,23 +1180,23 @@ def guardar_modelos_masivos(request):
 
                 titulo = str(fila.get('TÍTULO') or fila.get('TITULO') or '').strip()
                 marca = str(fila.get('MARCA') or '').strip()
+                categoria = str(fila.get('CATEGORÍA') or fila.get('CATEGORIA') or '').strip()
                 
-                # Función para leer las casillas (Acepta "SI", "TRUE", "1" o booleanos nativos)
+                # Función para leer las casillas estrictamente como TRUE
                 def es_activo(valor):
-                    v = str(valor).strip().upper()
-                    return v in ['SI', 'TRUE', '1', 'YES', 'X']
+                    return str(valor).strip().upper() == 'TRUE'
 
-                inv = es_activo(fila.get('INVENTARIADO'))
+                inv = es_activo(fila.get('INVENTARIADO POR LOS PERCHERONES') or fila.get('INVENTARIADO'))
                 ml = es_activo(fila.get('MERCADO LIBRE'))
                 fbl = es_activo(fila.get('FALABELLA'))
                 cdt = es_activo(fila.get('CREDITIENDA'))
                 web = es_activo(fila.get('PÁGINA WEB') or fila.get('PAGINA WEB'))
 
                 if modelo in modelos_existentes:
-                    # Actualizamos el existente
                     obj = modelos_existentes[modelo]
                     obj.titulo = titulo
                     obj.marca = marca
+                    obj.categoria = categoria
                     obj.activo_intercorp = inv
                     obj.activo_ml = ml
                     obj.activo_falabella = fbl
@@ -1203,13 +1204,14 @@ def guardar_modelos_masivos(request):
                     obj.activo_web = web
                     objetos_a_actualizar.append(obj)
                 else:
-                    # Creamos uno nuevo (Generando un SKU aleatorio porque es obligatorio en tu BD)
+                    import uuid
                     nuevo_sku = f"SKU-{uuid.uuid4().hex[:8].upper()}"
                     nuevo_obj = Producto(
                         sku=nuevo_sku,
                         modelo=modelo,
                         titulo=titulo,
                         marca=marca,
+                        categoria=categoria,
                         activo_intercorp=inv,
                         activo_ml=ml,
                         activo_falabella=fbl,
@@ -1222,7 +1224,7 @@ def guardar_modelos_masivos(request):
                 if objetos_a_actualizar:
                     Producto.objects.bulk_update(
                         objetos_a_actualizar, 
-                        ['titulo', 'marca', 'activo_intercorp', 'activo_ml', 'activo_falabella', 'activo_creditienda', 'activo_web']
+                        ['titulo', 'marca', 'categoria', 'activo_intercorp', 'activo_ml', 'activo_falabella', 'activo_creditienda', 'activo_web']
                     )
                 if objetos_a_crear:
                     Producto.objects.bulk_create(objetos_a_crear)
@@ -1230,6 +1232,4 @@ def guardar_modelos_masivos(request):
             return JsonResponse({'status': 'ok', 'message': f'Se actualizaron {len(objetos_a_actualizar)} y crearon {len(objetos_a_crear)} modelos.'})
 
         except Exception as e:
-            import traceback
-            print(traceback.format_exc())
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
