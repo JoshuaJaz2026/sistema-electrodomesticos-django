@@ -105,7 +105,7 @@ def percheron_modelos(request):
     productos_lista = Producto.objects.all().order_by('-id')
     
     # Paginación
-    paginator = Paginator(productos_lista, 50) 
+    paginator = Paginator(productos_lista, 20) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
