@@ -99,12 +99,19 @@ def percheron_registros(request):
 
 @login_required
 def percheron_modelos(request):
-    canal = request.session.get('canal_activo', 'Web')
-    color = request.session.get('color_actual', '#3498DB')
-    icono = request.session.get('icono_actual', 'fas fa-globe')
+    canal = request.session.get('canal_activo', 'Percheron')
     
+    # Traemos todos los productos maestros
+    productos_lista = Producto.objects.all().order_by('-id')
+    
+    # Paginación
+    paginator = Paginator(productos_lista, 50) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'inventario/percheron_modelos.html', {
-        'canal': canal, 'color_actual': color, 'icono_actual': icono
+        'canal': canal,
+        'page_obj': page_obj,
     })
 
 @login_required
@@ -1123,3 +1130,106 @@ def descargar_plantilla_ingresos(request):
     ])
     
     return response
+
+
+@login_required
+def exportar_modelos_excel(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="Directorio_Modelos.csv"'
+    response.write('\ufeff'.encode('utf8'))
+    
+    writer = csv.writer(response, delimiter=';')
+    writer.writerow([
+        'MODELO', 'TÍTULO', 'MARCA', 'STOCK', 
+        'INVENTARIADO', 'MERCADO LIBRE', 'FALABELLA', 'CREDITIENDA', 'PÁGINA WEB'
+    ])
+    
+    for p in Producto.objects.all().order_by('-id'):
+        writer.writerow([
+            p.modelo or '', 
+            p.titulo or '', 
+            p.marca or '', 
+            p.stock_actual, # Esto es de solo lectura, se calcula solo
+            'SI' if p.activo_intercorp else 'NO',
+            'SI' if p.activo_ml else 'NO',
+            'SI' if p.activo_falabella else 'NO',
+            'SI' if p.activo_creditienda else 'NO',
+            'SI' if p.activo_web else 'NO'
+        ])
+        
+    return response
+
+@login_required
+def guardar_modelos_masivos(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            filas = data.get('referencias', [])
+
+            objetos_a_actualizar = []
+            objetos_a_crear = []
+            
+            # Buscamos todos los modelos existentes para no ir a la BD uno por uno
+            modelos_existentes = {p.modelo: p for p in Producto.objects.all() if p.modelo}
+
+            for fila in filas:
+                modelo = str(fila.get('MODELO') or '').strip()
+                if not modelo:
+                    continue
+
+                titulo = str(fila.get('TÍTULO') or fila.get('TITULO') or '').strip()
+                marca = str(fila.get('MARCA') or '').strip()
+                
+                # Función para leer las casillas (Acepta "SI", "TRUE", "1" o booleanos nativos)
+                def es_activo(valor):
+                    v = str(valor).strip().upper()
+                    return v in ['SI', 'TRUE', '1', 'YES', 'X']
+
+                inv = es_activo(fila.get('INVENTARIADO'))
+                ml = es_activo(fila.get('MERCADO LIBRE'))
+                fbl = es_activo(fila.get('FALABELLA'))
+                cdt = es_activo(fila.get('CREDITIENDA'))
+                web = es_activo(fila.get('PÁGINA WEB') or fila.get('PAGINA WEB'))
+
+                if modelo in modelos_existentes:
+                    # Actualizamos el existente
+                    obj = modelos_existentes[modelo]
+                    obj.titulo = titulo
+                    obj.marca = marca
+                    obj.activo_intercorp = inv
+                    obj.activo_ml = ml
+                    obj.activo_falabella = fbl
+                    obj.activo_creditienda = cdt
+                    obj.activo_web = web
+                    objetos_a_actualizar.append(obj)
+                else:
+                    # Creamos uno nuevo (Generando un SKU aleatorio porque es obligatorio en tu BD)
+                    nuevo_sku = f"SKU-{uuid.uuid4().hex[:8].upper()}"
+                    nuevo_obj = Producto(
+                        sku=nuevo_sku,
+                        modelo=modelo,
+                        titulo=titulo,
+                        marca=marca,
+                        activo_intercorp=inv,
+                        activo_ml=ml,
+                        activo_falabella=fbl,
+                        activo_creditienda=cdt,
+                        activo_web=web
+                    )
+                    objetos_a_crear.append(nuevo_obj)
+
+            with transaction.atomic():
+                if objetos_a_actualizar:
+                    Producto.objects.bulk_update(
+                        objetos_a_actualizar, 
+                        ['titulo', 'marca', 'activo_intercorp', 'activo_ml', 'activo_falabella', 'activo_creditienda', 'activo_web']
+                    )
+                if objetos_a_crear:
+                    Producto.objects.bulk_create(objetos_a_crear)
+
+            return JsonResponse({'status': 'ok', 'message': f'Se actualizaron {len(objetos_a_actualizar)} y crearon {len(objetos_a_crear)} modelos.'})
+
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc())
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)

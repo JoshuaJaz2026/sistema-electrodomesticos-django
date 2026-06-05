@@ -89,4 +89,7 @@ urlpatterns = [
     path('percheron/ingresos/guardar/', views.guardar_ingresos_masivos, name='guardar_ingresos_masivos'),
     path('percheron/ingresos/descargar-plantilla/', views.descargar_plantilla_ingresos, name='descargar_plantilla_ingresos'),
     path('percheron/registros/exportar/', views.exportar_registros_excel, name='exportar_registros_excel'),
+
+    path('percheron/modelos/exportar/', views.exportar_modelos_excel, name='exportar_modelos_excel'),
+    path('percheron/modelos/guardar/', views.guardar_modelos_masivos, name='guardar_modelos_masivos'),
 ]
