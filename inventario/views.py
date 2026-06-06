@@ -61,17 +61,21 @@ def inventario_magazzino(request):
 def percheron_ingresos(request):
     canal = request.session.get('canal_activo', 'Percheron')
     
-    # Traemos todos los ingresos, del más reciente al más antiguo
-    ingresos_lista = IngresoPercheron.objects.all().order_by('fecha_ingreso', 'id')
-    
-    # Paginación (para que no carguen mil de golpe y se cuelgue)
-    paginator = Paginator(ingresos_lista, 50) 
+    # Paginación normal de los ingresos
+    registros_lista = IngresoPercheron.objects.all().order_by('-id')
+    paginator = Paginator(registros_lista, 100) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # === NUEVA LÓGICA: DICCIONARIO DE TÍTULOS ===
+    # Traemos todos los productos y armamos un diccionario { 'EPS10': 'VAPORIZADOR...', ... }
+    productos_db = Producto.objects.all()
+    dict_titulos = {p.modelo: p.titulo for p in productos_db if p.modelo}
+
     return render(request, 'inventario/percheron_ingresos.html', {
         'canal': canal,
-        'page_obj': page_obj, # Enviamos los datos como 'page_obj'
+        'page_obj': page_obj,
+        'titulos_json': json.dumps(dict_titulos) # Lo enviamos al HTML
     })
 
 @login_required

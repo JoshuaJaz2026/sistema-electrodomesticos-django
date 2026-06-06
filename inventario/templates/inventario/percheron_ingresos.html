@@ -184,6 +184,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
 <script>
+    // === DICCIONARIO INVISIBLE DE TÍTULOS (Enviado desde Django) ===
+    const diccionarioTitulos = {{ titulos_json|safe|default:"{}" }};
+
     let memoriaIngresos = JSON.parse(localStorage.getItem('memoriaIngresosTemp')) || {};
     let ingresosAEliminar = JSON.parse(localStorage.getItem('ingresosAEliminarTemp')) || [];
 
@@ -226,21 +229,32 @@
         nuevaFila.querySelector('.val-modelo').focus();
     }
 
-    // === FUNCIÓN CORREGIDA A +16 PARA QUE INICIE EN 18 ===
+    // === FUNCIÓN ACTUALIZADA: Genera SKU y busca Título automáticamente ===
     function autogenerarSKU(inputModelo) {
         const fila = inputModelo.closest('tr');
         const inputSku = fila.querySelector('.val-sku');
+        const inputTitulo = fila.querySelector('.val-titulo'); 
         const modelo = inputModelo.value.trim().toUpperCase();
 
-        if (modelo !== '' && inputSku.value === '') {
-            // En HTML la cabecera es 0, el molde es 1. La primera fila real es 2.
-            // Para que 2 se convierta en 18, le sumamos 16. ¡Magia matemática!
-            const indiceFila = fila.rowIndex; 
-            inputSku.value = modelo + "-" + (indiceFila + 16);
+        if (modelo !== '') {
+            // 1. Buscamos si existe el título en nuestro diccionario
+            if (diccionarioTitulos[modelo]) {
+                inputTitulo.value = diccionarioTitulos[modelo];
+            } else {
+                inputTitulo.value = 'Modelo nuevo / Sin título'; 
+            }
+
+            // 2. Generamos el SKU si está vacío
+            if (inputSku.value === '') {
+                const indiceFila = fila.rowIndex; 
+                inputSku.value = modelo + "-" + (indiceFila + 16);
+            }
             
             registrarCambioIngreso(inputSku);
-        } else if (modelo === '') {
+        } else {
+            // Si borran el modelo, limpiamos todo
             inputSku.value = '';
+            inputTitulo.value = '';
         }
     }
 
@@ -342,9 +356,7 @@
                     let skuLeido = buscarColumna(item, ['SKU']);
                     if (!modeloLeido && !skuLeido) return; 
 
-                    // === EL MOTOR DEL EXCEL CORREGIDO A +18 ===
                     if (!skuLeido && modeloLeido) {
-                        // totalFilasActuales + index (el bucle actual 0, 1, 2...) + 18 (tu base exacta del Excel)
                         let numeroCorrelativo = totalFilasActuales + index + 18;
                         skuLeido = modeloLeido + "-" + numeroCorrelativo;
                     }
@@ -362,7 +374,12 @@
                         fechaCalendario = fechaRaw.substring(0, 10); 
                     }
 
-                    const tituloLeido = buscarColumna(item, ['TITULO', 'DESC']);
+                    // === LÓGICA DE BÚSQUEDA DE TÍTULO PARA EL EXCEL ===
+                    let tituloLeido = buscarColumna(item, ['TITULO', 'DESC']);
+                    if (!tituloLeido && modeloLeido && diccionarioTitulos[modeloLeido]) {
+                        tituloLeido = diccionarioTitulos[modeloLeido];
+                    }
+
                     const eanLeido = buscarColumna(item, ['EAN', 'CODIGO']);
                     const serieLeido = buscarColumna(item, ['SERIE', 'NRO']);
                     const costoLeido = formatNum(buscarColumna(item, ['COSTO']));
@@ -413,7 +430,7 @@
                 const indicador = document.getElementById('indicador-cambios');
                 if(indicador) indicador.style.display = 'inline-block';
 
-                alert(`¡Se procesaron ${importadas} ingresos! El sistema autogeneró los SKUs faltantes. Revisa la tabla y presiona 'Guardar Ingresos'.`);
+                alert(`¡Se procesaron ${importadas} ingresos! El sistema autogeneró los SKUs y Títulos faltantes. Revisa la tabla y presiona 'Guardar Ingresos'.`);
             }
         });
     });
