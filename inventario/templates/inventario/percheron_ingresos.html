@@ -54,7 +54,7 @@
                     <th class="th-rep" style="background-color: #f8fafc; width: 120px;">COSTO UNT.</th>
                     <th class="th-rep" style="background-color: #f8fafc; width: 100px;">ING. X 1UND</th>
                     <th class="th-rep" style="background-color: #f8fafc; width: 200px;">PROVEEDOR / MOTIVO</th>
-                    <th class="th-rep" style="background-color: #f8fafc; width: 120px;">BY:</th>
+                    <th class="th-rep" style="background-color: #f8fafc; width: 130px;">BY:</th>
                     <th class="th-rep" style="background-color: #fef2f2; width: 60px; border-right: none;"><i class="fas fa-trash-alt" style="color: #ef4444;"></i></th>
                 </tr>
             </thead>
@@ -90,9 +90,25 @@
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;">
                         <input type="text" class="celda-input central bold text-dark val-proveedor" oninput="registrarCambioIngreso(this)">
                     </td>
+                    
                     <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                        <input type="text" class="celda-input central text-orange val-by" style="color: #ea580c; font-weight: bold;" oninput="registrarCambioIngreso(this)">
+                        <select class="celda-input central text-orange val-by" style="color: #ea580c; font-weight: bold; cursor: pointer; -webkit-appearance: none; -moz-appearance: none; text-align-last: center;" onchange="registrarCambioIngreso(this)">
+                            <option value="">-- By --</option>
+                            <option value="DAVID">DAVID</option>
+                            <option value="LUIS">LUIS</option>
+                            <option value="CARLOS">CARLOS</option>
+                            <option value="BELÉN">BELÉN</option>
+                            <option value="MILAGROS">MILAGROS</option>
+                            <option value="ALDO">ALDO</option>
+                            <option value="DENISE">DENISE</option>
+                            <option value="JOSHUA">JOSHUA</option>
+                            <option value="KEVIN">KEVIN</option>
+                            <option value="ADAMARI">ADAMARI</option>
+                            <option value="EDUARDO">EDUARDO</option>
+                            <option value="PABLO">PABLO</option>
+                        </select>
                     </td>
+
                     <td style="padding: 0; text-align: center; vertical-align: middle;">
                         <button type="button" onclick="eliminarFilaIngreso(this)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 8px;" title="Eliminar fila">
                             <i class="fas fa-trash-alt"></i>
@@ -133,9 +149,25 @@
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;">
                             <input type="text" value="{{ item.proveedor_motivo|default:'' }}" class="celda-input central bold text-dark val-proveedor" oninput="registrarCambioIngreso(this)">
                         </td>
+                        
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                            <input type="text" value="{{ item.creado_por|default:'' }}" class="celda-input central text-orange val-by" style="color: #ea580c; font-weight: bold;" oninput="registrarCambioIngreso(this)">
+                            <select class="celda-input central text-orange val-by" style="color: #ea580c; font-weight: bold; cursor: pointer; -webkit-appearance: none; -moz-appearance: none; text-align-last: center;" onchange="registrarCambioIngreso(this)">
+                                <option value="" {% if not item.creado_por %}selected{% endif %}>-- By --</option>
+                                <option value="DAVID" {% if item.creado_por == "DAVID" %}selected{% endif %}>DAVID</option>
+                                <option value="LUIS" {% if item.creado_por == "LUIS" %}selected{% endif %}>LUIS</option>
+                                <option value="CARLOS" {% if item.creado_por == "CARLOS" %}selected{% endif %}>CARLOS</option>
+                                <option value="BELÉN" {% if item.creado_por == "BELÉN" %}selected{% endif %}>BELÉN</option>
+                                <option value="MILAGROS" {% if item.creado_por == "MILAGROS" %}selected{% endif %}>MILAGROS</option>
+                                <option value="ALDO" {% if item.creado_por == "ALDO" %}selected{% endif %}>ALDO</option>
+                                <option value="DENISE" {% if item.creado_por == "DENISE" %}selected{% endif %}>DENISE</option>
+                                <option value="JOSHUA" {% if item.creado_por == "JOSHUA" %}selected{% endif %}>JOSHUA</option>
+                                <option value="KEVIN" {% if item.creado_por == "KEVIN" %}selected{% endif %}>KEVIN</option>
+                                <option value="ADAMARI" {% if item.creado_por == "ADAMARI" %}selected{% endif %}>ADAMARI</option>
+                                <option value="EDUARDO" {% if item.creado_por == "EDUARDO" %}selected{% endif %}>EDUARDO</option>
+                                <option value="PABLO" {% if item.creado_por == "PABLO" %}selected{% endif %}>PABLO</option>
+                            </select>
                         </td>
+
                         <td style="padding: 0; text-align: center; vertical-align: middle;">
                             <button type="button" onclick="eliminarFilaIngreso(this)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 8px;" title="Eliminar fila">
                                 <i class="fas fa-trash-alt"></i>
@@ -389,7 +421,9 @@
                     const costoLeido = formatNum(buscarColumna(item, ['COSTO']));
                     const ingLeido = formatNum(buscarColumna(item, ['1UND', 'CANTIDAD', 'UND'])) || 1;
                     const proveedorLeido = buscarColumna(item, ['PROVEEDOR', 'MOTIVO']);
-                    const byLeido = buscarColumna(item, ['BY', 'USUARIO']);
+                    
+                    // EL "ESCUDO" QUE CONVIERTE "denise" A "DENISE" PARA QUE EL COMBO BOX LO RECONOZCA
+                    const byLeido = (buscarColumna(item, ['BY', 'USUARIO']) || '').toUpperCase();
 
                     const key = 'import-' + Math.random().toString(36).substr(2, 9);
                     
