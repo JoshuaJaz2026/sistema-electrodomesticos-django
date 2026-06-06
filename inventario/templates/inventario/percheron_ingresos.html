@@ -226,19 +226,18 @@
         nuevaFila.querySelector('.val-modelo').focus();
     }
 
-    // === FUNCIÓN QUE REEMPLAZA TU FÓRMULA DE EXCEL: =C8&"-"&FILA()+10 ===
+    // === FUNCIÓN CORREGIDA A +16 PARA QUE INICIE EN 18 ===
     function autogenerarSKU(inputModelo) {
         const fila = inputModelo.closest('tr');
         const inputSku = fila.querySelector('.val-sku');
         const modelo = inputModelo.value.trim().toUpperCase();
 
-        // Solo generamos si hay un modelo y si el SKU aún está vacío
         if (modelo !== '' && inputSku.value === '') {
-            // fila.rowIndex nos da el número de fila exacto en la tabla web
+            // En HTML la cabecera es 0, el molde es 1. La primera fila real es 2.
+            // Para que 2 se convierta en 18, le sumamos 16. ¡Magia matemática!
             const indiceFila = fila.rowIndex; 
-            inputSku.value = modelo + "-" + (indiceFila + 10);
+            inputSku.value = modelo + "-" + (indiceFila + 16);
             
-            // Registramos el cambio para que el SKU se guarde en memoria
             registrarCambioIngreso(inputSku);
         } else if (modelo === '') {
             inputSku.value = '';
@@ -320,21 +319,13 @@
 
                 const formatNum = (val) => {
                     if (!val) return 0;
-                    // 1. Borramos la moneda "S/." o "S/" y los espacios
                     let texto = String(val).replace(/S\/\.?/gi, '').trim(); 
-                    
-                    // 2. Dejamos solo números, comas y puntos
                     texto = texto.replace(/[^0-9.,-]/g, '');
-                    
-                    // 3. Si tiene formato gringo (1,250.00) borramos la coma
                     if (texto.indexOf(',') > -1 && texto.indexOf('.') > -1) {
                         texto = texto.replace(/,/g, '');
-                    } 
-                    // 4. Si tiene formato latino (125,00) cambiamos la coma por punto para el cálculo
-                    else if (texto.indexOf(',') > -1) {
+                    } else if (texto.indexOf(',') > -1) {
                         texto = texto.replace(/,/g, '.');
                     }
-                    
                     let num = parseFloat(texto);
                     return isNaN(num) ? 0 : num;
                 };
@@ -344,19 +335,17 @@
                     return llave ? limpiarValor(fila[llave]) : '';
                 };
 
-                // Contamos las filas actuales en la tabla para continuar el correlativo del SKU
-                let totalFilasActuales = tbody.children.length - 1; // Le restamos el molde
+                let totalFilasActuales = tbody.children.length - 1; 
 
                 results.data.forEach((item, index) => {
                     const modeloLeido = buscarColumna(item, ['MODELO']);
                     let skuLeido = buscarColumna(item, ['SKU']);
                     if (!modeloLeido && !skuLeido) return; 
 
-                    // === EL MOTOR DEL EXCEL APLICADO A LA IMPORTACIÓN ===
-                    // Si el SKU viene vacío en el Excel, lo armamos nosotros
+                    // === EL MOTOR DEL EXCEL CORREGIDO A +18 ===
                     if (!skuLeido && modeloLeido) {
-                        // totalFilasActuales + index (el bucle actual) + 10 (tu fórmula base)
-                        let numeroCorrelativo = totalFilasActuales + index + 10;
+                        // totalFilasActuales + index (el bucle actual 0, 1, 2...) + 18 (tu base exacta del Excel)
+                        let numeroCorrelativo = totalFilasActuales + index + 18;
                         skuLeido = modeloLeido + "-" + numeroCorrelativo;
                     }
 
