@@ -27,6 +27,10 @@
             <button type="button" id="btnGuardarIngresos" onclick="guardarDatosPendientes()" style="background-color: #047857; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 <i class="fas fa-save"></i> Guardar Ingresos
             </button>
+
+            <button type="button" onclick="confirmarBorradoTotal()" style="background-color: #ef4444; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-trash"></i> Borrar Todo
+            </button>
         </div>
     </div>
 
@@ -480,6 +484,28 @@
             btn.innerHTML = textoOriginal;
             btn.disabled = false;
         });
+    }
+
+    // === NUEVA LÓGICA: Confirmar y Borrar Todos Los Ingresos ===
+    function confirmarBorradoTotal() {
+        if (confirm("¡ATENCIÓN! ¿Estás totalmente seguro de borrar TODOS los ingresos y resetear el stock de todos los modelos a cero? Esta acción no se puede deshacer.")) {
+            
+            fetch("{% url 'borrar_todos_los_ingresos' %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'ok') {
+                    localStorage.removeItem('memoriaIngresosTemp');
+                    localStorage.removeItem('ingresosAEliminarTemp');
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert("Error: " + data.message);
+                }
+            });
+        }
     }
 </script>
 {% endblock %}
