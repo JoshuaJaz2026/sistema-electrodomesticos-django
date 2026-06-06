@@ -1250,7 +1250,8 @@ def borrar_todos_los_ingresos(request):
                 IngresoPercheron.objects.all().delete()
                 
                 # EL CAMBIO ESTÁ AQUÍ: Usamos "stock" en lugar de "stock_actual"
-                Producto.objects.all().update(stock=0)
+                # Cámbialo de nuevo a esto:
+                Producto.objects.all().update(stock_actual=0)
             
             return JsonResponse({'status': 'ok', 'message': '¡Base de datos de ingresos limpiada y stocks reseteados a 0!'})
         except Exception as e:
