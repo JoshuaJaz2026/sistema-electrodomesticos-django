@@ -54,7 +54,10 @@ class Producto(models.Model):
     costo_dolares = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Costo Unit. ($)")
     costo_soles = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Costo Cero (S/.)")
     
-    # NUEVO: Casillas (Checkboxes) para tu pantalla "Consulta Rápida"
+    # NUEVO: ¡La columna física real para el Stock!
+    stock_actual = models.IntegerField(default=0, verbose_name="Stock Actual")
+    
+    # Casillas (Checkboxes) para tu pantalla "Consulta Rápida"
     activo_ml = models.BooleanField(default=False, verbose_name="Mercado Libre")
     activo_ml_jr = models.BooleanField(default=False, verbose_name="Mercado Libre Junior")
     activo_falabella = models.BooleanField(default=False, verbose_name="Falabella")
@@ -64,13 +67,6 @@ class Producto(models.Model):
 
     def __str__(self):
         return f"{self.sku} - {self.titulo}"
-
-    # Función mágica para calcular el stock en tiempo real
-    @property
-    def stock_actual(self):
-        ingresos = sum(mov.cantidad for mov in self.movimientos_percheron.filter(tipo='IN'))
-        salidas = sum(mov.cantidad for mov in self.movimientos_percheron.filter(tipo='OUT'))
-        return ingresos - salidas
 
 # =========================================================
 # 4. KARDEX PERCHERÓN (El Historial de Movimientos)
@@ -221,18 +217,12 @@ class ReporteMercadoLibre(models.Model):
 # 5. REGISTRO DE INGRESOS - PERCHERON
 # =========================================================
 class IngresoPercheron(models.Model):
-    # CORRECCIÓN: Se quita unique=True y se permite null/blank
     sku = models.CharField(max_length=150, blank=True, null=True, verbose_name="SKU Autogenerado")
-    
     modelo = models.CharField(max_length=200, blank=True, null=True, verbose_name="Modelo")
     titulo = models.CharField(max_length=500, blank=True, null=True, verbose_name="Título")
     fecha_ingreso = models.DateField(blank=True, null=True, verbose_name="Fecha de Ingreso")
-    
     codigo_ean = models.CharField(max_length=150, blank=True, null=True, verbose_name="Código EAN")
-    
-    # CORRECCIÓN: Se quita unique=True para evitar bloqueos con filas vacías
     serie_nro = models.CharField(max_length=200, blank=True, null=True, verbose_name="Serie / N°")
-    
     costo_unitario = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Costo Unt.")
     cantidad = models.IntegerField(default=1, verbose_name="Ing. x 1 und")
     proveedor_motivo = models.CharField(max_length=300, blank=True, null=True, verbose_name="Proveedor / Motivo")
