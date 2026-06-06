@@ -92,4 +92,5 @@ urlpatterns = [
 
     path('percheron/modelos/exportar/', views.exportar_modelos_excel, name='exportar_modelos_excel'),
     path('percheron/modelos/guardar/', views.guardar_modelos_masivos, name='guardar_modelos_masivos'),
+    path('borrar-ingresos/', views.borrar_todos_los_ingresos, name='borrar_todos_los_ingresos'),
 ]

@@ -14,6 +14,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.db import transaction
+from django.views.decorators.csrf import csrf_exempt
 from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron
 
 # =========================================================
@@ -1237,3 +1238,19 @@ def guardar_modelos_masivos(request):
 
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+        
+@login_required
+@csrf_exempt
+def borrar_todos_los_ingresos(request):
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                # 1. Borramos todos los ingresos
+                IngresoPercheron.objects.all().delete()
+                # 2. Reseteamos el stock de todos los productos
+                Producto.objects.all().update(stock_actual=0)
+            
+            return JsonResponse({'status': 'ok', 'message': '¡Base de datos de ingresos limpiada y stocks reseteados a 0!'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Solo permitido POST'})
