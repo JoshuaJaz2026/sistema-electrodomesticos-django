@@ -16,7 +16,7 @@ from django.contrib.auth.views import LoginView
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 
- from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron
+from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron
 
 # =========================================================
 # 1. EL PRE-LOGIN (Portal público)
