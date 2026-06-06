@@ -64,7 +64,7 @@ def percheron_ingresos(request):
     canal = request.session.get('canal_activo', 'Percheron')
     
     # Paginación normal de los ingresos
-    registros_lista = IngresoPercheron.objects.all().order_by('-id')
+    registros_lista = IngresoPercheron.objects.all().order_by('id')
     paginator = Paginator(registros_lista, 100) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
