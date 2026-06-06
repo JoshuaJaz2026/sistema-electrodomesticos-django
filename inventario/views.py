@@ -1172,73 +1172,49 @@ def guardar_modelos_masivos(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            filas = data.get('referencias', [])
-
-            objetos_a_actualizar = []
-            objetos_a_crear = []
+            referencias = data.get('referencias', [])
             
-            modelos_existentes = {p.modelo: p for p in Producto.objects.all() if p.modelo}
-
-            for fila in filas:
-                modelo = str(fila.get('MODELO') or '').strip()
-                if not modelo:
-                    continue
-
-                titulo = str(fila.get('TÍTULO') or fila.get('TITULO') or '').strip()
-                marca = str(fila.get('MARCA') or '').strip()
-                categoria = str(fila.get('CATEGORÍA') or fila.get('CATEGORIA') or '').strip()
-                
-                # Función para leer las casillas estrictamente como TRUE
-                def es_activo(valor):
-                    return str(valor).strip().upper() == 'TRUE'
-
-                inv = es_activo(fila.get('INVENTARIADO POR LOS PERCHERONES') or fila.get('INVENTARIADO'))
-                ml = es_activo(fila.get('MERCADO LIBRE'))
-                fbl = es_activo(fila.get('FALABELLA'))
-                cdt = es_activo(fila.get('CREDITIENDA'))
-                web = es_activo(fila.get('PÁGINA WEB') or fila.get('PAGINA WEB'))
-
-                if modelo in modelos_existentes:
-                    obj = modelos_existentes[modelo]
-                    obj.titulo = titulo
-                    obj.marca = marca
-                    obj.categoria = categoria
-                    obj.activo_intercorp = inv
-                    obj.activo_ml = ml
-                    obj.activo_falabella = fbl
-                    obj.activo_creditienda = cdt
-                    obj.activo_web = web
-                    objetos_a_actualizar.append(obj)
-                else:
-                    import uuid
-                    nuevo_sku = f"SKU-{uuid.uuid4().hex[:8].upper()}"
-                    nuevo_obj = Producto(
-                        sku=nuevo_sku,
-                        modelo=modelo,
-                        titulo=titulo,
-                        marca=marca,
-                        categoria=categoria,
-                        activo_intercorp=inv,
-                        activo_ml=ml,
-                        activo_falabella=fbl,
-                        activo_creditienda=cdt,
-                        activo_web=web
-                    )
-                    objetos_a_crear.append(nuevo_obj)
+            if not referencias:
+                return JsonResponse({'status': 'error', 'message': 'No se enviaron datos.'})
 
             with transaction.atomic():
-                if objetos_a_actualizar:
-                    Producto.objects.bulk_update(
-                        objetos_a_actualizar, 
-                        ['titulo', 'marca', 'categoria', 'activo_intercorp', 'activo_ml', 'activo_falabella', 'activo_creditienda', 'activo_web']
+                for item in referencias:
+                    modelo_val = str(item.get('MODELO') or '').strip()
+                    if not modelo_val:
+                        continue
+                    
+                    # Buscamos si el modelo ya existe. Si no existe, lo crea.
+                    # Le asignamos un SKU temporal autogenerado si es nuevo.
+                    obj, created = Producto.objects.get_or_create(
+                        modelo=modelo_val, 
+                        defaults={
+                            'sku': f'SKU-{uuid.uuid4().hex[:8].upper()}', 
+                            'titulo': item.get('TÍTULO', '')
+                        }
                     )
-                if objetos_a_crear:
-                    Producto.objects.bulk_create(objetos_a_crear)
-
-            return JsonResponse({'status': 'ok', 'message': f'Se actualizaron {len(objetos_a_actualizar)} y crearon {len(objetos_a_crear)} modelos.'})
-
+                    
+                    # Actualizamos todos sus datos con lo que viene de la tabla/Excel
+                    obj.marca = item.get('MARCA', '')
+                    obj.categoria = item.get('CATEGORÍA', '')
+                    obj.titulo = item.get('TÍTULO', '')
+                    
+                    # Actualizamos los checks de disponibilidad (True o False)
+                    obj.activo_intercorp = True if item.get('INVENTARIADO POR LOS PERCHERONES') == 'TRUE' else False
+                    obj.activo_ml = True if item.get('MERCADO LIBRE') == 'TRUE' else False
+                    obj.activo_falabella = True if item.get('FALABELLA') == 'TRUE' else False
+                    obj.activo_creditienda = True if item.get('CREDITIENDA') == 'TRUE' else False
+                    obj.activo_web = True if item.get('PÁGINA WEB') == 'TRUE' else False
+                    
+                    obj.save()
+                    
+            return JsonResponse({'status': 'ok', 'message': '¡Directorio de Modelos actualizado correctamente!'})
+            
         except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            import traceback
+            print(traceback.format_exc()) # Esto imprimirá el error en la consola negra si algo más falla
+            return JsonResponse({'status': 'error', 'message': f'Error en el servidor: {str(e)}'})
+            
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
         
 @login_required
 @csrf_exempt
