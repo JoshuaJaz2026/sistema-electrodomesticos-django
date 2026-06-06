@@ -83,24 +83,68 @@ def percheron_ingresos(request):
 @login_required
 def percheron_registros(request):
     canal = request.session.get('canal_activo', 'Percheron')
-    color = request.session.get('color_actual', '#3498DB')
-    icono = request.session.get('icono_actual', 'fas fa-globe')
     
-    # DESCONECTADO TEMPORALMENTE: 
-    # registros_lista = IngresoPercheron.objects.all().order_by('-fecha_ingreso', '-id')
+    # 1. Obtenemos TODOS los ingresos (Esta es nuestra base equivalente a la hoja IN)
+    # Ordenados por ID (del más antiguo al más reciente)
+    ingresos_db = IngresoPercheron.objects.all().order_by('id')
     
-    # Enviamos una lista vacía hasta que me des la nueva lógica
-    registros_lista = []
+    # 2. Obtenemos los Modelos para hacer el equivalente a "BUSCARV"
+    productos_db = Producto.objects.all()
+    dict_productos = {p.modelo: p for p in productos_db if p.modelo}
     
-    paginator = Paginator(registros_lista, 50) 
+    registros_data = []
+    
+    # 3. Recorremos fila por fila cruzando la información
+    for ing in ingresos_db:
+        prod = dict_productos.get(ing.modelo)
+        
+        # BUSCARV simulado (Traemos Marca y Ubicación del catálogo)
+        marca_val = prod.marca if prod else 'SIN MARCA'
+        ubicacion_val = prod.ubicacion if prod else 'SIN UBICACIÓN'
+        
+        # SUMAR.SI simulado (Por ahora en 0, se conectarán al crear las vistas de salidas)
+        out_ml = 0
+        out_fbl = 0
+        out_cdt = 0
+        out_vl = 0
+        out_tk = 0
+        out_intcp = 0
+        out_ml2 = 0
+        
+        total_out = out_ml + out_fbl + out_cdt + out_vl + out_tk + out_intcp + out_ml2
+        stock_val = ing.cantidad - total_out
+        
+        registros_data.append({
+            'sku': ing.sku,
+            'marca': marca_val,
+            'fecha_ingreso': ing.fecha_ingreso,
+            'codigo_ean': ing.codigo_ean,
+            'serie_nro': ing.serie_nro,
+            'costo_unitario': ing.costo_unitario,
+            'proveedor': ing.proveedor_motivo,
+            'ubicacion': ubicacion_val,
+            'registrado_por': ing.creado_por,
+            'modelo': ing.modelo,
+            'titulo': ing.titulo,
+            'in_cant': ing.cantidad,
+            'out_ml': out_ml,
+            'out_fbl': out_fbl,
+            'out_cdt': out_cdt,
+            'out_vl': out_vl,
+            'out_tk': out_tk,
+            'out_intcp': out_intcp,
+            'out_ml2': out_ml2,
+            'stock': stock_val
+        })
+        
+    # 4. Paginación
+    paginator = Paginator(registros_data, 100) # Muestra 100 registros por página
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     return render(request, 'inventario/percheron_registros.html', {
-        'canal': canal, 
-        'color_actual': color, 
-        'icono_actual': icono, 
-        'page_obj': page_obj,
+        'canal': canal,
+        'page_obj': page_obj
     })
 
 @login_required
