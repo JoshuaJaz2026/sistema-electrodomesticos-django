@@ -151,19 +151,19 @@ def percheron_registros(request):
 def percheron_modelos(request):
     canal = request.session.get('canal_activo', 'Percheron')
     
-    # Traemos todos los productos maestros
-    productos_lista = Producto.objects.all().order_by('id')
+    # Traemos todos los modelos registrados. 
+    # El "-stock_actual" hace que los que tienen más stock aparezcan arriba (como en tu Excel)
+    modelos_db = Producto.objects.all().order_by('-stock_actual')
     
-    # Paginación
-    paginator = Paginator(productos_lista, 20) 
+    # Paginación para que la página cargue rápido
+    paginator = Paginator(modelos_db, 100)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     return render(request, 'inventario/percheron_modelos.html', {
         'canal': canal,
-        'page_obj': page_obj,
+        'page_obj': page_obj
     })
-
 @login_required
 def exportar_registros_excel(request):
     response = HttpResponse(content_type='text/csv')

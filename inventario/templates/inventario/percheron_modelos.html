@@ -36,7 +36,7 @@
     </div>
 
     <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">
-        Las columnas Marca y Categoría tienen un buscador desplegable (Combo Box). <strong style="color: #b91c1c;">La columna STOCK es de solo lectura.</strong>
+        Las columnas Marca y Categoría tienen un buscador desplegable (Combo Box). <strong style="color: #b91c1c;">La columna STOCK es de solo lectura y se actualiza sola.</strong>
     </p>
 
     <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
@@ -62,7 +62,9 @@
                     <td style="padding: 8px;"><input type="text" list="lista-marcas" class="input-limpio val-marca" placeholder="Elegir Marca..."></td>
                     <td style="padding: 8px;"><input type="text" list="lista-categorias" class="input-limpio val-categoria" placeholder="Elegir Categoría..."></td>
                     <td style="padding: 8px;"><input type="text" class="input-limpio val-titulo" placeholder="Descripción..."></td>
-                    <td style="padding: 8px; background-color: #eff6ff;"><input type="text" value="0" readonly class="input-limpio central text-bold text-blue" style="cursor: not-allowed;"></td>
+                    <td style="padding: 8px; background-color: #f8fafc;">
+                        <input type="text" value="0" readonly class="input-limpio central text-bold" style="cursor: not-allowed; color: #94a3b8; font-size: 1.1em;">
+                    </td>
                     
                     <td style="padding: 8px; text-align: center; border-left: 2px solid #e2e8f0; transition: 0.3s;" class="celda-paint"><input type="checkbox" class="check-moderno val-inv" onchange="pintarCelda(this, 'bg-inv')"></td>
                     <td style="padding: 8px; text-align: center; transition: 0.3s;" class="celda-paint"><input type="checkbox" class="check-moderno val-ml" onchange="pintarCelda(this, 'bg-ml')"></td>
@@ -78,8 +80,15 @@
                     <td style="padding: 8px;"><input type="text" list="lista-categorias" value="{{ item.categoria|default:'' }}" class="input-limpio val-categoria" placeholder="Categoría..."></td>
                     <td style="padding: 8px;"><input type="text" value="{{ item.titulo|default:'' }}" class="input-limpio val-titulo"></td>
                     
-                    <td style="padding: 8px; background-color: #eff6ff;">
-                        <input type="text" value="{{ item.stock_actual }}" readonly class="input-limpio central text-bold text-blue" style="cursor: not-allowed;">
+                    <td style="padding: 8px; text-align: center; 
+                        {% if item.stock_actual > 10 %} background-color: #ecfdf5; 
+                        {% elif item.stock_actual > 0 %} background-color: #fffbeb; 
+                        {% else %} background-color: #fef2f2; {% endif %}">
+                        <input type="text" value="{{ item.stock_actual }}" readonly class="input-limpio central text-bold" 
+                            style="cursor: not-allowed; font-size: 1.1em;
+                            {% if item.stock_actual > 10 %} color: #047857; 
+                            {% elif item.stock_actual > 0 %} color: #b45309; 
+                            {% else %} color: #ef4444; {% endif %}">
                     </td>
                     
                     <td style="padding: 8px; text-align: center; border-left: 2px solid #e2e8f0; transition: 0.3s;" class="celda-paint"><input type="checkbox" class="check-moderno val-inv" onchange="pintarCelda(this, 'bg-inv')" {% if item.activo_intercorp %}checked{% endif %}></td>
