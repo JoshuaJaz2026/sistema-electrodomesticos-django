@@ -1277,3 +1277,27 @@ def borrar_todos_los_ingresos(request):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'error', 'message': 'Solo permitido POST'})
+
+
+@login_required
+def percheron_mercadolibre(request):
+    canal = request.session.get('canal_activo', 'Mercado Libre')
+    
+    # === SIMULACIÓN DE BUSCARV (Diccionario de SKUs) ===
+    # Traemos todos los ingresos que tengan un SKU válido
+    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='')
+    
+    dict_skus = {}
+    for ing in ingresos_db:
+        dict_skus[ing.sku] = {
+            'modelo': ing.modelo or '',
+            'titulo': ing.titulo or '',
+            'serie': ing.serie_nro or '-',
+            'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
+            'registrado_por': ing.creado_por or ''
+        }
+        
+    return render(request, 'inventario/percheron_mercadolibre.html', {
+        'canal': canal,
+        'skus_json': json.dumps(dict_skus) # Lo mandamos a JavaScript
+    })
