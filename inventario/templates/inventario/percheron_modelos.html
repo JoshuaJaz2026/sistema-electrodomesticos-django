@@ -36,6 +36,10 @@
             <button id="btnGuardar" onclick="guardarModelos()" style="background-color: #2563eb; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
                 <i class="fas fa-save"></i> Guardar Cambios
             </button>
+
+            <button id="btnBorrarModelos" onclick="borrarTodosModelos()" style="background-color: #ef4444; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-trash-alt"></i> Borrar Todo
+            </button>
         </div>
     </div>
 
@@ -228,7 +232,7 @@
         .then(res => res.json())
         .then(data => {
             if (data.status === 'ok') {
-                window.location.reload(); // Recarga la página para mostrar los nuevos números
+                window.location.reload(); 
             } else {
                 alert("Error: " + data.message);
             }
@@ -238,6 +242,35 @@
             btn.innerHTML = textOriginal; 
             btn.disabled = false; 
         });
+    }
+
+    // === FUNCIÓN PARA BORRAR TODOS LOS MODELOS ===
+    function borrarTodosModelos() {
+        if (confirm("¡ATENCIÓN PELIGRO! ¿Estás totalmente seguro de borrar TODOS los modelos del catálogo? Esta acción dejará tu directorio en blanco y no se puede deshacer.")) {
+            const btn = document.getElementById('btnBorrarModelos');
+            const textOriginal = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Borrando...';
+            btn.disabled = true;
+
+            fetch("{% url 'borrar_todos_los_modelos' %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(err => alert("Ocurrió un error de conexión."))
+            .finally(() => {
+                btn.innerHTML = textOriginal;
+                btn.disabled = false;
+            });
+        }
     }
 
     // === FUNCIÓN PARA PINTAR CELDAS ===

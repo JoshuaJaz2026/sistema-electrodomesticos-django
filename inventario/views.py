@@ -1308,41 +1308,76 @@ def percheron_mercadolibre(request):
 def sincronizar_stock_modelos(request):
     if request.method == 'POST':
         try:
+            # Función "Modo Nuclear" para limpiar textos de Excel
+            def limpiar_codigo(s):
+                if not s: return ""
+                t = str(s).strip().upper()
+                # Quita tildes
+                t = unicodedata.normalize('NFKD', t).encode('ASCII', 'ignore').decode('utf-8')
+                # Borra CUALQUIER cosa que no sea letra, número, guión o guión bajo
+                return re.sub(r'[^A-Z0-9\-_]', '', t)
+
             with transaction.atomic():
-                # 1. Reseteamos todos los stocks a 0 por seguridad
+                # 1. Poner todo el stock en 0 temporalmente
                 Producto.objects.all().update(stock_actual=0)
                 
-                # 2. Sumamos TODO en la memoria de Python (Infalible contra espacios)
+                # 2. Contar los ingresos
                 conteo_stock = {}
-                todos_los_ingresos = IngresoPercheron.objects.all()
+                todos_ingresos = IngresoPercheron.objects.all()
                 
-                for ing in todos_los_ingresos:
+                for ing in todos_ingresos:
                     if ing.modelo:
-                        # Limpiamos espacios extremos y forzamos mayúsculas
-                        mod_limpio = str(ing.modelo).strip().upper()
-                        
-                        if mod_limpio not in conteo_stock:
-                            conteo_stock[mod_limpio] = 0
-                        conteo_stock[mod_limpio] += (ing.cantidad or 0)
-                        
-                # 3. Recorremos tu directorio de Modelos y le inyectamos la suma
-                todos_los_productos = Producto.objects.all()
+                        mod_limpio = limpiar_codigo(ing.modelo)
+                        if mod_limpio:
+                            if mod_limpio not in conteo_stock:
+                                conteo_stock[mod_limpio] = 0
+                                
+                            # Convertimos a número entero de forma segura por si vino como texto ('1')
+                            try:
+                                cant = int(float(ing.cantidad))
+                            except (ValueError, TypeError):
+                                cant = 0
+                                
+                            conteo_stock[mod_limpio] += cant
+
+                # 3. Asignar el stock sumado a tu catálogo de Modelos
+                todos_productos = Producto.objects.all()
+                modelos_actualizados = 0
                 
-                for prod in todos_los_productos:
+                for prod in todos_productos:
                     if prod.modelo:
-                        # Limpiamos también el nombre en el catálogo por si el error está aquí
-                        mod_prod_limpio = str(prod.modelo).strip().upper()
-                        
-                        # Si encontramos el modelo exacto, le ponemos su stock
+                        mod_prod_limpio = limpiar_codigo(prod.modelo)
                         if mod_prod_limpio in conteo_stock:
+                            # ¡Encontró la pareja perfecta!
                             prod.stock_actual = conteo_stock[mod_prod_limpio]
-                            prod.save(update_fields=['stock_actual']) # Guardamos el cajón
-                            
-            return JsonResponse({'status': 'ok', 'message': '¡Stock sincronizado correctamente!'})
+                            prod.save(update_fields=['stock_actual'])
+                            modelos_actualizados += 1
+
+            # El mensaje de alerta ahora nos dirá EXACTAMENTE cuántos logró emparejar
+            return JsonResponse({
+                'status': 'ok', 
+                'message': f'¡Sincronización completada! Se sumó el stock de {modelos_actualizados} modelos exitosamente.'
+            })
             
         except Exception as e:
             import traceback
             print(traceback.format_exc()) 
             return JsonResponse({'status': 'error', 'message': str(e)})
             
-    return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
+    return JsonResponse({'status': 'error', 'message': 'Solo permitido POST'})
+
+@login_required
+@csrf_exempt
+def borrar_todos_los_modelos(request):
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                # Borra absolutamente todos los registros de la tabla Producto (Directorio de Modelos)
+                Producto.objects.all().delete()
+                
+            return JsonResponse({'status': 'ok', 'message': '¡Directorio de Modelos borrado completamente!'})
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc())
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Solo permitido POST'})
