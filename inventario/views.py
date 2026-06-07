@@ -1312,15 +1312,37 @@ def sincronizar_stock_modelos(request):
                 # 1. Reseteamos todos los stocks a 0 por seguridad
                 Producto.objects.all().update(stock_actual=0)
                 
-                # 2. Agrupamos y sumamos las cantidades por Modelo desde la tabla de Ingresos
-                ingresos = IngresoPercheron.objects.values('modelo').annotate(total=Sum('cantidad'))
+                # 2. Sumamos TODO en la memoria de Python (Infalible contra espacios)
+                conteo_stock = {}
+                todos_los_ingresos = IngresoPercheron.objects.all()
                 
-                # 3. Metemos el resultado en el "cajón" físico de cada Producto
-                for ing in ingresos:
-                    if ing['modelo']: # Verificamos que el modelo no esté en blanco
-                        Producto.objects.filter(modelo=ing['modelo']).update(stock_actual=ing['total'])
+                for ing in todos_los_ingresos:
+                    if ing.modelo:
+                        # Limpiamos espacios extremos y forzamos mayúsculas
+                        mod_limpio = str(ing.modelo).strip().upper()
                         
+                        if mod_limpio not in conteo_stock:
+                            conteo_stock[mod_limpio] = 0
+                        conteo_stock[mod_limpio] += (ing.cantidad or 0)
+                        
+                # 3. Recorremos tu directorio de Modelos y le inyectamos la suma
+                todos_los_productos = Producto.objects.all()
+                
+                for prod in todos_los_productos:
+                    if prod.modelo:
+                        # Limpiamos también el nombre en el catálogo por si el error está aquí
+                        mod_prod_limpio = str(prod.modelo).strip().upper()
+                        
+                        # Si encontramos el modelo exacto, le ponemos su stock
+                        if mod_prod_limpio in conteo_stock:
+                            prod.stock_actual = conteo_stock[mod_prod_limpio]
+                            prod.save(update_fields=['stock_actual']) # Guardamos el cajón
+                            
             return JsonResponse({'status': 'ok', 'message': '¡Stock sincronizado correctamente!'})
+            
         except Exception as e:
+            import traceback
+            print(traceback.format_exc()) 
             return JsonResponse({'status': 'error', 'message': str(e)})
+            
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
