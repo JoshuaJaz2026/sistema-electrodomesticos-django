@@ -59,7 +59,7 @@
             </h3>
             <div style="display: flex; gap: 12px;">
                 
-                <button type="button" style="background-color: #3b82f6; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <button type="button" onclick="descargarPlantillaSalidas()" style="background-color: #3b82f6; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     <i class="fas fa-download"></i> Bajar Plantilla
                 </button>
                 <input type="file" id="csvImportarSalidas" accept=".csv" style="display: none;">
@@ -305,5 +305,24 @@
             }
         });
     });
+
+    // === FUNCIÓN PARA DESCARGAR LA PLANTILLA ===
+    function descargarPlantillaSalidas() {
+        // Estas son las cabeceras exactas que espera nuestro importador
+        const cabeceras = "SKU,MODELO,TITULO,FECHA SALIDA,SERIE / N°,COSTO UNT.,DESC. x 1und,NRO. VENTAS,TIPO DE VENTA,BY\n";
+        
+        // Creamos el archivo CSV en la memoria del navegador
+        const blob = new Blob([cabeceras], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        
+        // Forzamos la descarga
+        link.setAttribute("href", url);
+        link.setAttribute("download", "Plantilla_Salidas_MercadoLibre.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 </script>
 {% endblock %}
