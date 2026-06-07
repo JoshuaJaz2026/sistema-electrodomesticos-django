@@ -98,4 +98,5 @@ urlpatterns = [
     # NUEVA RUTA DE SINCRONIZACIÓN DE STOCK
     path('percheron/modelos/sincronizar-stock/', views.sincronizar_stock_modelos, name='sincronizar_stock_modelos'),
     path('percheron/modelos/borrar-todos/', views.borrar_todos_los_modelos, name='borrar_todos_los_modelos'),
+    path('percheron/mercado-libre/procesar/', views.procesar_salidas_ml, name='procesar_salidas_ml'),
 ]

@@ -1286,23 +1286,43 @@ def borrar_todos_los_ingresos(request):
 def percheron_mercadolibre(request):
     canal = request.session.get('canal_activo', 'Mercado Libre')
     
-    # === SIMULACIÓN DE BUSCARV (Diccionario de SKUs) ===
-    # Traemos todos los ingresos que tengan un SKU válido
+    # 1. Traemos todos los ingresos válidos
     ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='')
+    
+    # 2. Traemos los productos para sacar la Marca y el Stock Real en el buscador
+    productos_db = Producto.objects.all()
+    dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
     
     dict_skus = {}
     for ing in ingresos_db:
+        mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
+        prod = dict_prods.get(mod_limpio)
+        
+        marca_val = prod.marca if prod else 'S/N MARCA'
+        stock_val = prod.stock_actual if prod else 0
+        
+        fecha_str = '-'
+        if ing.fecha_ingreso:
+            try:
+                fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
+            except:
+                fecha_str = str(ing.fecha_ingreso)
+
         dict_skus[ing.sku] = {
             'modelo': ing.modelo or '',
             'titulo': ing.titulo or '',
             'serie': ing.serie_nro or '-',
             'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
-            'registrado_por': ing.creado_por or ''
+            'fecha_ingreso': fecha_str,
+            'proveedor': ing.proveedor_motivo or '-',
+            'registrado_por': ing.creado_por or '',
+            'marca': marca_val,
+            'stock_real': stock_val
         }
         
     return render(request, 'inventario/percheron_mercadolibre.html', {
         'canal': canal,
-        'skus_json': json.dumps(dict_skus) # Lo mandamos a JavaScript
+        'skus_json': json.dumps(dict_skus)
     })
 
 
@@ -1357,3 +1377,50 @@ def borrar_todos_los_modelos(request):
             print(traceback.format_exc())
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'error', 'message': 'Solo permitido POST'})
+
+@login_required
+@csrf_exempt
+def procesar_salidas_ml(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            salidas = data.get('salidas', [])
+            
+            with transaction.atomic():
+                conteo_descuentos = {}
+                
+                # 1. Sumar todo lo que estamos vendiendo/sacando
+                for sal in salidas:
+                    mod_limpio = str(sal.get('modelo', '')).strip().upper().replace(" ", "").replace("-", "")
+                    if mod_limpio and mod_limpio != 'NO REGISTRADO':
+                        try:
+                            cantidad = int(float(sal.get('desc_1und', 1)))
+                        except:
+                            cantidad = 1
+                        conteo_descuentos[mod_limpio] = conteo_descuentos.get(mod_limpio, 0) + cantidad
+                
+                modelos_afectados = 0
+                
+                # 2. Descontarlo de nuestro Directorio de Modelos
+                for prod in Producto.objects.all():
+                    if prod.modelo:
+                        mod_prod_limpio = str(prod.modelo).strip().upper().replace(" ", "").replace("-", "")
+                        if mod_prod_limpio in conteo_descuentos:
+                            prod.stock_actual = prod.stock_actual - conteo_descuentos[mod_prod_limpio]
+                            
+                            # Seguro contra números negativos
+                            if prod.stock_actual < 0:
+                                prod.stock_actual = 0
+                                
+                            prod.save(update_fields=['stock_actual'])
+                            modelos_afectados += 1
+                            
+            return JsonResponse({
+                'status': 'ok', 
+                'message': f'¡Éxito! Se procesaron las salidas y se descontó el stock de {modelos_afectados} modelos de tu Catálogo.'
+            })
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc())
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
