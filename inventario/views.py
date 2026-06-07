@@ -1308,63 +1308,36 @@ def percheron_mercadolibre(request):
 def sincronizar_stock_modelos(request):
     if request.method == 'POST':
         try:
-            # Función "Modo Nuclear" para limpiar textos de Excel
-            def limpiar_codigo(s):
-                if not s: return ""
-                t = str(s).strip().upper()
-                # Quita tildes
-                t = unicodedata.normalize('NFKD', t).encode('ASCII', 'ignore').decode('utf-8')
-                # Borra CUALQUIER cosa que no sea letra, número, guión o guión bajo
-                return re.sub(r'[^A-Z0-9\-_]', '', t)
-
             with transaction.atomic():
-                # 1. Poner todo el stock en 0 temporalmente
+                # 1. Resetear todo a 0
                 Producto.objects.all().update(stock_actual=0)
                 
-                # 2. Contar los ingresos
+                # 2. Crear un mapa de stock basado en el modelo limpio
                 conteo_stock = {}
                 todos_ingresos = IngresoPercheron.objects.all()
                 
                 for ing in todos_ingresos:
-                    if ing.modelo:
-                        mod_limpio = limpiar_codigo(ing.modelo)
-                        if mod_limpio:
-                            if mod_limpio not in conteo_stock:
-                                conteo_stock[mod_limpio] = 0
-                                
-                            # Convertimos a número entero de forma segura por si vino como texto ('1')
-                            try:
-                                cant = int(float(ing.cantidad))
-                            except (ValueError, TypeError):
-                                cant = 0
-                                
-                            conteo_stock[mod_limpio] += cant
+                    # Usamos el modelo tal cual viene en la base de datos de ingresos
+                    modelo_key = str(ing.modelo).strip().upper()
+                    if modelo_key:
+                        conteo_stock[modelo_key] = conteo_stock.get(modelo_key, 0) + (ing.cantidad or 0)
 
-                # 3. Asignar el stock sumado a tu catálogo de Modelos
-                todos_productos = Producto.objects.all()
+                # 3. Comparar con el Directorio de Modelos
+                modelos_db = Producto.objects.all()
                 modelos_actualizados = 0
                 
-                for prod in todos_productos:
-                    if prod.modelo:
-                        mod_prod_limpio = limpiar_codigo(prod.modelo)
-                        if mod_prod_limpio in conteo_stock:
-                            # ¡Encontró la pareja perfecta!
-                            prod.stock_actual = conteo_stock[mod_prod_limpio]
-                            prod.save(update_fields=['stock_actual'])
-                            modelos_actualizados += 1
-
-            # El mensaje de alerta ahora nos dirá EXACTAMENTE cuántos logró emparejar
-            return JsonResponse({
-                'status': 'ok', 
-                'message': f'¡Sincronización completada! Se sumó el stock de {modelos_actualizados} modelos exitosamente.'
-            })
+                for prod in modelos_db:
+                    modelo_prod = str(prod.modelo).strip().upper()
+                    if modelo_prod in conteo_stock:
+                        prod.stock_actual = conteo_stock[modelo_prod]
+                        prod.save(update_fields=['stock_actual'])
+                        modelos_actualizados += 1
+            
+            return JsonResponse({'status': 'ok', 'message': f'Sincronización exitosa: {modelos_actualizados} modelos actualizados.'})
             
         except Exception as e:
-            import traceback
-            print(traceback.format_exc()) 
             return JsonResponse({'status': 'error', 'message': str(e)})
-            
-    return JsonResponse({'status': 'error', 'message': 'Solo permitido POST'})
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
 
 @login_required
 @csrf_exempt
