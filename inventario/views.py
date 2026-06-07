@@ -151,11 +151,12 @@ def percheron_registros(request):
 def percheron_modelos(request):
     canal = request.session.get('canal_activo', 'Percheron')
     
-    # Traemos todos los modelos registrados. 
-    # El "-stock_actual" hace que los que tienen más stock aparezcan arriba (como en tu Excel)
-    modelos_db = Producto.objects.all().order_by('-stock_actual')
+    # === LA MAGIA DEL ORDEN ===
+    # '-stock_actual' ordena de MAYOR a MENOR cantidad.
+    # 'modelo' es el desempate (los ordena alfabéticamente si tienen el mismo stock)
+    modelos_db = Producto.objects.all().order_by('-stock_actual', 'modelo')
     
-    # Paginación para que la página cargue rápido
+    # Paginación para que no colapse si tienes miles de modelos
     paginator = Paginator(modelos_db, 100)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -164,6 +165,8 @@ def percheron_modelos(request):
         'canal': canal,
         'page_obj': page_obj
     })
+
+
 @login_required
 def exportar_registros_excel(request):
     response = HttpResponse(content_type='text/csv')
