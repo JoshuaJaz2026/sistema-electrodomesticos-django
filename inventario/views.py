@@ -1301,3 +1301,26 @@ def percheron_mercadolibre(request):
         'canal': canal,
         'skus_json': json.dumps(dict_skus) # Lo mandamos a JavaScript
     })
+
+
+@login_required
+@csrf_exempt
+def sincronizar_stock_modelos(request):
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                # 1. Reseteamos todos los stocks a 0 por seguridad
+                Producto.objects.all().update(stock_actual=0)
+                
+                # 2. Agrupamos y sumamos las cantidades por Modelo desde la tabla de Ingresos
+                ingresos = IngresoPercheron.objects.values('modelo').annotate(total=Sum('cantidad'))
+                
+                # 3. Metemos el resultado en el "cajón" físico de cada Producto
+                for ing in ingresos:
+                    if ing['modelo']: # Verificamos que el modelo no esté en blanco
+                        Producto.objects.filter(modelo=ing['modelo']).update(stock_actual=ing['total'])
+                        
+            return JsonResponse({'status': 'ok', 'message': '¡Stock sincronizado correctamente!'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'})

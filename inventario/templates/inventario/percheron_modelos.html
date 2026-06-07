@@ -29,6 +29,10 @@
                 <i class="fas fa-plus"></i> Nueva Fila
             </button>
 
+            <button id="btnSync" onclick="sincronizarStock()" style="background-color: #8b5cf6; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-sync-alt"></i> Sincronizar Stock
+            </button>
+
             <button id="btnGuardar" onclick="guardarModelos()" style="background-color: #2563eb; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
                 <i class="fas fa-save"></i> Guardar Cambios
             </button>
@@ -209,6 +213,33 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script>
+    // === FUNCIÓN PARA SINCRONIZAR EL STOCK CON INGRESOS ===
+    function sincronizarStock() {
+        const btn = document.getElementById('btnSync');
+        const textOriginal = btn.innerHTML;
+        
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
+        btn.disabled = true;
+
+        fetch("{% url 'sincronizar_stock_modelos' %}", {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                window.location.reload(); // Recarga la página para mostrar los nuevos números
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(err => alert("Ocurrió un error de conexión."))
+        .finally(() => { 
+            btn.innerHTML = textOriginal; 
+            btn.disabled = false; 
+        });
+    }
+
     // === FUNCIÓN PARA PINTAR CELDAS ===
     function pintarCelda(checkbox, claseCss) {
         const td = checkbox.closest('td');
@@ -246,7 +277,6 @@
         Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
-            // Truco: Quitamos TODOS los espacios y símbolos de las cabeceras para el emparejamiento
             transformHeader: h => h.normalize("NFD").replace(/[^a-zA-Z0-9]/g, "").toUpperCase(),
             complete: function(results) {
                 const tbody = document.querySelector("#tablaModelos tbody");
@@ -272,7 +302,6 @@
                     nueva.querySelector('.val-categoria').value = item['CATEGORIA'] || '';
                     nueva.querySelector('.val-titulo').value = item['TITULO'] || '';
                     
-                    // Activamos casillas según el TRUE del excel y las pintamos!
                     const cbInv = nueva.querySelector('.val-inv');
                     cbInv.checked = checkValor(item['INVENTARIADOPORLOSPERCHERONES'] || item['INVENTARIADO']);
                     pintarCelda(cbInv, 'bg-inv');
@@ -318,7 +347,6 @@
                 'MARCA': fila.querySelector('.val-marca').value.trim(),
                 'CATEGORÍA': fila.querySelector('.val-categoria').value.trim(),
                 'TÍTULO': fila.querySelector('.val-titulo').value.trim(),
-                // Enviamos TRUE o FALSE al servidor
                 'INVENTARIADO POR LOS PERCHERONES': fila.querySelector('.val-inv').checked ? 'TRUE' : 'FALSE',
                 'MERCADO LIBRE': fila.querySelector('.val-ml').checked ? 'TRUE' : 'FALSE',
                 'FALABELLA': fila.querySelector('.val-fbl').checked ? 'TRUE' : 'FALSE',

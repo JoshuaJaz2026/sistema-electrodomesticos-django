@@ -70,7 +70,7 @@ urlpatterns = [
     path('api/guardar-kardex/', views.guardar_kardex_percheron, name='guardar_kardex_percheron'),
     path('api/guardar-simulador/', views.api_guardar_simulador, name='api_guardar_simulador'),
     
-    # Rutas para el guardado de comisiones (manual y por archivo CSV)
+    # Rutas para el guardado de comisiones
     path('guardar-comisiones/', views.guardar_comisiones, name='guardar_comisiones'),
     path('guardar-comisiones-masivas/', views.guardar_comisiones_masivas, name='guardar_comisiones_masivas'), 
     path('descargar-plantilla-comisiones/', views.descargar_plantilla_comisiones, name='descargar_plantilla_comisiones'),
@@ -86,11 +86,15 @@ urlpatterns = [
     # Rutas para Reportes de Mercado Libre
     path('descargar-plantilla-reporte-ml/', views.descargar_plantilla_reporte_ml, name='descargar_plantilla_reporte_ml'),
     path('guardar-reportes-masivos-ml/', views.guardar_reportes_masivos_ml, name='guardar_reportes_masivos_ml'),
+    
+    # Rutas de Ingresos y Modelos
     path('percheron/ingresos/guardar/', views.guardar_ingresos_masivos, name='guardar_ingresos_masivos'),
     path('percheron/ingresos/descargar-plantilla/', views.descargar_plantilla_ingresos, name='descargar_plantilla_ingresos'),
     path('percheron/registros/exportar/', views.exportar_registros_excel, name='exportar_registros_excel'),
-
     path('percheron/modelos/exportar/', views.exportar_modelos_excel, name='exportar_modelos_excel'),
     path('percheron/modelos/guardar/', views.guardar_modelos_masivos, name='guardar_modelos_masivos'),
     path('borrar-ingresos/', views.borrar_todos_los_ingresos, name='borrar_todos_los_ingresos'),
+    
+    # NUEVA RUTA DE SINCRONIZACIÓN DE STOCK
+    path('percheron/modelos/sincronizar-stock/', views.sincronizar_stock_modelos, name='sincronizar_stock_modelos'),
 ]
