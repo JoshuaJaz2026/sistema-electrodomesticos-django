@@ -1310,7 +1310,7 @@ def percheron_mercadolibre(request):
             'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
         }
         
-    # 2. Traemos LAS SALIDAS GUARDADAS para pintarlas en la tabla
+    # 2. HISTORIAL: Traemos LAS SALIDAS GUARDADAS para pintarlas en la tabla
     salidas_lista = SalidaMercadoLibre.objects.all().order_by('-id')
     paginator = Paginator(salidas_lista, 100)
     page_obj = paginator.get_page(request.GET.get('page'))
@@ -1318,8 +1318,60 @@ def percheron_mercadolibre(request):
     return render(request, 'inventario/percheron_mercadolibre.html', {
         'canal': canal,
         'skus_json': json.dumps(dict_skus),
-        'page_obj': page_obj # Enviamos el historial al HTML
+        'page_obj': page_obj # <-- Esto es lo que faltaba para que aparezcan en pantalla
     })
+
+@login_required
+@csrf_exempt
+def procesar_salidas_ml(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            salidas = data.get('salidas', [])
+            
+            with transaction.atomic():
+                conteo_descuentos = {}
+                
+                # 1. Registrar cada salida en la nueva tabla (HISTORIAL)
+                for sal in salidas:
+                    fecha_raw = sal.get('fecha_salida')
+                    if not fecha_raw: fecha_raw = None
+                    
+                    SalidaMercadoLibre.objects.create(
+                        sku=sal.get('sku', ''),
+                        modelo=sal.get('modelo', ''),
+                        titulo=sal.get('titulo', ''),
+                        fecha_salida=fecha_raw,
+                        serie=sal.get('serie', ''),
+                        costo=float(sal.get('costo') or 0),
+                        descuento=int(float(sal.get('desc_1und') or 1)),
+                        nro_venta=sal.get('nro_ventas', ''),
+                        tipo_venta=sal.get('tipo_venta', ''),
+                        creado_por=sal.get('by', '')
+                    )
+                    
+                    # Agrupamos para descontar del stock virtual
+                    mod_limpio = str(sal.get('modelo', '')).strip().upper().replace(" ", "").replace("-", "")
+                    if mod_limpio and mod_limpio != 'NO REGISTRADO':
+                        conteo_descuentos[mod_limpio] = conteo_descuentos.get(mod_limpio, 0) + int(float(sal.get('desc_1und', 1)))
+                
+                # 2. Descontarlo de nuestro Directorio de Modelos
+                modelos_afectados = 0
+                for prod in Producto.objects.all():
+                    if prod.modelo:
+                        mod_prod_limpio = str(prod.modelo).strip().upper().replace(" ", "").replace("-", "")
+                        if mod_prod_limpio in conteo_descuentos:
+                            prod.stock_actual = prod.stock_actual - conteo_descuentos[mod_prod_limpio]
+                            if prod.stock_actual < 0: prod.stock_actual = 0
+                            prod.save(update_fields=['stock_actual'])
+                            modelos_afectados += 1
+                            
+            return JsonResponse({'status': 'ok', 'message': f'¡Éxito! Se guardaron las salidas y se descontó el stock de {modelos_afectados} modelos.'})
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc())
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
 
 @login_required
 @csrf_exempt
