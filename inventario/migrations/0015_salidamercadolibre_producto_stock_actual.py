@@ -26,9 +26,4 @@ class Migration(migrations.Migration):
                 ('creado_por', models.CharField(blank=True, max_length=50, null=True)),
             ],
         ),
-        migrations.AddField(
-            model_name='producto',
-            name='stock_actual',
-            field=models.IntegerField(default=0, verbose_name='Stock Actual'),
-        ),
     ]
