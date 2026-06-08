@@ -95,25 +95,6 @@
                 </thead>
                 <tbody id="cuerpoSalidas">
                     <tr id="fila-molde-salida" style="display: none; border-bottom: 1px solid #e2e8f0;">
-                        </tr>
-
-                    {% if page_obj %}
-                        {% for item in page_obj %}
-                        <tr style="border-bottom: 1px solid #e2e8f0; background-color: #f8fafc;">
-                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center; font-weight: bold; color: #0f172a;">{{ item.sku }}</td>
-                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center; color: #64748b;">{{ item.modelo }}</td>
-                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; color: #64748b;">{{ item.titulo }}</td>
-                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center;">{{ item.fecha_salida|date:"Y-m-d" }}</td>
-                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center; font-family: monospace; color: #3b82f6; font-weight: bold;">{{ item.serie }}</td>
-                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; font-weight: bold; color: #991b1b;">S/ {{ item.costo|floatformat:2 }}</td>
-                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center; font-weight: bold; color: #ef4444;">{{ item.descuento }}</td>
-                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center; font-weight: bold;">{{ item.nro_venta }}</td>
-                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center;">{{ item.tipo_venta }}</td>
-                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center; font-weight: bold; color: #047857;">{{ item.creado_por }}</td>
-                            <td style="padding: 10px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981;" title="Guardado en BD"></i></td>
-                        </tr>
-                        {% endfor %}
-                    {% endif %}
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Pega SKU..." class="input-celda text-bold text-dark centralizar val-sku" oninput="autocompletarBUSCARV(this)"></td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" readonly class="input-celda input-bloqueado centralizar font-bold val-modelo" tabindex="-1"></td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" readonly class="input-celda input-bloqueado val-titulo" tabindex="-1"></td>
@@ -155,6 +136,24 @@
                             </button>
                         </td>
                     </tr>
+
+                    {% if page_obj %}
+                        {% for item in page_obj %}
+                        <tr style="border-bottom: 1px solid #e2e8f0; background-color: #f8fafc;">
+                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center; font-weight: bold; color: #0f172a;">{{ item.sku }}</td>
+                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center; color: #64748b;">{{ item.modelo }}</td>
+                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; color: #64748b;">{{ item.titulo }}</td>
+                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center;">{{ item.fecha_salida|date:"Y-m-d" }}</td>
+                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center; font-family: monospace; color: #3b82f6; font-weight: bold;">{{ item.serie }}</td>
+                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; font-weight: bold; color: #991b1b;">S/ {{ item.costo|floatformat:2 }}</td>
+                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center; font-weight: bold; color: #ef4444;">{{ item.descuento }}</td>
+                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center; font-weight: bold;">{{ item.nro_venta }}</td>
+                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center;">{{ item.tipo_venta }}</td>
+                            <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: center; font-weight: bold; color: #047857;">{{ item.creado_por }}</td>
+                            <td style="padding: 10px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981;" title="Guardado en BD"></i></td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
                 </tbody>
             </table>
         </div>
@@ -207,17 +206,14 @@
         let infoProductoMostrada = false;
 
         for (const [sku, data] of Object.entries(diccionarioSKUs)) {
-            // Buscamos si el modelo escrito coincide con algo en el diccionario
             if (data.modelo.toUpperCase().includes(query)) {
                 
-                // Extrae el título y el stock del primer resultado que encaje
                 if (!infoProductoMostrada) {
                     document.getElementById('bciProducto').value = data.titulo;
                     document.getElementById('bciStock').value = data.stock_real;
                     infoProductoMostrada = true;
                 }
 
-                // Genera la fila con el evento de copia mágica
                 html += `
                     <tr class="fila-buscador" style="border-bottom: 1px solid #e2e8f0; transition: background 0.2s;">
                         <td style="padding: 10px; font-weight: bold; color: #2563eb; cursor: pointer;" onclick="copiarAlPortapapeles('${sku}')" title="Clic para copiar SKU">${sku} <i class="far fa-copy" style="font-size: 0.8em; color: #94a3b8; margin-left: 5px;"></i></td>
@@ -239,16 +235,14 @@
         }
     });
 
-    // Función para copiar el SKU automáticamente al darle clic
     function copiarAlPortapapeles(texto) {
         navigator.clipboard.writeText(texto).then(() => {
-            // Buscar si hay una fila vacía abajo, si no, crear una
             agregarFilaSalida();
             const inputsSKU = document.querySelectorAll('#cuerpoSalidas .val-sku');
-            const ultimoInput = inputsSKU[inputsSKU.length - 1]; // Toma la última fila agregada
+            const ultimoInput = inputsSKU[inputsSKU.length - 1]; 
             
-            ultimoInput.value = texto; // Lo pega
-            autocompletarBUSCARV(ultimoInput); // Desata la fórmula
+            ultimoInput.value = texto;
+            autocompletarBUSCARV(ultimoInput); 
             
             ultimoInput.focus();
         });
