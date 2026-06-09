@@ -1322,109 +1322,8 @@ def percheron_mercadolibre(request):
         'page_obj': page_obj 
     })
 
-@login_required
-@csrf_exempt
-def procesar_salidas_ml(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            salidas = data.get('salidas', [])
-            
-            with transaction.atomic():
-                conteo_descuentos = {}
-                
-                # 1. Registrar cada salida en la nueva tabla (HISTORIAL)
-                for sal in salidas:
-                    fecha_raw = sal.get('fecha_salida')
-                    if not fecha_raw: fecha_raw = None
-                    
-                    SalidaMercadoLibre.objects.create(
-                        sku=sal.get('sku', ''),
-                        modelo=sal.get('modelo', ''),
-                        titulo=sal.get('titulo', ''),
-                        fecha_salida=fecha_raw,
-                        serie=sal.get('serie', ''),
-                        costo=float(sal.get('costo') or 0),
-                        descuento=int(float(sal.get('desc_1und') or 1)),
-                        nro_venta=sal.get('nro_ventas', ''),
-                        tipo_venta=sal.get('tipo_venta', ''),
-                        creado_por=sal.get('by', '')
-                    )
-                    
-                    # Agrupamos para descontar del stock virtual
-                    mod_limpio = str(sal.get('modelo', '')).strip().upper().replace(" ", "").replace("-", "")
-                    if mod_limpio and mod_limpio != 'NO REGISTRADO':
-                        conteo_descuentos[mod_limpio] = conteo_descuentos.get(mod_limpio, 0) + int(float(sal.get('desc_1und', 1)))
-                
-                # 2. Descontarlo de nuestro Directorio de Modelos
-                modelos_afectados = 0
-                for prod in Producto.objects.all():
-                    if prod.modelo:
-                        mod_prod_limpio = str(prod.modelo).strip().upper().replace(" ", "").replace("-", "")
-                        if mod_prod_limpio in conteo_descuentos:
-                            prod.stock_actual = prod.stock_actual - conteo_descuentos[mod_prod_limpio]
-                            if prod.stock_actual < 0: prod.stock_actual = 0
-                            prod.save(update_fields=['stock_actual'])
-                            modelos_afectados += 1
-                            
-            return JsonResponse({'status': 'ok', 'message': f'¡Éxito! Se guardaron las salidas y se descontó el stock de {modelos_afectados} modelos.'})
-        except Exception as e:
-            import traceback
-            print(traceback.format_exc())
-            return JsonResponse({'status': 'error', 'message': str(e)})
-    return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
 
-@login_required
-@csrf_exempt
-def procesar_salidas_ml(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            salidas = data.get('salidas', [])
-            
-            with transaction.atomic():
-                conteo_descuentos = {}
-                
-                # 1. Registrar cada salida en la nueva tabla
-                for sal in salidas:
-                    fecha_raw = sal.get('fecha_salida')
-                    if not fecha_raw: fecha_raw = None
-                    
-                    SalidaMercadoLibre.objects.create(
-                        sku=sal.get('sku', ''),
-                        modelo=sal.get('modelo', ''),
-                        titulo=sal.get('titulo', ''),
-                        fecha_salida=fecha_raw,
-                        serie=sal.get('serie', ''),
-                        costo=float(sal.get('costo') or 0),
-                        descuento=int(float(sal.get('desc_1und') or 1)),
-                        nro_venta=sal.get('nro_ventas', ''),
-                        tipo_venta=sal.get('tipo_venta', ''),
-                        creado_por=sal.get('by', '')
-                    )
-                    
-                    # Agrupamos para descontar del stock
-                    mod_limpio = str(sal.get('modelo', '')).strip().upper().replace(" ", "").replace("-", "")
-                    if mod_limpio and mod_limpio != 'NO REGISTRADO':
-                        conteo_descuentos[mod_limpio] = conteo_descuentos.get(mod_limpio, 0) + int(float(sal.get('desc_1und', 1)))
-                
-                # 2. Descontarlo de nuestro Directorio de Modelos
-                modelos_afectados = 0
-                for prod in Producto.objects.all():
-                    if prod.modelo:
-                        mod_prod_limpio = str(prod.modelo).strip().upper().replace(" ", "").replace("-", "")
-                        if mod_prod_limpio in conteo_descuentos:
-                            prod.stock_actual = prod.stock_actual - conteo_descuentos[mod_prod_limpio]
-                            if prod.stock_actual < 0: prod.stock_actual = 0
-                            prod.save(update_fields=['stock_actual'])
-                            modelos_afectados += 1
-                            
-            return JsonResponse({'status': 'ok', 'message': f'¡Éxito! Se guardaron las salidas y se descontó el stock de {modelos_afectados} modelos.'})
-        except Exception as e:
-            import traceback
-            print(traceback.format_exc())
-            return JsonResponse({'status': 'error', 'message': str(e)})
-    return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
+
 
 
 @login_required
@@ -1482,46 +1381,62 @@ def borrar_todos_los_modelos(request):
 @login_required
 @csrf_exempt
 def procesar_salidas_ml(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            salidas = data.get('salidas', [])
-            
-            with transaction.atomic():
-                conteo_descuentos = {}
-                
-                # 1. Sumar todo lo que estamos vendiendo/sacando
-                for sal in salidas:
-                    mod_limpio = str(sal.get('modelo', '')).strip().upper().replace(" ", "").replace("-", "")
-                    if mod_limpio and mod_limpio != 'NO REGISTRADO':
-                        try:
-                            cantidad = int(float(sal.get('desc_1und', 1)))
-                        except:
-                            cantidad = 1
-                        conteo_descuentos[mod_limpio] = conteo_descuentos.get(mod_limpio, 0) + cantidad
-                
-                modelos_afectados = 0
-                
-                # 2. Descontarlo de nuestro Directorio de Modelos
-                for prod in Producto.objects.all():
-                    if prod.modelo:
-                        mod_prod_limpio = str(prod.modelo).strip().upper().replace(" ", "").replace("-", "")
-                        if mod_prod_limpio in conteo_descuentos:
-                            prod.stock_actual = prod.stock_actual - conteo_descuentos[mod_prod_limpio]
-                            
-                            # Seguro contra números negativos
-                            if prod.stock_actual < 0:
-                                prod.stock_actual = 0
-                                
-                            prod.save(update_fields=['stock_actual'])
-                            modelos_afectados += 1
-                            
-            return JsonResponse({
-                'status': 'ok', 
-                'message': f'¡Éxito! Se procesaron las salidas y se descontó el stock de {modelos_afectados} modelos de tu Catálogo.'
-            })
-        except Exception as e:
-            import traceback
-            print(traceback.format_exc())
-            return JsonResponse({'status': 'error', 'message': str(e)})
-    return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
+
+    try:
+        data = json.loads(request.body)
+        salidas = data.get('salidas', [])
+
+        if not salidas:
+            return JsonResponse({'status': 'error', 'message': 'No hay salidas para procesar.'})
+
+        with transaction.atomic():
+            conteo_descuentos = {}
+
+            # Guardar historial y acumular descuentos por modelo
+            for sal in salidas:
+                sku = sal.get('sku', '').strip()
+                modelo = sal.get('modelo', '').strip()
+                titulo = sal.get('titulo', '').strip()
+                fecha_salida = sal.get('fecha_salida') or datetime.now().date()
+                serie = sal.get('serie', '')
+                costo = float(sal.get('costo') or 0)
+                descuento = int(float(sal.get('desc_1und') or 1))
+                nro_venta = sal.get('nro_ventas', '')
+                tipo_venta = sal.get('tipo_venta', '')
+                by_usuario = sal.get('by', request.user.username)
+
+                SalidaMercadoLibre.objects.create(
+                    sku=sku,
+                    modelo=modelo,
+                    titulo=titulo,
+                    fecha_salida=fecha_salida,
+                    serie=serie,
+                    costo=costo,
+                    descuento=descuento,
+                    nro_venta=nro_venta,
+                    tipo_venta=tipo_venta,
+                    creado_por=by_usuario
+                )
+
+                key = modelo.upper().replace(" ", "").replace("-", "")
+                if key:
+                    conteo_descuentos[key] = conteo_descuentos.get(key, 0) + descuento
+
+            # Actualizar stock de productos
+            modelos_afectados = 0
+            for prod in Producto.objects.all():
+                if prod.modelo:
+                    key = prod.modelo.upper().replace(" ", "").replace("-", "")
+                    if key in conteo_descuentos:
+                        prod.stock_actual = max(prod.stock_actual - conteo_descuentos[key], 0)
+                        prod.save(update_fields=['stock_actual'])
+                        modelos_afectados += 1
+
+        return JsonResponse({'status': 'ok', 'message': f'Salidas registradas y stock actualizado de {modelos_afectados} modelos.'})
+
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return JsonResponse({'status': 'error', 'message': str(e)})
