@@ -192,10 +192,7 @@ def exportar_registros_excel(request):
 # =========================================================
 # 4. SECCIÓN PERCHERÓN: PLATAFORMAS ESPECÍFICAS
 # =========================================================
-@login_required
-def percheron_mercadolibre(request):
-    canal = request.session.get('canal_activo', 'Web')
-    return render(request, 'inventario/percheron_mercadolibre.html', {'canal': canal})
+
 
 @login_required
 def percheron_mercadolibre_junior(request):
@@ -1300,14 +1297,21 @@ def percheron_mercadolibre(request):
         
         fecha_str = '-'
         if ing.fecha_ingreso:
-            try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
-            except: fecha_str = str(ing.fecha_ingreso)
+            try: 
+                fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
+            except: 
+                fecha_str = str(ing.fecha_ingreso)
 
         dict_skus[ing.sku] = {
-            'modelo': ing.modelo or '', 'titulo': ing.titulo or '', 'serie': ing.serie_nro or '-',
+            'modelo': ing.modelo or '', 
+            'titulo': ing.titulo or '', 
+            'serie': ing.serie_nro or '-',
             'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
-            'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
-            'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
+            'fecha_ingreso': fecha_str, 
+            'proveedor': ing.proveedor_motivo or '-',
+            'registrado_por': ing.creado_por or '', 
+            'marca': marca_val, 
+            'stock_real': stock_val
         }
         
     # 2. HISTORIAL: Traemos LAS SALIDAS GUARDADAS para pintarlas en la tabla
@@ -1318,7 +1322,7 @@ def percheron_mercadolibre(request):
     return render(request, 'inventario/percheron_mercadolibre.html', {
         'canal': canal,
         'skus_json': json.dumps(dict_skus),
-        'page_obj': page_obj # <-- Esto es lo que faltaba para que aparezcan en pantalla
+        'page_obj': page_obj
     })
 
 @login_required
