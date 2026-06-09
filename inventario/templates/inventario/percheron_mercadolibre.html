@@ -186,9 +186,6 @@
 <script>
     const diccionarioSKUs = {{ skus_json|safe|default:"{}" }};
 
-    // =========================================================
-    // 1. NUEVA LÓGICA: OBTENER SKUS YA EN USO (En la tabla de abajo)
-    // =========================================================
     function getSKUsUsados() {
         const inputs = document.querySelectorAll('#cuerpoSalidas .val-sku');
         const usados = new Set();
@@ -199,9 +196,6 @@
         return usados;
     }
 
-    // =========================================================
-    // 2. FUNCIÓN DE BÚSQUEDA EXTRAÍDA (Para poder llamarla cuando queramos)
-    // =========================================================
     function ejecutarBusqueda() {
         const query = document.getElementById('bciModelo').value.trim().toUpperCase();
         const tbody = document.getElementById('cuerpoReferencia');
@@ -214,12 +208,11 @@
             return;
         }
 
-        const skusUsados = getSKUsUsados(); // Obtenemos la lista de los que ya bajaron
+        const skusUsados = getSKUsUsados();
         let html = '';
         let infoProductoMostrada = false;
 
         for (const [sku, data] of Object.entries(diccionarioSKUs)) {
-            // MAGIA: Si el SKU ya está en la tabla de salidas, lo saltamos y no lo dibujamos
             if (skusUsados.has(sku)) continue;
 
             if (data.modelo.toUpperCase().includes(query)) {
@@ -250,12 +243,8 @@
         }
     }
 
-    // Escuchamos el evento de escribir para ejecutar la búsqueda
     document.getElementById('bciModelo').addEventListener('input', ejecutarBusqueda);
 
-    // =========================================================
-    // 3. COPIAR Y ACTUALIZAR
-    // =========================================================
     function copiarAlPortapapeles(texto) {
         navigator.clipboard.writeText(texto).then(() => {
             agregarFilaSalida();
@@ -266,15 +255,10 @@
             autocompletarBUSCARV(ultimoInput); 
             
             ultimoInput.focus();
-            
-            // ACTUALIZAMOS EL BUSCADOR: Como el SKU ya bajó, desaparecerá de la lista de arriba
             ejecutarBusqueda();
         });
     }
 
-    // =========================================================
-    // LÓGICA DE SALIDAS (AGREGAR, ELIMINAR Y PROCESAR)
-    // =========================================================
     function agregarFilaSalida() {
         const tbody = document.getElementById('cuerpoSalidas');
         const filaMolde = document.getElementById('fila-molde-salida');
@@ -286,7 +270,6 @@
 
     function eliminarFilaSalida(btn) {
         btn.closest('tr').remove();
-        // ACTUALIZAMOS EL BUSCADOR: Si borraste la salida, el SKU vuelve a aparecer disponible arriba
         ejecutarBusqueda();
     }
 
@@ -309,7 +292,6 @@
             fila.querySelector('.val-desc').value = '1';
         }
         
-        // Si el usuario escribe a mano en lugar de darle click, también actualizamos el buscador
         ejecutarBusqueda();
     }
 
@@ -319,7 +301,6 @@
 
         filas.forEach(fila => {
             const inputSku = fila.querySelector('.val-sku');
-            // Evita procesar las filas que ya son parte del historial (las que no tienen el <input> visible)
             if (inputSku && inputSku.type !== 'hidden') {
                 const sku = inputSku.value.trim();
                 if(sku) {
