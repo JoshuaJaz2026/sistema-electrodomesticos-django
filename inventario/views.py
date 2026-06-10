@@ -80,30 +80,40 @@ def percheron_ingresos(request):
         'titulos_json': json.dumps(dict_titulos) # Lo enviamos al HTML
     })
 
+from django.db.models import Sum
+
 @login_required
 def percheron_registros(request):
     canal = request.session.get('canal_activo', 'Percheron')
     
-    # 1. Obtenemos TODOS los ingresos (Esta es nuestra base equivalente a la hoja IN)
-    # Ordenados por ID (del más antiguo al más reciente)
+    # 1. Obtenemos TODOS los ingresos (La hoja IN)
     ingresos_db = IngresoPercheron.objects.all().order_by('id')
     
-    # 2. Obtenemos los Modelos para hacer el equivalente a "BUSCARV"
+    # 2. Obtenemos los Modelos para hacer el BUSCARV de Marca/Ubicación
     productos_db = Producto.objects.all()
     dict_productos = {p.modelo: p for p in productos_db if p.modelo}
     
+    # =========================================================
+    # 3. LA MAGIA: CONECTAMOS LAS SALIDAS DE MERCADO LIBRE
+    # =========================================================
+    # Agrupamos todas las salidas de ML y sumamos el descuento por cada SKU
+    salidas_ml_agrupadas = SalidaMercadoLibre.objects.values('sku').annotate(total_desc=Sum('descuento'))
+    dict_out_ml = {s['sku']: s['total_desc'] for s in salidas_ml_agrupadas if s['sku']}
+    
     registros_data = []
     
-    # 3. Recorremos fila por fila cruzando la información
+    # 4. Recorremos fila por fila cruzando la información
     for ing in ingresos_db:
         prod = dict_productos.get(ing.modelo)
         
-        # BUSCARV simulado (Traemos Marca y Ubicación del catálogo)
         marca_val = prod.marca if prod else 'SIN MARCA'
         ubicacion_val = prod.ubicacion if prod else 'SIN UBICACIÓN'
         
-        # SUMAR.SI simulado (Por ahora en 0, se conectarán al crear las vistas de salidas)
-        out_ml = 0
+        # === AQUI SE APLICA EL DESCUENTO AUTOMÁTICO ===
+        # Va a buscar el SKU en el diccionario de salidas de Mercado Libre
+        out_ml = dict_out_ml.get(ing.sku, 0)
+        
+        # Las demás plataformas siguen en 0 hasta que las vayamos programando
         out_fbl = 0
         out_cdt = 0
         out_vl = 0
@@ -137,7 +147,7 @@ def percheron_registros(request):
             'stock': stock_val
         })
         
-    # 4. Paginación
+    # 5. Paginación
     paginator = Paginator(registros_data, 100) # Muestra 100 registros por página
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
