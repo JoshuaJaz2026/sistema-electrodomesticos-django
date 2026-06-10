@@ -2,76 +2,82 @@
 {% load static %}
 
 {% block content %}
-<div class="card" style="max-width: 1100px; margin: auto; border-top: 4px solid var(--color-principal);">
+<div class="card" style="max-width: 1100px; margin: auto; border-top: 4px solid var(--color-principal); padding: 20px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-        <h2 style="margin: 0; color: #1e293b; text-transform: uppercase;">
+        <h2 style="margin: 0; color: #1e293b; text-transform: uppercase; display: flex; align-items: center; gap: 10px; font-size: 1.25rem; font-weight: 700;">
             <i class="fas fa-list-ul" style="color: var(--color-principal);"></i> Referencia: MARCA Y CATEG
         </h2>
         
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex-grow: 1; justify-content: flex-end;">
-            
-            <form method="GET" action="" style="display: flex; gap: 15px; align-items: center; margin-right: 15px; width: 100%; max-width: 450px;">
-                <div style="position: relative; flex-grow: 1;">
-                    <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
-                    <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar categoría o subcategoría..." style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-family: inherit; box-sizing: border-box;">
-                </div>
-                <button type="submit" style="background: var(--color-principal); color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; flex-shrink: 0; margin-left: 5px;">
-                    Buscar
-                </button>
-                {% if query_search %}
-                <a href="?" style="background: #ef4444; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-weight: bold; flex-shrink: 0;">
-                    <i class="fas fa-times"></i> Limpiar
-                </a>
-                {% endif %}
-            </form>
-
-            <a href="{% url 'descargar_plantilla_comisiones' %}" class="btn" style="background: #3b82f6; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <a href="{% url 'descargar_plantilla_comisiones' %}" class="btn-premium" style="background-color: #3b82f6;">
                 <i class="fas fa-download"></i> Bajar Plantilla
             </a>
 
-            <button type="button" onclick="eliminarTodasLasComisiones()" style="background: #ef4444; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+            <button type="button" onclick="eliminarTodasLasComisiones()" class="btn-premium" style="background-color: #ef4444;">
                 <i class="fas fa-trash-alt"></i> Borrar Todo
             </button>
 
             <input type="file" id="csvComisiones" accept=".csv" style="display: none;">
-            <button type="button" onclick="document.getElementById('csvComisiones').click()" style="background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+            <button type="button" onclick="document.getElementById('csvComisiones').click()" class="btn-premium" style="background-color: #10b981;">
                 <i class="fas fa-upload"></i> Importar Masivo
             </button>
 
-            <button type="button" id="btnGuardarComisiones" onclick="guardarDatosPendientes()" style="background: #f59e0b; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+            <button type="button" id="btnGuardarComisiones" onclick="guardarDatosPendientes()" class="btn-premium" style="background-color: #f59e0b;">
                 <i class="fas fa-save"></i> Guardar Modificaciones
             </button>
         </div>
     </div>
     
-    <div class="tabla-scroll-container">
-        <table id="tablaComisiones" class="tabla-simulador-moderna" style="width: 100%;">
-            <thead style="background: #f8fafc; position: sticky; top: 0; z-index: 10;">
-                <tr>
-                    <th class="th-rep" style="width: 35%;">SUB CATEGORÍA</th>
-                    <th class="th-rep" style="width: 45%;">CATEGORÍA</th>
-                    <th class="th-rep" style="width: 20%;">COMISIÓN (%)</th>
+    <div style="background-color: #f8fafc; border-left: 4px solid var(--color-principal); padding: 15px 20px; border-radius: 6px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; flex-wrap: wrap; gap: 15px;">
+        <form method="GET" action="" style="display: flex; gap: 15px; width: 100%; max-width: 500px; align-items: center;">
+            <div style="position: relative; flex-grow: 1;">
+                <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar categoría o subcategoría..." style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-family: inherit; box-sizing: border-box; font-size: 0.9rem; transition: border-color 0.2s;">
+            </div>
+            <button type="submit" class="btn-premium" style="background-color: var(--color-principal); flex-shrink: 0; padding: 10px 20px;">
+                Buscar
+            </button>
+            {% if query_search %}
+            <a href="?" class="btn-premium" style="background-color: #ef4444; flex-shrink: 0; padding: 10px 15px;">
+                <i class="fas fa-times"></i> Limpiar
+            </a>
+            {% endif %}
+        </form>
+
+        <span id="indicador-cambios" style="background-color: #f59e0b; color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; display: none; font-weight: bold; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);">
+            <i class="fas fa-exclamation-circle" style="margin-right: 5px;"></i> Cambios sin guardar
+        </span>
+    </div>
+    
+    <div style="overflow-x: auto; overflow-y: auto; max-height: 60vh; border: 1px solid #e2e8f0; border-radius: 6px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+        <table id="tablaComisiones" style="width: 100%; border-collapse: separate; border-spacing: 0; background: white; font-size: 0.85rem; white-space: nowrap;">
+            <thead style="position: sticky; top: 0; z-index: 10;">
+                <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;">
+                    <th class="th-premium" style="width: 35%;">SUB CATEGORÍA</th>
+                    <th class="th-premium" style="width: 45%;">CATEGORÍA</th>
+                    <th class="th-premium" style="width: 20%; text-align: center; background-color: #1e3a8a;">COMISIÓN (%)</th>
                 </tr>
             </thead>
             <tbody>
                 {% if page_obj %}
                     {% for item in page_obj %}
-                    <tr class="fila-simulador" data-original-key="{{ item.id|default_if_none:'' }}">
-                        <td class="td-cell">
+                    <tr class="fila-simulador" data-original-key="{{ item.id|default_if_none:'' }}" style="border-bottom: 1px solid #e2e8f0; transition: background-color 0.2s;">
+                        <td class="td-premium">
                             <input type="text" class="celda-input val-subcat text-dark bold" value="{{ item.sub_categoria|default:'' }}" oninput="registrarCambioFila(this)">
                         </td>
-                        <td class="td-cell">
+                        <td class="td-premium">
                             <input type="text" class="celda-input val-cat" value="{{ item.categoria|default:'' }}" oninput="registrarCambioFila(this)">
                         </td>
-                        <td class="td-cell" style="background: #f8fafc;">
+                        <td class="td-premium" style="background-color: #eff6ff;">
                             <input type="number" step="0.01" class="celda-input central bold text-blue val-comision" value="{{ item.comision|stringformat:'.2f'|default:'0.00' }}" oninput="registrarCambioFila(this)">
                         </td>
                     </tr>
                     {% endfor %}
                 {% else %}
                     <tr id="fila-vacia" data-original-key="molde">
-                        <td colspan="3" style="padding: 20px; text-align: center; color: #64748b;">
+                        <td colspan="3" style="padding: 40px; text-align: center; color: #94a3b8; font-size: 1rem;">
+                            <i class="fas fa-folder-open" style="font-size: 2.5em; color: #cbd5e1; margin-bottom: 15px; display: block;"></i>
                             No se encontraron categorías o la tabla está vacía. ¡Agrega una nueva fila o importa tu Excel!
                         </td>
                     </tr>
@@ -80,30 +86,27 @@
         </table>
     </div>
 
-    <div style="margin-top: 15px; display: flex; justify-content: center;">
+    <div style="margin-top: 25px; display: flex; justify-content: center;">
         <button type="button" onclick="agregarFila()" class="btn-agregar-fila">
             <i class="fas fa-plus"></i> Agregar nueva fila
         </button>
     </div>
 
     {% if page_obj %}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 12px 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 12px 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
         <span style="color: #475569; font-weight: 600; font-size: 0.9rem;">
             Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-            {% if query_search %}(Resultados filtrados){% endif %}
-            <span id="indicador-cambios" style="color: #f59e0b; font-weight: bold; display: none; margin-left: 10px;">
-                <i class="fas fa-exclamation-circle"></i> Tienes cambios sin guardar
-            </span>
+            {% if query_search %}<span style="color: #64748b; font-style: italic; margin-left: 5px;">(Resultados filtrados)</span>{% endif %}
         </span>
         <div style="display: flex; gap: 8px;">
             {% if page_obj.has_previous %}
-                <a href="?page=1{% if query_search %}&q={{ query_search }}{% endif %}" style="background: #64748b; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px;">&laquo; Primera</a>
-                <a href="?page={{ page_obj.previous_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" style="background: #475569; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px;">Anterior</a>
+                <a href="?page=1{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">&laquo; Primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">Anterior</a>
             {% endif %}
 
             {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" style="background: #475569; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px;">Siguiente</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}{% if query_search %}&q={{ query_search }}{% endif %}" style="background: #64748b; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px;">Última &raquo;</a>
+                <a href="?page={{ page_obj.next_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">Siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">Última &raquo;</a>
             {% endif %}
         </div>
     </div>
@@ -112,31 +115,41 @@
 </div>
 
 <style>
-    .tabla-scroll-container { overflow-x: auto; overflow-y: visible; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #fff; max-height: 600px; }
-    .tabla-simulador-moderna { border-collapse: collapse; font-size: 0.85rem; width: 100%; }
-    .th-rep { padding: 14px 12px; border-bottom: 2px solid #e2e8f0; border-right: 1px solid #e2e8f0; text-align: left; font-weight: 700; color: #475569; text-transform: uppercase; background-color: #f8fafc; }
-    .th-rep:last-child { text-align: center; }
-    .fila-simulador { border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s ease; }
-    .fila-simulador:hover { background-color: #fef9c3 !important; }
-    .td-cell { padding: 0; border-right: 1px solid #f1f5f9; vertical-align: middle; }
-
-    .celda-input { width: 100%; box-sizing: border-box; border: 2px solid transparent; padding: 10px 12px; color: #1e293b; background: transparent; outline: none; font-size: 0.85rem; font-family: inherit; transition: all 0.15s ease; }
-    .celda-input:not([readonly]):focus { background-color: #fff; border-color: #eab308; box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1); color: #000; z-index: 1; position: relative; border-radius: 4px; }
-
-    .central { text-align: center; } 
-    .bold { font-weight: 700; }
-    .text-dark { color: #0f172a; } 
-    .text-blue { color: #2563eb; } 
-
-    .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .celda-input[type=number] { -moz-appearance: textfield; }
-
-    /* Estilo para filas editadas temporalmente */
+    /* Estructura de Tabla */
+    #tablaComisiones { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    .th-premium { padding: 14px 12px; border-right: 1px solid #334155; border-bottom: 2px solid #cbd5e1; text-align: left; }
+    .td-premium { padding: 0; border-right: 1px solid #e2e8f0; height: 42px; vertical-align: middle; }
+    
+    /* Interacciones de fila */
+    .fila-simulador:hover { background-color: #f1f5f9; }
     .fila-editada > td { background-color: #fffbeb !important; }
     .fila-editada > td:first-child { border-left: 4px solid #f59e0b; }
 
-    .btn-agregar-fila { background-color: #f1f5f9; color: #475569; border: 2px dashed #cbd5e1; padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; transition: all 0.2s ease; font-family: inherit; }
+    /* Inputs Fantasma */
+    .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 10px 15px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
+    .celda-input:not([readonly]):focus { background-color: #fef9c3; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; }
+    
+    /* Utilidades de texto */
+    .central { text-align: center; } 
+    .bold { font-weight: 700; }
+    .text-dark { color: #0f172a; } 
+    .text-blue { color: #1d4ed8; font-family: 'Courier New', Courier, monospace; font-size: 14px; } 
+
+    /* Quitar flechas a inputs de numero */
+    .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .celda-input[type=number] { -moz-appearance: textfield; }
+
+    /* Botones Premium */
+    .btn-premium { color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s, filter 0.2s; text-decoration: none; font-size: 0.85rem; font-family: inherit; }
+    .btn-premium:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    /* Boton añadir fila */
+    .btn-agregar-fila { background-color: #f8fafc; color: #475569; border: 2px dashed #cbd5e1; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; transition: all 0.2s; font-family: inherit; }
     .btn-agregar-fila:hover { background-color: #e2e8f0; border-color: #94a3b8; color: #1e293b; transform: translateY(-2px); }
+
+    /* Paginación */
+    .btn-pag { padding: 6px 14px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; }
+    .btn-pag:hover { background: var(--color-principal); color: white; border-color: var(--color-principal); }
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -149,7 +162,6 @@
     function registrarCambioFila(elemento) {
         const fila = elemento.closest('tr');
         
-        // Identificador único de la fila
         let key = fila.dataset.originalKey;
         if (!key || key === 'molde' || key === '') {
             key = 'temp-' + Math.random().toString(36).substr(2, 9);
@@ -160,9 +172,8 @@
         const cat = fila.querySelector('.val-cat')?.value.trim() || '';
         const comision = parseFloat(fila.querySelector('.val-comision')?.value) || 0;
 
-        if (subcat === '' && cat === '') return; // No guardamos filas fantasma
+        if (subcat === '' && cat === '') return; 
 
-        // Guardamos el estado actual en la memoria (Las llaves deben coincidir con lo que espera el backend)
         memoriaComisiones[key] = {
             'SUB CATEGORÍA': subcat,
             'CATEGORÍA': cat,
@@ -172,7 +183,7 @@
         localStorage.setItem('memoriaComisionesTemp', JSON.stringify(memoriaComisiones));
         
         fila.classList.add('fila-editada');
-        document.getElementById('indicador-cambios').style.display = 'inline-block';
+        document.getElementById('indicador-cambios').style.display = 'inline-flex';
     }
 
     // -------------------------------------------------------------
@@ -198,7 +209,7 @@
 
         if (hayCambiosPrevios || Object.keys(memoriaComisiones).length > 0) {
             const indicador = document.getElementById('indicador-cambios');
-            if(indicador) indicador.style.display = 'inline-block';
+            if(indicador) indicador.style.display = 'inline-flex';
         }
     });
 
@@ -208,22 +219,22 @@
     function agregarFila() {
         const tbody = document.querySelector('#tablaComisiones tbody');
         
-        // Creamos la estructura de la nueva fila editable vacía
         const tr = document.createElement('tr');
         tr.className = 'fila-simulador';
         tr.dataset.originalKey = 'temp-' + Math.random().toString(36).substr(2, 9);
+        tr.style.borderBottom = "1px solid #e2e8f0";
         
         tr.innerHTML = `
-            <td class="td-cell"><input type="text" class="celda-input val-subcat text-dark bold" oninput="registrarCambioFila(this)"></td>
-            <td class="td-cell"><input type="text" class="celda-input val-cat" oninput="registrarCambioFila(this)"></td>
-            <td class="td-cell" style="background: #f8fafc;"><input type="number" step="0.01" class="celda-input central bold text-blue val-comision" value="0.00" oninput="registrarCambioFila(this)"></td>
+            <td class="td-premium"><input type="text" class="celda-input val-subcat text-dark bold" oninput="registrarCambioFila(this)"></td>
+            <td class="td-premium"><input type="text" class="celda-input val-cat" oninput="registrarCambioFila(this)"></td>
+            <td class="td-premium" style="background-color: #eff6ff;"><input type="number" step="0.01" class="celda-input central bold text-blue val-comision" value="0.00" oninput="registrarCambioFila(this)"></td>
         `;
         
-        // Si hay una fila de "vacia", la removemos antes de agregar
         const filaVacia = document.getElementById('fila-vacia');
         if (filaVacia) filaVacia.remove();
 
         tbody.appendChild(tr);
+        tr.querySelector('.val-subcat').focus();
     }
 
     // -------------------------------------------------------------
@@ -285,7 +296,6 @@
                 'Content-Type': 'application/json',
                 'X-CSRFToken': '{{ csrf_token }}'
             },
-            // Enviamos el array completo de lo que recolectamos de la memoria
             body: JSON.stringify({ referencias: datosAguardar })
         })
         .then(response => response.json())
