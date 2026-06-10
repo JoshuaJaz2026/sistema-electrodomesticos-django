@@ -16,80 +16,81 @@
 
     <div class="card" style="padding: 0; background: white; width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;">
         
-        <div style="overflow-x: auto; max-height: 70vh;">
-            <table style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.85rem; white-space: nowrap;">
+        <div style="overflow-x: auto; max-height: 70vh; border: 2px solid #94a3b8; border-radius: 4px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; white-space: nowrap;">
                 <thead style="position: sticky; top: 0; z-index: 10;">
                     <tr style="background-color: #1e293b; color: white; text-align: center; font-size: 0.75rem; letter-spacing: 1px;">
-                        <th colspan="6" style="padding: 8px; border-right: 1px solid #334155;">DATOS DEL PRODUCTO</th>
-                        <th colspan="4" style="padding: 8px; border-right: 1px solid #334155; background-color: #047857;">ENTRADAS (IN)</th>
-                        <th colspan="7" style="padding: 8px; border-right: 1px solid #334155; background-color: #b45309;">SALIDAS POR PLATAFORMA (OUT)</th>
-                        <th colspan="1" style="padding: 8px; background-color: #0f172a;">BALANCE</th>
+                        <th colspan="6" style="padding: 8px; border: 1px solid #334155;">DATOS DEL PRODUCTO</th>
+                        <th colspan="4" style="padding: 8px; border: 1px solid #334155; background-color: #047857;">ENTRADAS (IN)</th>
+                        <th colspan="7" style="padding: 8px; border: 1px solid #334155; background-color: #b45309;">SALIDAS POR PLATAFORMA (OUT)</th>
+                        <th colspan="1" style="padding: 8px; border: 1px solid #334155; background-color: #0f172a;">BALANCE</th>
                     </tr>
-                    <tr style="background-color: #f8fafc; color: #475569; text-transform: uppercase; font-weight: 800; border-bottom: 2px solid #cbd5e1;">
-                        <th class="th-estilo">SKU</th>
-                        <th class="th-estilo">MODELO</th>
-                        <th class="th-estilo">MARCA</th>
-                        <th class="th-estilo" style="min-width: 200px;">TÍTULO</th>
-                        <th class="th-estilo">UBICACIÓN</th>
-                        <th class="th-estilo" style="border-right: 2px solid #cbd5e1;">SERIE / N°</th>
+                    <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem;">
+                        <th class="th-estilo" style="width: 140px;">SKU</th>
+                        <th class="th-estilo" style="width: 130px;">MODELO</th>
+                        <th class="th-estilo" style="width: 120px;">MARCA</th>
+                        <th class="th-estilo" style="min-width: 250px;">TÍTULO</th>
+                        <th class="th-estilo" style="width: 120px;">UBICACIÓN</th>
+                        <th class="th-estilo" style="width: 130px;">SERIE / N°</th>
                         
-                        <th class="th-estilo">FECHA ING.</th>
-                        <th class="th-estilo">PROVEEDOR</th>
-                        <th class="th-estilo">COSTO</th>
-                        <th class="th-estilo" style="border-right: 2px solid #cbd5e1; background-color: #ecfdf5; color: #065f46;">IN</th>
+                        <th class="th-estilo" style="width: 110px;">FECHA ING.</th>
+                        <th class="th-estilo" style="width: 140px;">PROVEEDOR</th>
+                        <th class="th-estilo" style="width: 100px;">COSTO</th>
+                        <th class="th-estilo" style="background-color: #064e3b; width: 60px;">IN</th>
                         
-                        <th class="th-estilo out-header">ML</th>
-                        <th class="th-estilo out-header">FBL</th>
-                        <th class="th-estilo out-header">CDT</th>
-                        <th class="th-estilo out-header">VL</th>
-                        <th class="th-estilo out-header">TK</th>
-                        <th class="th-estilo out-header">INT</th>
-                        <th class="th-estilo out-header" style="border-right: 2px solid #cbd5e1;">ML JR</th>
+                        <th class="th-estilo out-header" style="width: 60px;">ML</th>
+                        <th class="th-estilo out-header" style="width: 60px;">FBL</th>
+                        <th class="th-estilo out-header" style="width: 60px;">CDT</th>
+                        <th class="th-estilo out-header" style="width: 60px;">VL</th>
+                        <th class="th-estilo out-header" style="width: 60px;">TK</th>
+                        <th class="th-estilo out-header" style="width: 60px;">INT</th>
+                        <th class="th-estilo out-header" style="width: 60px;">ML JR</th>
                         
-                        <th class="th-estilo" style="background-color: #f1f5f9; color: #0f172a; font-size: 0.95rem;">STOCK</th>
+                        <th class="th-estilo" style="background-color: #0f172a; font-size: 0.85rem; width: 80px;">STOCK</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in page_obj %}
-                    <tr class="fila-hover" style="border-bottom: 1px solid #e2e8f0; transition: background-color 0.2s;">
+                    <tr class="fila-hover">
                         
-                        <td class="td-estilo font-mono" style="color: #2563eb; font-weight: bold;">{{ item.sku }}</td>
-                        <td class="td-estilo" style="font-weight: 700; color: #334155;">{{ item.modelo|default:"-" }}</td>
-                        <td class="td-estilo">{{ item.marca }}</td>
-                        <td class="td-estilo" style="color: #64748b; font-size: 0.8rem; white-space: normal; min-width: 200px; line-height: 1.2;">{{ item.titulo|default:"-" }}</td>
-                        <td class="td-estilo"><span style="background: #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; color: #475569;">{{ item.ubicacion }}</span></td>
-                        <td class="td-estilo font-mono" style="border-right: 2px solid #e2e8f0;">{{ item.serie_nro|default:"-" }}</td>
+                        <td class="td-estilo font-mono" style="color: #2563eb; font-weight: bold; text-align: center;">{{ item.sku }}</td>
+                        <td class="td-estilo" style="font-weight: 700; color: #334155; text-align: center;">{{ item.modelo|default:"-" }}</td>
+                        <td class="td-estilo" style="text-align: center;">{{ item.marca }}</td>
+                        <td class="td-estilo" style="color: #64748b; font-size: 0.8rem; white-space: normal; min-width: 250px; line-height: 1.2;">{{ item.titulo|default:"-" }}</td>
+                        <td class="td-estilo" style="text-align: center;"><span style="background: #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; color: #475569; border: 1px solid #cbd5e1;">{{ item.ubicacion }}</span></td>
+                        <td class="td-estilo font-mono" style="text-align: center;">{{ item.serie_nro|default:"-" }}</td>
                         
-                        <td class="td-estilo" style="color: #64748b;">{{ item.fecha_ingreso|date:"d/m/Y"|default:"-" }}</td>
-                        <td class="td-estilo" style="color: #64748b;">{{ item.proveedor|default:"-" }}</td>
-                        <td class="td-estilo" style="text-align: right; color: #64748b;">S/ {{ item.costo_unitario|floatformat:2 }}</td>
-                        <td class="td-estilo" style="border-right: 2px solid #e2e8f0; text-align: center;">
+                        <td class="td-estilo" style="color: #64748b; text-align: center;">{{ item.fecha_ingreso|date:"d/m/Y"|default:"-" }}</td>
+                        <td class="td-estilo" style="color: #64748b; text-align: center;">{{ item.proveedor|default:"-" }}</td>
+                        <td class="td-estilo" style="text-align: right; color: #64748b; padding-right: 15px;">S/ {{ item.costo_unitario|floatformat:2 }}</td>
+                        
+                        <td class="td-estilo td-badge">
                             <span class="badge badge-in">{{ item.in_cant }}</span>
                         </td>
                         
-                        <td class="td-estilo out-cell">
-                            {% if item.out_ml > 0 %}<span class="badge badge-out">{{ item.out_ml }}</span>{% else %}<span class="badge-zero">-</span>{% endif %}
+                        <td class="td-estilo td-badge">
+                            {% if item.out_ml > 0 %}<span class="badge badge-out">{{ item.out_ml }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
                         </td>
-                        <td class="td-estilo out-cell">
-                            {% if item.out_fbl > 0 %}<span class="badge badge-out">{{ item.out_fbl }}</span>{% else %}<span class="badge-zero">-</span>{% endif %}
+                        <td class="td-estilo td-badge">
+                            {% if item.out_fbl > 0 %}<span class="badge badge-out">{{ item.out_fbl }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
                         </td>
-                        <td class="td-estilo out-cell">
-                            {% if item.out_cdt > 0 %}<span class="badge badge-out">{{ item.out_cdt }}</span>{% else %}<span class="badge-zero">-</span>{% endif %}
+                        <td class="td-estilo td-badge">
+                            {% if item.out_cdt > 0 %}<span class="badge badge-out">{{ item.out_cdt }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
                         </td>
-                        <td class="td-estilo out-cell">
-                            {% if item.out_vl > 0 %}<span class="badge badge-out">{{ item.out_vl }}</span>{% else %}<span class="badge-zero">-</span>{% endif %}
+                        <td class="td-estilo td-badge">
+                            {% if item.out_vl > 0 %}<span class="badge badge-out">{{ item.out_vl }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
                         </td>
-                        <td class="td-estilo out-cell">
-                            {% if item.out_tk > 0 %}<span class="badge badge-out">{{ item.out_tk }}</span>{% else %}<span class="badge-zero">-</span>{% endif %}
+                        <td class="td-estilo td-badge">
+                            {% if item.out_tk > 0 %}<span class="badge badge-out">{{ item.out_tk }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
                         </td>
-                        <td class="td-estilo out-cell">
-                            {% if item.out_intcp > 0 %}<span class="badge badge-out">{{ item.out_intcp }}</span>{% else %}<span class="badge-zero">-</span>{% endif %}
+                        <td class="td-estilo td-badge">
+                            {% if item.out_intcp > 0 %}<span class="badge badge-out">{{ item.out_intcp }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
                         </td>
-                        <td class="td-estilo out-cell" style="border-right: 2px solid #e2e8f0;">
-                            {% if item.out_ml2 > 0 %}<span class="badge badge-out">{{ item.out_ml2 }}</span>{% else %}<span class="badge-zero">-</span>{% endif %}
+                        <td class="td-estilo td-badge">
+                            {% if item.out_ml2 > 0 %}<span class="badge badge-out">{{ item.out_ml2 }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
                         </td>
                         
-                        <td class="td-estilo" style="text-align: center; background-color: #f8fafc;">
+                        <td class="td-estilo td-badge">
                             {% if item.stock > 0 %}
                                 <span class="badge badge-stock-ok">{{ item.stock }}</span>
                             {% else %}
@@ -99,7 +100,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="18" style="text-align: center; padding: 40px; color: #94a3b8; font-size: 1.1rem;">
+                        <td colspan="18" style="text-align: center; padding: 40px; color: #94a3b8; font-size: 1.1rem; border: 1px solid #cbd5e1;">
                             <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 15px; color: #cbd5e1; display: block;"></i>
                             No hay registros de ingresos disponibles. Importa tu kardex para comenzar.
                         </td>
@@ -128,24 +129,46 @@
 </div>
 
 <style>
-    /* Estilos de Celdas y Tabla */
-    .th-estilo { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e2e8f0; background-color: #f8fafc; }
-    .td-estilo { padding: 10px 15px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-    .fila-hover:hover { background-color: #f1f5f9 !important; }
+    /* ========================================================
+       DISEÑO TIPO EXCEL (GRID MARCADOS)
+       ======================================================== */
+    /* Celdas y Tabla */
+    .th-estilo { padding: 12px 6px; text-align: center; border: 1px solid #334155; }
+    .td-estilo { padding: 8px 10px; border: 1px solid #cbd5e1; vertical-align: middle; }
+    
+    /* Efecto Cebra: Fila blanca y Fila ligeramente gris */
+    .fila-hover:nth-child(even) { background-color: #f8fafc; }
+    .fila-hover:nth-child(odd) { background-color: #ffffff; }
+    .fila-hover:hover { background-color: #e2e8f0 !important; }
+    
     .font-mono { font-family: 'Courier New', Courier, monospace; letter-spacing: -0.5px; }
     
-    /* Columnas OUT */
-    .out-header { background-color: #fff7ed !important; color: #9a3412 !important; text-align: center; }
-    .out-cell { text-align: center; background-color: #fafafa; }
+    /* Cabeceras OUT */
+    .out-header { background-color: #431407 !important; color: #fdba74 !important; }
     
-    /* Píldoras (Badges) */
-    .badge { padding: 4px 10px; border-radius: 12px; font-weight: 800; font-size: 0.8rem; display: inline-block; min-width: 25px; text-align: center; }
-    .badge-in { background-color: #d1fae5; color: #047857; border: 1px solid #10b981; }
-    .badge-out { background-color: #fee2e2; color: #b91c1c; border: 1px solid #ef4444; }
-    .badge-zero { color: #cbd5e1; font-weight: bold; }
+    /* ========================================================
+       CELDAS TIPO BLOQUE (LLENAN EL 100% DEL ESPACIO)
+       ======================================================== */
+    .td-badge { padding: 0 !important; height: 38px; }
+    .badge { 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        width: 100%; 
+        height: 100%; 
+        min-height: 38px; 
+        box-sizing: border-box; 
+        font-weight: 900; 
+        font-size: 1rem; 
+    }
     
-    .badge-stock-ok { background-color: #10b981; color: white; font-size: 1rem; padding: 6px 14px; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3); }
-    .badge-stock-zero { background-color: #ef4444; color: white; font-size: 1rem; padding: 6px 14px; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3); }
+    /* Colores de las celdas numéricas */
+    .badge-in { background-color: #d1fae5; color: #047857; }
+    .badge-out { background-color: #fee2e2; color: #b91c1c; }
+    .badge-zero { background-color: transparent; color: #cbd5e1; font-weight: bold; }
+    
+    .badge-stock-ok { background-color: #10b981; color: white; font-size: 1.1rem; }
+    .badge-stock-zero { background-color: #ef4444; color: white; font-size: 1.1rem; }
 
     /* Paginación */
     .btn-pag { padding: 6px 12px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; }
