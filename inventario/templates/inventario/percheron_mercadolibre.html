@@ -296,63 +296,44 @@
     }
 
     function procesarDescuentosML() {
-    const filas = document.querySelectorAll('#cuerpoSalidas tr:not(#fila-molde-salida)');
-    let datos = [];
+        const filas = document.querySelectorAll('#cuerpoSalidas tr:not(#fila-molde-salida)');
+        let datos = [];
+        let hayIncompletos = false;
 
-    filas.forEach(fila => {
-        const sku = fila.querySelector('.val-sku').value.trim();
-        const modelo = fila.querySelector('.val-modelo').value.trim();
-        const titulo = fila.querySelector('.val-titulo').value.trim();
+        filas.forEach(fila => {
+            const inputSku = fila.querySelector('.val-sku');
+            if (inputSku && inputSku.type !== 'hidden') {
+                const sku = inputSku.value.trim();
+                const modelo = fila.querySelector('.val-modelo').value.trim();
+                const titulo = fila.querySelector('.val-titulo').value.trim();
 
-        if(!sku || !modelo || !titulo) {
-            fila.style.backgroundColor = '#fde2e2'; // Resaltar fila incompleta
+                if(!sku) return; // Ignorar si está vacío completamente
+
+                if(!modelo || !titulo || modelo === 'NO REGISTRADO') {
+                    fila.style.backgroundColor = '#fde2e2'; 
+                    hayIncompletos = true;
+                } else {
+                    fila.style.backgroundColor = ''; 
+                    datos.push({
+                        'sku': sku,
+                        'modelo': modelo,
+                        'titulo': titulo,
+                        'fecha_salida': fila.querySelector('.val-fecha').value,
+                        'serie': fila.querySelector('.val-serie').value.trim(),
+                        'costo': fila.querySelector('.val-costo').value,
+                        'desc_1und': fila.querySelector('.val-desc').value,
+                        'nro_ventas': fila.querySelector('.val-ventas').value.trim(),
+                        'tipo_venta': fila.querySelector('.val-tipo').value,
+                        'by': fila.querySelector('.val-by').value
+                    });
+                }
+            }
+        });
+
+        if (hayIncompletos) {
+            alert("Hay filas con SKUs no registrados o incompletos. Bórralas o corrígelas antes de procesar.");
             return;
         }
-
-        datos.push({
-            'sku': sku,
-            'modelo': modelo,
-            'titulo': titulo,
-            'fecha_salida': fila.querySelector('.val-fecha').value,
-            'serie': fila.querySelector('.val-serie').value.trim(),
-            'costo': fila.querySelector('.val-costo').value,
-            'desc_1und': fila.querySelector('.val-desc').value,
-            'nro_ventas': fila.querySelector('.val-ventas').value.trim(),
-            'tipo_venta': fila.querySelector('.val-tipo').value,
-            'by': fila.querySelector('.val-by').value
-        });
-    });
-
-    if(datos.length === 0) {
-        alert("No hay filas válidas para procesar.");
-        return;
-    }
-
-    const btn = document.querySelector('button[onclick="procesarDescuentosML()"]');
-    const textoOriginal = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
-    btn.disabled = true;
-
-    fetch("{% url 'procesar_salidas_ml' %}", {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
-        body: JSON.stringify({ salidas: datos })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.status === 'ok') {
-            alert(data.message);
-            filas.forEach(f => f.style.backgroundColor = '#d1fae5'); // Marcar filas guardadas
-        } else {
-            alert("Error: " + data.message);
-        }
-    })
-    .catch(err => alert("Ocurrió un error en la conexión."))
-    .finally(() => { 
-        btn.innerHTML = textoOriginal; 
-        btn.disabled = false; 
-    });
-}
 
         if(datos.length === 0) {
             alert("No hay nuevas salidas para procesar.");
@@ -373,7 +354,7 @@
         .then(data => {
             if(data.status === 'ok') {
                 alert(data.message);
-                window.location.reload();
+                window.location.reload(); // Recarga la pantalla para mostrar el historial
             } else {
                 alert("Error: " + data.message);
             }
