@@ -5,45 +5,45 @@
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
-<div class="card simulador-container">
+<div class="card" style="border-top: 4px solid var(--color-principal, #eab308); padding: 20px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
     
-    <div class="simulador-header">
-        <h2 class="simulador-titulo">
-            <i class="fas fa-calculator icono-titulo"></i> Simulador: {{ canal }}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
+        <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase; font-size: 1.25rem; font-weight: 700;">
+            <i class="fas fa-calculator" style="color: var(--color-principal, #eab308);"></i> Simulador: {{ canal }}
         </h2>
         
-        <div class="simulador-acciones">
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; position: relative;">
             <input type="file" id="fileImportExcel" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importarSimulador(event)">
             
-            <button type="button" onclick="document.getElementById('fileImportExcel').click()" class="btn-accion btn-importar">
+            <button type="button" onclick="document.getElementById('fileImportExcel').click()" class="btn-premium" style="background-color: #f59e0b;">
                 <i class="fas fa-file-import"></i> Importar Excel
             </button>
 
-            <a href="{% url 'descargar_plantilla' %}" class="btn-accion btn-secundario" style="background-color: #64748b; color: white; text-decoration: none;">
+            <a href="{% url 'descargar_plantilla' %}" class="btn-premium" style="background-color: #64748b;">
                 <i class="fas fa-download"></i> Descargar Plantilla
             </a>
 
-            <button type="button" onclick="exportarSimulador()" class="btn-accion btn-exportar">
+            <button type="button" onclick="exportarSimulador()" class="btn-premium" style="background-color: #0ea5e9;">
                 <i class="fas fa-file-excel"></i> Exportar
             </button>
 
-            <button type="button" id="btnGuardar" onclick="guardarSimulaciones()" class="btn-accion btn-principal btn-guardar">
+            <button type="button" id="btnGuardar" onclick="guardarSimulaciones()" class="btn-premium" style="background-color: var(--color-principal, #eab308); color: white;">
                 <i class="fas fa-save"></i> Guardar Simulaciones
             </button>
             
             <div style="position: relative;">
-                <button type="button" onclick="togglePanelColumnas()" class="btn-accion btn-secundario">
-                    <i class="fas fa-columns"></i> Opciones de Pantalla
+                <button type="button" onclick="togglePanelColumnas()" class="btn-premium" style="background-color: #334155;">
+                    <i class="fas fa-columns"></i> Opciones
                 </button>
                 
-                <div id="panelPersonalizarColumnas" class="panel-columnas">
-                    <div class="panel-header">
-                        <h4 class="panel-titulo">
-                            <i class="fas fa-tasks icono-titulo"></i> Elementos en pantalla
+                <div id="panelPersonalizarColumnas" style="display: none; position: absolute; right: 0; top: 115%; background: white; border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 100; width: 650px; animation: slideInDown 0.2s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
+                        <h4 style="margin: 0; color: #1e293b; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-tasks" style="color: var(--color-principal, #eab308);"></i> Elementos en pantalla
                         </h4>
-                        <button onclick="togglePanelColumnas()" class="btn-cerrar-panel">&times;</button>
+                        <button onclick="togglePanelColumnas()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.4rem; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; transition: background 0.2s;">&times;</button>
                     </div>
-                    <div id="columnCheckboxes" class="panel-body grid-columnas"></div>
+                    <div id="columnCheckboxes" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;"></div>
                 </div>
             </div>
         </div>
@@ -52,122 +52,139 @@
     <datalist id="list-itemtype"><option value="KILLER"><option value="NORMAL"><option value="SLOW"><option value="NUEVO"></datalist>
     <datalist id="list-estado"><option value="ACTIVO"><option value="PAUSADO"></datalist>
     <datalist id="list-tipopub"><option value="CATALOGO"><option value="TRADICIONAL"></datalist>
-    
     <datalist id="list-categoria">
         <option value="MAQUINA DE CORTAR PELO"><option value="ARROCERA"><option value="AUDIFONOS"><option value="BATIDORA DE INMERSIÓN"><option value="BATIDORA DE MANO"><option value="BATIDORA DE TAZÓN"><option value="CACEROLA"><option value="CAFETERA"><option value="COCINA DE INDUCCIÓN"><option value="COCINA ELÉCTRICA"><option value="COMBO BLACK"><option value="COMBO CHERRY"><option value="COMBO OSTER"><option value="DISPENSADOR DE AGUA"><option value="EXTRACTOR DE JUGOS"><option value="FREIDORA DE AIRE"><option value="HERVIDOR ELÉCTRICO"><option value="JUEGO DE OLLAS"><option value="LAVADORA"><option value="LICUADORA"><option value="LAVASECA"><option value="MICRÓFONO"><option value="MICROONDAS"><option value="MOLEDOR DE CARNE"><option value="MOLINILLO"><option value="OLLA A PRESIÓN"><option value="PANIFICADORA"><option value="PARLANTE"><option value="SARTÉN"><option value="SET DE CUBIERTOS"><option value="SET DE OLLAS"><option value="TERMO BOMBA"><option value="TERMORADIADOR"><option value="TERMO HERVIDOR"><option value="TETERA"><option value="TRICOMBO OSTER"><option value="TV"><option value="WAFLERA ELÉCTRICA"><option value="YOGURT MAKER"><option value="SARTÉN ELÉCTRICA"><option value="VAPORIZADOR DE PRENDAS"><option value="JVC"><option value="ONDULADOR"><option value="PLANCHA GRILL"><option value="PROCESADOR DE ALIMENTOS"><option value="CUATRICOMBO OSTER"><option value="MULTI OLLA"><option value="CUCHILLA DE LICUADORA"><option value="PERFUME"><option value="OLLA DE ACERO"><option value="PARRILLA ELÉCTRICA"><option value="SANDWICHERA"><option value="HORNO CON FREIDORA DE AIRE"><option value="HORNO ELÉCTRICO"><option value="REFRIGERADORA"><option value="CONGELADORA"><option value="PARRILLA PORTÁTIL"><option value="MINICOMPONENTE"><option value="EXTRACTOR POR PRENSADO"><option value="CONTROL DE TV"><option value="SOUNDBAR"><option value="HIERRO FUNDIDO"><option value="HORNO MICROONDAS"><option value="TETERA ELÉCTRICA"><option value="BATIDORA MULTIUSOS"><option value="OLLA ANTIHADERENTE"><option value="DESHUMEDECEDOR"><option value="PLANCHA A VAPOR"><option value="FRIGOBAR"><option value="ASPIRADORA"><option value="ESPUMADERA"><option value="KIT DE ACCESORIOS"><option value="PLANCHA DE PELO"><option value="SET DE MÁQUINAS PARA CORTAR PELO"><option value="ESPÁTULA"><option value="TABLET"><option value="COMBO FINEZZA"><option value="BLOQUEADOR"><option value="PACK CUIDADO PERSONAL"><option value="AFEITADOR"><option value="BISUTERÍA"><option value="MOLDES"><option value="LUSTRADORA"><option value="BOWLS"><option value="CUIDADO PERSONAL"><option value="BATIDORA DE MANO Y PEDESTAL"><option value="SARTÉN ANTIHADERENTE"><option value="VASO"><option value="COCINA A GAS"><option value="HORNO TOSTADOR"><option value="TAPA DE LICUADORA"><option value="DEPILADORA"><option value="EXPRIMIDOR CÍTRICO"><option value="MÁQUINA PARA HACER PASTA"><option value="PLANCHA CLÁSICA"><option value="TOSTADORA"><option value="OLLA"><option value="PARRILLA Y PLANCHA"><option value="COMBO RECORD"><option value="PATINES"><option value="JARRA"><option value="ASADOR ELÉCTRICO"><option value="CARGADOR PORTATIL"><option value="AIRE ACONDICIONADO"><option value="KIT OSTER"><option value="EXHIBIDORA"><option value="CAMPANA"><option value="ESTUFA"><option value="IMPRESORA"><option value="COCINA ENCIMERA"><option value="VENTILADOR"><option value="AMPLIFICADOR"><option value="FUNDA DE PARLANTE"><option value="CEPILLO MODELADOR"><option value="ESCOBA ELECTRICA"><option value="CREEPERA"><option value="MAQUINA DE DONDAS"><option value="MAQUINA DE HIELO">
     </datalist>
-
     <datalist id="list-marca">
         <option value="WAHL"><option value="OSTER"><option value="FINEZZA"><option value="RECORD"><option value="IMACO"><option value="BOSSKO"><option value="TAURUS"><option value="LG"><option value="SAMSUNG"><option value="INDURAMA"><option value="ELECTROLUX"><option value="JBO"><option value="TREVELY"><option value="JVC"><option value="BGH"><option value="PHILIPS"><option value="FUJITEC"><option value="PANASONIC"><option value="SONY"><option value="TCL"><option value="HALION"><option value="MIRAY"><option value="EVOLUTION"><option value="YANBAL"><option value="DSP"><option value="MASTERTECH"><option value="CREST"><option value="GAMA"><option value="WHITELINE"><option value="REMINGTONE"><option value="MAGIC CLIP"><option value="ILUMI"><option value="MABE"><option value="AOC"><option value="TRAMONTINA"><option value="PREMIER"><option value="IMPERIAL"><option value="VISIONNER"><option value="SILVER CREST"><option value="BORD"><option value="EPSON"><option value="SOLE">
     </datalist>
 
-    <div style="margin-bottom: 15px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+    <div style="background-color: #f8fafc; border-left: 4px solid var(--color-principal, #eab308); padding: 15px 20px; border-radius: 6px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #e2e8f0;">
         <form method="GET" action="" style="display: flex; gap: 15px; width: 100%; max-width: 650px; align-items: center;">
             <div style="position: relative; flex-grow: 1;">
                 <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
-                <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar por CÓD. PUB o CÓD. PROD (SKU)..." style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-family: inherit; box-sizing: border-box;">
+                <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar por CÓD. PUB o CÓD. PROD (SKU)..." style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; box-sizing: border-box; font-size: 0.9rem; transition: border-color 0.2s;">
             </div>
             
-            <button type="submit" class="btn-accion btn-principal" style="margin-left: 25px; flex-shrink: 0;">
+            <button type="submit" class="btn-premium" style="background-color: var(--color-principal, #eab308); flex-shrink: 0; padding: 10px 20px;">
                 Buscar
             </button>
             
             {% if query_search %}
-            <a href="?" class="btn-accion" style="background-color: #ef4444; color: white; text-decoration: none; flex-shrink: 0;">
+            <a href="?" class="btn-premium" style="background-color: #ef4444; flex-shrink: 0; padding: 10px 15px;">
                 <i class="fas fa-times"></i> Limpiar
             </a>
             {% endif %}
         </form>
+        
+        <span id="indicador-cambios" style="background-color: #f59e0b; color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; display: none; font-weight: bold; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);">
+            <i class="fas fa-exclamation-circle" style="margin-right: 5px;"></i> Cambios sin guardar
+        </span>
     </div>
 
-    <div class="tabla-scroll-container" style="position: relative;">
+    <div style="position: relative; overflow-x: auto; overflow-y: auto; max-height: 65vh; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
         
         <div id="pantalla-carga-tabla" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); z-index: 50; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: opacity 0.4s ease;">
             <div style="width: 200px; height: 6px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; margin-bottom: 12px;">
-                <div class="barra-animada" style="height: 100%; width: 40%; background-color: var(--color-principal, #2563eb); border-radius: 10px;"></div>
+                <div class="barra-animada" style="height: 100%; width: 40%; background-color: var(--color-principal, #eab308); border-radius: 10px;"></div>
             </div>
             <span style="color: #475569; font-weight: 600; font-size: 0.9rem;">Preparando datos...</span>
         </div>
 
-        <table id="tablaReporte" class="tabla-simulador-moderna">
-            <thead>
-                <tr>
-                    <th class="th-rep th-itemtype">ITEM TYPE</th>
-                    <th class="th-rep th-link">LINK</th>
-                    <th class="th-rep th-estado">ESTADO</th>
-                    <th class="th-rep th-codpub">CÓD. PUB</th>
-                    <th class="th-rep th-tipo">TIPO</th>
-                    <th class="th-rep th-codprod">CÓD. PROD</th>
-                    <th class="th-rep th-categoria">CATEGORIA</th>
-                    <th class="th-rep th-marca">MARCA</th>
-                    <th class="th-rep th-producto">PRODUCTO</th>
-                    <th class="th-rep th-ptachado" style="background: #f8fafc;">P. TACHADO</th>
-                    <th class="th-rep th-dscto" style="color: #475569;">% DSCTO</th>
-                    <th class="th-rep th-venta" style="background: #dcfce7; color: #166534;">P. VENTA</th>
-                    <th class="th-rep th-envio">ENVÍO</th>
-                    <th class="th-rep th-porccom" style="background: #fee2e2; color: #991b1b;">% NUEVA COM</th>
-                    <th class="th-rep th-comsoles" style="background: #fef2f2; color: #991b1b;">COM (S/)</th>
-                    <th class="th-rep th-pagoneto" style="background: #f0fdf4; color: #166534;">PAGO NETO</th>
-                    <th class="th-rep th-costo" style="background: #fee2e2; color: #991b1b;">COSTO</th>
-                    <th class="th-rep th-ganancia" style="background: #eff6ff; color: #1e40af;">GANANCIA</th>
-                    <th class="th-rep th-rentabilidad" style="background: #eff6ff; color: #1e40af;">RTBLD%</th>
-                    <th class="th-rep th-mpe">MPE</th>
+        <table id="tablaReporte" style="width: max-content; border-collapse: separate; border-spacing: 0; background: white; font-size: 0.85rem; white-space: nowrap; table-layout: fixed;">
+            <thead style="position: sticky; top: 0; z-index: 10;">
+                <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem; letter-spacing: 0.5px;">
+                    <th class="th-premium" style="width: 100px;">ITEM TYPE</th>
+                    <th class="th-premium" style="width: 220px;">LINK</th>
+                    <th class="th-premium" style="width: 100px;">ESTADO</th>
+                    <th class="th-premium" style="width: 120px; color: #60a5fa;">CÓD. PUB</th>
+                    <th class="th-premium" style="width: 120px;">TIPO</th>
+                    <th class="th-premium" style="width: 120px; color: #60a5fa;">CÓD. PROD</th>
+                    <th class="th-premium" style="width: 200px;">CATEGORIA</th>
+                    <th class="th-premium" style="width: 140px;">MARCA</th>
+                    <th class="th-premium" style="width: 320px;">PRODUCTO</th>
+                    
+                    <th class="th-premium" style="width: 100px; background-color: #1e293b;">P. TACHADO</th>
+                    <th class="th-premium" style="width: 90px; background-color: #1e293b;">% DSCTO</th>
+                    <th class="th-premium" style="width: 100px; background-color: #064e3b;">P. VENTA</th>
+                    
+                    <th class="th-premium" style="width: 90px; background-color: #7f1d1d;">ENVÍO</th>
+                    <th class="th-premium" style="width: 110px; background-color: #7f1d1d;">% NUEVA COM</th>
+                    <th class="th-premium" style="width: 100px; background-color: #7f1d1d;">COM (S/)</th>
+                    
+                    <th class="th-premium" style="width: 110px; background-color: #064e3b;">PAGO NETO</th>
+                    <th class="th-premium" style="width: 100px; background-color: #7f1d1d;">COSTO</th>
+                    
+                    <th class="th-premium" style="width: 110px; background-color: #1e3a8a;">GANANCIA</th>
+                    <th class="th-premium" style="width: 100px; background-color: #1e3a8a;">RTBLD%</th>
+                    
+                    <th class="th-premium" style="width: 140px; color: #60a5fa;">MPE</th>
                 </tr>
             </thead>
             <tbody>
                 {% if page_obj %}
                     {% for sim in page_obj %}
                     <tr class="fila-simulador" data-original-key="{{ sim.id|default_if_none:'' }}">
-                        <td class="td-cell"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype" value="{{ sim.item_type|default_if_none:'' }}"></td>
-                        <td class="td-cell td-link-container" style="background: #f8fafc;">
-                            <input type="text" class="celda-input val-link text-blue" readonly value="{{ sim.link|default_if_none:'' }}">
+                        <td class="td-premium"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype" value="{{ sim.item_type|default_if_none:'' }}"></td>
+                        <td class="td-premium td-link-container">
+                            <input type="text" class="celda-input val-link text-blue input-readonly" readonly value="{{ sim.link|default_if_none:'' }}" tabindex="-1">
                             <a href="{{ sim.link|default:'#' }}" target="_blank" class="btn-link" style="{% if sim.link %}display: inline-block;{% else %}display: none;{% endif %}"><i class="fas fa-external-link-alt"></i></a>
                         </td>
-                        <td class="td-cell"><input list="list-estado" class="celda-input central val-estado" value="{{ sim.estado_publicacion|default_if_none:'' }}"></td>
-                        <td class="td-cell" style="background: #fffdec;"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub" style="color: var(--color-principal);" value="{{ sim.cod_publicacion|default_if_none:'' }}"></td>
-                        <td class="td-cell"><input list="list-tipopub" class="celda-input central val-tipo" value="{{ sim.tipo_publicacion|default_if_none:'' }}"></td>
-                        <td class="td-cell"><input type="text" class="celda-input central val-codprod" oninput="buscarCosto(this)" value="{{ sim.cod_producto|default_if_none:'' }}"></td>
-                        <td class="td-cell"><input list="list-categoria" class="celda-input val-categoria" oninput="buscarComision(this)" value="{{ sim.categoria|default_if_none:'' }}"></td>
-                        <td class="td-cell"><input list="list-marca" class="celda-input val-marca" value="{{ sim.marca|default_if_none:'' }}"></td>
-                        <td class="td-cell"><input type="text" class="celda-input val-producto" value="{{ sim.producto|default_if_none:'' }}"></td>
-                        <td class="td-cell" style="background: #f8fafc;"><input type="text" class="celda-input derecha bold val-ptachado" readonly tabindex="-1" value="{{ sim.precio_tachado|stringformat:'.2f'|default:'' }}" style="color: #64748b;"></td>
-                        <td class="td-cell"><input type="number" step="0.01" class="celda-input central bold val-dscto" oninput="calcularFila(this)" value="{{ sim.porc_descuento|stringformat:'.2f'|default:'' }}"></td>
-                        <td class="td-cell" style="background: #f0fdf4;"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)" value="{{ sim.precio_venta|stringformat:'.2f'|default:'' }}"></td>
-                        <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-envio" oninput="calcularFila(this)" value="{{ sim.costo_envio|stringformat:'.2f'|default:'' }}"></td>
-                        <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input central text-red val-porc-com" readonly tabindex="-1" value="{% if sim.nueva_comision_ref %}{{ sim.nueva_comision_ref|stringformat:'.2f' }}{% elif sim.porc_comision %}{{ sim.porc_comision|stringformat:'.2f' }}{% else %}0.00{% endif %}"></td>
-                        <td class="td-cell" style="background: #fef2f2;"><input type="text" class="celda-input derecha text-red val-com-soles" readonly tabindex="-1" value="{{ sim.comision_soles|stringformat:'.2f'|default:'' }}"></td>
-                        <td class="td-cell" style="background: #dcfce7;"><input type="text" class="celda-input derecha bold text-green val-pago-neto" readonly tabindex="-1" value="{{ sim.pago_neto|stringformat:'.2f'|default:'' }}"></td>
-                        <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input derecha text-red val-costo" readonly tabindex="-1" value="{% if sim.nuevo_costo_ref %}{{ sim.nuevo_costo_ref|stringformat:'.2f' }}{% elif sim.costo_producto %}{{ sim.costo_producto|stringformat:'.2f' }}{% else %}0.00{% endif %}"></td>
-                        <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input derecha bold val-ganancia" readonly tabindex="-1" value="{{ sim.ganancia|stringformat:'.2f'|default:'' }}" style="color: {% if sim.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
-                        <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input central bold val-rentabilidad" readonly tabindex="-1" value="{{ sim.rentabilidad_porc|stringformat:'.2f'|default:'' }}%" style="color: {% if sim.rentabilidad_porc < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
-                        <td class="td-cell"><input type="text" class="celda-input central bold val-mpe" readonly tabindex="-1" style="background: #f1f5f9; cursor: not-allowed;" value="{{ sim.mpe|default:'MPE' }}"></td>
+                        <td class="td-premium"><input list="list-estado" class="celda-input central val-estado" value="{{ sim.estado_publicacion|default_if_none:'' }}"></td>
+                        <td class="td-premium" style="background-color: #fef9c3;"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub text-mono" style="color: #b45309;" value="{{ sim.cod_publicacion|default_if_none:'' }}"></td>
+                        <td class="td-premium"><input list="list-tipopub" class="celda-input central val-tipo" value="{{ sim.tipo_publicacion|default_if_none:'' }}"></td>
+                        <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-codprod" oninput="buscarCosto(this)" value="{{ sim.cod_producto|default_if_none:'' }}"></td>
+                        <td class="td-premium"><input list="list-categoria" class="celda-input val-categoria" oninput="buscarComision(this)" value="{{ sim.categoria|default_if_none:'' }}"></td>
+                        <td class="td-premium"><input list="list-marca" class="celda-input val-marca bold text-dark" value="{{ sim.marca|default_if_none:'' }}"></td>
+                        <td class="td-premium"><input type="text" class="celda-input val-producto" value="{{ sim.producto|default_if_none:'' }}"></td>
+                        
+                        <td class="td-premium" style="background-color: #f8fafc;"><input type="text" class="celda-input derecha bold val-ptachado input-readonly" readonly tabindex="-1" value="{{ sim.precio_tachado|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-premium"><input type="number" step="0.01" class="celda-input central bold val-dscto text-dark" oninput="calcularFila(this)" value="{{ sim.porc_descuento|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-premium bg-green-light"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)" value="{{ sim.precio_venta|stringformat:'.2f'|default:'' }}"></td>
+                        
+                        <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-envio" oninput="calcularFila(this)" value="{{ sim.costo_envio|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input central bold text-red val-porc-com input-readonly" readonly tabindex="-1" value="{% if sim.nueva_comision_ref %}{{ sim.nueva_comision_ref|stringformat:'.2f' }}{% elif sim.porc_comision %}{{ sim.porc_comision|stringformat:'.2f' }}{% else %}0.00{% endif %}"></td>
+                        <td class="td-premium bg-red-light"><input type="text" class="celda-input derecha text-red val-com-soles input-readonly" readonly tabindex="-1" value="{{ sim.comision_soles|stringformat:'.2f'|default:'' }}"></td>
+                        
+                        <td class="td-premium bg-green-light"><input type="text" class="celda-input derecha bold text-green-dark val-pago-neto input-readonly" readonly tabindex="-1" value="{{ sim.pago_neto|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-costo input-readonly" readonly tabindex="-1" value="{% if sim.nuevo_costo_ref %}{{ sim.nuevo_costo_ref|stringformat:'.2f' }}{% elif sim.costo_producto %}{{ sim.costo_producto|stringformat:'.2f' }}{% else %}0.00{% endif %}"></td>
+                        
+                        <td class="td-premium bg-blue-light"><input type="text" class="celda-input derecha bold val-ganancia input-readonly" readonly tabindex="-1" value="{{ sim.ganancia|stringformat:'.2f'|default:'' }}" style="color: {% if sim.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
+                        <td class="td-premium bg-blue-light"><input type="text" class="celda-input central bold val-rentabilidad input-readonly" readonly tabindex="-1" value="{{ sim.rentabilidad_porc|stringformat:'.2f'|default:'' }}%" style="color: {% if sim.rentabilidad_porc < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
+                        
+                        <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-mpe input-readonly" readonly tabindex="-1" value="{{ sim.mpe|default:'MPE' }}"></td>
                     </tr>
                     {% endfor %}
                 {% else %}
                     <tr class="fila-simulador" data-original-key="molde">
-                        <td class="td-cell"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype"></td>
-                        <td class="td-cell td-link-container" style="background: #f8fafc;">
-                            <input type="text" class="celda-input val-link text-blue" readonly placeholder="Link..." style="cursor: not-allowed;">
+                        <td class="td-premium"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype"></td>
+                        <td class="td-premium td-link-container">
+                            <input type="text" class="celda-input val-link text-blue input-readonly" readonly placeholder="Link..." tabindex="-1">
                             <a href="#" target="_blank" class="btn-link" style="display: none;"><i class="fas fa-external-link-alt"></i></a>
                         </td>
-                        <td class="td-cell"><input list="list-estado" class="celda-input central val-estado"></td>
-                        <td class="td-cell" style="background: #fffdec;"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub" style="color: var(--color-principal);" placeholder="Ej. 123456"></td>
-                        <td class="td-cell"><input list="list-tipopub" class="celda-input central val-tipo"></td>
-                        <td class="td-cell"><input type="text" class="celda-input central val-codprod" oninput="buscarCosto(this)"></td>
-                        <td class="td-cell"><input list="list-categoria" class="celda-input val-categoria" oninput="buscarComision(this)"></td>
-                        <td class="td-cell"><input list="list-marca" class="celda-input val-marca"></td>
-                        <td class="td-cell"><input type="text" class="celda-input val-producto"></td>
-                        <td class="td-cell" style="background: #f8fafc;"><input type="text" class="celda-input derecha bold val-ptachado" readonly tabindex="-1" style="color: #64748b;"></td>
-                        <td class="td-cell"><input type="number" step="0.01" class="celda-input central bold val-dscto" oninput="calcularFila(this)"></td>
-                        <td class="td-cell" style="background: #f0fdf4;"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)"></td>
-                        <td class="td-cell"><input type="number" step="0.01" class="celda-input derecha val-envio" oninput="calcularFila(this)"></td>
-                        <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input central text-red val-porc-com" readonly tabindex="-1" value="0.00"></td>
-                        <td class="td-cell" style="background: #fef2f2;"><input type="text" class="celda-input derecha text-red val-com-soles" readonly tabindex="-1"></td>
-                        <td class="td-cell" style="background: #dcfce7;"><input type="text" class="celda-input derecha bold text-green val-pago-neto" readonly tabindex="-1"></td>
-                        <td class="td-cell" style="background: #fff5f5;"><input type="number" step="0.01" class="celda-input derecha text-red val-costo" readonly tabindex="-1" value="0.00"></td>
-                        <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input derecha bold val-ganancia" readonly tabindex="-1"></td>
-                        <td class="td-cell" style="background: #eff6ff;"><input type="text" class="celda-input central bold val-rentabilidad" readonly tabindex="-1"></td>
-                        <td class="td-cell"><input type="text" class="celda-input central bold val-mpe" readonly tabindex="-1" style="background: #f1f5f9; cursor: not-allowed;" value="MPE"></td>
+                        <td class="td-premium"><input list="list-estado" class="celda-input central val-estado"></td>
+                        <td class="td-premium" style="background-color: #fef9c3;"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub text-mono" style="color: #b45309;" placeholder="Ej. 123456"></td>
+                        <td class="td-premium"><input list="list-tipopub" class="celda-input central val-tipo"></td>
+                        <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-codprod" oninput="buscarCosto(this)"></td>
+                        <td class="td-premium"><input list="list-categoria" class="celda-input val-categoria" oninput="buscarComision(this)"></td>
+                        <td class="td-premium"><input list="list-marca" class="celda-input val-marca bold text-dark"></td>
+                        <td class="td-premium"><input type="text" class="celda-input val-producto"></td>
+                        
+                        <td class="td-premium" style="background-color: #f8fafc;"><input type="text" class="celda-input derecha bold val-ptachado input-readonly" readonly tabindex="-1"></td>
+                        <td class="td-premium"><input type="number" step="0.01" class="celda-input central bold val-dscto text-dark" oninput="calcularFila(this)"></td>
+                        <td class="td-premium bg-green-light"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)"></td>
+                        
+                        <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-envio" oninput="calcularFila(this)"></td>
+                        <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input central bold text-red val-porc-com input-readonly" readonly tabindex="-1" value="0.00"></td>
+                        <td class="td-premium bg-red-light"><input type="text" class="celda-input derecha text-red val-com-soles input-readonly" readonly tabindex="-1"></td>
+                        
+                        <td class="td-premium bg-green-light"><input type="text" class="celda-input derecha bold text-green-dark val-pago-neto input-readonly" readonly tabindex="-1"></td>
+                        <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-costo input-readonly" readonly tabindex="-1" value="0.00"></td>
+                        
+                        <td class="td-premium bg-blue-light"><input type="text" class="celda-input derecha bold val-ganancia input-readonly" readonly tabindex="-1"></td>
+                        <td class="td-premium bg-blue-light"><input type="text" class="celda-input central bold val-rentabilidad input-readonly" readonly tabindex="-1"></td>
+                        
+                        <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-mpe input-readonly" readonly tabindex="-1" value="MPE"></td>
                     </tr>
                 {% endif %}
             </tbody>
@@ -178,110 +195,86 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 12px 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
         <span style="color: #475569; font-weight: 600; font-size: 0.9rem;">
             Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-            {% if query_search %}(Resultados filtrados){% endif %}
-            <span id="indicador-cambios" style="color: #f59e0b; font-weight: bold; display: none; margin-left: 10px;">
-                <i class="fas fa-exclamation-circle"></i> Tienes cambios sin guardar
-            </span>
+            {% if query_search %}<span style="color: #64748b; font-style: italic; margin-left: 5px;">(Resultados filtrados)</span>{% endif %}
         </span>
         <div style="display: flex; gap: 8px;">
             {% if page_obj.has_previous %}
-                <a href="?page=1{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-accion btn-secundario" style="text-decoration: none; padding: 6px 12px; background: #64748b;">&laquo; Primera</a>
-                <a href="?page={{ page_obj.previous_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-accion btn-secundario" style="text-decoration: none; padding: 6px 12px;">Anterior</a>
+                <a href="?page=1{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">&laquo; Primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">Anterior</a>
             {% endif %}
 
             {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-accion btn-secundario" style="text-decoration: none; padding: 6px 12px;">Siguiente</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-accion btn-secundario" style="text-decoration: none; padding: 6px 12px; background: #64748b;">Última &raquo;</a>
+                <a href="?page={{ page_obj.next_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">Siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">Última &raquo;</a>
             {% endif %}
         </div>
     </div>
     {% endif %}
 
-    <div class="simulador-footeracciones">
-        <button type="button" onclick="agregarFila()" class="btn-agregar-fila">
+    <div style="margin-top: 25px; display: flex; justify-content: center;">
+        <button type="button" onclick="agregarFila()" style="background-color: #f8fafc; color: #475569; border: 2px dashed #cbd5e1; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; transition: all 0.2s;">
             <i class="fas fa-plus"></i> Agregar nueva fila de simulación
         </button>
     </div>
 </div>
 
 <style>
-    /* ESTILOS DEL SIMULADOR */
-    .simulador-container { border-top: 4px solid var(--color-principal); padding: 25px; background-color: #fff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important; border-radius: 8px; }
-    .simulador-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
-    .simulador-titulo { margin: 0; color: #1e293b; text-transform: uppercase; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-    .icono-titulo { color: var(--color-principal); font-size: 1.2em; }
-    .simulador-acciones { display: flex; gap: 12px; align-items: center; position: relative; }
+    /* Estructura y Cabeceras */
+    #tablaReporte { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    .th-premium { padding: 12px 10px; border-right: 1px solid #334155; border-bottom: 2px solid #cbd5e1; text-align: center; }
+    .td-premium { padding: 0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #f1f5f9; height: 42px; vertical-align: middle; }
     
-    .btn-buscar-estilo { margin-left: 15px; } 
-
-    .btn-accion { border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; transition: all 0.2s ease; font-family: inherit; }
-    .btn-principal { background-color: var(--color-principal); color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .btn-principal:hover { filter: brightness(0.9); transform: translateY(-1px); }
-    .btn-secundario { background-color: #475569; color: white; }
-    .btn-secundario:hover { background-color: #334155; }
-    .btn-importar { background-color: #f59e0b; color: white; }
-    .btn-importar:hover { background-color: #d97706; }
-    .btn-exportar { background-color: #0ea5e9; color: white; }
-    .btn-exportar:hover { background-color: #0284c7; }
-
-    .tabla-scroll-container { overflow-x: auto; overflow-y: visible; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #fff; }
-    .tabla-simulador-moderna { width: 100%; border-collapse: collapse; font-size: 0.8rem; white-space: nowrap; }
-    .tabla-simulador-moderna thead { position: sticky; top: 0; z-index: 10; background-color: #f8fafc; }
+    /* Zonas de Color Codificadas */
+    .bg-green-light { background-color: #f0fdf4; }
+    .bg-green-medium { background-color: #dcfce7; }
+    .bg-red-light { background-color: #fef2f2; }
+    .bg-blue-light { background-color: #eff6ff; }
     
-    .th-rep { padding: 14px 12px; border-bottom: 2px solid #e2e8f0; border-right: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; font-family: inherit; }
-    .fila-simulador { border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s ease; }
+    /* Interacciones de Filas */
     .fila-simulador:hover { background-color: #f8fafc; }
-    .td-cell { padding: 0; border-right: 1px solid #f1f5f9; vertical-align: middle; }
-
-    .celda-input { width: 100%; box-sizing: border-box; border: 2px solid transparent; padding: 10px 8px; color: #1e293b; background: transparent; outline: none; field-sizing: content; font-size: 0.85rem; font-family: inherit !important; transition: all 0.15s ease; }
-    .celda-input:not([readonly]):focus { background-color: #fff; border-color: var(--color-principal); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); color: #000; border-radius: 4px; z-index: 1; position: relative; }
-    .celda-input[readonly] { cursor: default; }
-
-    .th-itemtype, .val-itemtype { min-width: 90px; }
-    .th-link, .val-link { min-width: 200px; }
-    .th-estado, .val-estado { min-width: 90px; }
-    .th-codpub, .val-codpub { min-width: 100px; }
-    .th-tipo, .val-tipo { min-width: 110px; }
-    .th-codprod, .val-codprod { min-width: 100px; }
-    .th-categoria, .val-categoria { min-width: 220px; }
-    .th-marca, .val-marca { min-width: 130px; }
-    .th-producto, .val-producto { min-width: 300px; }
-    .th-mpe, .val-mpe { min-width: 130px; }
-    .th-ptachado, .th-dscto, .th-venta, .th-envio, .th-porccom, .th-comsoles, .th-pagoneto, .th-costo, .th-ganancia, .th-rentabilidad { min-width: 85px; }
-
-    .central { text-align: center; } .derecha { text-align: right; } .bold { font-weight: 700; }
-    .text-dark { color: #0f172a; } .text-blue { color: #2563eb; } .text-green { color: #166534; } .text-red { color: #dc2626; }
-    .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .celda-input[type=number] { -moz-appearance: textfield; }
-
-    .td-link-container { display: flex; align-items: center; height: 41px; padding-right: 5px; }
-    .btn-link { color: var(--color-principal); text-decoration: none; font-size: 0.9rem; padding: 0 8px; transition: transform 0.2s ease; }
-    .btn-link:hover { transform: scale(1.2); }
-
-    .simulador-footeracciones { margin-top: 25px; display: flex; justify-content: center; }
-    .btn-agregar-fila { background-color: #f1f5f9; color: #475569; border: 2px dashed #cbd5e1; padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; transition: all 0.2s ease; font-family: inherit; }
-    .btn-agregar-fila:hover { background-color: #e2e8f0; border-color: #94a3b8; color: #1e293b; transform: translateY(-2px); }
-
-    .panel-columnas { display: none; position: absolute; right: 0; top: 115%; background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 100; width: 650px; animation: slideInDown 0.3s ease; }
-    .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 15px; }
-    .panel-titulo { margin: 0; color: #1e293b; font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-    .fa-tasksTituloPanel { color: var(--color-principal); }
-    .btn-cerrar-panel { background: #f1f5f9; border: none; color: #94a3b8; cursor: pointer; font-size: 1.4rem; line-height: 1; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
-    .btn-cerrar-panel:hover { background-color: #fee2e2; color: #dc2626; }
-    .grid-columnas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-    .label-columna { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; font-weight: 600; color: #475569; cursor: pointer; padding: 6px; border-radius: 6px; transition: background-color 0.2s ease; }
-    .label-columna:hover { background-color: #f1f5f9; color: #1e293b; }
-    .check-opcion { width: 16px; height: 16px; accent-color: var(--color-principal); cursor: pointer; }
-    @keyframes slideInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* Efecto de fila seleccionada */
-    .fila-seleccionada > td { background-color: #fef9c3 !important; transition: background-color 0.1s ease; }
-    .fila-seleccionada input { background-color: transparent !important; }
-    
-    /* Efecto para filas que tienen cambios sin guardar (memoria temporal) */
+    .fila-seleccionada > td { background-color: #fef9c3 !important; }
     .fila-editada > td { background-color: #fffbeb !important; }
     .fila-editada > td:first-child { border-left: 4px solid #f59e0b; }
 
+    /* Inputs Fantasma y Readonly */
+    .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
+    .celda-input:focus:not([readonly]) { background-color: #fff; box-shadow: inset 0 0 0 2px var(--color-principal, #eab308); color: #000; }
+    .input-readonly { color: #94a3b8; cursor: not-allowed; }
+    .input-readonly:focus { box-shadow: none; background-color: transparent; }
+
+    /* Tipografías y Textos Especiales */
+    .central { text-align: center; }
+    .derecha { text-align: right; }
+    .bold { font-weight: bold; }
+    .text-dark { color: #0f172a; }
+    .text-mono { font-family: 'Courier New', Courier, monospace; letter-spacing: -0.5px; font-weight: 800; font-size: 0.9rem; }
+    .text-blue { color: #2563eb; }
+    .text-blue-dark { color: #1e40af; }
+    .text-green { color: #166534; }
+    .text-green-dark { color: #064e3b; }
+    .text-red { color: #dc2626; }
+
+    /* Link Externo (Mercado Libre) */
+    .td-link-container { display: flex; align-items: center; padding-right: 5px; height: 100%; background-color: #f8fafc; }
+    .btn-link { color: #3b82f6; text-decoration: none; font-size: 0.95rem; padding: 0 8px; transition: transform 0.2s; }
+    .btn-link:hover { transform: scale(1.2); color: #2563eb; }
+
+    /* Botones Superiores */
+    .btn-premium { color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s, filter 0.2s; text-decoration: none; font-size: 0.85rem; }
+    .btn-premium:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    /* Inputs Numéricos sin flechas */
+    .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .celda-input[type=number] { -moz-appearance: textfield; }
+
+    /* Paginación y Opciones */
+    .btn-pag { padding: 6px 14px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; }
+    .btn-pag:hover { background: var(--color-principal, #eab308); color: white; border-color: var(--color-principal, #eab308); }
+    .label-columna { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: bold; color: #475569; cursor: pointer; }
+    .check-opcion { width: 16px; height: 16px; accent-color: var(--color-principal, #eab308); cursor: pointer; }
+    @keyframes slideInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Animación del Loader */
     .barra-animada { animation: moverBarra 1.2s infinite linear; }
     @keyframes moverBarra { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
 </style>
@@ -292,7 +285,6 @@
     // -------------------------------------------------------------------------
     let memoriaSimulador = JSON.parse(localStorage.getItem('memoriaSimuladorML')) || {};
 
-    // Escucha cualquier escritura en los inputs de la tabla
     document.querySelector('#tablaReporte').addEventListener('input', function(e) {
         if (e.target.tagName === 'INPUT') {
             const fila = e.target.closest('tr.fila-simulador');
@@ -301,7 +293,6 @@
     });
 
     function registrarCambioFilaML(fila) {
-        // Buscamos su ID original o le creamos uno temporal si es una fila nueva
         let key = fila.dataset.originalKey;
         if (!key || key === 'molde') {
             key = 'temp-' + Math.random().toString(36).substr(2, 9);
@@ -310,7 +301,7 @@
 
         const codPub = fila.querySelector('.val-codpub')?.value.trim() || '';
         const producto = fila.querySelector('.val-producto')?.value.trim() || '';
-        if (codPub === '' && producto === '') return; // Ignorar filas fantasma
+        if (codPub === '' && producto === '') return; 
 
         memoriaSimulador[key] = {
             item_type: fila.querySelector('.val-itemtype').value,
@@ -357,7 +348,6 @@
             if (key && memoriaSimulador[key]) {
                 const mem = memoriaSimulador[key];
                 
-                // Rellenamos las celdas con lo que hay en memoria
                 if(fila.querySelector('.val-itemtype')) fila.querySelector('.val-itemtype').value = mem.item_type || '';
                 if(fila.querySelector('.val-link')) fila.querySelector('.val-link').value = mem.link || '';
                 if(fila.querySelector('.val-estado')) fila.querySelector('.val-estado').value = mem.estado || '';
@@ -422,7 +412,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-        const ths = document.querySelectorAll("#tablaReporte th.th-rep");
+        const ths = document.querySelectorAll("#tablaReporte th.th-premium");
         const container = document.getElementById("columnCheckboxes");
         ths.forEach((th, index) => {
             const colName = th.innerText.trim();
@@ -518,13 +508,13 @@
         const tbody = document.querySelector('#tablaReporte tbody');
         const primeraFila = tbody.querySelector('tr.fila-simulador');
         const nuevaFila = primeraFila.cloneNode(true);
-        nuevaFila.dataset.originalKey = 'temp-' + Math.random().toString(36).substr(2, 9); // Nueva ID
+        nuevaFila.dataset.originalKey = 'temp-' + Math.random().toString(36).substr(2, 9);
         nuevaFila.classList.remove('fila-editada');
         nuevaFila.querySelectorAll('input').forEach(input => input.value = '');
         nuevaFila.querySelector('.val-mpe').value = 'MPE';
         nuevaFila.querySelector('.btn-link').style.display = 'none';
-        nuevaFila.querySelector('.val-ganancia').style.color = '#475569';
-        nuevaFila.querySelector('.val-rentabilidad').style.color = '#475569';
+        nuevaFila.querySelector('.val-ganancia').style.color = '#1e40af';
+        nuevaFila.querySelector('.val-rentabilidad').style.color = '#1e40af';
         tbody.appendChild(nuevaFila);
     }
 
@@ -634,8 +624,6 @@
                     if(inputVenta) calcularFila(inputVenta);
                     
                     fragmento.appendChild(nuevaFila);
-                    
-                    // Mandamos la fila importada directo a la memoria
                     registrarCambioFilaML(nuevaFila);
                 });
                 
@@ -654,7 +642,6 @@
     }
 
     function guardarSimulaciones() {
-        // En lugar de leer solo la pantalla, leemos TOOOODA la memoria acumulada
         let datosAguardar = Object.values(memoriaSimulador);
 
         if (datosAguardar.length === 0) return alert("No hay cambios pendientes para guardar.");
@@ -672,7 +659,6 @@
         .then(response => response.json())
         .then(data => {
             if(data.status === 'ok') {
-                // Al guardar con éxito, limpiamos la memoria
                 localStorage.removeItem('memoriaSimuladorML');
                 memoriaSimulador = {};
                 alert("¡Simulación guardada con éxito en la Base de Datos!");
