@@ -43,8 +43,8 @@
         </span>
     </div>
 
-    <div style="overflow-x: auto; overflow-y: auto; max-height: 60vh; border: 1px solid #e2e8f0; border-radius: 6px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-        <table id="tablaIngresos" style="width: max-content; border-collapse: separate; border-spacing: 0; background: white; font-size: 0.85rem; white-space: nowrap; table-layout: fixed;">
+    <div style="overflow-x: auto; overflow-y: auto; max-height: 60vh; border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+        <table id="tablaIngresos" style="width: max-content; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap; table-layout: fixed;">
             
             <thead style="position: sticky; top: 0; z-index: 10;">
                 <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;">
@@ -63,7 +63,7 @@
             </thead>
             
             <tbody>
-                <tr class="fila-ingresos" id="fila-molde" style="display: none; border-bottom: 1px solid #e2e8f0; transition: background-color 0.2s;">
+                <tr class="fila-ingresos" id="fila-molde" style="display: none;">
                     <td class="td-premium">
                         <input type="text" class="celda-input central text-blue val-sku" readonly tabindex="-1" oninput="registrarCambioIngreso(this)">
                     </td>
@@ -120,7 +120,7 @@
                 
                 {% if page_obj %}
                     {% for item in page_obj %}
-                    <tr class="fila-ingresos" data-original-key="{{ item.id }}" style="border-bottom: 1px solid #e2e8f0; transition: background-color 0.2s;">
+                    <tr class="fila-ingresos" data-original-key="{{ item.id }}">
                         <td class="td-premium">
                             <input type="text" value="{{ item.sku|default:'' }}" class="celda-input central text-blue val-sku" readonly tabindex="-1" oninput="registrarCambioIngreso(this)">
                         </td>
@@ -203,18 +203,41 @@
 </div>
 
 <style>
-    /* Tipografía y Estructura */
-    #tablaIngresos { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-    .th-premium { padding: 12px 10px; border-right: 1px solid #334155; border-bottom: 2px solid #cbd5e1; text-align: left; }
-    .td-premium { padding: 0; border-right: 1px solid #e2e8f0; }
-    .fila-ingresos:hover { background-color: #f1f5f9; }
-    .fila-editada { background-color: #fffdec !important; }
+    /* ========================================================
+       DISEÑO TIPO EXCEL (GRID MARCADOS)
+       ======================================================== */
+    #tablaIngresos { 
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+        border-collapse: collapse; /* Permite bordes pegados como Excel */
+    }
+    
+    .th-premium { 
+        padding: 12px 10px; 
+        border: 1px solid #334155; /* Borde oscuro para cabeceras */
+        text-align: center; 
+    }
+    
+    .td-premium { 
+        padding: 0; 
+        border: 1px solid #cbd5e1; /* Borde de cuadrícula Excel para todas las celdas */
+        height: 38px;
+    }
+    
+    /* Efecto Cebra: Fila blanca y Fila ligeramente gris */
+    .fila-ingresos:nth-child(even) { background-color: #f8fafc; }
+    .fila-ingresos:nth-child(odd) { background-color: #ffffff; }
+    
+    /* Hover interactivo más fuerte */
+    .fila-ingresos:hover { background-color: #e2e8f0 !important; }
+    
+    /* Fila editada se pinta de amarillo pálido */
+    .fila-editada { background-color: #fef9c3 !important; }
 
-    /* Inputs Fantasma (Transparencia e interactividad) */
-    .celda-input { width: 100%; box-sizing: border-box; border: none; padding: 12px 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
+    /* Inputs Fantasma (Llenan toda la celda) */
+    .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; }
     .celda-input:focus:not([readonly]) { background-color: #f0fdf4; box-shadow: inset 0 0 0 2px #10b981; color: #000; }
-    .input-readonly { background-color: #f8fafc; color: #94a3b8; font-size: 0.8rem; cursor: not-allowed; }
-    .input-readonly:focus { box-shadow: none; }
+    .input-readonly { color: #94a3b8; cursor: not-allowed; }
+    .input-readonly:focus { box-shadow: none; background-color: transparent; }
     
     /* Tipografías Específicas */
     .central { text-align: center; }
@@ -225,7 +248,7 @@
     .text-orange { color: #ea580c; font-weight: bold; }
     
     /* El Badge verde de Cantidad (ING X 1UND) */
-    .input-badge { background-color: #d1fae5; color: #047857; border: 1px solid #10b981; border-radius: 12px; padding: 6px; width: 60px; margin: 4px auto; font-weight: 900; font-size: 0.9rem; text-align: center; display: block; transition: all 0.2s; }
+    .input-badge { background-color: #d1fae5; color: #047857; border: 1px solid #10b981; border-radius: 4px; padding: 6px; width: 60px; margin: 4px auto; font-weight: 900; font-size: 0.9rem; text-align: center; display: block; }
     .input-badge:focus { background-color: #fff; box-shadow: 0 0 0 2px #10b981; color: #000; }
 
     /* Selectores Custom (Combobox "By") */
