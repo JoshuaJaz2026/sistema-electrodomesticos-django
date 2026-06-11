@@ -82,7 +82,7 @@
         </span>
     </div>
 
-    <div style="position: relative; overflow-x: auto; overflow-y: auto; max-height: 65vh; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+    <div style="position: relative; overflow-x: auto; overflow-y: auto; max-height: 65vh; border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
         
         <div id="pantalla-carga-tabla" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); z-index: 50; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: opacity 0.4s ease;">
             <div style="width: 200px; height: 6px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; margin-bottom: 12px;">
@@ -91,7 +91,7 @@
             <span style="color: #475569; font-weight: 600; font-size: 0.9rem;">Preparando datos...</span>
         </div>
 
-        <table id="tablaReporte" style="width: max-content; border-collapse: separate; border-spacing: 0; background: white; font-size: 0.85rem; white-space: nowrap; table-layout: fixed;">
+        <table id="tablaReporte" style="width: max-content; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap; table-layout: fixed;">
             <thead style="position: sticky; top: 0; z-index: 10;">
                 <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem; letter-spacing: 0.5px;">
                     <th class="th-premium" style="width: 100px;">ITEM TYPE</th>
@@ -131,14 +131,14 @@
                             <a href="{{ sim.link|default:'#' }}" target="_blank" class="btn-link" style="{% if sim.link %}display: inline-block;{% else %}display: none;{% endif %}"><i class="fas fa-external-link-alt"></i></a>
                         </td>
                         <td class="td-premium"><input list="list-estado" class="celda-input central val-estado" value="{{ sim.estado_publicacion|default_if_none:'' }}"></td>
-                        <td class="td-premium" style="background-color: #fef9c3;"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub text-mono" style="color: #b45309;" value="{{ sim.cod_publicacion|default_if_none:'' }}"></td>
+                        <td class="td-premium bg-yellow-light"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub text-mono" style="color: #b45309;" value="{{ sim.cod_publicacion|default_if_none:'' }}"></td>
                         <td class="td-premium"><input list="list-tipopub" class="celda-input central val-tipo" value="{{ sim.tipo_publicacion|default_if_none:'' }}"></td>
                         <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-codprod" oninput="buscarCosto(this)" value="{{ sim.cod_producto|default_if_none:'' }}"></td>
                         <td class="td-premium"><input list="list-categoria" class="celda-input val-categoria" oninput="buscarComision(this)" value="{{ sim.categoria|default_if_none:'' }}"></td>
                         <td class="td-premium"><input list="list-marca" class="celda-input val-marca bold text-dark" value="{{ sim.marca|default_if_none:'' }}"></td>
                         <td class="td-premium"><input type="text" class="celda-input val-producto" value="{{ sim.producto|default_if_none:'' }}"></td>
                         
-                        <td class="td-premium" style="background-color: #f8fafc;"><input type="text" class="celda-input derecha bold val-ptachado input-readonly" readonly tabindex="-1" value="{{ sim.precio_tachado|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-premium"><input type="text" class="celda-input derecha bold val-ptachado input-readonly" readonly tabindex="-1" value="{{ sim.precio_tachado|stringformat:'.2f'|default:'' }}"></td>
                         <td class="td-premium"><input type="number" step="0.01" class="celda-input central bold val-dscto text-dark" oninput="calcularFila(this)" value="{{ sim.porc_descuento|stringformat:'.2f'|default:'' }}"></td>
                         <td class="td-premium bg-green-light"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)" value="{{ sim.precio_venta|stringformat:'.2f'|default:'' }}"></td>
                         
@@ -163,14 +163,14 @@
                             <a href="#" target="_blank" class="btn-link" style="display: none;"><i class="fas fa-external-link-alt"></i></a>
                         </td>
                         <td class="td-premium"><input list="list-estado" class="celda-input central val-estado"></td>
-                        <td class="td-premium" style="background-color: #fef9c3;"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub text-mono" style="color: #b45309;" placeholder="Ej. 123456"></td>
+                        <td class="td-premium bg-yellow-light"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub text-mono" style="color: #b45309;" placeholder="Ej. 123456"></td>
                         <td class="td-premium"><input list="list-tipopub" class="celda-input central val-tipo"></td>
                         <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-codprod" oninput="buscarCosto(this)"></td>
                         <td class="td-premium"><input list="list-categoria" class="celda-input val-categoria" oninput="buscarComision(this)"></td>
                         <td class="td-premium"><input list="list-marca" class="celda-input val-marca bold text-dark"></td>
                         <td class="td-premium"><input type="text" class="celda-input val-producto"></td>
                         
-                        <td class="td-premium" style="background-color: #f8fafc;"><input type="text" class="celda-input derecha bold val-ptachado input-readonly" readonly tabindex="-1"></td>
+                        <td class="td-premium"><input type="text" class="celda-input derecha bold val-ptachado input-readonly" readonly tabindex="-1"></td>
                         <td class="td-premium"><input type="number" step="0.01" class="celda-input central bold val-dscto text-dark" oninput="calcularFila(this)"></td>
                         <td class="td-premium bg-green-light"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)"></td>
                         
@@ -219,48 +219,53 @@
 </div>
 
 <style>
-    /* Estructura y Cabeceras */
-    #tablaReporte { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-    .th-premium { padding: 12px 10px; border-right: 1px solid #334155; border-bottom: 2px solid #cbd5e1; text-align: center; }
-    .td-premium { padding: 0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #f1f5f9; height: 42px; vertical-align: middle; }
+    /* Estructura de Tabla Excel Estricta */
+    #tablaReporte { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-collapse: collapse; }
+    .th-premium { padding: 12px 10px; border: 1px solid #334155; text-align: center; }
+    .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; }
     
-    /* Zonas de Color Codificadas */
-    .bg-green-light { background-color: #f0fdf4; }
-    .bg-green-medium { background-color: #dcfce7; }
-    .bg-red-light { background-color: #fef2f2; }
-    .bg-blue-light { background-color: #eff6ff; }
+    /* Zonas de Color Codificadas (!important para que sobresalgan) */
+    .bg-green-light { background-color: #f0fdf4 !important; }
+    .bg-red-light { background-color: #fef2f2 !important; }
+    .bg-blue-light { background-color: #eff6ff !important; }
+    .bg-yellow-light { background-color: #fef9c3 !important; }
     
-    /* Interacciones de Filas */
-    .fila-simulador:hover { background-color: #f8fafc; }
-    .fila-seleccionada > td { background-color: #fef9c3 !important; }
-    .fila-editada > td { background-color: #fffbeb !important; }
+    /* Efecto Cebra y Hover Fuerte */
+    .fila-simulador:nth-child(even) { background-color: #f8fafc; }
+    .fila-simulador:nth-child(odd) { background-color: #ffffff; }
+    
+    /* Hover poderoso: Oscurece toda la fila y sus colores */
+    .fila-simulador:hover td { filter: brightness(0.96); background-color: #e2e8f0; }
+
+    /* Fila Seleccionada / Editada */
+    .fila-seleccionada > td { background-color: #fef9c3 !important; filter: none !important; }
+    .fila-editada > td { background-color: #fffbeb !important; filter: none !important; }
     .fila-editada > td:first-child { border-left: 4px solid #f59e0b; }
 
-    /* Inputs Fantasma y Readonly */
+    /* Inputs Fantasma (Llenan 100% de celda) */
     .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
-    .celda-input:focus:not([readonly]) { background-color: #fff; box-shadow: inset 0 0 0 2px var(--color-principal, #eab308); color: #000; }
+    .celda-input:not([readonly]):focus { background-color: #fff; box-shadow: inset 0 0 0 2px var(--color-principal, #eab308); color: #000; position: relative; z-index: 1; border-radius: 2px;}
     .input-readonly { color: #94a3b8; cursor: not-allowed; }
     .input-readonly:focus { box-shadow: none; background-color: transparent; }
 
-    /* Tipografías y Textos Especiales */
+    /* Tipografías Especiales */
     .central { text-align: center; }
     .derecha { text-align: right; }
     .bold { font-weight: bold; }
     .text-dark { color: #0f172a; }
     .text-mono { font-family: 'Courier New', Courier, monospace; letter-spacing: -0.5px; font-weight: 800; font-size: 0.9rem; }
     .text-blue { color: #2563eb; }
-    .text-blue-dark { color: #1e40af; }
     .text-green { color: #166534; }
     .text-green-dark { color: #064e3b; }
     .text-red { color: #dc2626; }
 
-    /* Link Externo (Mercado Libre) */
-    .td-link-container { display: flex; align-items: center; padding-right: 5px; height: 100%; background-color: #f8fafc; }
+    /* Link Externo */
+    .td-link-container { display: flex; align-items: center; padding-right: 5px; height: 100%; }
     .btn-link { color: #3b82f6; text-decoration: none; font-size: 0.95rem; padding: 0 8px; transition: transform 0.2s; }
     .btn-link:hover { transform: scale(1.2); color: #2563eb; }
 
     /* Botones Superiores */
-    .btn-premium { color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s, filter 0.2s; text-decoration: none; font-size: 0.85rem; }
+    .btn-premium { color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s, filter 0.2s; text-decoration: none; font-size: 0.85rem; font-family: inherit; }
     .btn-premium:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
     /* Inputs Numéricos sin flechas */
