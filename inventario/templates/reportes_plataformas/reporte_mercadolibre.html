@@ -147,7 +147,7 @@
                             <input type="text" value="{{ item.producto|default:'' }}" class="celda-input val-producto input-readonly" readonly tabindex="-1" placeholder="Esperando modelo...">
                         </td>
                         
-                        <td class="td-premium"><input type="number" value="{{ item.cantidad|default:'' }}" class="celda-input central bold val-cant" oninput="calcularFilaVenta(this); registrarCambioVenta(this)"></td>
+                        <td class="td-premium"><input type="number" value="{{ item.cantidad|floatformat:'0'|default:'' }}" class="celda-input central bold val-cant" oninput="calcularFilaVenta(this); registrarCambioVenta(this)"></td>
                         
                         <td class="td-premium bg-green-light">
                             <div class="wrapper-moneda">
@@ -159,7 +159,7 @@
                         <td class="td-premium bg-green-light bg-locked">
                             <div class="wrapper-moneda">
                                 <span class="simbolo-moneda">S/</span>
-                                <input type="text" class="celda-input derecha bold text-green val-totalv input-readonly" readonly tabindex="-1">
+                                <input type="text" value="{{ item.total_venta|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-green val-totalv input-readonly" readonly tabindex="-1">
                             </div>
                         </td>
 
@@ -194,7 +194,7 @@
                         <td class="td-premium bg-green-medium bg-locked">
                             <div class="wrapper-moneda">
                                 <span class="simbolo-moneda text-green-dark">S/</span>
-                                <input type="text" class="celda-input derecha bold text-green-dark val-totalpagado input-readonly" readonly tabindex="-1">
+                                <input type="text" value="{{ item.total_pagado|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-green-dark val-totalpagado input-readonly" readonly tabindex="-1">
                             </div>
                         </td>
                         
@@ -206,13 +206,13 @@
                         </td>
                         
                         <td class="td-premium bg-red-light bg-locked">
-                            <input type="text" class="celda-input central val-und input-readonly" readonly tabindex="-1">
+                            <input type="text" value="{{ item.und|default:'0' }}" class="celda-input central val-und input-readonly" readonly tabindex="-1">
                         </td>
                         
                         <td class="td-premium bg-red-light bg-locked">
                             <div class="wrapper-moneda">
                                 <span class="simbolo-moneda">S/</span>
-                                <input type="text" class="celda-input derecha bold text-red val-costototal input-readonly" readonly tabindex="-1">
+                                <input type="text" value="{{ item.costo_total|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-red val-costototal input-readonly" readonly tabindex="-1">
                             </div>
                         </td>
                         
@@ -226,13 +226,13 @@
                         <td class="td-premium bg-blue-light bg-locked">
                             <div class="wrapper-moneda">
                                 <span class="simbolo-moneda" style="color: #60a5fa;">S/</span>
-                                <input type="text" class="celda-input derecha bold val-ganancia input-readonly" readonly tabindex="-1">
+                                <input type="text" value="{{ item.ganancia|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold val-ganancia input-readonly" readonly tabindex="-1">
                             </div>
                         </td>
                         
                         <td class="td-premium bg-blue-light bg-locked">
                             <div class="wrapper-moneda">
-                                <input type="text" class="celda-input derecha bold val-rentabilidad input-readonly" readonly tabindex="-1">
+                                <input type="text" value="{{ item.rentabilidad|default:'0.00' }}" class="celda-input derecha bold val-rentabilidad input-readonly" readonly tabindex="-1">
                                 <span class="simbolo-porcentaje">%</span>
                             </div>
                         </td>
@@ -275,6 +275,7 @@
                     </td>
 
                     <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-sku" oninput="registrarCambioVenta(this)"></td>
+                    
                     <td class="td-premium"><input type="text" class="celda-input central bold text-dark val-modelo" oninput="buscarProductoPorModelo(this)"></td>
                     
                     <td class="td-premium bg-locked">
@@ -515,33 +516,33 @@
 
         // 2. FÓRMULA: TOTAL V. = PRECIO * CANT.
         const totalV = precio * cant;
-        fila.querySelector('.val-totalv').value = totalV > 0 ? totalV.toFixed(2) : '';
+        fila.querySelector('.val-totalv').value = totalV > 0 ? totalV.toFixed(2) : '0.00';
 
         // 3. FÓRMULA: % CARGO V. = CARGO(S/) / TOTAL V.
         const porcCargo = totalV > 0 ? (cargoSoles / totalV) * 100 : 0;
-        fila.querySelector('.val-cargoporc').value = porcCargo > 0 ? porcCargo.toFixed(2) : '';
+        fila.querySelector('.val-cargoporc').value = porcCargo > 0 ? porcCargo.toFixed(2) : '0.00';
 
         // 4. FÓRMULA: TOTAL PAGADO = (PRECIO - CARGO - URBANO + FLEX) * CANT.
         const totalPagado = (precio - cargoSoles - urbano + flex) * cant;
-        fila.querySelector('.val-totalpagado').value = totalPagado !== 0 ? totalPagado.toFixed(2) : '';
+        fila.querySelector('.val-totalpagado').value = (totalPagado !== 0 || cant > 0) ? totalPagado.toFixed(2) : '0.00';
 
         // 5. FÓRMULA: UND = CANT.
-        fila.querySelector('.val-und').value = cant > 0 ? cant : '';
+        fila.querySelector('.val-und').value = cant > 0 ? cant : '0';
 
         // 6. FÓRMULA: COSTO TOTAL = COSTO PROD. * UND
         const costoTotal = costoProd * cant;
-        fila.querySelector('.val-costototal').value = costoTotal > 0 ? costoTotal.toFixed(2) : '';
+        fila.querySelector('.val-costototal').value = (costoTotal > 0 || cant > 0) ? costoTotal.toFixed(2) : '0.00';
 
         // 7. FÓRMULA: GANANCIA = TOTAL PAGADO - COSTO TOTAL - C. ENTREGA FLEX
         const ganancia = totalPagado - costoTotal - costoFlex;
         const inputGanancia = fila.querySelector('.val-ganancia');
-        inputGanancia.value = (totalPagado > 0 || costoTotal > 0) ? ganancia.toFixed(2) : '';
-        inputGanancia.style.color = ganancia < 0 ? '#dc2626' : '#1e40af'; // Rojo si es pérdida, Azul si es ganancia
+        inputGanancia.value = (totalPagado > 0 || costoTotal > 0) ? ganancia.toFixed(2) : '0.00';
+        inputGanancia.style.color = ganancia < 0 ? '#dc2626' : '#1e40af';
 
         // 8. FÓRMULA: RENTABILIDAD % = GANANCIA / COSTO TOTAL
         const rentabilidad = costoTotal > 0 ? (ganancia / costoTotal) * 100 : 0;
         const inputRentabilidad = fila.querySelector('.val-rentabilidad');
-        inputRentabilidad.value = (costoTotal > 0) ? rentabilidad.toFixed(2) : '';
+        inputRentabilidad.value = (costoTotal > 0) ? rentabilidad.toFixed(2) : '0.00';
         inputRentabilidad.style.color = rentabilidad < 0 ? '#dc2626' : '#1e40af';
     }
 
@@ -835,9 +836,10 @@
                     let marcaLeida = limpiarValor(item['MARCA']).toUpperCase();
                     let categoriaLeida = limpiarValor(item['CATEGORIA']).toUpperCase();
 
-                    // BUSCARV IMPORTACIÓN
+                    // === BUSCARV MÁGICO DURANTE LA IMPORTACIÓN MASIVA ===
                     let modeloLeido = limpiarValor(item['MODELO']).toUpperCase();
                     let productoLeido = limpiarValor(item['PRODUCTO']);
+                    
                     if (!productoLeido && modeloLeido && diccionarioProductos[modeloLeido]) {
                         productoLeido = diccionarioProductos[modeloLeido];
                     } else if (!productoLeido && modeloLeido && !diccionarioProductos[modeloLeido]) {
