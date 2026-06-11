@@ -91,17 +91,17 @@
                     <th class="th-premium" style="width: 320px;">PRODUCTO <i class="fas fa-magic" style="color: #34d399; font-size: 0.9em; margin-left: 5px;" title="Autocompletado BUSCARV"></i></th>
                     <th class="th-premium" style="width: 70px;">CANT.</th>
                     
-                    <th class="th-premium" style="width: 100px; background-color: #064e3b;">PRECIO</th>
+                    <th class="th-premium" style="width: 110px; background-color: #064e3b;">PRECIO</th>
                     <th class="th-premium" style="width: 110px; background-color: #064e3b;">TOTAL V.</th>
-                    <th class="th-premium" style="width: 130px; background-color: #064e3b;">% CARGO V.</th>
-                    <th class="th-premium" style="width: 100px; background-color: #064e3b;">URBANO</th>
-                    <th class="th-premium" style="width: 100px; background-color: #064e3b;">FLEX</th>
+                    <th class="th-premium" style="width: 110px; background-color: #064e3b;">% CARGO V.</th>
+                    <th class="th-premium" style="width: 110px; background-color: #064e3b;">URBANO</th>
+                    <th class="th-premium" style="width: 110px; background-color: #064e3b;">FLEX</th>
                     <th class="th-premium" style="width: 130px; background-color: #10b981; color: #022c22;">TOTAL PAGADO</th>
                     
                     <th class="th-premium" style="width: 130px; background-color: #7f1d1d;">COSTO x PROD</th>
                     <th class="th-premium" style="width: 70px; background-color: #7f1d1d;">UND</th>
-                    <th class="th-premium" style="width: 110px; background-color: #7f1d1d;">COSTO TOTAL</th>
-                    <th class="th-premium" style="width: 150px; background-color: #7f1d1d;">C. ENTREGA FLEX</th>
+                    <th class="th-premium" style="width: 120px; background-color: #7f1d1d;">COSTO TOTAL</th>
+                    <th class="th-premium" style="width: 140px; background-color: #7f1d1d;">C. ENTREGA FLEX</th>
                     
                     <th class="th-premium" style="width: 120px; background-color: #1e3a8a;">GANANCIA</th>
                     <th class="th-premium" style="width: 130px; background-color: #1e3a8a;">RENTABILIDAD %</th>
@@ -140,7 +140,6 @@
                         </td>
 
                         <td class="td-premium"><input type="text" value="{{ item.sku_almacen|default:'' }}" class="celda-input central text-mono text-blue val-sku" oninput="registrarCambioVenta(this)"></td>
-                        
                         <td class="td-premium"><input type="text" value="{{ item.modelo|default:'' }}" class="celda-input central bold text-dark val-modelo" oninput="buscarProductoPorModelo(this)"></td>
                         
                         <td class="td-premium" style="background-color: #f1f5f9;">
@@ -149,20 +148,81 @@
                         
                         <td class="td-premium"><input type="number" value="{{ item.cantidad|default:'' }}" class="celda-input central bold val-cant" oninput="registrarCambioVenta(this)"></td>
                         
-                        <td class="td-premium bg-green-light"><input type="number" step="0.01" value="{{ item.precio|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-green val-precio" oninput="registrarCambioVenta(this)"></td>
-                        <td class="td-premium bg-green-light"><input type="number" step="0.01" value="{{ item.total_venta|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-green val-totalv" oninput="registrarCambioVenta(this)"></td>
-                        <td class="td-premium bg-green-light"><input type="number" step="0.01" value="{{ item.cargo_venta|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha text-red val-cargoventa" oninput="registrarCambioVenta(this)"></td>
-                        <td class="td-premium bg-green-light"><input type="number" step="0.01" value="{{ item.urbano|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha val-urbano" oninput="registrarCambioVenta(this)"></td>
-                        <td class="td-premium bg-green-light"><input type="number" step="0.01" value="{{ item.flex|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha val-flex" oninput="registrarCambioVenta(this)"></td>
-                        <td class="td-premium bg-green-medium"><input type="number" step="0.01" value="{{ item.total_pagado|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-green-dark val-totalpagado" oninput="registrarCambioVenta(this)"></td>
+                        <td class="td-premium bg-green-light">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda">S/</span>
+                                <input type="number" step="0.01" value="{{ item.precio|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-green val-precio" oninput="registrarCambioVenta(this)">
+                            </div>
+                        </td>
                         
-                        <td class="td-premium bg-red-light"><input type="number" step="0.01" value="{{ item.costo_producto|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-red val-costoproducto" oninput="registrarCambioVenta(this)"></td>
+                        <td class="td-premium bg-green-light">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda">S/</span>
+                                <input type="number" step="0.01" value="{{ item.total_venta|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-green val-totalv" oninput="registrarCambioVenta(this)">
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-green-light">
+                            <div class="wrapper-moneda">
+                                <input type="number" step="0.01" value="{{ item.cargo_venta|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha text-red val-cargoventa" oninput="registrarCambioVenta(this)">
+                                <span class="simbolo-porcentaje">%</span>
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-green-light">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda">S/</span>
+                                <input type="number" step="0.01" value="{{ item.urbano|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha val-urbano" oninput="registrarCambioVenta(this)">
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-green-light">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda">S/</span>
+                                <input type="number" step="0.01" value="{{ item.flex|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha val-flex" oninput="registrarCambioVenta(this)">
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-green-medium">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda text-green-dark">S/</span>
+                                <input type="number" step="0.01" value="{{ item.total_pagado|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-green-dark val-totalpagado" oninput="registrarCambioVenta(this)">
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-red-light">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda">S/</span>
+                                <input type="number" step="0.01" value="{{ item.costo_producto|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-red val-costoproducto" oninput="registrarCambioVenta(this)">
+                            </div>
+                        </td>
+                        
                         <td class="td-premium bg-red-light"><input type="number" value="{{ item.und|default:'' }}" class="celda-input central val-und" oninput="registrarCambioVenta(this)"></td>
-                        <td class="td-premium bg-red-light"><input type="number" step="0.01" value="{{ item.costo_total|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-red val-costototal" oninput="registrarCambioVenta(this)"></td>
-                        <td class="td-premium bg-red-light"><input type="number" step="0.01" value="{{ item.costo_entrega_flex|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha text-red val-costoflex" oninput="registrarCambioVenta(this)"></td>
                         
-                        <td class="td-premium bg-blue-light"><input type="number" step="0.01" value="{{ item.ganancia|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold val-ganancia" style="color: {% if item.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};" oninput="registrarCambioVenta(this)"></td>
-                        <td class="td-premium bg-blue-light"><input type="text" value="{{ item.rentabilidad|default:'' }}" class="celda-input central bold val-rentabilidad" style="color: {% if item.rentabilidad < 0 %}#dc2626{% else %}#1e40af{% endif %};" oninput="registrarCambioVenta(this)"></td>
+                        <td class="td-premium bg-red-light">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda">S/</span>
+                                <input type="number" step="0.01" value="{{ item.costo_total|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-red val-costototal" oninput="registrarCambioVenta(this)">
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-red-light">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda">S/</span>
+                                <input type="number" step="0.01" value="{{ item.costo_entrega_flex|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha text-red val-costoflex" oninput="registrarCambioVenta(this)">
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-blue-light">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda" style="color: #60a5fa;">S/</span>
+                                <input type="number" step="0.01" value="{{ item.ganancia|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold val-ganancia" style="color: {% if item.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};" oninput="registrarCambioVenta(this)">
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-blue-light">
+                            <input type="text" value="{{ item.rentabilidad|default:'' }}" class="celda-input derecha bold val-rentabilidad" style="color: {% if item.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %}; padding-right: 15px;" oninput="registrarCambioVenta(this)">
+                        </td>
                         
                         <td class="td-premium"><input type="text" value="{{ item.distrito|default:'' }}" placeholder="Dep/Prov/Dist" class="celda-input val-distrito" oninput="registrarCambioVenta(this)"></td>
                         <td class="td-premium"><input type="text" value="{{ item.direccion|default:'' }}" class="celda-input val-direccion" oninput="registrarCambioVenta(this)"></td>
@@ -211,20 +271,72 @@
                     
                     <td class="td-premium"><input type="number" class="celda-input central bold val-cant" oninput="registrarCambioVenta(this)"></td>
                     
-                    <td class="td-premium bg-green-light"><input type="number" step="0.01" class="celda-input derecha bold text-green val-precio" oninput="registrarCambioVenta(this)"></td>
-                    <td class="td-premium bg-green-light"><input type="number" step="0.01" class="celda-input derecha bold text-green val-totalv" oninput="registrarCambioVenta(this)"></td>
-                    <td class="td-premium bg-green-light"><input type="number" step="0.01" class="celda-input derecha text-red val-cargoventa" oninput="registrarCambioVenta(this)"></td>
-                    <td class="td-premium bg-green-light"><input type="number" step="0.01" class="celda-input derecha val-urbano" oninput="registrarCambioVenta(this)"></td>
-                    <td class="td-premium bg-green-light"><input type="number" step="0.01" class="celda-input derecha val-flex" oninput="registrarCambioVenta(this)"></td>
-                    <td class="td-premium bg-green-medium"><input type="number" step="0.01" class="celda-input derecha bold text-green-dark val-totalpagado" oninput="registrarCambioVenta(this)"></td>
+                    <td class="td-premium bg-green-light">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha bold text-green val-precio" oninput="registrarCambioVenta(this)">
+                        </div>
+                    </td>
+                    <td class="td-premium bg-green-light">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha bold text-green val-totalv" oninput="registrarCambioVenta(this)">
+                        </div>
+                    </td>
+                    <td class="td-premium bg-green-light">
+                        <div class="wrapper-moneda">
+                            <input type="number" step="0.01" class="celda-input derecha text-red val-cargoventa" oninput="registrarCambioVenta(this)">
+                            <span class="simbolo-porcentaje">%</span>
+                        </div>
+                    </td>
+                    <td class="td-premium bg-green-light">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha val-urbano" oninput="registrarCambioVenta(this)">
+                        </div>
+                    </td>
+                    <td class="td-premium bg-green-light">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha val-flex" oninput="registrarCambioVenta(this)">
+                        </div>
+                    </td>
+                    <td class="td-premium bg-green-medium">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda text-green-dark">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha bold text-green-dark val-totalpagado" oninput="registrarCambioVenta(this)">
+                        </div>
+                    </td>
                     
-                    <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha bold text-red val-costoproducto" oninput="registrarCambioVenta(this)"></td>
+                    <td class="td-premium bg-red-light">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha bold text-red val-costoproducto" oninput="registrarCambioVenta(this)">
+                        </div>
+                    </td>
                     <td class="td-premium bg-red-light"><input type="number" class="celda-input central val-und" oninput="registrarCambioVenta(this)"></td>
-                    <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha bold text-red val-costototal" oninput="registrarCambioVenta(this)"></td>
-                    <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-costoflex" oninput="registrarCambioVenta(this)"></td>
+                    <td class="td-premium bg-red-light">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha bold text-red val-costototal" oninput="registrarCambioVenta(this)">
+                        </div>
+                    </td>
+                    <td class="td-premium bg-red-light">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha text-red val-costoflex" oninput="registrarCambioVenta(this)">
+                        </div>
+                    </td>
                     
-                    <td class="td-premium bg-blue-light"><input type="number" step="0.01" class="celda-input derecha bold val-ganancia" style="color: #1e40af;" oninput="registrarCambioVenta(this)"></td>
-                    <td class="td-premium bg-blue-light"><input type="text" class="celda-input central bold val-rentabilidad" style="color: #1e40af;" oninput="registrarCambioVenta(this)"></td>
+                    <td class="td-premium bg-blue-light">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda" style="color: #60a5fa;">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha bold val-ganancia" style="color: #1e40af;" oninput="registrarCambioVenta(this)">
+                        </div>
+                    </td>
+                    <td class="td-premium bg-blue-light">
+                        <input type="text" class="celda-input derecha bold val-rentabilidad" style="color: #1e40af; padding-right: 15px;" oninput="registrarCambioVenta(this)">
+                    </td>
                     
                     <td class="td-premium"><input type="text" placeholder="Dep/Prov/Dist" class="celda-input val-distrito" oninput="registrarCambioVenta(this)"></td>
                     <td class="td-premium"><input type="text" class="celda-input val-direccion" oninput="registrarCambioVenta(this)"></td>
@@ -295,12 +407,19 @@
     .bg-red-light { background-color: #fef2f2 !important; }
     .bg-blue-light { background-color: #eff6ff !important; }
 
+    /* FORMATO DE MONEDA Y PORCENTAJE (Flexbox) */
+    .wrapper-moneda { display: flex; align-items: center; padding: 0 8px; height: 100%; box-sizing: border-box; }
+    .simbolo-moneda { color: #94a3b8; font-weight: 800; font-size: 0.85rem; user-select: none; flex-shrink: 0; }
+    .simbolo-porcentaje { color: #94a3b8; font-weight: 800; font-size: 0.85rem; user-select: none; flex-shrink: 0; }
+
     /* Inputs Fantasma (Llenan el 100% de la celda) */
     .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
     .celda-input:focus:not([readonly]) { background-color: #fff; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; position: relative; z-index: 1; border-radius: 2px;}
     
+    .wrapper-moneda .celda-input { padding-left: 6px; padding-right: 6px; }
+
     /* Inputs Bloqueados (Readonly / Tipo Fórmula) */
-    .input-readonly { cursor: not-allowed; }
+    .input-readonly { color: #94a3b8; cursor: not-allowed; }
     .input-readonly:focus { box-shadow: none; background-color: transparent; }
 
     /* Tipografías y Colores Específicos */
@@ -362,7 +481,6 @@
         const modelo = inputModelo.value.trim().toUpperCase();
 
         if (modelo !== '') {
-            // Buscamos en nuestro diccionario JSON que vino desde la Base de Datos
             if (diccionarioProductos[modelo]) {
                 inputProducto.value = diccionarioProductos[modelo];
             } else {
@@ -372,7 +490,6 @@
             inputProducto.value = '';
         }
         
-        // Registramos el cambio para que guarde en memoria
         registrarCambioVenta(inputModelo);
     }
 
@@ -459,14 +576,11 @@
                 inputMes.value = inputFecha.value.substring(0, 7);
             }
             
-            // ========================================================
-            // BUSCARV EN TIEMPO REAL AL CARGAR (Para datos antiguos)
-            // ========================================================
+            // BUSCARV EN TIEMPO REAL AL CARGAR
             const inputModelo = fila.querySelector('.val-modelo');
             const inputProducto = fila.querySelector('.val-producto');
             if (inputModelo && inputProducto) {
                 const mod = inputModelo.value.trim().toUpperCase();
-                // Actualizamos si está vacío o dice "NO ENCONTRADO"
                 if (mod !== '' && (inputProducto.value.trim() === '' || inputProducto.value === 'NO ENCONTRADO' || inputProducto.value === 'None')) {
                     if (diccionarioProductos[mod]) {
                         inputProducto.value = diccionarioProductos[mod];
