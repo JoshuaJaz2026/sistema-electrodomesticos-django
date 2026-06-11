@@ -43,6 +43,38 @@
         </span>
     </div>
 
+    <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; padding: 15px 20px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+        <div style="flex: 1; min-width: 200px;">
+            <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px;"><i class="fas fa-barcode"></i> MODELO</label>
+            <input type="text" id="masivo-modelo" placeholder="Ej. BK-8210PD" style="width: 100%; padding: 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; text-transform: uppercase; outline: none; box-sizing: border-box;">
+        </div>
+        <div style="width: 120px;">
+            <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px;"><i class="fas fa-hashtag"></i> CANTIDAD</label>
+            <input type="number" id="masivo-cant" placeholder="15" min="1" style="width: 100%; padding: 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; text-align: center; outline: none; box-sizing: border-box;">
+        </div>
+        <div style="flex: 1; min-width: 180px;">
+            <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px;"><i class="fas fa-user-check"></i> AUTORIZADO (BY)</label>
+            <select id="masivo-by" style="width: 100%; padding: 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; outline: none; cursor: pointer; box-sizing: border-box;">
+                <option value="">-- Seleccionar --</option>
+                <option value="DAVID">DAVID</option>
+                <option value="LUIS">LUIS</option>
+                <option value="CARLOS">CARLOS</option>
+                <option value="BELÉN">BELÉN</option>
+                <option value="MILAGROS">MILAGROS</option>
+                <option value="ALDO">ALDO</option>
+                <option value="DENISE">DENISE</option>
+                <option value="JOSHUA">JOSHUA</option>
+                <option value="KEVIN">KEVIN</option>
+                <option value="ADAMARI">ADAMARI</option>
+                <option value="EDUARDO">EDUARDO</option>
+                <option value="PABLO">PABLO</option>
+            </select>
+        </div>
+        <button type="button" onclick="generarLoteMasivo()" style="background-color: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; height: 40px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); transition: transform 0.1s;">
+            <i class="fas fa-bolt"></i> Generar Filas
+        </button>
+    </div>
+
     <div style="overflow-x: auto; overflow-y: auto; max-height: 60vh; border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
         <table id="tablaIngresos" style="width: max-content; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap; table-layout: fixed;">
             
@@ -55,7 +87,9 @@
                     <th class="th-premium" style="width: 160px;">CÓDIGO EAN</th>
                     <th class="th-premium" style="width: 160px;">SERIE / N°</th>
                     <th class="th-premium" style="width: 120px;">COSTO UNT.</th>
-                    <th class="th-premium" style="width: 100px; background-color: #064e3b; text-align: center;">CANT. IN</th>
+                    
+                    <th class="th-premium" style="width: 65px; background-color: #064e3b; text-align: center;">CANT. IN</th>
+                    
                     <th class="th-premium" style="width: 200px;">PROV. / MOTIVO</th>
                     <th class="th-premium" style="width: 130px; text-align: center;">BY:</th>
                     <th class="th-premium" style="width: 50px; text-align: center;"><i class="fas fa-trash-alt" style="color: #f87171;"></i></th>
@@ -208,38 +242,31 @@
        ======================================================== */
     #tablaIngresos { 
         font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-        border-collapse: collapse; /* Permite bordes pegados como Excel */
+        border-collapse: collapse; 
     }
     
     .th-premium { 
         padding: 12px 10px; 
-        border: 1px solid #334155; /* Borde oscuro para cabeceras */
+        border: 1px solid #334155; 
         text-align: center; 
     }
     
     .td-premium { 
         padding: 0; 
-        border: 1px solid #cbd5e1; /* Borde de cuadrícula Excel para todas las celdas */
+        border: 1px solid #cbd5e1; 
         height: 38px;
     }
     
-    /* Efecto Cebra: Fila blanca y Fila ligeramente gris */
     .fila-ingresos:nth-child(even) { background-color: #f8fafc; }
     .fila-ingresos:nth-child(odd) { background-color: #ffffff; }
-    
-    /* Hover interactivo más fuerte */
     .fila-ingresos:hover { background-color: #e2e8f0 !important; }
-    
-    /* Fila editada se pinta de amarillo pálido */
     .fila-editada { background-color: #fef9c3 !important; }
 
-    /* Inputs Fantasma (Llenan toda la celda) */
     .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; }
     .celda-input:focus:not([readonly]) { background-color: #f0fdf4; box-shadow: inset 0 0 0 2px #10b981; color: #000; }
     .input-readonly { color: #94a3b8; cursor: not-allowed; }
     .input-readonly:focus { box-shadow: none; background-color: transparent; }
     
-    /* Tipografías Específicas */
     .central { text-align: center; }
     .derecha { text-align: right; }
     .bold { font-weight: bold; }
@@ -247,7 +274,7 @@
     .text-blue { color: #2563eb; font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 14px; letter-spacing: -0.5px; }
     .text-orange { color: #ea580c; font-weight: bold; }
     
-    /* EL BADGE VERDE ACTUALIZADO (SE ADAPTA AL TAMAÑO DE LA CELDA) */
+    /* EL BADGE VERDE ACTUALIZADO CON MENOS PADDING LATERAL */
     .input-badge { 
         background-color: #d1fae5; 
         color: #047857; 
@@ -259,24 +286,17 @@
         text-align: center; 
         display: block; 
         box-sizing: border-box; 
-        padding: 10px; 
+        padding: 10px 5px; 
     }
-    .input-badge:focus { 
-        background-color: #a7f3d0; 
-        box-shadow: inset 0 0 0 2px #047857; 
-        color: #000; 
-    }
+    .input-badge:focus { background-color: #a7f3d0; box-shadow: inset 0 0 0 2px #047857; color: #000; }
 
-    /* Selectores Custom (Combobox "By") */
     .select-premium { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px top 50%; background-size: 8px auto; padding-right: 20px; }
     
-    /* Botones y Quitar flechas a Inputs Numéricos */
     .btn-eliminar { background: none; border: none; color: #ef4444; cursor: pointer; padding: 10px; border-radius: 4px; transition: background 0.2s; }
     .btn-eliminar:hover { background: #fee2e2; color: #b91c1c; }
     .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .celda-input[type=number] { -moz-appearance: textfield; }
 
-    /* Paginación */
     .btn-pag { padding: 6px 14px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; }
     .btn-pag:hover { background: #10b981; color: white; border-color: #10b981; }
 </style>
@@ -284,7 +304,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
 <script>
-    // === DICCIONARIO INVISIBLE DE TÍTULOS (Enviado desde Django) ===
+    // === DICCIONARIO INVISIBLE DE TÍTULOS ===
     const diccionarioTitulos = {{ titulos_json|safe|default:"{}" }};
 
     let memoriaIngresos = JSON.parse(localStorage.getItem('memoriaIngresosTemp')) || {};
@@ -309,6 +329,84 @@
         }
     });
 
+    // === NUEVA FUNCIÓN: GENERADOR DE LOTES MASIVOS ===
+    function generarLoteMasivo() {
+        const modeloInput = document.getElementById('masivo-modelo').value.trim().toUpperCase();
+        const cantInput = parseInt(document.getElementById('masivo-cant').value);
+        const byInput = document.getElementById('masivo-by').value;
+
+        if (!modeloInput || isNaN(cantInput) || cantInput <= 0 || !byInput) {
+            alert("⚠️ Por favor, ingresa el Modelo, una Cantidad válida (mayor a 0) y selecciona un Responsable (BY).");
+            return;
+        }
+
+        const tbody = document.querySelector("#tablaIngresos tbody");
+        const filaMolde = document.getElementById('fila-molde');
+        const fragmento = document.createDocumentFragment();
+
+        // Calculamos cuántas filas reales existen para continuar la numeración de los SKUs
+        let totalFilasActuales = tbody.querySelectorAll('tr.fila-ingresos:not(#fila-molde)').length;
+
+        // Formatear fecha actual a YYYY-MM-DD
+        const hoy = new Date();
+        const fechaActual = hoy.getFullYear() + "-" + String(hoy.getMonth() + 1).padStart(2, '0') + "-" + String(hoy.getDate()).padStart(2, '0');
+
+        for (let i = 0; i < cantInput; i++) {
+            const nuevaFila = filaMolde.cloneNode(true);
+            nuevaFila.id = ""; 
+            nuevaFila.style.display = ""; 
+            
+            const key = 'temp-' + Math.random().toString(36).substr(2, 9);
+            nuevaFila.dataset.originalKey = key;
+            nuevaFila.classList.add('fila-editada');
+
+            // Setear los datos en los inputs visuales
+            nuevaFila.querySelector('.val-modelo').value = modeloInput;
+            nuevaFila.querySelector('.val-by').value = byInput;
+            nuevaFila.querySelector('.val-fecha').value = fechaActual;
+
+            // Autocompletar Título
+            if (diccionarioTitulos[modeloInput]) {
+                nuevaFila.querySelector('.val-titulo').value = diccionarioTitulos[modeloInput];
+            } else {
+                nuevaFila.querySelector('.val-titulo').value = 'Modelo nuevo / Sin título'; 
+            }
+
+            // Generar SKU Correlativo
+            let numeroCorrelativo = totalFilasActuales + i + 18; 
+            const skuGenerado = modeloInput + "-" + numeroCorrelativo;
+            nuevaFila.querySelector('.val-sku').value = skuGenerado;
+
+            // Guardar en la memoria local
+            memoriaIngresos[key] = {
+                'SKU': skuGenerado,
+                'MODELO': modeloInput,
+                'TÍTULO': nuevaFila.querySelector('.val-titulo').value,
+                'FECHA INGRESO': fechaActual,
+                'CÓDIGO EAN': '',
+                'SERIE / N°': '',
+                'COSTO UNT.': 0,
+                'ING. x 1 und': 1,
+                'PROVEEDOR / MOTIVO': '',
+                'BY:': byInput
+            };
+
+            fragmento.appendChild(nuevaFila);
+        }
+
+        // Insertar todas las filas generadas de golpe
+        tbody.appendChild(fragmento);
+        
+        localStorage.setItem('memoriaIngresosTemp', JSON.stringify(memoriaIngresos));
+        
+        const indicador = document.getElementById('indicador-cambios');
+        if(indicador) indicador.style.display = 'inline-block';
+        
+        document.getElementById('masivo-cant').value = '';
+        
+        alert(`✅ ¡Se generaron con éxito ${cantInput} filas listas para escanear números de serie! Revisa la parte inferior de la tabla.`);
+    }
+
     function agregarNuevoIngreso() {
         const tbody = document.querySelector("#tablaIngresos tbody");
         const filaMolde = document.getElementById('fila-molde');
@@ -329,7 +427,6 @@
         nuevaFila.querySelector('.val-modelo').focus();
     }
 
-    // === FUNCIÓN ACTUALIZADA: Genera SKU y busca Título automáticamente ===
     function autogenerarSKU(inputModelo) {
         const fila = inputModelo.closest('tr');
         const inputSku = fila.querySelector('.val-sku');
@@ -337,14 +434,12 @@
         const modelo = inputModelo.value.trim().toUpperCase();
 
         if (modelo !== '') {
-            // 1. Buscamos si existe el título en nuestro diccionario
             if (diccionarioTitulos[modelo]) {
                 inputTitulo.value = diccionarioTitulos[modelo];
             } else {
                 inputTitulo.value = 'Modelo nuevo / Sin título'; 
             }
 
-            // 2. Generamos el SKU si está vacío
             if (inputSku.value === '') {
                 const indiceFila = fila.rowIndex; 
                 inputSku.value = modelo + "-" + (indiceFila + 16);
@@ -352,7 +447,6 @@
             
             registrarCambioIngreso(inputSku);
         } else {
-            // Si borran el modelo, limpiamos todo
             inputSku.value = '';
             inputTitulo.value = '';
         }
@@ -474,7 +568,6 @@
                         fechaCalendario = fechaRaw.substring(0, 10); 
                     }
 
-                    // === LÓGICA DE BÚSQUEDA DE TÍTULO PARA EL EXCEL ===
                     let tituloLeido = buscarColumna(item, ['TITULO', 'DESC']);
                     if (!tituloLeido && modeloLeido && diccionarioTitulos[modeloLeido]) {
                         tituloLeido = diccionarioTitulos[modeloLeido];
@@ -486,7 +579,6 @@
                     const ingLeido = formatNum(buscarColumna(item, ['1UND', 'CANTIDAD', 'UND'])) || 1;
                     const proveedorLeido = buscarColumna(item, ['PROVEEDOR', 'MOTIVO']);
                     
-                    // EL "ESCUDO" QUE CONVIERTE "denise" A "DENISE" PARA QUE EL COMBO BOX LO RECONOZCA
                     const byLeido = (buscarColumna(item, ['BY', 'USUARIO']) || '').toUpperCase();
 
                     const key = 'import-' + Math.random().toString(36).substr(2, 9);
@@ -584,7 +676,6 @@
         });
     }
 
-    // === LÓGICA DE BORRADO ===
     function confirmarBorradoTotal() {
         if (confirm("¡ATENCIÓN! ¿Estás totalmente seguro de borrar TODOS los ingresos y resetear el stock de todos los modelos a cero? Esta acción no se puede deshacer.")) {
             
