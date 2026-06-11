@@ -50,19 +50,19 @@
         </span>
     </div>
     
-    <div style="overflow-x: auto; overflow-y: auto; max-height: 60vh; border: 1px solid #e2e8f0; border-radius: 6px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-        <table id="tablaComisiones" style="width: 100%; border-collapse: separate; border-spacing: 0; background: white; font-size: 0.85rem; white-space: nowrap;">
+    <div style="overflow-x: auto; overflow-y: auto; max-height: 60vh; border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+        <table id="tablaComisiones" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap; table-layout: fixed;">
             <thead style="position: sticky; top: 0; z-index: 10;">
                 <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;">
-                    <th class="th-premium" style="width: 35%;">SUB CATEGORÍA</th>
-                    <th class="th-premium" style="width: 45%;">CATEGORÍA</th>
+                    <th class="th-premium" style="width: 35%; text-align: left;">SUB CATEGORÍA</th>
+                    <th class="th-premium" style="width: 45%; text-align: left;">CATEGORÍA</th>
                     <th class="th-premium" style="width: 20%; text-align: center; background-color: #1e3a8a;">COMISIÓN (%)</th>
                 </tr>
             </thead>
             <tbody>
                 {% if page_obj %}
                     {% for item in page_obj %}
-                    <tr class="fila-simulador" data-original-key="{{ item.id|default_if_none:'' }}" style="border-bottom: 1px solid #e2e8f0; transition: background-color 0.2s;">
+                    <tr class="fila-simulador" data-original-key="{{ item.id|default_if_none:'' }}">
                         <td class="td-premium">
                             <input type="text" class="celda-input val-subcat text-dark bold" value="{{ item.sub_categoria|default:'' }}" oninput="registrarCambioFila(this)">
                         </td>
@@ -76,7 +76,7 @@
                     {% endfor %}
                 {% else %}
                     <tr id="fila-vacia" data-original-key="molde">
-                        <td colspan="3" style="padding: 40px; text-align: center; color: #94a3b8; font-size: 1rem;">
+                        <td colspan="3" style="padding: 40px; text-align: center; color: #94a3b8; font-size: 1rem; border: 1px solid #cbd5e1;">
                             <i class="fas fa-folder-open" style="font-size: 2.5em; color: #cbd5e1; margin-bottom: 15px; display: block;"></i>
                             No se encontraron categorías o la tabla está vacía. ¡Agrega una nueva fila o importa tu Excel!
                         </td>
@@ -115,31 +115,40 @@
 </div>
 
 <style>
-    /* Estructura de Tabla */
-    #tablaComisiones { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-    .th-premium { padding: 14px 12px; border-right: 1px solid #334155; border-bottom: 2px solid #cbd5e1; text-align: left; }
-    .td-premium { padding: 0; border-right: 1px solid #e2e8f0; height: 42px; vertical-align: middle; }
+    /* ========================================================
+       DISEÑO TIPO EXCEL (GRID MARCADOS ESTRICTOS)
+       ======================================================== */
+    #tablaComisiones { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-collapse: collapse; }
     
-    /* Interacciones de fila */
-    .fila-simulador:hover { background-color: #f1f5f9; }
-    .fila-editada > td { background-color: #fffbeb !important; }
+    .th-premium { padding: 12px 10px; border: 1px solid #334155; }
+    .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; }
+    
+    /* Efecto Cebra y Hover Excel */
+    .fila-simulador:nth-child(even) { background-color: #f8fafc; }
+    .fila-simulador:nth-child(odd) { background-color: #ffffff; }
+    
+    /* Hover poderoso: Oscurece toda la fila y sus colores */
+    .fila-simulador:hover td { filter: brightness(0.96); background-color: #e2e8f0; }
+
+    /* Fila Editada temporalmente */
+    .fila-editada > td { background-color: #fffbeb !important; filter: none !important; }
     .fila-editada > td:first-child { border-left: 4px solid #f59e0b; }
 
-    /* Inputs Fantasma */
+    /* Inputs Fantasma (Llenan el 100% de la celda) */
     .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 10px 15px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
-    .celda-input:not([readonly]):focus { background-color: #fef9c3; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; }
+    .celda-input:not([readonly]):focus { background-color: #fef9c3; box-shadow: inset 0 0 0 2px var(--color-principal, #eab308); color: #000; position: relative; z-index: 1; border-radius: 2px; }
     
     /* Utilidades de texto */
     .central { text-align: center; } 
     .bold { font-weight: 700; }
     .text-dark { color: #0f172a; } 
-    .text-blue { color: #1d4ed8; font-family: 'Courier New', Courier, monospace; font-size: 14px; } 
+    .text-blue { color: #1d4ed8; font-family: 'Courier New', Courier, monospace; font-size: 14px; font-weight: bold; } 
 
     /* Quitar flechas a inputs de numero */
     .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .celda-input[type=number] { -moz-appearance: textfield; }
 
-    /* Botones Premium */
+    /* Botones Superiores */
     .btn-premium { color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s, filter 0.2s; text-decoration: none; font-size: 0.85rem; font-family: inherit; }
     .btn-premium:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
@@ -222,7 +231,6 @@
         const tr = document.createElement('tr');
         tr.className = 'fila-simulador';
         tr.dataset.originalKey = 'temp-' + Math.random().toString(36).substr(2, 9);
-        tr.style.borderBottom = "1px solid #e2e8f0";
         
         tr.innerHTML = `
             <td class="td-premium"><input type="text" class="celda-input val-subcat text-dark bold" oninput="registrarCambioFila(this)"></td>
