@@ -50,15 +50,15 @@
         </span>
     </div>
     
-    <div style="overflow-x: auto; overflow-y: auto; max-height: 60vh; border: 1px solid #e2e8f0; border-radius: 6px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-        <table id="tablaCostos" style="width: 100%; border-collapse: separate; border-spacing: 0; background: white; font-size: 0.85rem; white-space: nowrap;">
+    <div style="overflow-x: auto; overflow-y: auto; max-height: 60vh; border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+        <table id="tablaCostos" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap;">
             <thead style="position: sticky; top: 0; z-index: 10;">
                 <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;">
                     <th class="th-premium" style="width: 150px; text-align: center;">CÓDIGO</th>
                     <th class="th-premium" style="min-width: 300px; text-align: left;">PRODUCTO</th>
-                    <th class="th-premium" style="width: 120px; text-align: right; background-color: #7f1d1d;">COSTO CERO</th>
-                    <th class="th-premium" style="width: 120px; text-align: right; background-color: #064e3b;">COSTO U. ($)</th>
-                    <th class="th-premium" style="width: 150px; text-align: right; background-color: #1e3a8a;">COSTO U. ($ ► S/.)</th>
+                    <th class="th-premium" style="width: 120px; text-align: center; background-color: #7f1d1d;">COSTO CERO</th>
+                    <th class="th-premium" style="width: 120px; text-align: center; background-color: #064e3b;">COSTO U. ($)</th>
+                    <th class="th-premium" style="width: 150px; text-align: center; background-color: #1e3a8a;">COSTO U. ($ ► S/.)</th>
                 </tr>
             </thead>
             <tbody>
@@ -84,7 +84,7 @@
                     {% endfor %}
                 {% else %}
                     <tr id="fila-vacia">
-                        <td colspan="5" style="padding: 40px; text-align: center; color: #94a3b8; font-size: 1rem;">
+                        <td colspan="5" style="padding: 40px; text-align: center; color: #94a3b8; font-size: 1rem; border: 1px solid #cbd5e1;">
                             <i class="fas fa-folder-open" style="font-size: 2.5em; color: #cbd5e1; margin-bottom: 15px; display: block;"></i>
                             No se encontraron costos o la tabla está vacía. ¡Importa tu Excel de costos!
                         </td>
@@ -117,19 +117,28 @@
 </div>
 
 <style>
-    /* Estructura de Tabla */
-    #tablaCostos { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-    .th-premium { padding: 14px 12px; border-right: 1px solid #334155; border-bottom: 2px solid #cbd5e1; }
-    .td-premium { padding: 0; border-right: 1px solid #e2e8f0; height: 42px; vertical-align: middle; }
+    /* ========================================================
+       DISEÑO TIPO EXCEL (GRID MARCADOS ESTRICTOS)
+       ======================================================== */
+    #tablaCostos { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-collapse: collapse; }
     
-    /* Interacciones de fila */
-    .fila-simulador:hover { background-color: #f1f5f9; }
-    .fila-editada > td { background-color: #fffbeb !important; }
+    .th-premium { padding: 12px 10px; border: 1px solid #334155; }
+    .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; }
+    
+    /* Efecto Cebra y Hover Excel */
+    .fila-simulador:nth-child(even) { background-color: #f8fafc; }
+    .fila-simulador:nth-child(odd) { background-color: #ffffff; }
+    
+    /* Hover poderoso: Oscurece toda la fila y sus colores */
+    .fila-simulador:hover td { filter: brightness(0.96); background-color: #e2e8f0; }
+
+    /* Fila Editada temporalmente */
+    .fila-editada > td { background-color: #fffbeb !important; filter: none !important; }
     .fila-editada > td:first-child { border-left: 4px solid #f59e0b; }
 
-    /* Inputs Fantasma */
+    /* Inputs Fantasma (Llenan el 100% de la celda) */
     .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 10px 15px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
-    .celda-input:not([readonly]):focus { background-color: #fef9c3; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; }
+    .celda-input:not([readonly]):focus { background-color: #fef9c3; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; position: relative; z-index: 1; border-radius: 2px; }
     
     /* Inputs Bloqueados (Readonly) */
     .input-readonly { cursor: not-allowed; }
@@ -140,7 +149,7 @@
     .derecha { text-align: right; }
     .bold { font-weight: 700; }
     .text-dark { color: #0f172a; } 
-    .text-blue { color: #2563eb; }
+    .text-blue { color: #1d4ed8; }
     .text-blue-dark { color: #1e40af; }
     .text-green { color: #166534; }
     .text-red { color: #dc2626; }
