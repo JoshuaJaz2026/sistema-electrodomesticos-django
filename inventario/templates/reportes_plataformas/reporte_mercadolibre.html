@@ -91,20 +91,20 @@
                     <th class="th-premium" style="width: 320px;">PRODUCTO <i class="fas fa-magic" style="color: #34d399; font-size: 0.9em; margin-left: 5px;" title="Autocompletado BUSCARV"></i></th>
                     <th class="th-premium" style="width: 70px;">CANT.</th>
                     
-                    <th class="th-premium" style="width: 110px; background-color: #064e3b;">PRECIO</th>
-                    <th class="th-premium" style="width: 110px; background-color: #064e3b;">TOTAL V.</th>
-                    <th class="th-premium" style="width: 110px; background-color: #064e3b;">% CARGO V.</th>
-                    <th class="th-premium" style="width: 110px; background-color: #064e3b;">URBANO</th>
-                    <th class="th-premium" style="width: 110px; background-color: #064e3b;">FLEX</th>
-                    <th class="th-premium" style="width: 130px; background-color: #10b981; color: #022c22;">TOTAL PAGADO</th>
+                    <th class="th-premium" style="width: 85px; background-color: #064e3b;">PRECIO</th>
+                    <th class="th-premium" style="width: 85px; background-color: #064e3b;">TOTAL V.</th>
+                    <th class="th-premium" style="width: 95px; background-color: #064e3b;">% CARGO V.</th>
+                    <th class="th-premium" style="width: 85px; background-color: #064e3b;">URBANO</th>
+                    <th class="th-premium" style="width: 85px; background-color: #064e3b;">FLEX</th>
+                    <th class="th-premium" style="width: 110px; background-color: #10b981; color: #022c22;">TOTAL PAGADO</th>
                     
-                    <th class="th-premium" style="width: 130px; background-color: #7f1d1d;">COSTO x PROD</th>
-                    <th class="th-premium" style="width: 70px; background-color: #7f1d1d;">UND</th>
-                    <th class="th-premium" style="width: 120px; background-color: #7f1d1d;">COSTO TOTAL</th>
-                    <th class="th-premium" style="width: 140px; background-color: #7f1d1d;">C. ENTREGA FLEX</th>
+                    <th class="th-premium" style="width: 110px; background-color: #7f1d1d;">COSTO x PROD</th>
+                    <th class="th-premium" style="width: 55px; background-color: #7f1d1d;">UND</th>
+                    <th class="th-premium" style="width: 100px; background-color: #7f1d1d;">COSTO TOTAL</th>
+                    <th class="th-premium" style="width: 120px; background-color: #7f1d1d;">C. ENTREGA FLEX</th>
                     
-                    <th class="th-premium" style="width: 120px; background-color: #1e3a8a;">GANANCIA</th>
-                    <th class="th-premium" style="width: 130px; background-color: #1e3a8a;">RENTABILIDAD %</th>
+                    <th class="th-premium" style="width: 90px; background-color: #1e3a8a;">GANANCIA</th>
+                    <th class="th-premium" style="width: 115px; background-color: #1e3a8a;">RENTABILIDAD %</th>
                     
                     <th class="th-premium" style="width: 220px;">UBICACIÓN</th>
                     <th class="th-premium" style="width: 250px;">DIRECCIÓN</th>
@@ -221,7 +221,7 @@
                         </td>
                         
                         <td class="td-premium bg-blue-light">
-                            <input type="text" value="{{ item.rentabilidad|default:'' }}" class="celda-input derecha bold val-rentabilidad" style="color: {% if item.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %}; padding-right: 15px;" oninput="registrarCambioVenta(this)">
+                            <input type="text" value="{{ item.rentabilidad|default:'' }}" class="celda-input derecha bold val-rentabilidad" style="color: {% if item.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};" oninput="registrarCambioVenta(this)">
                         </td>
                         
                         <td class="td-premium"><input type="text" value="{{ item.distrito|default:'' }}" placeholder="Dep/Prov/Dist" class="celda-input val-distrito" oninput="registrarCambioVenta(this)"></td>
@@ -335,7 +335,7 @@
                         </div>
                     </td>
                     <td class="td-premium bg-blue-light">
-                        <input type="text" class="celda-input derecha bold val-rentabilidad" style="color: #1e40af; padding-right: 15px;" oninput="registrarCambioVenta(this)">
+                        <input type="text" class="celda-input derecha bold val-rentabilidad" style="color: #1e40af;" oninput="registrarCambioVenta(this)">
                     </td>
                     
                     <td class="td-premium"><input type="text" placeholder="Dep/Prov/Dist" class="celda-input val-distrito" oninput="registrarCambioVenta(this)"></td>
@@ -407,16 +407,16 @@
     .bg-red-light { background-color: #fef2f2 !important; }
     .bg-blue-light { background-color: #eff6ff !important; }
 
-    /* FORMATO DE MONEDA Y PORCENTAJE (Flexbox) */
-    .wrapper-moneda { display: flex; align-items: center; padding: 0 8px; height: 100%; box-sizing: border-box; }
-    .simbolo-moneda { color: #94a3b8; font-weight: 800; font-size: 0.85rem; user-select: none; flex-shrink: 0; }
-    .simbolo-porcentaje { color: #94a3b8; font-weight: 800; font-size: 0.85rem; user-select: none; flex-shrink: 0; }
+    /* FORMATO DE MONEDA Y PORCENTAJE COMPRIMIDO (Flexbox) */
+    .wrapper-moneda { display: flex; align-items: center; padding: 0 4px; height: 100%; box-sizing: border-box; }
+    .simbolo-moneda { color: #94a3b8; font-weight: 800; font-size: 0.8rem; user-select: none; flex-shrink: 0; }
+    .simbolo-porcentaje { color: #94a3b8; font-weight: 800; font-size: 0.8rem; user-select: none; flex-shrink: 0; }
 
     /* Inputs Fantasma (Llenan el 100% de la celda) */
     .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
     .celda-input:focus:not([readonly]) { background-color: #fff; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; position: relative; z-index: 1; border-radius: 2px;}
     
-    .wrapper-moneda .celda-input { padding-left: 6px; padding-right: 6px; }
+    .wrapper-moneda .celda-input { padding-left: 4px; padding-right: 4px; text-align: right; width: 100%; }
 
     /* Inputs Bloqueados (Readonly / Tipo Fórmula) */
     .input-readonly { color: #94a3b8; cursor: not-allowed; }
