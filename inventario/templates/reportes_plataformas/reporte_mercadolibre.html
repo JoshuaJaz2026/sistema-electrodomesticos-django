@@ -88,7 +88,7 @@
                     <th class="th-premium" style="width: 220px;">CATEGORIA</th>
                     <th class="th-premium" style="width: 160px; color: #60a5fa;">SKU ALMACEN</th>
                     <th class="th-premium" style="width: 140px;">MODELO</th>
-                    <th class="th-premium" style="width: 280px;">PRODUCTO <i class="fas fa-magic" style="color: #34d399; font-size: 0.9em; margin-left: 5px;" title="Autocompletado BUSCARV"></i></th>
+                    <th class="th-premium" style="width: 320px;">PRODUCTO <i class="fas fa-magic" style="color: #34d399; font-size: 0.9em; margin-left: 5px;" title="Autocompletado BUSCARV"></i></th>
                     <th class="th-premium" style="width: 70px;">CANT.</th>
                     
                     <th class="th-premium" style="width: 100px; background-color: #064e3b;">PRECIO</th>
@@ -141,8 +141,11 @@
 
                         <td class="td-premium"><input type="text" value="{{ item.sku_almacen|default:'' }}" class="celda-input central text-mono text-blue val-sku" oninput="registrarCambioVenta(this)"></td>
                         
-                        <td class="td-premium"><input type="text" value="{{ item.modelo|default:'' }}" class="celda-input central bold text-dark val-modelo" oninput="buscarProductoPorModelo(this); registrarCambioVenta(this)"></td>
-                        <td class="td-premium"><input type="text" value="{{ item.producto|default:'' }}" class="celda-input val-producto" placeholder="Autocompletado..." oninput="registrarCambioVenta(this)"></td>
+                        <td class="td-premium"><input type="text" value="{{ item.modelo|default:'' }}" class="celda-input central bold text-dark val-modelo" oninput="buscarProductoPorModelo(this)"></td>
+                        
+                        <td class="td-premium" style="background-color: #f1f5f9;">
+                            <input type="text" value="{{ item.producto|default:'' }}" class="celda-input val-producto input-readonly" readonly tabindex="-1" placeholder="Esperando modelo..." style="font-weight: 600; color: #475569;">
+                        </td>
                         
                         <td class="td-premium"><input type="number" value="{{ item.cantidad|default:'' }}" class="celda-input central bold val-cant" oninput="registrarCambioVenta(this)"></td>
                         
@@ -200,8 +203,11 @@
 
                     <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-sku" oninput="registrarCambioVenta(this)"></td>
                     
-                    <td class="td-premium"><input type="text" class="celda-input central bold text-dark val-modelo" oninput="buscarProductoPorModelo(this); registrarCambioVenta(this)"></td>
-                    <td class="td-premium"><input type="text" class="celda-input val-producto" placeholder="Autocompletado..." oninput="registrarCambioVenta(this)"></td>
+                    <td class="td-premium"><input type="text" class="celda-input central bold text-dark val-modelo" oninput="buscarProductoPorModelo(this)"></td>
+                    
+                    <td class="td-premium" style="background-color: #f1f5f9;">
+                        <input type="text" class="celda-input val-producto input-readonly" readonly tabindex="-1" placeholder="Esperando modelo..." style="font-weight: 600; color: #475569;">
+                    </td>
                     
                     <td class="td-premium"><input type="number" class="celda-input central bold val-cant" oninput="registrarCambioVenta(this)"></td>
                     
@@ -293,8 +299,8 @@
     .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
     .celda-input:focus:not([readonly]) { background-color: #fff; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; position: relative; z-index: 1; border-radius: 2px;}
     
-    /* Inputs Bloqueados (Readonly) */
-    .input-readonly { color: #94a3b8; cursor: not-allowed; }
+    /* Inputs Bloqueados (Readonly / Tipo Fórmula) */
+    .input-readonly { cursor: not-allowed; }
     .input-readonly:focus { box-shadow: none; background-color: transparent; }
 
     /* Tipografías y Colores Específicos */
@@ -349,22 +355,25 @@
     const listaCategorias = ["HORNO ELECTRICO", "AFEITADORA", "ARROCERA", "ASPIRADORA", "AUDIFONOS", "BATIDORA DE INMERSION", "BATIDORA DE MANO", "BATIDORA DE TAZÓN", "BATIDORA PLANETARIA", "BLOQUEADOR", "CACEROLA", "CAFETERA", "CAMPANA", "CATEGORIA", "CEPILLO", "COCINA", "COCINA DE INDUCCION", "COCINA ELÉCTRICA", "COLLAR Y ARETES", "COMBO CHERRY", "COMBO OSTER", "CONGELADORA", "CONTROL DE TV", "CUATRICOMBO", "CUCHILLA DE LICUADORA", "CUCHILLO", "DESHUMEDECEDOR", "DISPENSADOR DE AGUA", "EQUIPO DE SONIDO", "ESPATULA", "EXPRIMIDOR", "EXTRACTOR DE JUGOS", "FREIDORA DE AIRE", "FRIGOBAR", "HERVIDOR", "JUEGO DE OLLAS", "LAVADORA", "LAVASECA", "LICUADORA", "MAQUINA DE CORTAR PELO", "MICROONDAS", "MOLDE", "MOLEDOR DE CARNE", "MOLINILLO", "MULTI OLLA", "OLLA", "OLLA A PRESIÓN", "ONDULADOR", "PANIFICADORA", "PARLANTE", "PARRILLA", "PERFUME", "PICADOR DE ALIMENTOS", "PLANCHA A VAPOR", "PLANCHA DE CABELLO", "PLANCHA GRILL", "PROCESADOR DE ALIMENTOS", "PROTECTOR SOLAR", "REFRIGERADORA", "SANDWICHERA", "SARTEN", "SARTÉN ELÉCTRICA", "SET DE CUBIERTOS", "SET DE OLLAS", "SET DE PIZZA", "SOUNDBAR", "SPAGUETERA", "TERMO BOMBA", "TERMO HERVIDOR", "TERMORADIADOR", "TETERA", "TOSTADORA", "TRICOMBO OSTER", "TV", "VAPORIZADOR", "VAPORIZADOR DE ALIMENTOS", "VASO DE LICUADORA", "VENTILADOR", "WAFLERA", "YOGURT MAKER", "HORNO CON FREIDORA", "CUIDADO PERSONAL", "CALEFACTOR", "IMPRESORA", "MONITOR DE ESCENARIO", "DEPILADORA", "TERMOVENTILADOR", "TABLET", "VISICOOLER", "Westinghouse", "ENCIMERA", "MAQUINA PARA HIELO"];
     const listaTiposVenta = ["FLEX", "URBANO", "ACUERDO CON EL COMPRADOR"];
 
-    // === FUNCIÓN BUSCARV (Se ejecuta al escribir el modelo) ===
+    // === FUNCIÓN BUSCARV AUTOMÁTICO (Igual a Excel) ===
     function buscarProductoPorModelo(inputModelo) {
         const fila = inputModelo.closest('tr');
         const inputProducto = fila.querySelector('.val-producto');
         const modelo = inputModelo.value.trim().toUpperCase();
 
         if (modelo !== '') {
-            // Buscamos en el diccionario equivalente a Costos Referenciales
+            // Buscamos en nuestro diccionario JSON que vino desde la Base de Datos
             if (diccionarioProductos[modelo]) {
                 inputProducto.value = diccionarioProductos[modelo];
+            } else {
+                inputProducto.value = 'NO ENCONTRADO';
             }
         } else {
             inputProducto.value = '';
         }
-        // Opcional: Para asegurar que el cambio de producto quede en memoria
-        registrarCambioVenta(inputProducto);
+        
+        // Registramos el cambio para que guarde en memoria
+        registrarCambioVenta(inputModelo);
     }
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -449,6 +458,24 @@
             if (inputFecha && inputFecha.value && (!inputMes.value || inputMes.value === '')) {
                 inputMes.value = inputFecha.value.substring(0, 7);
             }
+            
+            // ========================================================
+            // BUSCARV EN TIEMPO REAL AL CARGAR (Para datos antiguos)
+            // ========================================================
+            const inputModelo = fila.querySelector('.val-modelo');
+            const inputProducto = fila.querySelector('.val-producto');
+            if (inputModelo && inputProducto) {
+                const mod = inputModelo.value.trim().toUpperCase();
+                // Actualizamos si está vacío o dice "NO ENCONTRADO"
+                if (mod !== '' && (inputProducto.value.trim() === '' || inputProducto.value === 'NO ENCONTRADO' || inputProducto.value === 'None')) {
+                    if (diccionarioProductos[mod]) {
+                        inputProducto.value = diccionarioProductos[mod];
+                    } else {
+                        inputProducto.value = 'NO ENCONTRADO';
+                    }
+                }
+            }
+
             const key = fila.dataset.originalKey;
             if (key && memoriaVentas[key]) {
                 fila.classList.add('fila-editada');
@@ -619,12 +646,14 @@
                     let marcaLeida = limpiarValor(item['MARCA']).toUpperCase();
                     let categoriaLeida = limpiarValor(item['CATEGORIA']).toUpperCase();
 
-                    // === BUSCARV en importación masiva ===
+                    // === BUSCARV MÁGICO DURANTE LA IMPORTACIÓN MASIVA ===
                     let modeloLeido = limpiarValor(item['MODELO']).toUpperCase();
                     let productoLeido = limpiarValor(item['PRODUCTO']);
                     
                     if (!productoLeido && modeloLeido && diccionarioProductos[modeloLeido]) {
                         productoLeido = diccionarioProductos[modeloLeido];
+                    } else if (!productoLeido && modeloLeido && !diccionarioProductos[modeloLeido]) {
+                        productoLeido = "NO ENCONTRADO";
                     }
 
                     const key = 'import-' + Math.random().toString(36).substr(2, 9);
