@@ -34,7 +34,7 @@
             
             <div style="position: relative;">
                 <button type="button" onclick="togglePanelColumnas()" class="btn-premium" style="background-color: #334155;">
-                    <i class="fas fa-columns"></i> Columnas
+                    <i class="fas fa-columns"></i> Opciones de Pantalla
                 </button>
                 
                 <div id="panelPersonalizarColumnas" style="display: none; position: absolute; right: 0; top: 115%; background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 100; width: 750px;">
@@ -75,8 +75,8 @@
         </div>
     </form>
 
-    <div style="overflow-x: auto; overflow-y: auto; max-height: 60vh; border: 1px solid #e2e8f0; border-radius: 6px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-        <table id="tablaReporte" style="width: max-content; border-collapse: separate; border-spacing: 0; background: white; font-size: 0.85rem; white-space: nowrap; table-layout: fixed;">
+    <div style="overflow-x: auto; overflow-y: auto; max-height: 60vh; border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+        <table id="tablaReporte" style="width: max-content; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap; table-layout: fixed;">
             <thead style="position: sticky; top: 0; z-index: 10;">
                 <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;">
                     <th class="th-premium" style="width: 140px;">FECHA</th>
@@ -117,7 +117,7 @@
             <tbody>
                 {% if page_obj %}
                     {% for item in page_obj %}
-                    <tr class="fila-ventas" data-original-key="{{ item.id }}" style="border-bottom: 1px solid #e2e8f0; transition: background-color 0.2s;">
+                    <tr class="fila-ventas" data-original-key="{{ item.id }}">
                         <td class="td-premium"><input type="date" value="{{ item.fecha|date:'Y-m-d' }}" class="celda-input central val-fecha" oninput="actualizarMesAnio(this); registrarCambioVenta(this)"></td>
                         <td class="td-premium"><input type="text" value="{{ item.mes_anio|default:'' }}" class="celda-input central bold val-mes input-readonly" readonly tabindex="-1"></td>
                         <td class="td-premium"><input type="text" value="{{ item.nro_orden|default:'' }}" class="celda-input central text-mono text-blue val-orden" oninput="registrarCambioVenta(this)"></td>
@@ -156,8 +156,8 @@
                         <td class="td-premium bg-red-light"><input type="number" step="0.01" value="{{ item.costo_total|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-red val-costototal" oninput="registrarCambioVenta(this)"></td>
                         <td class="td-premium bg-red-light"><input type="number" step="0.01" value="{{ item.costo_entrega_flex|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha text-red val-costoflex" oninput="registrarCambioVenta(this)"></td>
                         
-                        <td class="td-premium bg-blue-light"><input type="number" step="0.01" value="{{ item.ganancia|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-blue-dark val-ganancia" oninput="registrarCambioVenta(this)"></td>
-                        <td class="td-premium bg-blue-light"><input type="text" value="{{ item.rentabilidad|default:'' }}" class="celda-input central bold text-blue-dark val-rentabilidad" oninput="registrarCambioVenta(this)"></td>
+                        <td class="td-premium bg-blue-light"><input type="number" step="0.01" value="{{ item.ganancia|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold val-ganancia" style="color: {% if item.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};" oninput="registrarCambioVenta(this)"></td>
+                        <td class="td-premium bg-blue-light"><input type="text" value="{{ item.rentabilidad|default:'' }}" class="celda-input central bold val-rentabilidad" style="color: {% if item.rentabilidad < 0 %}#dc2626{% else %}#1e40af{% endif %};" oninput="registrarCambioVenta(this)"></td>
                         
                         <td class="td-premium"><input type="text" value="{{ item.distrito|default:'' }}" placeholder="Dep/Prov/Dist" class="celda-input val-distrito" oninput="registrarCambioVenta(this)"></td>
                         <td class="td-premium"><input type="text" value="{{ item.direccion|default:'' }}" class="celda-input val-direccion" oninput="registrarCambioVenta(this)"></td>
@@ -174,7 +174,7 @@
                     {% endfor %}
                 {% endif %}
 
-                <tr class="fila-ventas" id="fila-molde" style="display: none; border-bottom: 1px solid #e2e8f0; transition: background-color 0.2s;">
+                <tr class="fila-ventas" id="fila-molde" style="display: none;">
                     <td class="td-premium"><input type="date" class="celda-input central val-fecha" oninput="actualizarMesAnio(this); registrarCambioVenta(this)"></td>
                     <td class="td-premium"><input type="text" class="celda-input central bold val-mes input-readonly" readonly tabindex="-1"></td>
                     <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue bold val-orden" oninput="registrarCambioVenta(this)"></td>
@@ -260,27 +260,37 @@
 </div>
 
 <style>
-    /* Estructura y Cabeceras */
-    #tablaReporte { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-    .th-premium { padding: 12px 10px; border-right: 1px solid #334155; border-bottom: 2px solid #cbd5e1; text-align: left; }
-    .td-premium { padding: 0; border-right: 1px solid #e2e8f0; height: 40px; }
+    /* ========================================================
+       DISEÑO TIPO EXCEL (GRID MARCADOS ESTRICTOS)
+       ======================================================== */
+    #tablaReporte { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-collapse: collapse; }
     
-    /* Fondos codificados por color */
-    .bg-green-light { background-color: #f0fdf4; }
-    .bg-green-medium { background-color: #dcfce7; }
-    .bg-red-light { background-color: #fef2f2; }
-    .bg-blue-light { background-color: #eff6ff; }
+    .th-premium { padding: 12px 10px; border: 1px solid #334155; text-align: center; }
+    .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; }
     
-    /* Efecto hover en filas */
-    .fila-ventas:hover { background-color: #f1f5f9; }
-    .fila-editada { background-color: #fffdec !important; }
+    /* Efecto Cebra y Hover Excel */
+    .fila-ventas:nth-child(even) { background-color: #f8fafc; }
+    .fila-ventas:nth-child(odd) { background-color: #ffffff; }
+    
+    /* Efecto Hover Poderoso: Al pasar el mouse toda la fila (incluso los colores de zona) se oscurece un poco */
+    .fila-ventas:hover td { filter: brightness(0.96); background-color: #e2e8f0; }
 
-    /* Inputs Fantasma (Transparencia e interactividad) */
+    /* Fila Editada temporalmente */
+    .fila-editada > td { background-color: #fffbeb !important; filter: none !important; }
+    .fila-editada > td:first-child { border-left: 4px solid #f59e0b; }
+
+    /* Fondos codificados por color (Zonas Financieras) */
+    .bg-green-light { background-color: #f0fdf4 !important; }
+    .bg-green-medium { background-color: #dcfce7 !important; }
+    .bg-red-light { background-color: #fef2f2 !important; }
+    .bg-blue-light { background-color: #eff6ff !important; }
+
+    /* Inputs Fantasma (Llenan el 100% de la celda) */
     .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
-    .celda-input:focus:not([readonly]) { background-color: #fef9c3; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; }
+    .celda-input:focus:not([readonly]) { background-color: #fff; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; position: relative; z-index: 1; border-radius: 2px;}
     
     /* Inputs Bloqueados (Readonly) */
-    .input-readonly { background-color: transparent; color: #94a3b8; font-size: 0.8rem; cursor: not-allowed; }
+    .input-readonly { color: #94a3b8; cursor: not-allowed; }
     .input-readonly:focus { box-shadow: none; background-color: transparent; }
 
     /* Tipografías y Colores Específicos */
@@ -305,19 +315,19 @@
     .btn-limpiar:hover { background: #dc2626; }
 
     /* Botones Superiores */
-    .btn-premium { color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s, filter 0.2s; text-decoration: none; }
+    .btn-premium { color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s, filter 0.2s; text-decoration: none; font-size: 0.85rem; font-family: inherit;}
     .btn-premium:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
     /* Selectores Custom (Combobox) */
     .select-premium { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px top 50%; background-size: 8px auto; padding-right: 20px; }
 
     /* Eliminar y Ocultar Spinners */
-    .btn-eliminar { background: none; border: none; color: #ef4444; cursor: pointer; padding: 10px; border-radius: 4px; transition: background 0.2s; }
+    .btn-eliminar { background: none; border: none; color: #ef4444; cursor: pointer; padding: 10px; border-radius: 4px; transition: background 0.2s; display: block; margin: 0 auto;}
     .btn-eliminar:hover { background: #fee2e2; color: #b91c1c; }
     .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .celda-input[type=number] { -moz-appearance: textfield; }
 
-    /* Checkboxes Menú */
+    /* Checkboxes Menú Flotante */
     .check-opcion { width: 16px; height: 16px; accent-color: var(--color-principal); cursor: pointer; }
 
     /* Paginación */
