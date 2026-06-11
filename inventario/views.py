@@ -469,11 +469,19 @@ def reporte_mercadolibre(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # === NUEVO: AÑADIR ESTAS LÍNEAS PARA EL BUSCARV DE PRODUCTO ===
+    # Extraemos todos los modelos (códigos) y su descripción de producto
+    costos_db = ReferenciaCosto.objects.all()
+    diccionario_productos = {str(c.codigo).strip().upper(): c.producto for c in costos_db if c.codigo}
+    diccionario_productos_json = json.dumps(diccionario_productos)
+    # ===============================================================
+
     # 6. Pasamos las variables al HTML (incluyendo la ruta de tu carpeta que es reportes_plataformas)
     return render(request, 'reportes_plataformas/reporte_mercadolibre.html', {
         'canal': canal, 
         'page_obj': page_obj,
-        'query_search': query_search
+        'query_search': query_search,
+        'diccionario_productos_json': diccionario_productos_json
     })
 
 @login_required
