@@ -88,23 +88,24 @@
                     <th class="th-premium" style="width: 220px;">CATEGORIA</th>
                     <th class="th-premium" style="width: 160px; color: #60a5fa;">SKU ALMACEN</th>
                     <th class="th-premium" style="width: 140px;">MODELO</th>
-                    <th class="th-premium" style="width: 320px;">PRODUCTO <i class="fas fa-magic" style="color: #34d399; font-size: 0.9em; margin-left: 5px;" title="Autocompletado BUSCARV"></i></th>
-                    <th class="th-premium" style="width: 70px;">CANT.</th>
+                    <th class="th-premium" style="width: 300px;">PRODUCTO <i class="fas fa-magic" style="color: #34d399; font-size: 0.9em; margin-left: 5px;"></i></th>
+                    <th class="th-premium" style="width: 60px;">CANT.</th>
                     
-                    <th class="th-premium" style="width: 85px; background-color: #064e3b; white-space: normal; line-height: 1.1;">PRECIO</th>
-                    <th class="th-premium" style="width: 85px; background-color: #064e3b; white-space: normal; line-height: 1.1;">TOTAL V.</th>
-                    <th class="th-premium" style="width: 85px; background-color: #064e3b; white-space: normal; line-height: 1.1;">% CARGO V.</th>
-                    <th class="th-premium" style="width: 85px; background-color: #064e3b; white-space: normal; line-height: 1.1;">URBANO</th>
-                    <th class="th-premium" style="width: 85px; background-color: #064e3b; white-space: normal; line-height: 1.1;">FLEX</th>
-                    <th class="th-premium" style="width: 85px; background-color: #10b981; color: #022c22; white-space: normal; line-height: 1.1;">TOTAL PAGADO</th>
+                    <th class="th-premium" style="width: 90px; background-color: #064e3b; white-space: normal; line-height: 1.1;">PRECIO</th>
+                    <th class="th-premium" style="width: 90px; background-color: #064e3b; white-space: normal; line-height: 1.1;">TOTAL V. <i class="fas fa-lock" style="color:#94a3b8; font-size:0.8em;"></i></th>
+                    <th class="th-premium" style="width: 90px; background-color: #064e3b; white-space: normal; line-height: 1.1;">CARGO V.</th>
+                    <th class="th-premium" style="width: 90px; background-color: #064e3b; white-space: normal; line-height: 1.1;">% CARGO V. <i class="fas fa-lock" style="color:#94a3b8; font-size:0.8em;"></i></th>
+                    <th class="th-premium" style="width: 90px; background-color: #064e3b; white-space: normal; line-height: 1.1;">URBANO</th>
+                    <th class="th-premium" style="width: 90px; background-color: #064e3b; white-space: normal; line-height: 1.1;">FLEX</th>
+                    <th class="th-premium" style="width: 90px; background-color: #10b981; color: #022c22; white-space: normal; line-height: 1.1;">TOTAL PAGADO <i class="fas fa-lock" style="color:#022c22; font-size:0.8em;"></i></th>
                     
-                    <th class="th-premium" style="width: 85px; background-color: #7f1d1d; white-space: normal; line-height: 1.1;">COSTO x PROD</th>
-                    <th class="th-premium" style="width: 50px; background-color: #7f1d1d;">UND</th>
-                    <th class="th-premium" style="width: 85px; background-color: #7f1d1d; white-space: normal; line-height: 1.1;">COSTO TOTAL</th>
-                    <th class="th-premium" style="width: 85px; background-color: #7f1d1d; white-space: normal; line-height: 1.1;">C. ENTREGA FLEX</th>
+                    <th class="th-premium" style="width: 90px; background-color: #7f1d1d; white-space: normal; line-height: 1.1;">COSTO x PROD</th>
+                    <th class="th-premium" style="width: 50px; background-color: #7f1d1d;">UND <i class="fas fa-lock" style="color:#94a3b8; font-size:0.8em;"></i></th>
+                    <th class="th-premium" style="width: 90px; background-color: #7f1d1d; white-space: normal; line-height: 1.1;">COSTO TOTAL <i class="fas fa-lock" style="color:#94a3b8; font-size:0.8em;"></i></th>
+                    <th class="th-premium" style="width: 90px; background-color: #7f1d1d; white-space: normal; line-height: 1.1;">C. ENTREGA FLEX</th>
                     
-                    <th class="th-premium" style="width: 85px; background-color: #1e3a8a; white-space: normal; line-height: 1.1;">GANANCIA</th>
-                    <th class="th-premium" style="width: 85px; background-color: #1e3a8a; white-space: normal; line-height: 1.1;">RENTABILIDAD %</th>
+                    <th class="th-premium" style="width: 90px; background-color: #1e3a8a; white-space: normal; line-height: 1.1;">GANANCIA <i class="fas fa-lock" style="color:#94a3b8; font-size:0.8em;"></i></th>
+                    <th class="th-premium" style="width: 90px; background-color: #1e3a8a; white-space: normal; line-height: 1.1;">RENTABILIDAD % <i class="fas fa-lock" style="color:#94a3b8; font-size:0.8em;"></i></th>
                     
                     <th class="th-premium" style="width: 220px;">UBICACIÓN</th>
                     <th class="th-premium" style="width: 250px;">DIRECCIÓN</th>
@@ -142,29 +143,36 @@
                         <td class="td-premium"><input type="text" value="{{ item.sku_almacen|default:'' }}" class="celda-input central text-mono text-blue val-sku" oninput="registrarCambioVenta(this)"></td>
                         <td class="td-premium"><input type="text" value="{{ item.modelo|default:'' }}" class="celda-input central bold text-dark val-modelo" oninput="buscarProductoPorModelo(this)"></td>
                         
-                        <td class="td-premium" style="background-color: #f1f5f9;">
-                            <input type="text" value="{{ item.producto|default:'' }}" class="celda-input val-producto input-readonly" readonly tabindex="-1" placeholder="Esperando modelo..." style="font-weight: 600; color: #475569;">
+                        <td class="td-premium bg-locked">
+                            <input type="text" value="{{ item.producto|default:'' }}" class="celda-input val-producto input-readonly" readonly tabindex="-1" placeholder="Esperando modelo...">
                         </td>
                         
-                        <td class="td-premium"><input type="number" value="{{ item.cantidad|default:'' }}" class="celda-input central bold val-cant" oninput="registrarCambioVenta(this)"></td>
+                        <td class="td-premium"><input type="number" value="{{ item.cantidad|default:'' }}" class="celda-input central bold val-cant" oninput="calcularFilaVenta(this); registrarCambioVenta(this)"></td>
                         
                         <td class="td-premium bg-green-light">
                             <div class="wrapper-moneda">
                                 <span class="simbolo-moneda">S/</span>
-                                <input type="number" step="0.01" value="{{ item.precio|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-green val-precio" oninput="registrarCambioVenta(this)">
+                                <input type="number" step="0.01" value="{{ item.precio|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-green val-precio" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
                             </div>
                         </td>
                         
+                        <td class="td-premium bg-green-light bg-locked">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda">S/</span>
+                                <input type="text" class="celda-input derecha bold text-green val-totalv input-readonly" readonly tabindex="-1">
+                            </div>
+                        </td>
+
                         <td class="td-premium bg-green-light">
                             <div class="wrapper-moneda">
                                 <span class="simbolo-moneda">S/</span>
-                                <input type="number" step="0.01" value="{{ item.total_venta|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-green val-totalv" oninput="registrarCambioVenta(this)">
+                                <input type="number" step="0.01" value="{{ item.cargo_venta|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha text-red val-cargosoles" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
                             </div>
                         </td>
                         
-                        <td class="td-premium bg-green-light">
+                        <td class="td-premium bg-green-light bg-locked">
                             <div class="wrapper-moneda">
-                                <input type="number" step="0.01" value="{{ item.cargo_venta|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha text-red val-cargoventa" oninput="registrarCambioVenta(this)">
+                                <input type="text" class="celda-input derecha text-red val-cargoporc input-readonly" readonly tabindex="-1">
                                 <span class="simbolo-porcentaje">%</span>
                             </div>
                         </td>
@@ -172,57 +180,59 @@
                         <td class="td-premium bg-green-light">
                             <div class="wrapper-moneda">
                                 <span class="simbolo-moneda">S/</span>
-                                <input type="number" step="0.01" value="{{ item.urbano|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha val-urbano" oninput="registrarCambioVenta(this)">
+                                <input type="number" step="0.01" value="{{ item.urbano|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha val-urbano" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
                             </div>
                         </td>
                         
                         <td class="td-premium bg-green-light">
                             <div class="wrapper-moneda">
                                 <span class="simbolo-moneda">S/</span>
-                                <input type="number" step="0.01" value="{{ item.flex|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha val-flex" oninput="registrarCambioVenta(this)">
+                                <input type="number" step="0.01" value="{{ item.flex|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha val-flex" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
                             </div>
                         </td>
                         
-                        <td class="td-premium bg-green-medium">
+                        <td class="td-premium bg-green-medium bg-locked">
                             <div class="wrapper-moneda">
                                 <span class="simbolo-moneda text-green-dark">S/</span>
-                                <input type="number" step="0.01" value="{{ item.total_pagado|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-green-dark val-totalpagado" oninput="registrarCambioVenta(this)">
+                                <input type="text" class="celda-input derecha bold text-green-dark val-totalpagado input-readonly" readonly tabindex="-1">
                             </div>
                         </td>
                         
                         <td class="td-premium bg-red-light">
                             <div class="wrapper-moneda">
                                 <span class="simbolo-moneda">S/</span>
-                                <input type="number" step="0.01" value="{{ item.costo_producto|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-red val-costoproducto" oninput="registrarCambioVenta(this)">
+                                <input type="number" step="0.01" value="{{ item.costo_producto|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-red val-costoproducto" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
                             </div>
                         </td>
                         
-                        <td class="td-premium bg-red-light"><input type="number" value="{{ item.und|default:'' }}" class="celda-input central val-und" oninput="registrarCambioVenta(this)"></td>
+                        <td class="td-premium bg-red-light bg-locked">
+                            <input type="text" class="celda-input central val-und input-readonly" readonly tabindex="-1">
+                        </td>
+                        
+                        <td class="td-premium bg-red-light bg-locked">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda">S/</span>
+                                <input type="text" class="celda-input derecha bold text-red val-costototal input-readonly" readonly tabindex="-1">
+                            </div>
+                        </td>
                         
                         <td class="td-premium bg-red-light">
                             <div class="wrapper-moneda">
                                 <span class="simbolo-moneda">S/</span>
-                                <input type="number" step="0.01" value="{{ item.costo_total|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-red val-costototal" oninput="registrarCambioVenta(this)">
+                                <input type="number" step="0.01" value="{{ item.costo_entrega_flex|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha text-red val-costoflex" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
                             </div>
                         </td>
                         
-                        <td class="td-premium bg-red-light">
-                            <div class="wrapper-moneda">
-                                <span class="simbolo-moneda">S/</span>
-                                <input type="number" step="0.01" value="{{ item.costo_entrega_flex|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha text-red val-costoflex" oninput="registrarCambioVenta(this)">
-                            </div>
-                        </td>
-                        
-                        <td class="td-premium bg-blue-light">
+                        <td class="td-premium bg-blue-light bg-locked">
                             <div class="wrapper-moneda">
                                 <span class="simbolo-moneda" style="color: #60a5fa;">S/</span>
-                                <input type="number" step="0.01" value="{{ item.ganancia|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold val-ganancia" style="color: {% if item.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};" oninput="registrarCambioVenta(this)">
+                                <input type="text" class="celda-input derecha bold val-ganancia input-readonly" readonly tabindex="-1">
                             </div>
                         </td>
                         
-                        <td class="td-premium bg-blue-light">
+                        <td class="td-premium bg-blue-light bg-locked">
                             <div class="wrapper-moneda">
-                                <input type="text" value="{{ item.rentabilidad|default:'' }}" class="celda-input derecha bold val-rentabilidad" style="color: {% if item.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};" oninput="registrarCambioVenta(this)">
+                                <input type="text" class="celda-input derecha bold val-rentabilidad input-readonly" readonly tabindex="-1">
                                 <span class="simbolo-porcentaje">%</span>
                             </div>
                         </td>
@@ -265,81 +275,88 @@
                     </td>
 
                     <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-sku" oninput="registrarCambioVenta(this)"></td>
-                    
                     <td class="td-premium"><input type="text" class="celda-input central bold text-dark val-modelo" oninput="buscarProductoPorModelo(this)"></td>
                     
-                    <td class="td-premium" style="background-color: #f1f5f9;">
-                        <input type="text" class="celda-input val-producto input-readonly" readonly tabindex="-1" placeholder="Esperando modelo..." style="font-weight: 600; color: #475569;">
+                    <td class="td-premium bg-locked">
+                        <input type="text" class="celda-input val-producto input-readonly" readonly tabindex="-1" placeholder="Esperando modelo...">
                     </td>
                     
-                    <td class="td-premium"><input type="number" class="celda-input central bold val-cant" oninput="registrarCambioVenta(this)"></td>
+                    <td class="td-premium"><input type="number" class="celda-input central bold val-cant" oninput="calcularFilaVenta(this); registrarCambioVenta(this)"></td>
                     
                     <td class="td-premium bg-green-light">
                         <div class="wrapper-moneda">
                             <span class="simbolo-moneda">S/</span>
-                            <input type="number" step="0.01" class="celda-input derecha bold text-green val-precio" oninput="registrarCambioVenta(this)">
+                            <input type="number" step="0.01" class="celda-input derecha bold text-green val-precio" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
+                        </div>
+                    </td>
+                    <td class="td-premium bg-green-light bg-locked">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda">S/</span>
+                            <input type="text" class="celda-input derecha bold text-green val-totalv input-readonly" readonly tabindex="-1">
                         </div>
                     </td>
                     <td class="td-premium bg-green-light">
                         <div class="wrapper-moneda">
                             <span class="simbolo-moneda">S/</span>
-                            <input type="number" step="0.01" class="celda-input derecha bold text-green val-totalv" oninput="registrarCambioVenta(this)">
+                            <input type="number" step="0.01" class="celda-input derecha text-red val-cargosoles" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
                         </div>
                     </td>
-                    <td class="td-premium bg-green-light">
+                    <td class="td-premium bg-green-light bg-locked">
                         <div class="wrapper-moneda">
-                            <input type="number" step="0.01" class="celda-input derecha text-red val-cargoventa" oninput="registrarCambioVenta(this)">
+                            <input type="text" class="celda-input derecha text-red val-cargoporc input-readonly" readonly tabindex="-1">
                             <span class="simbolo-porcentaje">%</span>
                         </div>
                     </td>
                     <td class="td-premium bg-green-light">
                         <div class="wrapper-moneda">
                             <span class="simbolo-moneda">S/</span>
-                            <input type="number" step="0.01" class="celda-input derecha val-urbano" oninput="registrarCambioVenta(this)">
+                            <input type="number" step="0.01" class="celda-input derecha val-urbano" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
                         </div>
                     </td>
                     <td class="td-premium bg-green-light">
                         <div class="wrapper-moneda">
                             <span class="simbolo-moneda">S/</span>
-                            <input type="number" step="0.01" class="celda-input derecha val-flex" oninput="registrarCambioVenta(this)">
+                            <input type="number" step="0.01" class="celda-input derecha val-flex" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
                         </div>
                     </td>
-                    <td class="td-premium bg-green-medium">
+                    <td class="td-premium bg-green-medium bg-locked">
                         <div class="wrapper-moneda">
                             <span class="simbolo-moneda text-green-dark">S/</span>
-                            <input type="number" step="0.01" class="celda-input derecha bold text-green-dark val-totalpagado" oninput="registrarCambioVenta(this)">
+                            <input type="text" class="celda-input derecha bold text-green-dark val-totalpagado input-readonly" readonly tabindex="-1">
                         </div>
                     </td>
                     
                     <td class="td-premium bg-red-light">
                         <div class="wrapper-moneda">
                             <span class="simbolo-moneda">S/</span>
-                            <input type="number" step="0.01" class="celda-input derecha bold text-red val-costoproducto" oninput="registrarCambioVenta(this)">
+                            <input type="number" step="0.01" class="celda-input derecha bold text-red val-costoproducto" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
                         </div>
                     </td>
-                    <td class="td-premium bg-red-light"><input type="number" class="celda-input central val-und" oninput="registrarCambioVenta(this)"></td>
+                    <td class="td-premium bg-red-light bg-locked">
+                        <input type="text" class="celda-input central val-und input-readonly" readonly tabindex="-1">
+                    </td>
+                    <td class="td-premium bg-red-light bg-locked">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda">S/</span>
+                            <input type="text" class="celda-input derecha bold text-red val-costototal input-readonly" readonly tabindex="-1">
+                        </div>
+                    </td>
                     <td class="td-premium bg-red-light">
                         <div class="wrapper-moneda">
                             <span class="simbolo-moneda">S/</span>
-                            <input type="number" step="0.01" class="celda-input derecha bold text-red val-costototal" oninput="registrarCambioVenta(this)">
-                        </div>
-                    </td>
-                    <td class="td-premium bg-red-light">
-                        <div class="wrapper-moneda">
-                            <span class="simbolo-moneda">S/</span>
-                            <input type="number" step="0.01" class="celda-input derecha text-red val-costoflex" oninput="registrarCambioVenta(this)">
+                            <input type="number" step="0.01" class="celda-input derecha text-red val-costoflex" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
                         </div>
                     </td>
                     
-                    <td class="td-premium bg-blue-light">
+                    <td class="td-premium bg-blue-light bg-locked">
                         <div class="wrapper-moneda">
                             <span class="simbolo-moneda" style="color: #60a5fa;">S/</span>
-                            <input type="number" step="0.01" class="celda-input derecha bold val-ganancia" style="color: #1e40af;" oninput="registrarCambioVenta(this)">
+                            <input type="text" class="celda-input derecha bold val-ganancia input-readonly" readonly tabindex="-1">
                         </div>
                     </td>
-                    <td class="td-premium bg-blue-light">
+                    <td class="td-premium bg-blue-light bg-locked">
                         <div class="wrapper-moneda">
-                            <input type="text" class="celda-input derecha bold val-rentabilidad" style="color: #1e40af;" oninput="registrarCambioVenta(this)">
+                            <input type="text" class="celda-input derecha bold val-rentabilidad input-readonly" readonly tabindex="-1">
                             <span class="simbolo-porcentaje">%</span>
                         </div>
                     </td>
@@ -399,33 +416,33 @@
     /* Efecto Cebra y Hover Excel */
     .fila-ventas:nth-child(even) { background-color: #f8fafc; }
     .fila-ventas:nth-child(odd) { background-color: #ffffff; }
-    
-    /* Efecto Hover Poderoso */
     .fila-ventas:hover td { filter: brightness(0.96); background-color: #e2e8f0; }
 
     /* Fila Editada temporalmente */
     .fila-editada > td { background-color: #fffbeb !important; filter: none !important; }
     .fila-editada > td:first-child { border-left: 4px solid #f59e0b; }
 
-    /* Fondos codificados por color (Zonas Financieras) */
+    /* Fondos Zonas Financieras */
     .bg-green-light { background-color: #f0fdf4 !important; }
     .bg-green-medium { background-color: #dcfce7 !important; }
     .bg-red-light { background-color: #fef2f2 !important; }
     .bg-blue-light { background-color: #eff6ff !important; }
+    
+    /* Celdas Bloqueadas (Fórmulas) */
+    .bg-locked { filter: brightness(0.96) contrast(0.95); }
 
-    /* FORMATO DE MONEDA Y PORCENTAJE COMPRIMIDO (Flexbox) */
+    /* FORMATO DE MONEDA Y PORCENTAJE (Flexbox) */
     .wrapper-moneda { display: flex; align-items: center; padding: 0 4px; height: 100%; box-sizing: border-box; }
     .simbolo-moneda { color: #94a3b8; font-weight: 800; font-size: 0.8rem; user-select: none; flex-shrink: 0; }
     .simbolo-porcentaje { color: #94a3b8; font-weight: 800; font-size: 0.8rem; user-select: none; flex-shrink: 0; }
 
-    /* Inputs Fantasma (Llenan el 100% de la celda) */
+    /* Inputs Fantasma */
     .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
-    .celda-input:focus:not([readonly]) { background-color: #fff; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; position: relative; z-index: 1; border-radius: 2px;}
-    
+    .celda-input:not([readonly]):focus { background-color: #fff; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; position: relative; z-index: 1; border-radius: 2px;}
     .wrapper-moneda .celda-input { padding-left: 4px; padding-right: 4px; text-align: right; width: 100%; }
 
-    /* Inputs Bloqueados (Readonly / Tipo Fórmula) */
-    .input-readonly { color: #94a3b8; cursor: not-allowed; }
+    /* Inputs Bloqueados (Readonly) */
+    .input-readonly { color: #475569; font-weight: bold; cursor: not-allowed; }
     .input-readonly:focus { box-shadow: none; background-color: transparent; }
 
     /* Tipografías y Colores Específicos */
@@ -480,7 +497,54 @@
     const listaCategorias = ["HORNO ELECTRICO", "AFEITADORA", "ARROCERA", "ASPIRADORA", "AUDIFONOS", "BATIDORA DE INMERSION", "BATIDORA DE MANO", "BATIDORA DE TAZÓN", "BATIDORA PLANETARIA", "BLOQUEADOR", "CACEROLA", "CAFETERA", "CAMPANA", "CATEGORIA", "CEPILLO", "COCINA", "COCINA DE INDUCCION", "COCINA ELÉCTRICA", "COLLAR Y ARETES", "COMBO CHERRY", "COMBO OSTER", "CONGELADORA", "CONTROL DE TV", "CUATRICOMBO", "CUCHILLA DE LICUADORA", "CUCHILLO", "DESHUMEDECEDOR", "DISPENSADOR DE AGUA", "EQUIPO DE SONIDO", "ESPATULA", "EXPRIMIDOR", "EXTRACTOR DE JUGOS", "FREIDORA DE AIRE", "FRIGOBAR", "HERVIDOR", "JUEGO DE OLLAS", "LAVADORA", "LAVASECA", "LICUADORA", "MAQUINA DE CORTAR PELO", "MICROONDAS", "MOLDE", "MOLEDOR DE CARNE", "MOLINILLO", "MULTI OLLA", "OLLA", "OLLA A PRESIÓN", "ONDULADOR", "PANIFICADORA", "PARLANTE", "PARRILLA", "PERFUME", "PICADOR DE ALIMENTOS", "PLANCHA A VAPOR", "PLANCHA DE CABELLO", "PLANCHA GRILL", "PROCESADOR DE ALIMENTOS", "PROTECTOR SOLAR", "REFRIGERADORA", "SANDWICHERA", "SARTEN", "SARTÉN ELÉCTRICA", "SET DE CUBIERTOS", "SET DE OLLAS", "SET DE PIZZA", "SOUNDBAR", "SPAGUETERA", "TERMO BOMBA", "TERMO HERVIDOR", "TERMORADIADOR", "TETERA", "TOSTADORA", "TRICOMBO OSTER", "TV", "VAPORIZADOR", "VAPORIZADOR DE ALIMENTOS", "VASO DE LICUADORA", "VENTILADOR", "WAFLERA", "YOGURT MAKER", "HORNO CON FREIDORA", "CUIDADO PERSONAL", "CALEFACTOR", "IMPRESORA", "MONITOR DE ESCENARIO", "DEPILADORA", "TERMOVENTILADOR", "TABLET", "VISICOOLER", "Westinghouse", "ENCIMERA", "MAQUINA PARA HIELO"];
     const listaTiposVenta = ["FLEX", "URBANO", "ACUERDO CON EL COMPRADOR"];
 
-    // === FUNCIÓN BUSCARV AUTOMÁTICO (Igual a Excel) ===
+    // =========================================================================
+    // NUEVO: MOTOR DE FÓRMULAS AUTOMÁTICAS
+    // =========================================================================
+    function calcularFilaVenta(elemento) {
+        const fila = elemento.closest('tr');
+        if (!fila || fila.id === 'fila-molde') return;
+
+        // 1. Extraemos los valores que el usuario ingresa manualmente
+        const cant = parseFloat(fila.querySelector('.val-cant').value) || 0;
+        const precio = parseFloat(fila.querySelector('.val-precio').value) || 0;
+        const cargoSoles = parseFloat(fila.querySelector('.val-cargosoles').value) || 0;
+        const urbano = parseFloat(fila.querySelector('.val-urbano').value) || 0;
+        const flex = parseFloat(fila.querySelector('.val-flex').value) || 0;
+        const costoProd = parseFloat(fila.querySelector('.val-costoproducto').value) || 0;
+        const costoFlex = parseFloat(fila.querySelector('.val-costoflex').value) || 0;
+
+        // 2. FÓRMULA: TOTAL V. = PRECIO * CANT.
+        const totalV = precio * cant;
+        fila.querySelector('.val-totalv').value = totalV > 0 ? totalV.toFixed(2) : '';
+
+        // 3. FÓRMULA: % CARGO V. = CARGO(S/) / TOTAL V.
+        const porcCargo = totalV > 0 ? (cargoSoles / totalV) * 100 : 0;
+        fila.querySelector('.val-cargoporc').value = porcCargo > 0 ? porcCargo.toFixed(2) : '';
+
+        // 4. FÓRMULA: TOTAL PAGADO = (PRECIO - CARGO - URBANO + FLEX) * CANT.
+        const totalPagado = (precio - cargoSoles - urbano + flex) * cant;
+        fila.querySelector('.val-totalpagado').value = totalPagado !== 0 ? totalPagado.toFixed(2) : '';
+
+        // 5. FÓRMULA: UND = CANT.
+        fila.querySelector('.val-und').value = cant > 0 ? cant : '';
+
+        // 6. FÓRMULA: COSTO TOTAL = COSTO PROD. * UND
+        const costoTotal = costoProd * cant;
+        fila.querySelector('.val-costototal').value = costoTotal > 0 ? costoTotal.toFixed(2) : '';
+
+        // 7. FÓRMULA: GANANCIA = TOTAL PAGADO - COSTO TOTAL - C. ENTREGA FLEX
+        const ganancia = totalPagado - costoTotal - costoFlex;
+        const inputGanancia = fila.querySelector('.val-ganancia');
+        inputGanancia.value = (totalPagado > 0 || costoTotal > 0) ? ganancia.toFixed(2) : '';
+        inputGanancia.style.color = ganancia < 0 ? '#dc2626' : '#1e40af'; // Rojo si es pérdida, Azul si es ganancia
+
+        // 8. FÓRMULA: RENTABILIDAD % = GANANCIA / COSTO TOTAL
+        const rentabilidad = costoTotal > 0 ? (ganancia / costoTotal) * 100 : 0;
+        const inputRentabilidad = fila.querySelector('.val-rentabilidad');
+        inputRentabilidad.value = (costoTotal > 0) ? rentabilidad.toFixed(2) : '';
+        inputRentabilidad.style.color = rentabilidad < 0 ? '#dc2626' : '#1e40af';
+    }
+
     function buscarProductoPorModelo(inputModelo) {
         const fila = inputModelo.closest('tr');
         const inputProducto = fila.querySelector('.val-producto');
@@ -596,6 +660,10 @@
                 }
             }
 
+            // APLICAMOS FÓRMULAS A LAS FILAS EXISTENTES
+            const inputCant = fila.querySelector('.val-cant');
+            if (inputCant) calcularFilaVenta(inputCant);
+
             const key = fila.dataset.originalKey;
             if (key && memoriaVentas[key]) {
                 fila.classList.add('fila-editada');
@@ -621,6 +689,7 @@
         const orden = fila.querySelector('.val-orden').value.trim();
         if(!orden) return; 
 
+        // Se guarda en memoria el Cargo en Soles para mandarlo a la DB de Python sin errores
         memoriaVentas[key] = {
             'NRO. ORDEN': orden,
             'FECHA': fila.querySelector('.val-fecha').value,
@@ -635,7 +704,7 @@
             'CANT.': parseFloat(fila.querySelector('.val-cant').value) || 0,
             'PRECIO': parseFloat(fila.querySelector('.val-precio').value) || 0,
             'TOTAL V.': parseFloat(fila.querySelector('.val-totalv').value) || 0,
-            '%CARGO x VENTA': parseFloat(fila.querySelector('.val-cargoventa').value) || 0,
+            '%CARGO x VENTA': parseFloat(fila.querySelector('.val-cargosoles').value) || 0, 
             'URBANO': parseFloat(fila.querySelector('.val-urbano').value) || 0,
             'FLEX': parseFloat(fila.querySelector('.val-flex').value) || 0,
             'TOTAL PAGADO': parseFloat(fila.querySelector('.val-totalpagado').value) || 0,
@@ -766,10 +835,9 @@
                     let marcaLeida = limpiarValor(item['MARCA']).toUpperCase();
                     let categoriaLeida = limpiarValor(item['CATEGORIA']).toUpperCase();
 
-                    // === BUSCARV MÁGICO DURANTE LA IMPORTACIÓN MASIVA ===
+                    // BUSCARV IMPORTACIÓN
                     let modeloLeido = limpiarValor(item['MODELO']).toUpperCase();
                     let productoLeido = limpiarValor(item['PRODUCTO']);
-                    
                     if (!productoLeido && modeloLeido && diccionarioProductos[modeloLeido]) {
                         productoLeido = diccionarioProductos[modeloLeido];
                     } else if (!productoLeido && modeloLeido && !diccionarioProductos[modeloLeido]) {
@@ -777,6 +845,8 @@
                     }
 
                     const key = 'import-' + Math.random().toString(36).substr(2, 9);
+                    
+                    const cargoSolesImportado = formatNum(item['CARGOXVENTA']);
                     
                     memoriaVentas[key] = {
                         'NRO. ORDEN': orden,
@@ -792,7 +862,7 @@
                         'CANT.': formatNum(item['CANT']),
                         'PRECIO': formatNum(item['PRECIO']),
                         'TOTAL V.': formatNum(item['TOTALV']),
-                        '%CARGO x VENTA': formatNum(item['CARGOXVENTA']),
+                        '%CARGO x VENTA': cargoSolesImportado, // Absolute value
                         'URBANO': formatNum(item['URBANO']),
                         'FLEX': formatNum(item['FLEX']),
                         'TOTAL PAGADO': formatNum(item['TOTALPAGADO']),
@@ -827,19 +897,18 @@
                     nuevaFila.querySelector('.val-sku').value = limpiarValor(item['SKUALMACEN']);
                     nuevaFila.querySelector('.val-modelo').value = modeloLeido;
                     nuevaFila.querySelector('.val-producto').value = productoLeido;
+                    
                     nuevaFila.querySelector('.val-cant').value = formatNum(item['CANT']);
                     nuevaFila.querySelector('.val-precio').value = formatNum(item['PRECIO']).toFixed(2);
-                    nuevaFila.querySelector('.val-totalv').value = formatNum(item['TOTALV']).toFixed(2);
-                    nuevaFila.querySelector('.val-cargoventa').value = formatNum(item['CARGOXVENTA']).toFixed(2);
+                    nuevaFila.querySelector('.val-cargosoles').value = cargoSolesImportado.toFixed(2);
                     nuevaFila.querySelector('.val-urbano').value = formatNum(item['URBANO']).toFixed(2);
                     nuevaFila.querySelector('.val-flex').value = formatNum(item['FLEX']).toFixed(2);
-                    nuevaFila.querySelector('.val-totalpagado').value = formatNum(item['TOTALPAGADO']).toFixed(2);
                     nuevaFila.querySelector('.val-costoproducto').value = formatNum(item['COSTOXPRODUCTO']).toFixed(2);
-                    nuevaFila.querySelector('.val-und').value = formatNum(item['UND']);
-                    nuevaFila.querySelector('.val-costototal').value = formatNum(item['COSTOTOTAL']).toFixed(2);
                     nuevaFila.querySelector('.val-costoflex').value = formatNum(item['COSTOENTREGAFLEX']).toFixed(2);
-                    nuevaFila.querySelector('.val-ganancia').value = formatNum(item['GANANCIA']).toFixed(2);
-                    nuevaFila.querySelector('.val-rentabilidad').value = limpiarValor(item['RENTABILIDAD']);
+                    
+                    // EJECUTAMOS LA FÓRMULA AUTOMÁTICA EN LA FILA RECIÉN IMPORTADA
+                    calcularFilaVenta(nuevaFila.querySelector('.val-cant'));
+
                     nuevaFila.querySelector('.val-distrito').value = limpiarValor(item['DISTRITO', 'UBICACION', 'DEPARTAMENTO']);
                     nuevaFila.querySelector('.val-direccion').value = limpiarValor(item['DIRECCION']);
                     nuevaFila.querySelector('.val-repartidor').value = limpiarValor(item['REPARTIDOR']);
@@ -857,7 +926,7 @@
                 const indicador = document.getElementById('indicador-cambios');
                 if(indicador) indicador.style.display = 'inline-flex';
 
-                alert(`¡Se cargaron ${importadas} ventas en pantalla! Revisa la tabla y presiona 'Guardar Modificaciones'.`);
+                alert(`¡Se cargaron y calcularon ${importadas} ventas automáticamente! Revisa la tabla y presiona 'Guardar Modificaciones'.`);
             }
         });
     });
