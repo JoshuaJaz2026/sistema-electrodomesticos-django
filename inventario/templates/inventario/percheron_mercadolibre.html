@@ -11,34 +11,34 @@
         <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px; margin-bottom: 20px; align-items: center;">
             <div>
                 <label style="display: block; font-size: 0.75rem; font-weight: bold; color: #64748b; margin-bottom: 6px; letter-spacing: 0.5px;">MODELO</label>
-                <input type="text" id="bciModelo" placeholder="Ej. BVSTEM6801M..." style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; text-transform: uppercase; font-weight: bold; box-sizing: border-box; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); font-size: 0.95rem; color: #0f172a; transition: border-color 0.2s;">
+                <input type="text" id="bciModelo" placeholder="Ej. BVSTEM6801M..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; text-transform: uppercase; font-weight: bold; box-sizing: border-box; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); font-size: 0.9rem; color: #0f172a; transition: border-color 0.2s;">
             </div>
             <div>
                 <label style="display: block; font-size: 0.75rem; font-weight: bold; color: #64748b; margin-bottom: 6px; letter-spacing: 0.5px;">PRODUCTO</label>
-                <input type="text" id="bciProducto" readonly placeholder="El título aparecerá aquí..." style="width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 6px; font-weight: 600; color: #475569; box-sizing: border-box; font-size: 0.9rem;">
+                <input type="text" id="bciProducto" readonly placeholder="El título aparecerá aquí..." style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 6px; font-weight: 600; color: #475569; box-sizing: border-box; font-size: 0.85rem;">
             </div>
             <div>
                 <label style="display: block; font-size: 0.75rem; font-weight: bold; color: #64748b; margin-bottom: 6px; letter-spacing: 0.5px;">STOCK REAL</label>
-                <input type="text" id="bciStock" readonly value="0" style="width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; background: #fffbeb; border-radius: 6px; text-align: center; font-weight: 900; color: #b45309; font-size: 1.2rem; box-sizing: border-box; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                <input type="text" id="bciStock" readonly value="0" style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; background: #fffbeb; border-radius: 6px; text-align: center; font-weight: 900; color: #b45309; font-size: 1.1rem; box-sizing: border-box; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
             </div>
         </div>
 
-        <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 6px; width: 100%; max-height: 250px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-            <table style="width: 100%; border-collapse: separate; border-spacing: 0; background: white; font-size: 0.85rem; white-space: nowrap;">
+        <div style="overflow-x: auto; border: 2px solid #94a3b8; border-radius: 4px; width: 100%; max-height: 250px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+            <table style="width: 100%; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap;">
                 <thead style="position: sticky; top: 0; z-index: 2;">
-                    <tr style="background-color: #334155; color: white; text-transform: uppercase; font-weight: bold; font-size: 0.75rem; letter-spacing: 1px;">
-                        <th class="th-premium" style="text-align: left;">SKU <i class="fas fa-hand-pointer" style="color: #60a5fa; font-size: 1em; margin-left: 5px;" title="Clic para copiar"></i></th>
-                        <th class="th-premium" style="text-align: left;">Marca</th>
+                    <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;">
+                        <th class="th-premium" style="text-align: center;">SKU <i class="fas fa-hand-pointer" style="color: #60a5fa; font-size: 1em; margin-left: 5px;" title="Clic para copiar"></i></th>
+                        <th class="th-premium" style="text-align: center;">Marca</th>
                         <th class="th-premium" style="text-align: center;">Fecha Ing.</th>
-                        <th class="th-premium" style="text-align: left;">Nro. Serie</th>
-                        <th class="th-premium" style="text-align: right;">Costo</th>
-                        <th class="th-premium" style="text-align: left;">Prov./Motivo</th>
-                        <th class="th-premium" style="text-align: left;">Ingresado Por</th>
+                        <th class="th-premium" style="text-align: center;">Nro. Serie</th>
+                        <th class="th-premium" style="text-align: center;">Costo</th>
+                        <th class="th-premium" style="text-align: center;">Prov./Motivo</th>
+                        <th class="th-premium" style="text-align: center;">Ingresado Por</th>
                     </tr>
                 </thead>
                 <tbody id="cuerpoReferencia">
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px; color: #94a3b8; font-size: 1rem;">
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #94a3b8; font-size: 1rem; border: 1px solid #cbd5e1;">
                             <i class="fas fa-barcode" style="font-size: 2.5em; color: #cbd5e1; margin-bottom: 15px; display: block;"></i>
                             Escribe un modelo arriba para buscar los SKUs disponibles
                         </td>
@@ -54,17 +54,17 @@
                 <i class="{{ request.session.icono_actual|default:'fas fa-handshake' }}" style="color: var(--color-principal, #eab308);"></i> Salidas de {{ canal|default:'Mercado Libre' }}
             </h3>
             <div style="display: flex; gap: 10px;">
-                <button type="button" onclick="descargarPlantillaSalidas()" style="background-color: #3b82f6; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s;">
+                <button type="button" onclick="descargarPlantillaSalidas()" class="btn-superior" style="background-color: #3b82f6;">
                     <i class="fas fa-download"></i> Bajar Plantilla
                 </button>
                 <input type="file" id="csvImportarSalidas" accept=".csv" style="display: none;">
-                <button type="button" onclick="document.getElementById('csvImportarSalidas').click()" style="background-color: #0ea5e9; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s;">
+                <button type="button" onclick="document.getElementById('csvImportarSalidas').click()" class="btn-superior" style="background-color: #0ea5e9;">
                     <i class="fas fa-upload"></i> Importar Masivo
                 </button>
-                <button type="button" onclick="agregarFilaSalida()" style="background-color: var(--color-principal, #eab308); color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s;">
+                <button type="button" onclick="agregarFilaSalida()" class="btn-superior" style="background-color: var(--color-principal, #eab308);">
                     <i class="fas fa-plus"></i> Agregar Fila
                 </button>
-                <button type="button" onclick="procesarDescuentosML()" style="background-color: #1e293b; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s;">
+                <button type="button" onclick="procesarDescuentosML()" class="btn-superior" style="background-color: #1e293b;">
                     <i class="fas fa-save"></i> Procesar Descuentos
                 </button>
             </div>
@@ -75,16 +75,16 @@
             <span>POR FAVOR, VERIFIQUE CUIDADOSAMENTE LOS DATOS. EL DESCUENTO SE APLICARÁ EXCLUSIVAMENTE A ESTA PLATAFORMA Y RESTARÁ DEL STOCK GLOBAL.</span>
         </div>
 
-        <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 6px; max-height: 450px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-            <table id="tablaSalidasML" style="width: max-content; border-collapse: separate; border-spacing: 0; background: white; font-size: 0.85rem; white-space: nowrap;">
+        <div style="overflow-x: auto; border: 2px solid #94a3b8; border-radius: 4px; max-height: 450px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+            <table id="tablaSalidasML" style="width: max-content; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap;">
                 <thead style="position: sticky; top: 0; z-index: 10;">
                     <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;">
-                        <th class="th-premium" style="width: 170px;">SKU</th>
-                        <th class="th-premium" style="width: 150px;">MODELO <i class="fas fa-lock" style="color: #64748b; font-size: 0.9em; margin-left: 5px;"></i></th>
-                        <th class="th-premium" style="width: 250px;">TÍTULO <i class="fas fa-lock" style="color: #64748b; font-size: 0.9em; margin-left: 5px;"></i></th>
+                        <th class="th-premium" style="width: 170px; text-align: center;">SKU</th>
+                        <th class="th-premium" style="width: 150px; text-align: center;">MODELO <i class="fas fa-lock" style="color: #64748b; font-size: 0.9em; margin-left: 5px;"></i></th>
+                        <th class="th-premium" style="width: 250px; text-align: center;">TÍTULO <i class="fas fa-lock" style="color: #64748b; font-size: 0.9em; margin-left: 5px;"></i></th>
                         <th class="th-premium" style="width: 140px; text-align: center;">FECHA SALIDA</th>
-                        <th class="th-premium" style="width: 150px;">SERIE / N° <i class="fas fa-lock" style="color: #64748b; font-size: 0.9em; margin-left: 5px;"></i></th>
-                        <th class="th-premium" style="width: 120px; background-color: #1e293b; text-align: right;">COSTO UNT.</th>
+                        <th class="th-premium" style="width: 150px; text-align: center;">SERIE / N° <i class="fas fa-lock" style="color: #64748b; font-size: 0.9em; margin-left: 5px;"></i></th>
+                        <th class="th-premium" style="width: 120px; background-color: #1e293b; text-align: center;">COSTO UNT.</th>
                         <th class="th-premium" style="width: 110px; background-color: #7f1d1d; text-align: center;">DESC. X 1UND</th>
                         <th class="th-premium" style="width: 140px; text-align: center;">NRO. VENTAS</th>
                         <th class="th-premium" style="width: 140px; text-align: center;">TIPO DE VENTA</th>
@@ -93,20 +93,20 @@
                     </tr>
                 </thead>
                 <tbody id="cuerpoSalidas">
-                    <tr id="fila-molde-salida" style="display: none; border-bottom: 1px solid #e2e8f0; transition: background-color 0.2s;">
-                        <td class="td-premium"><input type="text" placeholder="Pega SKU..." class="celda-input central text-blue val-sku" oninput="autocompletarBUSCARV(this)"></td>
+                    <tr id="fila-molde-salida" style="display: none;" class="fila-salida">
+                        <td class="td-premium"><input type="text" placeholder="Pega SKU..." class="celda-input central text-blue text-mono val-sku" oninput="autocompletarBUSCARV(this)"></td>
                         <td class="td-premium"><input type="text" readonly class="celda-input central bold val-modelo input-readonly" tabindex="-1"></td>
                         <td class="td-premium"><input type="text" readonly class="celda-input val-titulo input-readonly" tabindex="-1" placeholder="Autocompletado..."></td>
                         <td class="td-premium"><input type="date" class="celda-input central val-fecha"></td>
-                        <td class="td-premium"><input type="text" readonly class="celda-input central text-blue val-serie input-readonly" tabindex="-1"></td>
+                        <td class="td-premium"><input type="text" readonly class="celda-input central text-blue text-mono val-serie input-readonly" tabindex="-1"></td>
                         <td class="td-premium" style="background-color: #f8fafc;">
-                            <div style="display: flex; align-items: center; padding: 0 5px; justify-content: flex-end;">
+                            <div style="display: flex; align-items: center; padding: 0 5px; justify-content: center;">
                                 <span style="color: #94a3b8; font-weight: bold; margin-right: 2px;">S/</span>
-                                <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" style="padding-left: 2px; width: 80px;" tabindex="-1">
+                                <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" style="padding-left: 2px; width: 70px;" tabindex="-1">
                             </div>
                         </td>
                         <td class="td-premium" style="background-color: #fef2f2;">
-                            <input type="number" value="1" readonly class="celda-input central bold val-desc input-readonly input-badge-rojo" tabindex="-1">
+                            <input type="number" value="1" readonly class="celda-input central val-desc input-readonly input-badge-rojo" tabindex="-1">
                         </td>
                         <td class="td-premium"><input type="text" placeholder="Nro. Venta..." class="celda-input central bold text-dark val-ventas"></td>
                         <td class="td-premium">
@@ -142,24 +142,31 @@
 
                     {% if page_obj %}
                         {% for item in page_obj %}
-                        <tr style="border-bottom: 1px solid #e2e8f0; transition: background-color 0.2s;">
-                            <td class="td-premium" style="text-align: center; vertical-align: middle;">
+                        <tr class="fila-salida">
+                            <td class="td-premium">
                                 <input type="hidden" class="val-sku" value="{{ item.sku }}">
-                                <span class="text-blue">{{ item.sku }}</span>
+                                <input type="text" readonly class="celda-input central text-blue text-mono input-readonly" value="{{ item.sku }}" tabindex="-1">
                             </td>
-                            <td class="td-premium" style="text-align: center; vertical-align: middle; color: #475569; font-weight: bold;">{{ item.modelo }}</td>
-                            <td class="td-premium" style="color: #64748b; vertical-align: middle; padding-left: 10px;">{{ item.titulo }}</td>
-                            <td class="td-premium" style="text-align: center; vertical-align: middle; color: #475569;">{{ item.fecha_salida|date:"Y-m-d" }}</td>
-                            <td class="td-premium" style="text-align: center; vertical-align: middle;"><span class="text-blue">{{ item.serie|default:"-" }}</span></td>
-                            <td class="td-premium" style="text-align: right; vertical-align: middle; font-weight: bold; color: #475569; padding-right: 15px; background-color: #f8fafc;">
-                                <span style="color: #94a3b8; font-size: 0.8em; margin-right: 2px;">S/</span> {{ item.costo|floatformat:2 }}
+                            <td class="td-premium"><input type="text" readonly class="celda-input central bold val-modelo input-readonly" value="{{ item.modelo }}" tabindex="-1"></td>
+                            <td class="td-premium"><input type="text" readonly class="celda-input val-titulo input-readonly" value="{{ item.titulo }}" tabindex="-1"></td>
+                            <td class="td-premium"><input type="date" readonly class="celda-input central val-fecha input-readonly" value="{{ item.fecha_salida|date:'Y-m-d' }}" tabindex="-1"></td>
+                            <td class="td-premium"><input type="text" readonly class="celda-input central text-blue text-mono val-serie input-readonly" value="{{ item.serie|default:'-' }}" tabindex="-1"></td>
+                            
+                            <td class="td-premium" style="background-color: #f8fafc;">
+                                <div style="display: flex; align-items: center; padding: 0 5px; justify-content: center;">
+                                    <span style="color: #94a3b8; font-weight: bold; margin-right: 2px;">S/</span>
+                                    <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" value="{{ item.costo|floatformat:2 }}" style="padding-left: 2px; width: 70px;" tabindex="-1">
+                                </div>
                             </td>
-                            <td class="td-premium" style="text-align: center; vertical-align: middle; background-color: #fef2f2;">
-                                <span class="badge-rojo-texto">{{ item.descuento }}</span>
+                            
+                            <td class="td-premium" style="background-color: #fef2f2;">
+                                <input type="text" readonly class="celda-input central val-desc input-readonly input-badge-rojo" value="{{ item.descuento }}" tabindex="-1">
                             </td>
-                            <td class="td-premium" style="text-align: center; vertical-align: middle; font-weight: bold; color: #334155;">{{ item.nro_venta }}</td>
-                            <td class="td-premium" style="text-align: center; vertical-align: middle; color: #475569; font-weight: 600;">{{ item.tipo_venta }}</td>
-                            <td class="td-premium" style="text-align: center; vertical-align: middle; font-weight: bold; color: #ea580c;">{{ item.creado_por }}</td>
+                            
+                            <td class="td-premium"><input type="text" readonly class="celda-input central bold text-dark val-ventas input-readonly" value="{{ item.nro_venta }}" tabindex="-1"></td>
+                            <td class="td-premium"><input type="text" readonly class="celda-input central bold val-tipo input-readonly" value="{{ item.tipo_venta }}" tabindex="-1"></td>
+                            <td class="td-premium"><input type="text" readonly class="celda-input central text-orange val-by input-readonly" value="{{ item.creado_por }}" tabindex="-1"></td>
+                            
                             <td class="td-premium" style="text-align: center; vertical-align: middle;">
                                 <i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2em;" title="Guardado Exitosamente"></i>
                             </td>
@@ -191,40 +198,50 @@
 </div>
 
 <style>
-    /* Estructura y Cabeceras */
-    #tablaSalidasML { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-    .th-premium { padding: 12px 10px; border-right: 1px solid #334155; border-bottom: 2px solid #cbd5e1; }
-    .td-premium { padding: 0; border-right: 1px solid #e2e8f0; height: 42px; }
+    /* ========================================================
+       DISEÑO TIPO EXCEL (GRID MARCADOS ESTRICTOS)
+       ======================================================== */
+    table { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-collapse: collapse; }
     
-    /* Efecto hover interactivo */
-    #tablaSalidasML tbody tr:hover, #cuerpoReferencia tr:hover { background-color: #f1f5f9; }
-    .fila-incompleta { background-color: #fee2e2 !important; transition: background-color 0.3s ease; }
+    .th-premium { padding: 12px 10px; border: 1px solid #334155; }
+    .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; }
+    
+    /* Efecto Cebra y Hover */
+    .fila-salida:nth-child(even), .fila-buscador:nth-child(even) { background-color: #f8fafc; }
+    .fila-salida:nth-child(odd), .fila-buscador:nth-child(odd) { background-color: #ffffff; }
+    .fila-salida:hover, .fila-buscador:hover { background-color: #e2e8f0 !important; }
+    
+    /* Alerta Incompleta */
+    .fila-incompleta { background-color: #fef2f2 !important; border-left: 4px solid #ef4444; }
 
-    /* Inputs Fantasma (Transparencia e interactividad) */
+    /* Inputs Fantasma (Llenan toda la celda al 100%) */
     .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
     .celda-input:focus:not([readonly]) { background-color: #fef9c3; box-shadow: inset 0 0 0 2px var(--color-principal, #eab308); color: #000; }
     
     /* Inputs Bloqueados (Readonly) */
-    .input-readonly { background-color: transparent; color: #94a3b8; font-size: 0.8rem; cursor: not-allowed; }
+    .input-readonly { color: #94a3b8; cursor: not-allowed; }
     .input-readonly:focus { box-shadow: none; background-color: transparent; }
 
-    /* Tipografías y Colores */
+    /* Tipografías Específicas */
     .central { text-align: center; }
     .derecha { text-align: right; }
     .bold { font-weight: bold; }
     .text-dark { color: #0f172a; }
-    .text-blue { color: #2563eb; font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 14px; letter-spacing: -0.5px; }
-    .text-orange { color: #ea580c; font-weight: bold; }
+    .text-mono { font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 14px; letter-spacing: -0.5px; }
+    .text-blue { color: #2563eb; }
+    .text-orange { color: #ea580c; }
 
-    /* Badges de Descuento (Rojos) */
-    .input-badge-rojo { background-color: transparent; color: #ef4444; font-weight: 900; font-size: 1rem; }
-    .badge-rojo-texto { background-color: #fee2e2; color: #b91c1c; border: 1px solid #ef4444; border-radius: 12px; padding: 4px 12px; font-weight: 900; font-size: 0.9rem; display: inline-block; }
+    /* EL BADGE ROJO ACTUALIZADO (LLENA EL 100% DE LA CELDA) */
+    .input-badge-rojo { background-color: #fee2e2; color: #b91c1c; border: none; width: 100%; height: 100%; font-weight: 900; font-size: 1rem; text-align: center; display: block; box-sizing: border-box; padding: 10px; }
 
     /* Selectores Custom (Combobox) */
     .select-premium { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px top 50%; background-size: 8px auto; padding-right: 20px; }
 
     /* Botones de Acción y Restricciones Numéricas */
-    .btn-eliminar { background: none; border: none; color: #ef4444; cursor: pointer; padding: 10px; border-radius: 4px; transition: background 0.2s; }
+    .btn-superior { color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s, filter 0.2s; text-decoration: none; font-size: 0.85rem; }
+    .btn-superior:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    .btn-eliminar { background: none; border: none; color: #ef4444; cursor: pointer; padding: 10px; border-radius: 4px; transition: background 0.2s; display: block; margin: 0 auto;}
     .btn-eliminar:hover { background: #fee2e2; color: #b91c1c; }
     .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .celda-input[type=number] { -moz-appearance: textfield; }
@@ -257,7 +274,7 @@
         document.getElementById('bciStock').value = '0';
         
         if (query === '') {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #94a3b8; font-size: 1rem;"><i class="fas fa-barcode" style="font-size: 2.5em; color: #cbd5e1; margin-bottom: 15px; display: block;"></i>Escribe un modelo arriba para buscar los SKUs disponibles</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #94a3b8; font-size: 1rem; border: 1px solid #cbd5e1;"><i class="fas fa-barcode" style="font-size: 2.5em; color: #cbd5e1; margin-bottom: 15px; display: block;"></i>Escribe un modelo arriba para buscar los SKUs disponibles</td></tr>';
             return;
         }
 
@@ -276,21 +293,21 @@
                 }
 
                 html += `
-                    <tr style="border-bottom: 1px solid #e2e8f0; transition: background 0.2s; cursor: pointer;" onclick="copiarAlPortapapeles('${sku}')" title="Clic para agregar este SKU">
-                        <td class="td-premium text-blue" style="padding-left: 15px;">${sku} <i class="far fa-copy" style="font-size: 0.8em; color: #94a3b8; margin-left: 5px;"></i></td>
-                        <td class="td-premium bold" style="color: #475569; padding-left: 10px;">${data.marca}</td>
-                        <td class="td-premium central" style="color: #64748b;">${data.fecha_ingreso}</td>
-                        <td class="td-premium text-blue central">${data.serie}</td>
-                        <td class="td-premium bold derecha" style="padding-right: 15px; color: #0f172a;">S/ ${data.costo.toFixed(2)}</td>
-                        <td class="td-premium" style="color: #64748b; padding-left: 10px;">${data.proveedor}</td>
-                        <td class="td-premium text-orange central">${data.registrado_por}</td>
+                    <tr class="fila-buscador" style="cursor: pointer;" onclick="copiarAlPortapapeles('${sku}')" title="Clic para agregar este SKU">
+                        <td class="td-premium text-blue text-mono central" style="padding: 10px;">${sku} <i class="far fa-copy" style="font-size: 0.8em; color: #94a3b8; margin-left: 5px;"></i></td>
+                        <td class="td-premium bold central" style="color: #475569; padding: 10px;">${data.marca}</td>
+                        <td class="td-premium central" style="color: #64748b; padding: 10px;">${data.fecha_ingreso}</td>
+                        <td class="td-premium text-blue text-mono central" style="padding: 10px;">${data.serie}</td>
+                        <td class="td-premium bold derecha" style="color: #0f172a; padding: 10px;">S/ ${data.costo.toFixed(2)}</td>
+                        <td class="td-premium central" style="color: #64748b; padding: 10px;">${data.proveedor}</td>
+                        <td class="td-premium text-orange central" style="padding: 10px;">${data.registrado_por}</td>
                     </tr>
                 `;
             }
         }
 
         if (html === '') {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px; color: #ef4444; font-weight: bold; font-size: 1rem;"><i class="fas fa-exclamation-circle" style="margin-bottom: 10px; display: block; font-size: 1.5rem;"></i>No hay SKUs disponibles (o todos ya fueron agregados a salidas).</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px; color: #ef4444; font-weight: bold; font-size: 1rem; border: 1px solid #cbd5e1;"><i class="fas fa-exclamation-circle" style="margin-bottom: 10px; display: block; font-size: 1.5rem;"></i>No hay SKUs disponibles (o todos ya fueron agregados a salidas).</td></tr>';
         } else {
             tbody.innerHTML = html;
         }
