@@ -91,20 +91,20 @@
                     <th class="th-premium" style="width: 320px;">PRODUCTO <i class="fas fa-magic" style="color: #34d399; font-size: 0.9em; margin-left: 5px;" title="Autocompletado BUSCARV"></i></th>
                     <th class="th-premium" style="width: 70px;">CANT.</th>
                     
-                    <th class="th-premium" style="width: 85px; background-color: #064e3b;">PRECIO</th>
-                    <th class="th-premium" style="width: 85px; background-color: #064e3b;">TOTAL V.</th>
-                    <th class="th-premium" style="width: 95px; background-color: #064e3b;">% CARGO V.</th>
-                    <th class="th-premium" style="width: 85px; background-color: #064e3b;">URBANO</th>
-                    <th class="th-premium" style="width: 85px; background-color: #064e3b;">FLEX</th>
-                    <th class="th-premium" style="width: 110px; background-color: #10b981; color: #022c22;">TOTAL PAGADO</th>
+                    <th class="th-premium" style="width: 85px; background-color: #064e3b; white-space: normal; line-height: 1.1;">PRECIO</th>
+                    <th class="th-premium" style="width: 85px; background-color: #064e3b; white-space: normal; line-height: 1.1;">TOTAL V.</th>
+                    <th class="th-premium" style="width: 85px; background-color: #064e3b; white-space: normal; line-height: 1.1;">% CARGO V.</th>
+                    <th class="th-premium" style="width: 85px; background-color: #064e3b; white-space: normal; line-height: 1.1;">URBANO</th>
+                    <th class="th-premium" style="width: 85px; background-color: #064e3b; white-space: normal; line-height: 1.1;">FLEX</th>
+                    <th class="th-premium" style="width: 85px; background-color: #10b981; color: #022c22; white-space: normal; line-height: 1.1;">TOTAL PAGADO</th>
                     
-                    <th class="th-premium" style="width: 110px; background-color: #7f1d1d;">COSTO x PROD</th>
-                    <th class="th-premium" style="width: 55px; background-color: #7f1d1d;">UND</th>
-                    <th class="th-premium" style="width: 100px; background-color: #7f1d1d;">COSTO TOTAL</th>
-                    <th class="th-premium" style="width: 120px; background-color: #7f1d1d;">C. ENTREGA FLEX</th>
+                    <th class="th-premium" style="width: 85px; background-color: #7f1d1d; white-space: normal; line-height: 1.1;">COSTO x PROD</th>
+                    <th class="th-premium" style="width: 50px; background-color: #7f1d1d;">UND</th>
+                    <th class="th-premium" style="width: 85px; background-color: #7f1d1d; white-space: normal; line-height: 1.1;">COSTO TOTAL</th>
+                    <th class="th-premium" style="width: 85px; background-color: #7f1d1d; white-space: normal; line-height: 1.1;">C. ENTREGA FLEX</th>
                     
-                    <th class="th-premium" style="width: 90px; background-color: #1e3a8a;">GANANCIA</th>
-                    <th class="th-premium" style="width: 115px; background-color: #1e3a8a;">RENTABILIDAD %</th>
+                    <th class="th-premium" style="width: 85px; background-color: #1e3a8a; white-space: normal; line-height: 1.1;">GANANCIA</th>
+                    <th class="th-premium" style="width: 85px; background-color: #1e3a8a; white-space: normal; line-height: 1.1;">RENTABILIDAD %</th>
                     
                     <th class="th-premium" style="width: 220px;">UBICACIÓN</th>
                     <th class="th-premium" style="width: 250px;">DIRECCIÓN</th>
@@ -221,7 +221,10 @@
                         </td>
                         
                         <td class="td-premium bg-blue-light">
-                            <input type="text" value="{{ item.rentabilidad|default:'' }}" class="celda-input derecha bold val-rentabilidad" style="color: {% if item.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};" oninput="registrarCambioVenta(this)">
+                            <div class="wrapper-moneda">
+                                <input type="text" value="{{ item.rentabilidad|default:'' }}" class="celda-input derecha bold val-rentabilidad" style="color: {% if item.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};" oninput="registrarCambioVenta(this)">
+                                <span class="simbolo-porcentaje">%</span>
+                            </div>
                         </td>
                         
                         <td class="td-premium"><input type="text" value="{{ item.distrito|default:'' }}" placeholder="Dep/Prov/Dist" class="celda-input val-distrito" oninput="registrarCambioVenta(this)"></td>
@@ -335,7 +338,10 @@
                         </div>
                     </td>
                     <td class="td-premium bg-blue-light">
-                        <input type="text" class="celda-input derecha bold val-rentabilidad" style="color: #1e40af;" oninput="registrarCambioVenta(this)">
+                        <div class="wrapper-moneda">
+                            <input type="text" class="celda-input derecha bold val-rentabilidad" style="color: #1e40af;" oninput="registrarCambioVenta(this)">
+                            <span class="simbolo-porcentaje">%</span>
+                        </div>
                     </td>
                     
                     <td class="td-premium"><input type="text" placeholder="Dep/Prov/Dist" class="celda-input val-distrito" oninput="registrarCambioVenta(this)"></td>
