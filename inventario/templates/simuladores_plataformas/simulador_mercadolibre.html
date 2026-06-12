@@ -8,39 +8,56 @@
 <div class="card" style="border-top: 4px solid var(--color-principal, #eab308); padding: 12px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
-        <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase; font-size: 1.1rem;">
-            <i class="fas fa-calculator" style="color: var(--color-principal, #eab308);"></i> Simulador: {{ canal }}
-            <span id="indicador-cambios" style="background-color: #f59e0b; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; display: none; font-weight: bold; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3); align-items: center; gap: 5px; margin-left: 10px;">
-                <i class="fas fa-exclamation-circle"></i> Sin guardar
-            </span>
-        </h2>
         
-        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; position: relative;">
-            
-            <a href="{% url 'descargar_plantilla' %}" class="btn-top" style="background-color: #3b82f6;">
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-size: 1.1rem; white-space: nowrap;">
+                <i class="fas fa-calculator" style="color: var(--color-principal, #eab308);"></i> Simulador
+                <span id="indicador-cambios" style="background-color: #f59e0b; color: white; padding: 3px 8px; border-radius: 20px; font-size: 0.7rem; display: none; font-weight: bold; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);">
+                    <i class="fas fa-exclamation-circle"></i> Sin guardar
+                </span>
+            </h2>
+
+            <form method="GET" action="" style="display: flex; align-items: center; height: 32px; margin-left: 5px;">
+                <div style="position: relative;">
+                    <i class="fas fa-search" style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.8rem;"></i>
+                    <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar CÓD. PUB o SKU..." style="padding: 0 10px 0 26px; height: 32px; border: 1px solid #cbd5e1; border-radius: 4px 0 0 4px; outline: none; font-size: 0.8rem; width: 220px; box-sizing: border-box;">
+                </div>
+                <button type="submit" style="background: var(--color-principal, #eab308); color: #0f172a; border: none; height: 32px; padding: 0 12px; border-radius: 0 4px 4px 0; cursor: pointer; font-weight: bold; font-size: 0.8rem; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); transition: opacity 0.2s;">
+                    Buscar
+                </button>
+                {% if query_search %}
+                <a href="?" style="background: #ef4444; color: white; height: 32px; padding: 0 10px; border-radius: 4px; display: flex; align-items: center; text-decoration: none; font-weight: bold; font-size: 0.8rem; margin-left: 6px;">
+                    <i class="fas fa-times"></i>
+                </a>
+                {% endif %}
+            </form>
+        </div>
+        
+        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            <a href="{% url 'descargar_plantilla' %}" class="btn-top" style="background-color: #3b82f6;" title="Bajar Plantilla">
                 <i class="fas fa-download"></i> Plantilla
             </a>
 
-            <button type="button" onclick="agregarFila()" class="btn-top" style="background-color: #8b5cf6;">
-                <i class="fas fa-plus"></i> Nueva Fila
+            <button type="button" onclick="agregarFila()" class="btn-top" style="background-color: #8b5cf6;" title="Agregar nueva fila">
+                <i class="fas fa-plus"></i> Fila
             </button>
 
             <input type="file" id="fileImportExcel" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importarSimulador(event)">
-            <button type="button" onclick="document.getElementById('fileImportExcel').click()" class="btn-top" style="background-color: #10b981;">
+            <button type="button" onclick="document.getElementById('fileImportExcel').click()" class="btn-top" style="background-color: #10b981;" title="Importar desde Excel">
                 <i class="fas fa-file-import"></i> Importar
             </button>
 
-            <button type="button" onclick="exportarSimulador()" class="btn-top" style="background-color: #0ea5e9;">
+            <button type="button" onclick="exportarSimulador()" class="btn-top" style="background-color: #0ea5e9;" title="Exportar a Excel">
                 <i class="fas fa-file-excel"></i> Exportar
             </button>
 
-            <button type="button" id="btnGuardar" onclick="guardarSimulaciones()" class="btn-top" style="background-color: var(--color-principal, #eab308); color: #0f172a;">
+            <button type="button" id="btnGuardar" onclick="guardarSimulaciones()" class="btn-top" style="background-color: var(--color-principal, #eab308); color: #0f172a;" title="Guardar Cambios">
                 <i class="fas fa-save"></i> Guardar
             </button>
             
             <div style="position: relative;">
-                <button type="button" onclick="togglePanelColumnas()" class="btn-top" style="background-color: #334155;">
-                    <i class="fas fa-columns"></i> Opciones
+                <button type="button" onclick="togglePanelColumnas()" class="btn-top" style="background-color: #334155;" title="Personalizar Columnas">
+                    <i class="fas fa-columns"></i> Opción
                 </button>
                 
                 <div id="panelPersonalizarColumnas" style="display: none; position: absolute; right: 0; top: 115%; background: white; border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 100; width: 650px; animation: slideInDown 0.2s ease;">
@@ -66,26 +83,7 @@
         <option value="WAHL"><option value="OSTER"><option value="FINEZZA"><option value="RECORD"><option value="IMACO"><option value="BOSSKO"><option value="TAURUS"><option value="LG"><option value="SAMSUNG"><option value="INDURAMA"><option value="ELECTROLUX"><option value="JBO"><option value="TREVELY"><option value="JVC"><option value="BGH"><option value="PHILIPS"><option value="FUJITEC"><option value="PANASONIC"><option value="SONY"><option value="TCL"><option value="HALION"><option value="MIRAY"><option value="EVOLUTION"><option value="YANBAL"><option value="DSP"><option value="MASTERTECH"><option value="CREST"><option value="GAMA"><option value="WHITELINE"><option value="REMINGTONE"><option value="MAGIC CLIP"><option value="ILUMI"><option value="MABE"><option value="AOC"><option value="TRAMONTINA"><option value="PREMIER"><option value="IMPERIAL"><option value="VISIONNER"><option value="SILVER CREST"><option value="BORD"><option value="EPSON"><option value="SOLE">
     </datalist>
 
-    <div style="background-color: #f8fafc; border-left: 4px solid var(--color-principal, #eab308); padding: 8px 15px; border-radius: 6px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #e2e8f0;">
-        <form method="GET" action="" style="display: flex; gap: 10px; width: 100%; max-width: 650px; align-items: center;">
-            <div style="position: relative; flex-grow: 1;">
-                <i class="fas fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.85rem;"></i>
-                <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar por CÓD. PUB o CÓD. PROD (SKU)..." style="width: 100%; padding: 6px 10px 6px 30px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none; box-sizing: border-box; font-size: 0.85rem; height: 32px; transition: border-color 0.2s;">
-            </div>
-            
-            <button type="submit" class="btn-top" style="background-color: var(--color-principal, #eab308); color: #0f172a; flex-shrink: 0;">
-                Buscar
-            </button>
-            
-            {% if query_search %}
-            <a href="?" class="btn-top" style="background-color: #ef4444; flex-shrink: 0;">
-                <i class="fas fa-times"></i> Limpiar
-            </a>
-            {% endif %}
-        </form>
-    </div>
-
-    <div style="position: relative; overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 210px); border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+    <div style="position: relative; overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 145px); border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
         
         <div id="pantalla-carga-tabla" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); z-index: 50; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: opacity 0.4s ease;">
             <div style="width: 200px; height: 6px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; margin-bottom: 12px;">
@@ -195,7 +193,7 @@
     </div>
 
     {% if page_obj %}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 10px 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 6px 15px; background: #f8fafc; border-radius: 4px; border: 1px solid #e2e8f0;">
         <span style="color: #475569; font-weight: 600; font-size: 0.85rem;">
             Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
             {% if query_search %}<span style="color: #64748b; font-style: italic; margin-left: 5px;">(Resultados filtrados)</span>{% endif %}
@@ -217,8 +215,8 @@
 </div>
 
 <style>
-    /* COMPACTACIÓN DE BOTONES SUPERIORES Y PANEL BÚSQUEDA */
-    .btn-top { color: white; border: none; padding: 0 12px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s; font-size: 0.8rem; text-decoration: none; height: 32px;}
+    /* BOTONES SUPERIORES COMPACTOS */
+    .btn-top { color: white; border: none; padding: 0 10px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s; font-size: 0.8rem; text-decoration: none; height: 32px;}
     .btn-top:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
     /* Estructura de Tabla Excel Estricta */
@@ -269,7 +267,7 @@
     .celda-input[type=number] { -moz-appearance: textfield; }
 
     /* Paginación y Opciones */
-    .btn-pag { padding: 4px 12px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; font-size: 0.8rem; }
+    .btn-pag { padding: 4px 10px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; font-size: 0.8rem;}
     .btn-pag:hover { background: var(--color-principal, #eab308); color: white; border-color: var(--color-principal, #eab308); }
     .label-columna { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: bold; color: #475569; cursor: pointer; }
     .check-opcion { width: 16px; height: 16px; accent-color: var(--color-principal, #eab308); cursor: pointer; }
@@ -445,6 +443,7 @@
             }
         });
 
+        // Sombrear fila al hacer clic
         const tbodySeleccion = document.querySelector('#tablaReporte tbody');
         if (tbodySeleccion) {
             tbodySeleccion.addEventListener('click', function(e) {
@@ -516,8 +515,12 @@
         nuevaFila.querySelector('.val-ganancia').style.color = '#1e40af';
         nuevaFila.querySelector('.val-rentabilidad').style.color = '#1e40af';
         
-        // Insertamos la nueva fila al inicio para que el usuario la vea de inmediato
+        // Insertamos al inicio y scrolleamos arriba
         tbody.insertBefore(nuevaFila, tbody.firstChild);
+        const contenedorTabla = document.querySelector("div[style*='max-height: calc(100vh - 145px)']");
+        if(contenedorTabla) {
+            setTimeout(() => { contenedorTabla.scrollTop = 0; }, 50);
+        }
     }
 
     function exportarSimulador() {
