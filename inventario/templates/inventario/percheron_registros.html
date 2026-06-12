@@ -1,134 +1,140 @@
 {% extends 'inventario/dashboard_global.html' %}
 
 {% block content %}
-<div style="display: flex; flex-direction: column; gap: 25px; font-size: 0.85rem; width: 100%;">
+<div class="card" style="border-top: 4px solid #3b82f6; padding: 12px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 5px solid #3b82f6;">
-        <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase; font-size: 1.2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+        <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase; font-size: 1.1rem;">
             <i class="fas fa-clipboard-list" style="color: #3b82f6;"></i> Registro Maestro de Movimientos
         </h2>
-        <div style="display: flex; gap: 10px;">
-            <a href="{% url 'exportar_registros_excel' %}" style="background-color: #10b981; color: white; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: bold; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s;">
+        
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <a href="{% url 'exportar_registros_excel' %}" class="btn-top" style="background-color: #10b981;">
                 <i class="fas fa-file-excel"></i> Exportar Kardex
             </a>
         </div>
     </div>
 
-    <div class="card" style="padding: 0; background: white; width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;">
-        
-        <div style="overflow-x: auto; max-height: 70vh; border: 2px solid #94a3b8; border-radius: 4px;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; white-space: nowrap;">
-                <thead style="position: sticky; top: 0; z-index: 10;">
-                    <tr style="background-color: #1e293b; color: white; text-align: center; font-size: 0.75rem; letter-spacing: 1px;">
-                        <th colspan="6" style="padding: 8px; border: 1px solid #334155;">DATOS DEL PRODUCTO</th>
-                        <th colspan="4" style="padding: 8px; border: 1px solid #334155; background-color: #047857;">ENTRADAS (IN)</th>
-                        <th colspan="7" style="padding: 8px; border: 1px solid #334155; background-color: #b45309;">SALIDAS POR PLATAFORMA (OUT)</th>
-                        <th colspan="1" style="padding: 8px; border: 1px solid #334155; background-color: #0f172a;">BALANCE</th>
-                    </tr>
-                    <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem;">
-                        <th class="th-estilo" style="width: 140px;">SKU</th>
-                        <th class="th-estilo" style="width: 130px;">MODELO</th>
-                        <th class="th-estilo" style="width: 120px;">MARCA</th>
-                        <th class="th-estilo" style="min-width: 250px;">TÍTULO</th>
-                        <th class="th-estilo" style="width: 120px;">UBICACIÓN</th>
-                        <th class="th-estilo" style="width: 130px;">SERIE / N°</th>
-                        
-                        <th class="th-estilo" style="width: 110px;">FECHA ING.</th>
-                        <th class="th-estilo" style="width: 140px;">PROVEEDOR</th>
-                        <th class="th-estilo" style="width: 100px;">COSTO</th>
-                        <th class="th-estilo" style="background-color: #064e3b; width: 60px;">IN</th>
-                        
-                        <th class="th-estilo out-header" style="width: 60px;">ML</th>
-                        <th class="th-estilo out-header" style="width: 60px;">FBL</th>
-                        <th class="th-estilo out-header" style="width: 60px;">CDT</th>
-                        <th class="th-estilo out-header" style="width: 60px;">VL</th>
-                        <th class="th-estilo out-header" style="width: 60px;">TK</th>
-                        <th class="th-estilo out-header" style="width: 60px;">INT</th>
-                        <th class="th-estilo out-header" style="width: 60px;">ML JR</th>
-                        
-                        <th class="th-estilo" style="background-color: #0f172a; font-size: 0.85rem; width: 80px;">STOCK</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in page_obj %}
-                    <tr class="fila-hover">
-                        
-                        <td class="td-estilo font-mono" style="color: #2563eb; font-weight: bold; text-align: center;">{{ item.sku }}</td>
-                        <td class="td-estilo" style="font-weight: 700; color: #334155; text-align: center;">{{ item.modelo|default:"-" }}</td>
-                        <td class="td-estilo" style="text-align: center;">{{ item.marca }}</td>
-                        <td class="td-estilo" style="color: #64748b; font-size: 0.8rem; white-space: normal; min-width: 250px; line-height: 1.2;">{{ item.titulo|default:"-" }}</td>
-                        <td class="td-estilo" style="text-align: center;"><span style="background: #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; color: #475569; border: 1px solid #cbd5e1;">{{ item.ubicacion }}</span></td>
-                        <td class="td-estilo font-mono" style="text-align: center;">{{ item.serie_nro|default:"-" }}</td>
-                        
-                        <td class="td-estilo" style="color: #64748b; text-align: center;">{{ item.fecha_ingreso|date:"d/m/Y"|default:"-" }}</td>
-                        <td class="td-estilo" style="color: #64748b; text-align: center;">{{ item.proveedor|default:"-" }}</td>
-                        <td class="td-estilo" style="text-align: right; color: #64748b; padding-right: 15px;">S/ {{ item.costo_unitario|floatformat:2 }}</td>
-                        
-                        <td class="td-estilo td-badge">
-                            <span class="badge badge-in">{{ item.in_cant }}</span>
-                        </td>
-                        
-                        <td class="td-estilo td-badge">
-                            {% if item.out_ml > 0 %}<span class="badge badge-out">{{ item.out_ml }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
-                        </td>
-                        <td class="td-estilo td-badge">
-                            {% if item.out_fbl > 0 %}<span class="badge badge-out">{{ item.out_fbl }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
-                        </td>
-                        <td class="td-estilo td-badge">
-                            {% if item.out_cdt > 0 %}<span class="badge badge-out">{{ item.out_cdt }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
-                        </td>
-                        <td class="td-estilo td-badge">
-                            {% if item.out_vl > 0 %}<span class="badge badge-out">{{ item.out_vl }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
-                        </td>
-                        <td class="td-estilo td-badge">
-                            {% if item.out_tk > 0 %}<span class="badge badge-out">{{ item.out_tk }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
-                        </td>
-                        <td class="td-estilo td-badge">
-                            {% if item.out_intcp > 0 %}<span class="badge badge-out">{{ item.out_intcp }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
-                        </td>
-                        <td class="td-estilo td-badge">
-                            {% if item.out_ml2 > 0 %}<span class="badge badge-out">{{ item.out_ml2 }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
-                        </td>
-                        
-                        <td class="td-estilo td-badge">
-                            {% if item.stock > 0 %}
-                                <span class="badge badge-stock-ok">{{ item.stock }}</span>
-                            {% else %}
-                                <span class="badge badge-stock-zero">0</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="18" style="text-align: center; padding: 40px; color: #94a3b8; font-size: 1.1rem; border: 1px solid #cbd5e1;">
-                            <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 15px; color: #cbd5e1; display: block;"></i>
-                            No hay registros de ingresos disponibles. Importa tu kardex para comenzar.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div style="overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 160px); border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; white-space: nowrap;">
+            <thead style="position: sticky; top: 0; z-index: 10;">
+                <tr style="background-color: #1e293b; color: white; text-align: center; font-size: 0.75rem; letter-spacing: 1px;">
+                    <th colspan="6" style="padding: 8px; border: 1px solid #334155;">DATOS DEL PRODUCTO</th>
+                    <th colspan="4" style="padding: 8px; border: 1px solid #334155; background-color: #047857;">ENTRADAS (IN)</th>
+                    <th colspan="7" style="padding: 8px; border: 1px solid #334155; background-color: #b45309;">SALIDAS POR PLATAFORMA (OUT)</th>
+                    <th colspan="1" style="padding: 8px; border: 1px solid #334155; background-color: #0f172a;">BALANCE</th>
+                </tr>
+                <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem;">
+                    <th class="th-estilo" style="width: 140px;">SKU</th>
+                    <th class="th-estilo" style="width: 130px;">MODELO</th>
+                    <th class="th-estilo" style="width: 120px;">MARCA</th>
+                    <th class="th-estilo" style="min-width: 250px;">TÍTULO</th>
+                    <th class="th-estilo" style="width: 120px;">UBICACIÓN</th>
+                    <th class="th-estilo" style="width: 130px;">SERIE / N°</th>
+                    
+                    <th class="th-estilo" style="width: 110px;">FECHA ING.</th>
+                    <th class="th-estilo" style="width: 140px;">PROVEEDOR</th>
+                    <th class="th-estilo" style="width: 100px;">COSTO</th>
+                    <th class="th-estilo" style="background-color: #064e3b; width: 60px;">IN</th>
+                    
+                    <th class="th-estilo out-header" style="width: 60px;">ML</th>
+                    <th class="th-estilo out-header" style="width: 60px;">FBL</th>
+                    <th class="th-estilo out-header" style="width: 60px;">CDT</th>
+                    <th class="th-estilo out-header" style="width: 60px;">VL</th>
+                    <th class="th-estilo out-header" style="width: 60px;">TK</th>
+                    <th class="th-estilo out-header" style="width: 60px;">INT</th>
+                    <th class="th-estilo out-header" style="width: 60px;">ML JR</th>
+                    
+                    <th class="th-estilo" style="background-color: #0f172a; font-size: 0.85rem; width: 80px;">STOCK</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in page_obj %}
+                <tr class="fila-hover">
+                    <td class="td-estilo font-mono" style="color: #2563eb; font-weight: bold; text-align: center;">{{ item.sku }}</td>
+                    <td class="td-estilo" style="font-weight: 700; color: #334155; text-align: center;">{{ item.modelo|default:"-" }}</td>
+                    <td class="td-estilo" style="text-align: center;">{{ item.marca }}</td>
+                    <td class="td-estilo" style="color: #64748b; font-size: 0.8rem; white-space: normal; min-width: 250px; line-height: 1.2;">{{ item.titulo|default:"-" }}</td>
+                    <td class="td-estilo" style="text-align: center;"><span style="background: #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; color: #475569; border: 1px solid #cbd5e1;">{{ item.ubicacion }}</span></td>
+                    <td class="td-estilo font-mono" style="text-align: center;">{{ item.serie_nro|default:"-" }}</td>
+                    
+                    <td class="td-estilo" style="color: #64748b; text-align: center;">{{ item.fecha_ingreso|date:"d/m/Y"|default:"-" }}</td>
+                    <td class="td-estilo" style="color: #64748b; text-align: center;">{{ item.proveedor|default:"-" }}</td>
+                    <td class="td-estilo" style="text-align: right; color: #64748b; padding-right: 15px;">S/ {{ item.costo_unitario|floatformat:2 }}</td>
+                    
+                    <td class="td-estilo td-badge">
+                        <span class="badge badge-in">{{ item.in_cant }}</span>
+                    </td>
+                    
+                    <td class="td-estilo td-badge">
+                        {% if item.out_ml > 0 %}<span class="badge badge-out">{{ item.out_ml }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
+                    </td>
+                    <td class="td-estilo td-badge">
+                        {% if item.out_fbl > 0 %}<span class="badge badge-out">{{ item.out_fbl }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
+                    </td>
+                    <td class="td-estilo td-badge">
+                        {% if item.out_cdt > 0 %}<span class="badge badge-out">{{ item.out_cdt }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
+                    </td>
+                    <td class="td-estilo td-badge">
+                        {% if item.out_vl > 0 %}<span class="badge badge-out">{{ item.out_vl }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
+                    </td>
+                    <td class="td-estilo td-badge">
+                        {% if item.out_tk > 0 %}<span class="badge badge-out">{{ item.out_tk }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
+                    </td>
+                    <td class="td-estilo td-badge">
+                        {% if item.out_intcp > 0 %}<span class="badge badge-out">{{ item.out_intcp }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
+                    </td>
+                    <td class="td-estilo td-badge">
+                        {% if item.out_ml2 > 0 %}<span class="badge badge-out">{{ item.out_ml2 }}</span>{% else %}<span class="badge badge-zero">-</span>{% endif %}
+                    </td>
+                    
+                    <td class="td-estilo td-badge">
+                        {% if item.stock > 0 %}
+                            <span class="badge badge-stock-ok">{{ item.stock }}</span>
+                        {% else %}
+                            <span class="badge badge-stock-zero">0</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="18" style="text-align: center; padding: 40px; color: #94a3b8; font-size: 1.1rem; border: 1px solid #cbd5e1;">
+                        <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 15px; color: #cbd5e1; display: block;"></i>
+                        No hay registros de ingresos disponibles. Importa tu kardex para comenzar.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-        <div style="padding: 15px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #64748b; font-weight: bold;">
-                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-            </span>
-            <div style="display: flex; gap: 5px;">
-                {% if page_obj.has_previous %}
-                    <a href="?page=1" class="btn-pag">« Primera</a>
-                    <a href="?page={{ page_obj.previous_page_number }}" class="btn-pag">Anterior</a>
-                {% endif %}
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}" class="btn-pag">Siguiente</a>
-                    <a href="?page={{ page_obj.paginator.num_pages }}" class="btn-pag">Última »</a>
-                {% endif %}
-            </div>
+    {% if page_obj %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 10px 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <span style="color: #475569; font-weight: 600; font-size: 0.85rem;">
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        </span>
+        <div style="display: flex; gap: 8px;">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="btn-pag">« Primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn-pag">Anterior</a>
+            {% endif %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn-pag">Siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn-pag">Última »</a>
+            {% endif %}
         </div>
     </div>
+    {% endif %}
+
 </div>
 
 <style>
+    /* ========================================================
+       COMPACTACIÓN DE BOTONES SUPERIORES
+       ======================================================== */
+    .btn-top { color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s; font-size: 0.8rem; text-decoration: none; height: 32px;}
+    .btn-top:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
     /* ========================================================
        DISEÑO TIPO EXCEL (GRID MARCADOS)
        ======================================================== */
@@ -150,17 +156,7 @@
        CELDAS TIPO BLOQUE (LLENAN EL 100% DEL ESPACIO)
        ======================================================== */
     .td-badge { padding: 0 !important; height: 38px; }
-    .badge { 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        width: 100%; 
-        height: 100%; 
-        min-height: 38px; 
-        box-sizing: border-box; 
-        font-weight: 900; 
-        font-size: 1rem; 
-    }
+    .badge { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; min-height: 38px; box-sizing: border-box; font-weight: 900; font-size: 1rem; }
     
     /* Colores de las celdas numéricas */
     .badge-in { background-color: #d1fae5; color: #047857; }
@@ -171,7 +167,7 @@
     .badge-stock-zero { background-color: #ef4444; color: white; font-size: 1.1rem; }
 
     /* Paginación */
-    .btn-pag { padding: 6px 12px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; }
+    .btn-pag { padding: 4px 12px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; font-size: 0.8rem; }
     .btn-pag:hover { background: #3b82f6; color: white; border-color: #3b82f6; }
 </style>
 {% endblock %}
