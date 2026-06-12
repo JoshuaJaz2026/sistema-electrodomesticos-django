@@ -33,7 +33,7 @@
         </div>
     </div>
 
-    <div style="background-color: #f0fdf4; border-left: 4px solid #10b981; padding: 12px 15px; border-radius: 4px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; color: #064e3b; font-weight: 600; font-size: 0.85rem;">
+    <div style="background-color: #f0fdf4; border-left: 4px solid #10b981; padding: 10px 15px; border-radius: 4px; margin-bottom: 15px; display: flex; align-items: center; gap: 12px; color: #064e3b; font-weight: 600; font-size: 0.85rem;">
         <i class="fas fa-info-circle" style="font-size: 1.2rem; color: #10b981;"></i>
         <div style="flex-grow: 1;">
             Sube tu Excel con la columna SKU vacía. El sistema autogenerará el SKU basándose en tu fórmula (MODELO + N° Fila).
@@ -47,32 +47,32 @@
         
         <div style="flex: 2; min-width: 160px;">
             <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px;"><i class="fas fa-barcode"></i> MODELO</label>
-            <input type="text" id="masivo-modelo" placeholder="Ej. BK-8210PD" style="width: 100%; padding: 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; text-transform: uppercase; outline: none; box-sizing: border-box;">
+            <input type="text" id="masivo-modelo" placeholder="Ej. BK-8210PD" style="width: 100%; padding: 8px 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; text-transform: uppercase; outline: none; box-sizing: border-box;">
         </div>
         
-        <div style="width: 90px;">
+        <div style="width: 80px;">
             <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px;"><i class="fas fa-hashtag"></i> CANT.</label>
-            <input type="number" id="masivo-cant" placeholder="15" min="1" style="width: 100%; padding: 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; text-align: center; outline: none; box-sizing: border-box;">
+            <input type="number" id="masivo-cant" placeholder="15" min="1" style="width: 100%; padding: 8px 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; text-align: center; outline: none; box-sizing: border-box;">
         </div>
 
-        <div style="width: 140px;">
+        <div style="width: 130px;">
             <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px;"><i class="fas fa-calendar-alt"></i> FECHA ING.</label>
-            <input type="date" id="masivo-fecha" style="width: 100%; padding: 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; outline: none; box-sizing: border-box; color: #1e293b;">
+            <input type="date" id="masivo-fecha" style="width: 100%; padding: 8px 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; outline: none; box-sizing: border-box; color: #1e293b;">
         </div>
 
-        <div style="width: 110px;">
+        <div style="width: 100px;">
             <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px;"><i class="fas fa-dollar-sign"></i> COSTO</label>
-            <input type="number" step="0.01" id="masivo-costo" placeholder="0.00" style="width: 100%; padding: 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; outline: none; box-sizing: border-box; text-align: right;">
+            <input type="number" step="0.01" id="masivo-costo" placeholder="0.00" style="width: 100%; padding: 8px 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; outline: none; box-sizing: border-box; text-align: right;">
         </div>
 
         <div style="flex: 2; min-width: 160px;">
             <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px;"><i class="fas fa-truck"></i> PROVEEDOR</label>
-            <input type="text" id="masivo-proveedor" placeholder="Ej. STAREX" style="width: 100%; padding: 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; text-transform: uppercase; outline: none; box-sizing: border-box;">
+            <input type="text" id="masivo-proveedor" placeholder="Ej. STAREX" style="width: 100%; padding: 8px 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; text-transform: uppercase; outline: none; box-sizing: border-box;">
         </div>
 
-        <div style="flex: 1; min-width: 140px;">
+        <div style="flex: 1; min-width: 130px;">
             <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px;"><i class="fas fa-user-check"></i> AUTORIZADO</label>
-            <select id="masivo-by" style="width: 100%; padding: 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; outline: none; cursor: pointer; box-sizing: border-box;">
+            <select id="masivo-by" style="width: 100%; padding: 8px 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; outline: none; cursor: pointer; box-sizing: border-box;">
                 <option value="">-- By --</option>
                 <option value="DAVID">DAVID</option>
                 <option value="LUIS">LUIS</option>
@@ -89,12 +89,12 @@
             </select>
         </div>
 
-        <button type="button" onclick="generarLoteMasivo()" style="background-color: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; height: 40px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); transition: transform 0.1s; white-space: nowrap;">
+        <button type="button" onclick="generarLoteMasivo()" style="background-color: #2563eb; color: white; border: none; padding: 8px 18px; border-radius: 4px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; height: 36px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); transition: transform 0.1s; white-space: nowrap; margin-bottom: 1px;">
             <i class="fas fa-bolt"></i> Generar Filas
         </button>
     </div>
 
-    <div style="overflow-x: auto; overflow-y: auto; max-height: 60vh; border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+    <div style="overflow-x: auto; overflow-y: auto; max-height: 75vh; border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
         <table id="tablaIngresos" style="width: max-content; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap; table-layout: fixed;">
             
             <thead style="position: sticky; top: 0; z-index: 10;">
@@ -293,7 +293,6 @@
     .text-blue { color: #2563eb; font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 14px; letter-spacing: -0.5px; }
     .text-orange { color: #ea580c; font-weight: bold; }
     
-    /* EL BADGE VERDE ACTUALIZADO CON MENOS PADDING LATERAL */
     .input-badge { 
         background-color: #d1fae5; 
         color: #047857; 
@@ -348,7 +347,7 @@
         }
     });
 
-    // === NUEVA FUNCIÓN: GENERADOR DE LOTES MASIVOS ===
+    // === GENERADOR DE LOTES MASIVOS ===
     function generarLoteMasivo() {
         const modeloInput = document.getElementById('masivo-modelo').value.trim().toUpperCase();
         const cantInput = parseInt(document.getElementById('masivo-cant').value);
@@ -366,14 +365,10 @@
         const filaMolde = document.getElementById('fila-molde');
         const fragmento = document.createDocumentFragment();
 
-        // Calculamos cuántas filas reales existen para continuar la numeración de los SKUs
         let totalFilasActuales = tbody.querySelectorAll('tr.fila-ingresos:not(#fila-molde)').length;
 
-        // Formatear fecha actual a YYYY-MM-DD
         const hoy = new Date();
         const fechaActual = hoy.getFullYear() + "-" + String(hoy.getMonth() + 1).padStart(2, '0') + "-" + String(hoy.getDate()).padStart(2, '0');
-        
-        // Si el usuario no seleccionó fecha, usa la de hoy
         const fechaFinal = fechaInput ? fechaInput : fechaActual;
 
         for (let i = 0; i < cantInput; i++) {
@@ -385,7 +380,6 @@
             nuevaFila.dataset.originalKey = key;
             nuevaFila.classList.add('fila-editada');
 
-            // Setear los datos en los inputs visuales
             nuevaFila.querySelector('.val-modelo').value = modeloInput;
             nuevaFila.querySelector('.val-by').value = byInput;
             nuevaFila.querySelector('.val-fecha').value = fechaFinal;
@@ -395,19 +389,16 @@
                 nuevaFila.querySelector('.val-costo').value = costoInput.toFixed(2);
             }
 
-            // Autocompletar Título
             if (diccionarioTitulos[modeloInput]) {
                 nuevaFila.querySelector('.val-titulo').value = diccionarioTitulos[modeloInput];
             } else {
                 nuevaFila.querySelector('.val-titulo').value = 'Modelo nuevo / Sin título'; 
             }
 
-            // Generar SKU Correlativo
             let numeroCorrelativo = totalFilasActuales + i + 18; 
             const skuGenerado = modeloInput + "-" + numeroCorrelativo;
             nuevaFila.querySelector('.val-sku').value = skuGenerado;
 
-            // Guardar en la memoria local
             memoriaIngresos[key] = {
                 'SKU': skuGenerado,
                 'MODELO': modeloInput,
@@ -424,9 +415,7 @@
             fragmento.appendChild(nuevaFila);
         }
 
-        // Insertar todas las filas generadas de golpe
         tbody.appendChild(fragmento);
-        
         localStorage.setItem('memoriaIngresosTemp', JSON.stringify(memoriaIngresos));
         
         const indicador = document.getElementById('indicador-cambios');
@@ -434,7 +423,12 @@
         
         document.getElementById('masivo-cant').value = '';
         
-        alert(`✅ ¡Se generaron con éxito ${cantInput} filas listas para escanear números de serie! Revisa la parte inferior de la tabla.`);
+        const contenedorTabla = document.querySelector("div[style*='max-height: 75vh']");
+        setTimeout(() => {
+            contenedorTabla.scrollTop = contenedorTabla.scrollHeight;
+        }, 100);
+
+        alert(`✅ ¡Se generaron con éxito ${cantInput} filas listas para escanear números de serie!`);
     }
 
     function agregarNuevoIngreso() {
