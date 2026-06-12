@@ -9,10 +9,10 @@
         :root {
             --color-principal: {{ request.session.color_actual|default:"#3498DB" }};
         }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; background: #f4f7f6; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; background: #f4f7f6; overflow: hidden; }
         
-        /* Barra Lateral */
-        .sidebar { width: 260px; background: #2c3e50; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+        /* === BARRA LATERAL === */
+        .sidebar { width: 260px; background: #2c3e50; color: white; display: flex; flex-direction: column; flex-shrink: 0; height: 100vh; }
         .sidebar-header { padding: 20px; text-align: center; background: rgba(0,0,0,0.1); border-bottom: 2px solid var(--color-principal); }
         .sidebar-menu { flex: 1; padding: 10px 0; overflow-y: auto; }
         
@@ -52,16 +52,37 @@
         .submenu-item i { margin-right: 10px; font-size: 0.8em; width: 15px; text-align: center; }
         .rotate { transform: rotate(180deg); transition: transform 0.3s ease; }
         
-        /* Contenido Principal */
-        .main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-        header { 
-            background: white; padding: 15px 30px; display: flex; 
-            justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        /* === FOOTER DE LA BARRA LATERAL (NUEVO) === */
+        .sidebar-footer {
+            background: #1a252f;
+            padding: 15px 20px;
+            border-top: 1px solid #3e4f5f;
+            flex-shrink: 0;
         }
-        .container { padding: 30px; overflow-y: auto; flex: 1; }
-        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .btn-logout { background: #e74c3c; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-size: 0.9em; }
-        .btn-logout:hover { background: #c0392b; }
+        .btn-logout-sidebar {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: bold;
+            transition: background 0.2s;
+            font-size: 0.85rem;
+        }
+        .btn-logout-sidebar:hover { background: #c0392b; }
+
+        /* === CONTENIDO PRINCIPAL === */
+        .main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; height: 100vh; }
+        
+        /* El padding se redujo a 15px para maximizar el espacio de las tablas */
+        .container { padding: 15px 20px; overflow-y: auto; flex: 1; box-sizing: border-box; }
+        
     </style>
 </head>
 <body>
@@ -71,6 +92,7 @@
             <i class="{{ request.session.icono_actual|default:'fas fa-globe' }} fa-2x" style="color: var(--color-principal);"></i>
             <h3 style="margin-top: 10px;">{{ canal }}</h3>
         </div>
+        
         <nav class="sidebar-menu">
             <a href="{% url 'inicio' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-home"></i> Inicio</a>
             
@@ -149,20 +171,31 @@
             {% endif %}
 
         </nav>
+
+        <div class="sidebar-footer">
+            <div style="font-size: 0.7rem; color: #95a5a6; margin-bottom: 4px; letter-spacing: 0.5px;">
+                SESIÓN ACTIVA EN:
+            </div>
+            <div style="color: var(--color-principal); font-weight: 800; font-size: 0.95rem; margin-bottom: 15px; text-transform: uppercase;">
+                {{ canal }}
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 10px; color: white; margin-bottom: 15px; background: rgba(255,255,255,0.05); padding: 8px 10px; border-radius: 6px;">
+                <i class="fas fa-user-circle fa-lg" style="color: #cbd5e1;"></i>
+                <span style="font-weight: bold; font-size: 0.9rem;">{{ user.username|upper }}</span>
+            </div>
+            
+            <form method="post" action="{% url 'logout' %}" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="btn-logout-sidebar">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </form>
+        </div>
+
     </div>
 
     <div class="main-content">
-        <header>
-            <span>Sesión activa en: <strong style="color: var(--color-principal)">{{ canal }}</strong></span>
-            <div>
-                <span style="margin-right: 15px;"><i class="fas fa-user-circle"></i> {{ user.username|upper }}</span>
-                <form method="post" action="{% url 'logout' %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-logout" style="border:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Salir</button>
-                </form>
-            </div>
-        </header>
-
         <div class="container">
             {% block content %}
             {% endblock %}
