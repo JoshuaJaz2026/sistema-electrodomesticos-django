@@ -1,131 +1,152 @@
 {% extends 'inventario/dashboard_global.html' %}
 
 {% block content %}
-<div class="card" style="border-top: 4px solid #3b82f6; padding: 12px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+<div style="display: flex; flex-direction: column; width: 100%; height: 100%;">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
-        <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase; font-size: 1.1rem;">
-            <i class="fas fa-tags" style="color: #3b82f6;"></i> Directorio de Modelos
-        </h2>
+    <div class="card" style="border-top: 4px solid #3b82f6; padding: 12px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: flex; flex-direction: column; flex-grow: 1; min-height: 0;">
         
-        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; flex-shrink: 0;">
+            <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase; font-size: 1.1rem; white-space: nowrap;">
+                <i class="fas fa-tags" style="color: #3b82f6;"></i> Directorio de Modelos
+            </h2>
             
-            <form method="GET" action="" style="display: flex; align-items: center; height: 32px;">
-                <input type="text" name="q" value="{{ query_search|default:'' }}" placeholder="Buscar modelo o título..." style="padding: 0 10px; height: 100%; border: 1px solid #cbd5e1; border-radius: 4px 0 0 4px; outline: none; font-size: 0.8rem; min-width: 200px; box-sizing: border-box;">
-                <button type="submit" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-left: none; height: 100%; padding: 0 12px; border-radius: 0 4px 4px 0; cursor: pointer; display: flex; align-items: center; justify-content: center; box-sizing: border-box; transition: background 0.2s;">
-                    <i class="fas fa-search"></i>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                
+                <form method="GET" action="" style="display: flex; align-items: center; height: 32px;">
+                    <div style="position: relative;">
+                        <i class="fas fa-search" style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.8rem;"></i>
+                        <input type="text" name="q" value="{{ query_search|default:'' }}" placeholder="Buscar modelo o título..." style="padding: 0 10px 0 26px; height: 32px; border: 1px solid #cbd5e1; border-radius: 4px 0 0 4px; outline: none; font-size: 0.8rem; width: 220px; box-sizing: border-box;">
+                    </div>
+                    <button type="submit" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-left: none; height: 32px; padding: 0 12px; border-radius: 0 4px 4px 0; cursor: pointer; font-weight: bold; transition: background 0.2s;">
+                        Buscar
+                    </button>
+                    {% if query_search %}
+                    <a href="?" style="background: #ef4444; color: white; height: 32px; padding: 0 10px; border-radius: 4px; display: flex; align-items: center; text-decoration: none; font-weight: bold; font-size: 0.8rem; margin-left: 6px;">
+                        <i class="fas fa-times"></i>
+                    </a>
+                    {% endif %}
+                </form>
+
+                <a href="{% url 'exportar_modelos_excel' %}" class="btn-top" style="background-color: #10b981;">
+                    <i class="fas fa-file-excel"></i> Exportar
+                </a>
+                
+                <input type="file" id="csvImportar" accept=".csv" style="display: none;">
+                <button onclick="document.getElementById('csvImportar').click()" class="btn-top" style="background-color: #059669;">
+                    <i class="fas fa-upload"></i> Importar Masivo
                 </button>
-            </form>
+                
+                <button onclick="agregarNuevaFila()" class="btn-top" style="background-color: #3b82f6;">
+                    <i class="fas fa-plus"></i> Nueva Fila
+                </button>
 
-            <a href="{% url 'exportar_modelos_excel' %}" class="btn-top" style="background-color: #10b981;">
-                <i class="fas fa-file-excel"></i> Exportar
-            </a>
-            
-            <input type="file" id="csvImportar" accept=".csv" style="display: none;">
-            <button onclick="document.getElementById('csvImportar').click()" class="btn-top" style="background-color: #059669;">
-                <i class="fas fa-upload"></i> Importar Masivo
-            </button>
-            
-            <button onclick="agregarNuevaFila()" class="btn-top" style="background-color: #3b82f6;">
-                <i class="fas fa-plus"></i> Nueva Fila
-            </button>
+                <button id="btnSync" onclick="sincronizarStock()" class="btn-top" style="background-color: #8b5cf6;">
+                    <i class="fas fa-sync-alt"></i> Sincronizar Stock
+                </button>
 
-            <button id="btnSync" onclick="sincronizarStock()" class="btn-top" style="background-color: #8b5cf6;">
-                <i class="fas fa-sync-alt"></i> Sincronizar Stock
-            </button>
+                <button id="btnGuardar" onclick="guardarModelos()" class="btn-top" style="background-color: #2563eb;">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
 
-            <button id="btnGuardar" onclick="guardarModelos()" class="btn-top" style="background-color: #2563eb;">
-                <i class="fas fa-save"></i> Guardar Cambios
-            </button>
-
-            <button id="btnBorrarModelos" onclick="borrarTodosModelos()" class="btn-top" style="background-color: #ef4444;">
-                <i class="fas fa-trash-alt"></i> Borrar Todo
-            </button>
+                <button id="btnBorrarModelos" onclick="borrarTodosModelos()" class="btn-top" style="background-color: #ef4444;">
+                    <i class="fas fa-trash-alt"></i> Borrar Todo
+                </button>
+            </div>
         </div>
-    </div>
 
-    <div style="overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 160px); border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-        <table id="tablaModelos" style="width: 100%; border-collapse: collapse; background: white; white-space: nowrap; font-size: 0.85rem; table-layout: fixed;">
-            <thead style="position: sticky; top: 0; z-index: 10;">
-                <tr style="text-transform: uppercase; letter-spacing: 1px; font-weight: 800; font-size: 0.75rem;">
-                    <th class="th-premium" style="background-color: #0f172a; color: white; width: 180px;">Modelo <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em; margin-left: 5px;"></i></th>
-                    <th class="th-premium" style="background-color: #0f172a; color: white; width: 150px;">Marca <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em; margin-left: 5px;"></i></th>
-                    <th class="th-premium" style="background-color: #0f172a; color: white; width: 200px;">Categoría <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em; margin-left: 5px;"></i></th>
-                    <th class="th-premium" style="background-color: #0f172a; color: white; min-width: 320px;">Título <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em; margin-left: 5px;"></i></th>
-                    <th class="th-premium" style="background-color: #1e3a8a; color: white; width: 90px; text-align: center;">Stock <i class="fas fa-lock" style="font-size: 0.8em; margin-left: 5px;"></i></th>
-                    
-                    <th class="th-premium" style="background-color: #000000; color: #eab308; font-size: 0.7rem; line-height: 1.2; text-align: center; width: 110px;">Inv. por<br>Percherones</th>
-                    <th class="th-premium" style="background-color: #fde047; color: black; text-align: center; width: 85px;">Mercado<br>Libre</th>
-                    <th class="th-premium" style="background-color: #a3e635; color: black; text-align: center; width: 85px;">Falabella</th>
-                    <th class="th-premium" style="background-color: #3b82f6; color: white; text-align: center; width: 95px;">Creditienda</th>
-                    <th class="th-premium" style="background-color: #8b5cf6; color: white; text-align: center; width: 85px;">Página<br>Web</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr id="fila-molde" class="fila-modelo" style="display: none;">
-                    <td class="td-premium"><input type="text" class="celda-input bold text-dark val-modelo central" placeholder="Modelo..."></td>
-                    <td class="td-premium"><input type="text" list="lista-marcas" class="celda-input val-marca central" placeholder="Elegir Marca..."></td>
-                    <td class="td-premium"><input type="text" list="lista-categorias" class="celda-input val-categoria central" placeholder="Elegir Categoría..."></td>
-                    <td class="td-premium"><input type="text" class="celda-input val-titulo" placeholder="Descripción..."></td>
-                    
-                    <td class="td-premium" style="background-color: #f8fafc;">
-                        <input type="text" value="0" readonly class="celda-input central bold input-readonly text-stock" tabindex="-1">
-                    </td>
-                    
-                    <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-inv" onchange="pintarCelda(this, 'bg-inv')"></td>
-                    <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-ml" onchange="pintarCelda(this, 'bg-ml')"></td>
-                    <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-fbl" onchange="pintarCelda(this, 'bg-fbl')"></td>
-                    <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-cdt" onchange="pintarCelda(this, 'bg-cdt')"></td>
-                    <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-web" onchange="pintarCelda(this, 'bg-web')"></td>
-                </tr>
-
-                {% for item in page_obj %}
-                <tr class="fila-modelo">
-                    <td class="td-premium"><input type="text" value="{{ item.modelo|default:'' }}" class="celda-input bold text-dark val-modelo central"></td>
-                    <td class="td-premium"><input type="text" list="lista-marcas" value="{{ item.marca|default:'' }}" class="celda-input val-marca central" placeholder="Marca..."></td>
-                    <td class="td-premium"><input type="text" list="lista-categorias" value="{{ item.categoria|default:'' }}" class="celda-input val-categoria central" placeholder="Categoría..."></td>
-                    <td class="td-premium"><input type="text" value="{{ item.titulo|default:'' }}" class="celda-input val-titulo"></td>
-                    
-                    <td class="td-premium" style="
-                        {% if item.stock_actual > 10 %} background-color: #d1fae5; 
-                        {% elif item.stock_actual > 0 %} background-color: #fef3c7; 
-                        {% else %} background-color: #fee2e2; {% endif %}">
-                        <input type="text" value="{{ item.stock_actual }}" readonly class="celda-input central bold input-readonly text-stock" tabindex="-1" style="
-                            {% if item.stock_actual > 10 %} color: #047857; 
-                            {% elif item.stock_actual > 0 %} color: #b45309; 
-                            {% else %} color: #b91c1c; {% endif %}">
-                    </td>
-                    
-                    <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-inv" onchange="pintarCelda(this, 'bg-inv')" {% if item.activo_intercorp %}checked{% endif %}></td>
-                    <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-ml" onchange="pintarCelda(this, 'bg-ml')" {% if item.activo_ml %}checked{% endif %}></td>
-                    <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-fbl" onchange="pintarCelda(this, 'bg-fbl')" {% if item.activo_falabella %}checked{% endif %}></td>
-                    <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-cdt" onchange="pintarCelda(this, 'bg-cdt')" {% if item.activo_creditienda %}checked{% endif %}></td>
-                    <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-web" onchange="pintarCelda(this, 'bg-web')" {% if item.activo_web %}checked{% endif %}></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    {% if page_obj %}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 10px 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-        <span style="color: #475569; font-weight: 600; font-size: 0.85rem;">
-            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-        </span>
-        <div style="display: flex; gap: 8px;">
-            {% if page_obj.has_previous %}
-                <a href="?page=1" class="btn-pag">&laquo; Primera</a>
-                <a href="?page={{ page_obj.previous_page_number }}" class="btn-pag">Anterior</a>
-            {% endif %}
-
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="btn-pag">Siguiente</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn-pag">Última &raquo;</a>
-            {% endif %}
+        <div style="background-color: #f8fafc; border-left: 4px solid #3b82f6; padding: 8px 12px; border-radius: 4px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; color: #334155; font-size: 0.8rem; flex-shrink: 0;">
+            <i class="fas fa-info-circle" style="font-size: 1.1rem; color: #3b82f6;"></i>
+            <span><strong style="color: #b91c1c;">La columna STOCK se actualiza sola.</strong> Marca y Categoría son desplegables. El orden es igual al Excel.</span>
+            
+            <span id="indicador-cambios" style="margin-left: auto; background-color: #f59e0b; color: white; padding: 3px 8px; border-radius: 20px; font-size: 0.7rem; display: none; font-weight: bold; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);">
+                <i class="fas fa-exclamation-circle"></i> Sin guardar
+            </span>
         </div>
-    </div>
-    {% endif %}
 
+        <div style="overflow: auto; flex-grow: 1; border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); min-height: 0;">
+            <table id="tablaModelos" style="width: 100%; border-collapse: collapse; background: white; white-space: nowrap; font-size: 0.85rem; table-layout: fixed;">
+                <thead style="position: sticky; top: 0; z-index: 10;">
+                    <tr style="text-transform: uppercase; letter-spacing: 1px; font-weight: 800; font-size: 0.75rem;">
+                        <th class="th-premium" style="background-color: #0f172a; color: white; width: 180px;">Modelo <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em; margin-left: 5px;"></i></th>
+                        <th class="th-premium" style="background-color: #0f172a; color: white; width: 150px;">Marca <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em; margin-left: 5px;"></i></th>
+                        <th class="th-premium" style="background-color: #0f172a; color: white; width: 200px;">Categoría <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em; margin-left: 5px;"></i></th>
+                        <th class="th-premium" style="background-color: #0f172a; color: white; min-width: 320px;">Título <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em; margin-left: 5px;"></i></th>
+                        <th class="th-premium" style="background-color: #1e3a8a; color: white; width: 90px; text-align: center;">Stock <i class="fas fa-lock" style="font-size: 0.8em; margin-left: 5px;"></i></th>
+                        
+                        <th class="th-premium" style="background-color: #000000; color: #eab308; font-size: 0.7rem; line-height: 1.2; text-align: center; width: 110px;">Inv. por<br>Percherones</th>
+                        <th class="th-premium" style="background-color: #fde047; color: black; text-align: center; width: 85px;">Mercado<br>Libre</th>
+                        <th class="th-premium" style="background-color: #a3e635; color: black; text-align: center; width: 85px;">Falabella</th>
+                        <th class="th-premium" style="background-color: #3b82f6; color: white; text-align: center; width: 95px;">Creditienda</th>
+                        <th class="th-premium" style="background-color: #8b5cf6; color: white; text-align: center; width: 85px;">Página<br>Web</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="fila-molde" class="fila-modelo" style="display: none;">
+                        <td class="td-premium"><input type="text" class="celda-input bold text-dark val-modelo central" placeholder="Modelo..."></td>
+                        <td class="td-premium"><input type="text" list="lista-marcas" class="celda-input val-marca central" placeholder="Elegir Marca..."></td>
+                        <td class="td-premium"><input type="text" list="lista-categorias" class="celda-input val-categoria central" placeholder="Elegir Categoría..."></td>
+                        <td class="td-premium"><input type="text" class="celda-input val-titulo" placeholder="Descripción..."></td>
+                        
+                        <td class="td-premium" style="background-color: #f8fafc;">
+                            <input type="text" value="0" readonly class="celda-input central bold input-readonly text-stock" tabindex="-1">
+                        </td>
+                        
+                        <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-inv" onchange="pintarCelda(this, 'bg-inv')"></td>
+                        <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-ml" onchange="pintarCelda(this, 'bg-ml')"></td>
+                        <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-fbl" onchange="pintarCelda(this, 'bg-fbl')"></td>
+                        <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-cdt" onchange="pintarCelda(this, 'bg-cdt')"></td>
+                        <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-web" onchange="pintarCelda(this, 'bg-web')"></td>
+                    </tr>
+
+                    {% for item in page_obj %}
+                    <tr class="fila-modelo">
+                        <td class="td-premium"><input type="text" value="{{ item.modelo|default:'' }}" class="celda-input bold text-dark val-modelo central"></td>
+                        <td class="td-premium"><input type="text" list="lista-marcas" value="{{ item.marca|default:'' }}" class="celda-input val-marca central" placeholder="Marca..."></td>
+                        <td class="td-premium"><input type="text" list="lista-categorias" value="{{ item.categoria|default:'' }}" class="celda-input val-categoria central" placeholder="Categoría..."></td>
+                        <td class="td-premium"><input type="text" value="{{ item.titulo|default:'' }}" class="celda-input val-titulo"></td>
+                        
+                        <td class="td-premium" style="
+                            {% if item.stock_actual > 10 %} background-color: #d1fae5; 
+                            {% elif item.stock_actual > 0 %} background-color: #fef3c7; 
+                            {% else %} background-color: #fee2e2; {% endif %}">
+                            <input type="text" value="{{ item.stock_actual }}" readonly class="celda-input central bold input-readonly text-stock" tabindex="-1" style="
+                                {% if item.stock_actual > 10 %} color: #047857; 
+                                {% elif item.stock_actual > 0 %} color: #b45309; 
+                                {% else %} color: #b91c1c; {% endif %}">
+                        </td>
+                        
+                        <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-inv" onchange="pintarCelda(this, 'bg-inv')" {% if item.activo_intercorp %}checked{% endif %}></td>
+                        <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-ml" onchange="pintarCelda(this, 'bg-ml')" {% if item.activo_ml %}checked{% endif %}></td>
+                        <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-fbl" onchange="pintarCelda(this, 'bg-fbl')" {% if item.activo_falabella %}checked{% endif %}></td>
+                        <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-cdt" onchange="pintarCelda(this, 'bg-cdt')" {% if item.activo_creditienda %}checked{% endif %}></td>
+                        <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-web" onchange="pintarCelda(this, 'bg-web')" {% if item.activo_web %}checked{% endif %}></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj %}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 6px 15px; background: #f8fafc; border-radius: 4px; border: 1px solid #e2e8f0; flex-shrink: 0;">
+            <span style="color: #475569; font-weight: 600; font-size: 0.85rem;">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                {% if query_search %}<span style="color: #64748b; font-style: italic; margin-left: 5px;">(Resultados filtrados)</span>{% endif %}
+            </span>
+            <div style="display: flex; gap: 8px;">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">« Primera</a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">Anterior</a>
+                {% endif %}
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">Siguiente</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">Última »</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
 </div>
 
 <datalist id="lista-marcas">
@@ -195,100 +216,51 @@
 </datalist>
 
 <style>
-    /* ========================================================
-       COMPACTACIÓN DE BOTONES SUPERIORES
-       ======================================================== */
+    /* COMPACTACIÓN DE BOTONES SUPERIORES */
     .btn-top { color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s; font-size: 0.8rem; text-decoration: none; height: 32px;}
     .btn-top:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
-    /* ========================================================
-       DISEÑO TIPO EXCEL (GRID MARCADOS ESTRICTOS)
-       ======================================================== */
-    #tablaModelos { 
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-        border-collapse: collapse; 
-    }
-    
-    /* Cabeceras */
-    .th-premium { 
-        padding: 12px 10px; 
-        border: 1px solid #334155; 
-        text-align: center;
-    }
-    
-    /* Celdas de Texto (100% llenas) */
-    .td-premium { 
-        padding: 0; 
-        border: 1px solid #cbd5e1; 
-        height: 38px; 
-        vertical-align: middle; 
-    }
-    
-    /* Celdas de Checkbox */
-    .td-check { 
-        padding: 0; 
-        text-align: center; 
-        border: 1px solid #cbd5e1; 
-        vertical-align: middle; 
-        height: 38px;
-        transition: background-color 0.3s ease; 
-    }
+    /* DISEÑO TIPO EXCEL */
+    #tablaModelos { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-collapse: collapse; }
+    .th-premium { padding: 12px 10px; border: 1px solid #334155; text-align: center; }
+    .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; }
+    .td-check { padding: 0; text-align: center; border: 1px solid #cbd5e1; vertical-align: middle; height: 38px; transition: background-color 0.3s ease; }
 
-    /* Efecto Cebra: Fila blanca y Fila ligeramente gris */
+    /* Cebra y Hover */
     .fila-modelo:nth-child(even) { background-color: #f8fafc; }
     .fila-modelo:nth-child(odd) { background-color: #ffffff; }
-    
-    /* Hover en la fila entera */
-    .fila-modelo:hover { background-color: #e2e8f0 !important; }
+    .fila-modelo:hover td { filter: brightness(0.96); background-color: #e2e8f0; }
 
-    /* Inputs Fantasma (Llenan toda la celda) */
-    .celda-input { 
-        width: 100%; 
-        height: 100%; 
-        box-sizing: border-box; 
-        border: none; 
-        padding: 10px; 
-        font-family: inherit; 
-        font-size: 13px; 
-        color: #334155; 
-        background-color: transparent; 
-        outline: none; 
-    }
-    .celda-input:not([readonly]):focus { background-color: #f0fdf4; box-shadow: inset 0 0 0 2px #3b82f6; color: #000; }
-    
-    /* Readonly (Stock) */
+    /* Inputs Fantasma */
+    .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
+    .celda-input:not([readonly]):focus { background-color: #f0fdf4; box-shadow: inset 0 0 0 2px #3b82f6; color: #000; position: relative; z-index: 1;}
     .input-readonly { cursor: not-allowed; }
     .input-readonly:focus { box-shadow: none; background-color: transparent; }
     .text-stock { font-size: 1.1rem; font-weight: 900; }
     
-    /* Utilidades de texto */
     .central { text-align: center; }
     .bold { font-weight: bold; }
     .text-dark { color: #0f172a; }
 
-    /* Checkboxes modernos */
     .check-moderno { width: 18px; height: 18px; cursor: pointer; accent-color: #3b82f6; transition: 0.1s; margin: 0 auto; display: block;}
     .check-moderno:hover { transform: scale(1.15); }
 
-    /* Clases de colores para pintar la celda del checkbox */
     .bg-inv { background-color: #000000 !important; }
     .bg-ml { background-color: #fde047 !important; }
     .bg-fbl { background-color: #a3e635 !important; }
     .bg-cdt { background-color: #3b82f6 !important; }
     .bg-web { background-color: #8b5cf6 !important; }
 
-    /* Paginación */
-    .btn-pag { padding: 4px 12px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; font-size: 0.8rem; }
+    /* Estilo del Paginador */
+    .btn-pag { padding: 4px 10px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; font-size: 0.8rem;}
     .btn-pag:hover { background: #3b82f6; color: white; border-color: #3b82f6; }
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script>
-    // === FUNCIÓN PARA SINCRONIZAR EL STOCK CON INGRESOS ===
     function sincronizarStock() {
         const btn = document.getElementById('btnSync');
         const textOriginal = btn.innerHTML;
-        
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
         btn.disabled = true;
 
@@ -298,22 +270,15 @@
         })
         .then(res => res.json())
         .then(data => {
-            if (data.status === 'ok') {
-                window.location.reload(); 
-            } else {
-                alert("Error: " + data.message);
-            }
+            if (data.status === 'ok') { window.location.reload(); } 
+            else { alert("Error: " + data.message); }
         })
         .catch(err => alert("Ocurrió un error de conexión."))
-        .finally(() => { 
-            btn.innerHTML = textOriginal; 
-            btn.disabled = false; 
-        });
+        .finally(() => { btn.innerHTML = textOriginal; btn.disabled = false; });
     }
 
-    // === FUNCIÓN PARA BORRAR TODOS LOS MODELOS ===
     function borrarTodosModelos() {
-        if (confirm("¡ATENCIÓN PELIGRO! ¿Estás totalmente seguro de borrar TODOS los modelos del catálogo? Esta acción dejará tu directorio en blanco y no se puede deshacer.")) {
+        if (confirm("¡ATENCIÓN PELIGRO! ¿Estás totalmente seguro de borrar TODOS los modelos del catálogo?")) {
             const btn = document.getElementById('btnBorrarModelos');
             const textOriginal = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Borrando...';
@@ -325,32 +290,20 @@
             })
             .then(res => res.json())
             .then(data => {
-                if (data.status === 'ok') {
-                    alert(data.message);
-                    window.location.reload();
-                } else {
-                    alert("Error: " + data.message);
-                }
+                if (data.status === 'ok') { alert(data.message); window.location.reload(); } 
+                else { alert("Error: " + data.message); }
             })
             .catch(err => alert("Ocurrió un error de conexión."))
-            .finally(() => {
-                btn.innerHTML = textOriginal;
-                btn.disabled = false;
-            });
+            .finally(() => { btn.innerHTML = textOriginal; btn.disabled = false; });
         }
     }
 
-    // === FUNCIÓN PARA PINTAR CELDAS ===
     function pintarCelda(checkbox, claseCss) {
         const td = checkbox.closest('td');
-        if (checkbox.checked) {
-            td.classList.add(claseCss);
-        } else {
-            td.classList.remove(claseCss);
-        }
+        if (checkbox.checked) td.classList.add(claseCss);
+        else td.classList.remove(claseCss);
     }
 
-    // Al cargar la página, pintamos las celdas que ya vienen marcadas
     window.addEventListener('load', () => {
         document.querySelectorAll('.val-inv').forEach(cb => pintarCelda(cb, 'bg-inv'));
         document.querySelectorAll('.val-ml').forEach(cb => pintarCelda(cb, 'bg-ml'));
@@ -365,11 +318,19 @@
         const nueva = molde.cloneNode(true);
         nueva.id = "";
         nueva.style.display = "";
-        tbody.insertBefore(nueva, tbody.firstChild);
+        
+        // Agregar la fila al final de la lista
+        tbody.appendChild(nueva);
+        
+        // Scroll hacia abajo
+        const contenedorTabla = document.querySelector("div[style*='flex-grow: 1']");
+        if(contenedorTabla) {
+            setTimeout(() => { contenedorTabla.scrollTop = contenedorTabla.scrollHeight; }, 50);
+        }
+        
         nueva.querySelector('.val-modelo').focus();
     }
 
-    // === IMPORTADOR DE EXCEL ===
     document.getElementById('csvImportar').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -426,14 +387,14 @@
                     agregados++;
                 });
 
-                tbody.insertBefore(fragmento, tbody.firstChild);
+                tbody.appendChild(fragmento);
                 document.getElementById('csvImportar').value = ""; 
-                alert(`¡Cargados ${agregados} modelos! Las casillas con TRUE se marcaron y pintaron automáticamente.`);
+                alert(`¡Cargados ${agregados} modelos! Las casillas con TRUE se marcaron automáticamente.`);
+                document.getElementById('indicador-cambios').style.display = 'inline-flex';
             }
         });
     });
 
-    // === GUARDAR A LA BASE DE DATOS ===
     function guardarModelos() {
         const filas = document.querySelectorAll('.fila-modelo:not(#fila-molde)');
         let datos = [];
@@ -481,5 +442,11 @@
         .catch(err => alert("Ocurrió un error."))
         .finally(() => { btn.innerHTML = text; btn.disabled = false; });
     }
+    
+    document.querySelector('#tablaModelos').addEventListener('input', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
+            document.getElementById('indicador-cambios').style.display = 'inline-flex';
+        }
+    });
 </script>
 {% endblock %}

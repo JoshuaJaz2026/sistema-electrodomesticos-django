@@ -160,20 +160,27 @@ def percheron_registros(request):
 @login_required
 def percheron_modelos(request):
     canal = request.session.get('canal_activo', 'Percheron')
+    query_search = request.GET.get('q', '')
     
-    # === LA MAGIA DEL ORDEN ===
-    # '-stock_actual' ordena de MAYOR a MENOR cantidad.
-    # 'modelo' es el desempate (los ordena alfabéticamente si tienen el mismo stock)
-    modelos_db = Producto.objects.all().order_by('-stock_actual', 'modelo')
+    # 1. ORDENAMOS POR ID (Respeta el orden de tu Excel)
+    if query_search:
+        modelos_db = Producto.objects.filter(
+            modelo__icontains=query_search
+        ).order_by('id')
+    else:
+        modelos_db = Producto.objects.all().order_by('id')
     
-    # Paginación para que no colapse si tienes miles de modelos
-    paginator = Paginator(modelos_db, 100)
+    # 2. DEVOLVEMOS LA PAGINACIÓN (Carga rápida sin lag de CSS)
+    # 100 es un número perfecto: carga rápido y muestra bastantes datos
+    from django.core.paginator import Paginator
+    paginator = Paginator(modelos_db, 50)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     return render(request, 'inventario/percheron_modelos.html', {
         'canal': canal,
-        'page_obj': page_obj
+        'page_obj': page_obj,
+        'query_search': query_search
     })
 
 
