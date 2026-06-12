@@ -1,55 +1,50 @@
 {% extends 'inventario/dashboard_global.html' %}
 
 {% block content %}
-<div class="card" style="border-top: 4px solid #3b82f6; padding: 20px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+<div class="card" style="border-top: 4px solid #3b82f6; padding: 12px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
-        <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase; font-size: 1.2rem;">
-            <i class="fas fa-tags" style="color: #3b82f6;"></i> Directorio de Modelos y Disponibilidad
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+        <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase; font-size: 1.1rem;">
+            <i class="fas fa-tags" style="color: #3b82f6;"></i> Directorio de Modelos
         </h2>
         
-        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
             
-            <form method="GET" action="" style="display: flex; align-items: center;">
-                <input type="text" name="q" value="{{ query_search|default:'' }}" placeholder="Buscar modelo o título..." style="padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 6px 0 0 6px; outline: none; font-size: 0.9rem; min-width: 250px; transition: border-color 0.2s;">
-                <button type="submit" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-left: none; padding: 10px 15px; border-radius: 0 6px 6px 0; cursor: pointer; transition: background 0.2s;">
+            <form method="GET" action="" style="display: flex; align-items: center; height: 32px;">
+                <input type="text" name="q" value="{{ query_search|default:'' }}" placeholder="Buscar modelo o título..." style="padding: 0 10px; height: 100%; border: 1px solid #cbd5e1; border-radius: 4px 0 0 4px; outline: none; font-size: 0.8rem; min-width: 200px; box-sizing: border-box;">
+                <button type="submit" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-left: none; height: 100%; padding: 0 12px; border-radius: 0 4px 4px 0; cursor: pointer; display: flex; align-items: center; justify-content: center; box-sizing: border-box; transition: background 0.2s;">
                     <i class="fas fa-search"></i>
                 </button>
             </form>
 
-            <a href="{% url 'exportar_modelos_excel' %}" class="btn-premium" style="background-color: #10b981;">
+            <a href="{% url 'exportar_modelos_excel' %}" class="btn-top" style="background-color: #10b981;">
                 <i class="fas fa-file-excel"></i> Exportar
             </a>
             
             <input type="file" id="csvImportar" accept=".csv" style="display: none;">
-            <button onclick="document.getElementById('csvImportar').click()" class="btn-premium" style="background-color: #059669;">
+            <button onclick="document.getElementById('csvImportar').click()" class="btn-top" style="background-color: #059669;">
                 <i class="fas fa-upload"></i> Importar Masivo
             </button>
             
-            <button onclick="agregarNuevaFila()" class="btn-premium" style="background-color: #3b82f6;">
+            <button onclick="agregarNuevaFila()" class="btn-top" style="background-color: #3b82f6;">
                 <i class="fas fa-plus"></i> Nueva Fila
             </button>
 
-            <button id="btnSync" onclick="sincronizarStock()" class="btn-premium" style="background-color: #8b5cf6;">
+            <button id="btnSync" onclick="sincronizarStock()" class="btn-top" style="background-color: #8b5cf6;">
                 <i class="fas fa-sync-alt"></i> Sincronizar Stock
             </button>
 
-            <button id="btnGuardar" onclick="guardarModelos()" class="btn-premium" style="background-color: #2563eb;">
+            <button id="btnGuardar" onclick="guardarModelos()" class="btn-top" style="background-color: #2563eb;">
                 <i class="fas fa-save"></i> Guardar Cambios
             </button>
 
-            <button id="btnBorrarModelos" onclick="borrarTodosModelos()" class="btn-premium" style="background-color: #ef4444;">
+            <button id="btnBorrarModelos" onclick="borrarTodosModelos()" class="btn-top" style="background-color: #ef4444;">
                 <i class="fas fa-trash-alt"></i> Borrar Todo
             </button>
         </div>
     </div>
 
-    <div style="background-color: #f8fafc; border-left: 4px solid #3b82f6; padding: 12px 15px; border-radius: 4px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; color: #334155; font-size: 0.85rem;">
-        <i class="fas fa-info-circle" style="font-size: 1.2rem; color: #3b82f6;"></i>
-        <span>Las columnas Marca y Categoría tienen un buscador desplegable (Combo Box). <strong style="color: #b91c1c;">La columna STOCK es de solo lectura y se actualiza sola.</strong></span>
-    </div>
-
-    <div style="overflow-x: auto; overflow-y: auto; max-height: 60vh; border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+    <div style="overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 160px); border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
         <table id="tablaModelos" style="width: 100%; border-collapse: collapse; background: white; white-space: nowrap; font-size: 0.85rem; table-layout: fixed;">
             <thead style="position: sticky; top: 0; z-index: 10;">
                 <tr style="text-transform: uppercase; letter-spacing: 1px; font-weight: 800; font-size: 0.75rem;">
@@ -113,8 +108,8 @@
     </div>
 
     {% if page_obj %}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 12px 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-        <span style="color: #475569; font-weight: 600; font-size: 0.9rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 10px 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <span style="color: #475569; font-weight: 600; font-size: 0.85rem;">
             Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
         </span>
         <div style="display: flex; gap: 8px;">
@@ -184,7 +179,7 @@
     <option value="PLANCHA GRILL"><option value="PROCESADOR DE ALIMENTOS"><option value="PURIFICADOR">
     <option value="REFRIGERADORA"><option value="SANDWICHERA"><option value="SARTÉN"><option value="SARTÉN ANTIHADERENTE">
     <option value="SARTÉN ELÉCTRICA"><option value="SET DE COLADORES"><option value="SET DE CUBIERTOS">
-    <option value="SET DE MÁQUINAS PARA CORTAR PELO"><option value="SET DE OLLAS"><option value="SOUNDBAR">
+    <option value="SET DE MÁQUINAS PARA CORTAR PELO"><option value="SET DE OLLAS"><option value="SET DE PIZZA"><option value="SOUNDBAR">
     <option value="TABLET"><option value="TAPA DE LICUADORA"><option value="TERMO BOMBA"><option value="TERMO HERVIDOR">
     <option value="TERMORADIADOR"><option value="TERMOVENTILADOR"><option value="TETERA"><option value="TETERA ELÉCTRICA">
     <option value="TOSTADORA"><option value="TRICOMBO OSTER"><option value="TRICOMBO OSTER 2"><option value="VAPORERA ELÉCTRICA">
@@ -200,6 +195,12 @@
 </datalist>
 
 <style>
+    /* ========================================================
+       COMPACTACIÓN DE BOTONES SUPERIORES
+       ======================================================== */
+    .btn-top { color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s; font-size: 0.8rem; text-decoration: none; height: 32px;}
+    .btn-top:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
     /* ========================================================
        DISEÑO TIPO EXCEL (GRID MARCADOS ESTRICTOS)
        ======================================================== */
@@ -276,12 +277,8 @@
     .bg-cdt { background-color: #3b82f6 !important; }
     .bg-web { background-color: #8b5cf6 !important; }
 
-    /* Botones Superiores */
-    .btn-premium { color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s, filter 0.2s; text-decoration: none; font-size: 0.85rem; font-family: inherit; }
-    .btn-premium:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
     /* Paginación */
-    .btn-pag { padding: 6px 14px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; }
+    .btn-pag { padding: 4px 12px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; font-size: 0.8rem; }
     .btn-pag:hover { background: #3b82f6; color: white; border-color: #3b82f6; }
 </style>
 
