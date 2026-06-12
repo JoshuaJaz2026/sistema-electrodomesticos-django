@@ -1,78 +1,71 @@
 {% extends 'inventario/dashboard_global.html' %}
 
 {% block content %}
-<div class="card" style="border-top: 4px solid #10b981; padding: 20px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+<div class="card" style="border-top: 4px solid #10b981; padding: 12px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-        <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase; font-size: 1.2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+        <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase; font-size: 1.1rem;">
             <i class="fas fa-box-open" style="color: #10b981;"></i> 
-            Registro de Ingresos - Almacén Central
+            Registro de Ingresos
+            <span id="indicador-cambios" style="background-color: #f59e0b; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; display: none; font-weight: bold; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3); align-items: center; gap: 5px; margin-left: 10px;">
+                <i class="fas fa-exclamation-circle"></i> Sin guardar
+            </span>
         </h2>
         
-        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-            <a href="{% url 'descargar_plantilla_ingresos' %}" style="background-color: #3b82f6; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s;">
-                <i class="fas fa-download"></i> Bajar Plantilla
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <a href="{% url 'descargar_plantilla_ingresos' %}" class="btn-top" style="background-color: #3b82f6;">
+                <i class="fas fa-download"></i> Plantilla
             </a>
 
-            <button type="button" onclick="agregarNuevoIngreso()" style="background-color: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s;">
+            <button type="button" onclick="agregarNuevoIngreso()" class="btn-top" style="background-color: #10b981;">
                 <i class="fas fa-plus"></i> Nueva Fila
             </button>
 
             <input type="file" id="csvImportar" accept=".csv" style="display: none;">
-            <button type="button" onclick="document.getElementById('csvImportar').click()" style="background-color: #059669; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s;">
+            <button type="button" onclick="document.getElementById('csvImportar').click()" class="btn-top" style="background-color: #059669;">
                 <i class="fas fa-upload"></i> Importar Masivo
             </button>
 
-            <button type="button" id="btnGuardarIngresos" onclick="guardarDatosPendientes()" style="background-color: #047857; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s;">
+            <button type="button" id="btnGuardarIngresos" onclick="guardarDatosPendientes()" class="btn-top" style="background-color: #047857;">
                 <i class="fas fa-save"></i> Guardar Ingresos
             </button>
 
-            <button type="button" onclick="confirmarBorradoTotal()" style="background-color: #ef4444; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s;">
+            <button type="button" onclick="confirmarBorradoTotal()" class="btn-top" style="background-color: #ef4444;">
                 <i class="fas fa-trash"></i> Borrar Todo
             </button>
         </div>
     </div>
 
-    <div style="background-color: #f0fdf4; border-left: 4px solid #10b981; padding: 10px 15px; border-radius: 4px; margin-bottom: 15px; display: flex; align-items: center; gap: 12px; color: #064e3b; font-weight: 600; font-size: 0.85rem;">
-        <i class="fas fa-info-circle" style="font-size: 1.2rem; color: #10b981;"></i>
-        <div style="flex-grow: 1;">
-            Sube tu Excel con la columna SKU vacía. El sistema autogenerará el SKU basándose en tu fórmula (MODELO + N° Fila).
-        </div>
-        <span id="indicador-cambios" style="background-color: #f59e0b; color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; display: none; font-weight: bold; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);">
-            <i class="fas fa-exclamation-circle" style="margin-right: 5px;"></i> Tienes ingresos sin guardar
-        </span>
-    </div>
-
-    <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; padding: 15px 20px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+    <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; padding: 8px 15px; border-radius: 6px; margin-bottom: 12px; display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
         
-        <div style="flex: 2; min-width: 160px;">
-            <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px;"><i class="fas fa-barcode"></i> MODELO</label>
-            <input type="text" id="masivo-modelo" placeholder="Ej. BK-8210PD" style="width: 100%; padding: 8px 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; text-transform: uppercase; outline: none; box-sizing: border-box;">
+        <div style="flex: 2; min-width: 140px;">
+            <label class="label-mini"><i class="fas fa-barcode"></i> MODELO</label>
+            <input type="text" id="masivo-modelo" placeholder="Ej. BK-8210PD" class="input-mini" style="text-transform: uppercase;">
         </div>
         
-        <div style="width: 80px;">
-            <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px;"><i class="fas fa-hashtag"></i> CANT.</label>
-            <input type="number" id="masivo-cant" placeholder="15" min="1" style="width: 100%; padding: 8px 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; text-align: center; outline: none; box-sizing: border-box;">
+        <div style="width: 70px;">
+            <label class="label-mini"><i class="fas fa-hashtag"></i> CANT.</label>
+            <input type="number" id="masivo-cant" placeholder="15" min="1" class="input-mini" style="text-align: center;">
         </div>
 
-        <div style="width: 130px;">
-            <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px;"><i class="fas fa-calendar-alt"></i> FECHA ING.</label>
-            <input type="date" id="masivo-fecha" style="width: 100%; padding: 8px 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; outline: none; box-sizing: border-box; color: #1e293b;">
+        <div style="width: 120px;">
+            <label class="label-mini"><i class="fas fa-calendar-alt"></i> FECHA ING.</label>
+            <input type="date" id="masivo-fecha" class="input-mini" style="color: #1e293b;">
         </div>
 
-        <div style="width: 100px;">
-            <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px;"><i class="fas fa-dollar-sign"></i> COSTO</label>
-            <input type="number" step="0.01" id="masivo-costo" placeholder="0.00" style="width: 100%; padding: 8px 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; outline: none; box-sizing: border-box; text-align: right;">
+        <div style="width: 90px;">
+            <label class="label-mini"><i class="fas fa-dollar-sign"></i> COSTO</label>
+            <input type="number" step="0.01" id="masivo-costo" placeholder="0.00" class="input-mini" style="text-align: right;">
         </div>
 
-        <div style="flex: 2; min-width: 160px;">
-            <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px;"><i class="fas fa-truck"></i> PROVEEDOR</label>
-            <input type="text" id="masivo-proveedor" placeholder="Ej. STAREX" style="width: 100%; padding: 8px 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; text-transform: uppercase; outline: none; box-sizing: border-box;">
+        <div style="flex: 2; min-width: 140px;">
+            <label class="label-mini"><i class="fas fa-truck"></i> PROVEEDOR</label>
+            <input type="text" id="masivo-proveedor" placeholder="Ej. STAREX" class="input-mini" style="text-transform: uppercase;">
         </div>
 
-        <div style="flex: 1; min-width: 130px;">
-            <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px;"><i class="fas fa-user-check"></i> AUTORIZADO</label>
-            <select id="masivo-by" style="width: 100%; padding: 8px 10px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; outline: none; cursor: pointer; box-sizing: border-box;">
+        <div style="flex: 1; min-width: 120px;">
+            <label class="label-mini"><i class="fas fa-user-check"></i> AUTORIZADO</label>
+            <select id="masivo-by" class="input-mini" style="cursor: pointer;">
                 <option value="">-- By --</option>
                 <option value="DAVID">DAVID</option>
                 <option value="LUIS">LUIS</option>
@@ -89,12 +82,12 @@
             </select>
         </div>
 
-        <button type="button" onclick="generarLoteMasivo()" style="background-color: #2563eb; color: white; border: none; padding: 8px 18px; border-radius: 4px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; height: 36px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); transition: transform 0.1s; white-space: nowrap; margin-bottom: 1px;">
+        <button type="button" onclick="generarLoteMasivo()" style="background-color: #2563eb; color: white; border: none; padding: 0 15px; border-radius: 4px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; height: 32px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); transition: transform 0.1s; white-space: nowrap; font-size: 0.8rem;">
             <i class="fas fa-bolt"></i> Generar Filas
         </button>
     </div>
 
-    <div style="overflow-x: auto; overflow-y: auto; max-height: 75vh; border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+    <div style="overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 210px); border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
         <table id="tablaIngresos" style="width: max-content; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap; table-layout: fixed;">
             
             <thead style="position: sticky; top: 0; z-index: 10;">
@@ -106,9 +99,7 @@
                     <th class="th-premium" style="width: 160px;">CÓDIGO EAN</th>
                     <th class="th-premium" style="width: 160px;">SERIE / N°</th>
                     <th class="th-premium" style="width: 120px;">COSTO UNT.</th>
-                    
                     <th class="th-premium" style="width: 65px; background-color: #064e3b; text-align: center;">CANT. IN</th>
-                    
                     <th class="th-premium" style="width: 200px;">PROV. / MOTIVO</th>
                     <th class="th-premium" style="width: 130px; text-align: center;">BY:</th>
                     <th class="th-premium" style="width: 50px; text-align: center;"><i class="fas fa-trash-alt" style="color: #f87171;"></i></th>
@@ -235,8 +226,8 @@
     </div>
 
     {% if page_obj %}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 12px 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-        <span style="color: #475569; font-weight: 600; font-size: 0.9rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 10px 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <span style="color: #475569; font-weight: 600; font-size: 0.85rem;">
             Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
         </span>
         <div style="display: flex; gap: 8px;">
@@ -256,25 +247,18 @@
 </div>
 
 <style>
-    /* ========================================================
-       DISEÑO TIPO EXCEL (GRID MARCADOS)
-       ======================================================== */
-    #tablaIngresos { 
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-        border-collapse: collapse; 
-    }
-    
-    .th-premium { 
-        padding: 12px 10px; 
-        border: 1px solid #334155; 
-        text-align: center; 
-    }
-    
-    .td-premium { 
-        padding: 0; 
-        border: 1px solid #cbd5e1; 
-        height: 38px;
-    }
+    /* COMPACTACIÓN DE BOTONES SUPERIORES */
+    .btn-top { color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s; font-size: 0.8rem; text-decoration: none; height: 32px;}
+    .btn-top:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    /* COMPACTACIÓN PANEL MASIVO */
+    .label-mini { display: block; font-size: 0.7rem; font-weight: 800; color: #475569; margin-bottom: 3px; letter-spacing: 0.5px; }
+    .input-mini { width: 100%; padding: 6px 8px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: bold; outline: none; box-sizing: border-box; height: 32px; font-size: 0.85rem; }
+
+    /* DISEÑO TIPO EXCEL (GRID MARCADOS) */
+    #tablaIngresos { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-collapse: collapse; }
+    .th-premium { padding: 12px 10px; border: 1px solid #334155; text-align: center; }
+    .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 38px; }
     
     .fila-ingresos:nth-child(even) { background-color: #f8fafc; }
     .fila-ingresos:nth-child(odd) { background-color: #ffffff; }
@@ -293,19 +277,7 @@
     .text-blue { color: #2563eb; font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 14px; letter-spacing: -0.5px; }
     .text-orange { color: #ea580c; font-weight: bold; }
     
-    .input-badge { 
-        background-color: #d1fae5; 
-        color: #047857; 
-        border: none; 
-        width: 100%; 
-        height: 100%; 
-        font-weight: 900; 
-        font-size: 1rem; 
-        text-align: center; 
-        display: block; 
-        box-sizing: border-box; 
-        padding: 10px 5px; 
-    }
+    .input-badge { background-color: #d1fae5; color: #047857; border: none; width: 100%; height: 100%; font-weight: 900; font-size: 1rem; text-align: center; display: block; box-sizing: border-box; padding: 10px 5px; }
     .input-badge:focus { background-color: #a7f3d0; box-shadow: inset 0 0 0 2px #047857; color: #000; }
 
     .select-premium { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px top 50%; background-size: 8px auto; padding-right: 20px; }
@@ -315,7 +287,7 @@
     .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .celda-input[type=number] { -moz-appearance: textfield; }
 
-    .btn-pag { padding: 6px 14px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; }
+    .btn-pag { padding: 4px 12px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; font-size: 0.8rem; }
     .btn-pag:hover { background: #10b981; color: white; border-color: #10b981; }
 </style>
 
@@ -343,7 +315,7 @@
 
         if (hayCambiosPrevios || Object.keys(memoriaIngresos).length > 0 || ingresosAEliminar.length > 0) {
             const indicador = document.getElementById('indicador-cambios');
-            if(indicador) indicador.style.display = 'flex';
+            if(indicador) indicador.style.display = 'inline-flex';
         }
     });
 
@@ -419,11 +391,11 @@
         localStorage.setItem('memoriaIngresosTemp', JSON.stringify(memoriaIngresos));
         
         const indicador = document.getElementById('indicador-cambios');
-        if(indicador) indicador.style.display = 'flex';
+        if(indicador) indicador.style.display = 'inline-flex';
         
         document.getElementById('masivo-cant').value = '';
         
-        const contenedorTabla = document.querySelector("div[style*='max-height: 75vh']");
+        const contenedorTabla = document.querySelector("div[style*='max-height: calc(100vh - 210px)']");
         setTimeout(() => {
             contenedorTabla.scrollTop = contenedorTabla.scrollHeight;
         }, 100);
@@ -446,7 +418,7 @@
         tbody.appendChild(nuevaFila);
         
         const indicador = document.getElementById('indicador-cambios');
-        if(indicador) indicador.style.display = 'flex';
+        if(indicador) indicador.style.display = 'inline-flex';
         
         nuevaFila.querySelector('.val-modelo').focus();
     }
@@ -503,7 +475,7 @@
         fila.classList.add('fila-editada');
         
         const indicador = document.getElementById('indicador-cambios');
-        if(indicador) indicador.style.display = 'flex';
+        if(indicador) indicador.style.display = 'inline-flex';
     }
 
     function eliminarFilaIngreso(btn) {
@@ -524,7 +496,7 @@
         localStorage.setItem('memoriaIngresosTemp', JSON.stringify(memoriaIngresos));
         
         const indicador = document.getElementById('indicador-cambios');
-        if(indicador) indicador.style.display = 'flex';
+        if(indicador) indicador.style.display = 'inline-flex';
     }
 
     document.getElementById('csvImportar').addEventListener('change', function(e) {
@@ -646,7 +618,7 @@
                 document.getElementById('csvImportar').value = ""; 
                 
                 const indicador = document.getElementById('indicador-cambios');
-                if(indicador) indicador.style.display = 'flex';
+                if(indicador) indicador.style.display = 'inline-flex';
 
                 alert(`¡Se procesaron ${importadas} ingresos! El sistema autogeneró los SKUs y Títulos faltantes. Revisa la tabla y presiona 'Guardar Ingresos'.`);
             }
