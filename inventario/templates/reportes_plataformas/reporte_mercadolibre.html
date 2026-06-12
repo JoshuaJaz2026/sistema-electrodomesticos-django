@@ -1,40 +1,43 @@
 {% extends 'inventario/dashboard_global.html' %}
 
 {% block content %}
-<div class="card" style="border-top: 4px solid var(--color-principal); padding: 20px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+<div class="card" style="border-top: 4px solid var(--color-principal); padding: 12px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-        <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase; font-size: 1.2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+        <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase; font-size: 1.1rem;">
             <i class="{{ request.session.icono_actual|default:'fas fa-chart-line' }}" style="color: var(--color-principal);"></i> 
             Reporte de Ventas - {{ canal }}
+            <span id="indicador-cambios" style="background-color: #f59e0b; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; display: none; font-weight: bold; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3); align-items: center; gap: 5px; margin-left: 10px;">
+                <i class="fas fa-exclamation-circle"></i> Sin guardar
+            </span>
         </h2>
         
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
             
-            <a href="{% url 'descargar_plantilla_reporte_ml' %}" class="btn-premium" style="background-color: #3b82f6;">
+            <a href="{% url 'descargar_plantilla_reporte_ml' %}" class="btn-top" style="background-color: #3b82f6;">
                 <i class="fas fa-download"></i> Bajar Plantilla
             </a>
 
-            <button type="button" onclick="agregarNuevaVenta()" class="btn-premium" style="background-color: #8b5cf6;">
+            <button type="button" onclick="agregarNuevaVenta()" class="btn-top" style="background-color: #8b5cf6;">
                 <i class="fas fa-plus"></i> Nueva Venta
             </button>
 
             <input type="file" id="csvImportar" accept=".csv" style="display: none;">
-            <button type="button" onclick="document.getElementById('csvImportar').click()" class="btn-premium" style="background-color: #10b981;">
+            <button type="button" onclick="document.getElementById('csvImportar').click()" class="btn-top" style="background-color: #10b981;">
                 <i class="fas fa-upload"></i> Importar Masivo
             </button>
 
-            <button type="button" class="btn-premium" style="background-color: #f59e0b;">
+            <button type="button" class="btn-top" style="background-color: #f59e0b;">
                 <i class="fas fa-file-excel"></i> Exportar
             </button>
             
-            <button type="button" id="btnGuardarVentas" onclick="guardarDatosPendientes()" class="btn-premium" style="background-color: var(--color-principal);">
+            <button type="button" id="btnGuardarVentas" onclick="guardarDatosPendientes()" class="btn-top" style="background-color: var(--color-principal); color: #0f172a;">
                 <i class="fas fa-save"></i> Guardar Modificaciones
             </button>
             
             <div style="position: relative;">
-                <button type="button" onclick="togglePanelColumnas()" class="btn-premium" style="background-color: #334155;">
-                    <i class="fas fa-columns"></i> Opciones de Pantalla
+                <button type="button" onclick="togglePanelColumnas()" class="btn-top" style="background-color: #334155;">
+                    <i class="fas fa-columns"></i> Opciones Pantalla
                 </button>
                 
                 <div id="panelPersonalizarColumnas" style="display: none; position: absolute; right: 0; top: 115%; background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 100; width: 750px;">
@@ -50,32 +53,30 @@
         </div>
     </div>
 
-    <form method="GET" action="" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; background-color: #f8fafc; padding: 15px 20px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); align-items: flex-end;">
-        <div>
-            <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 6px; letter-spacing: 0.5px;">DESDE</label>
+    <form method="GET" action="" style="display: flex; gap: 12px; margin-bottom: 15px; background-color: #f8fafc; padding: 10px 15px; border-radius: 6px; border: 1px solid #e2e8f0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); align-items: flex-end; flex-wrap: wrap;">
+        <div style="width: 140px;">
+            <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 4px; letter-spacing: 0.5px;">DESDE</label>
             <input type="date" name="fecha_inicio" value="{{ request.GET.fecha_inicio }}" class="input-filtro">
         </div>
-        <div>
-            <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 6px; letter-spacing: 0.5px;">HASTA</label>
+        <div style="width: 140px;">
+            <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 4px; letter-spacing: 0.5px;">HASTA</label>
             <input type="date" name="fecha_fin" value="{{ request.GET.fecha_fin }}" class="input-filtro">
         </div>
-        <div style="display: flex; gap: 10px; flex-grow: 1;">
-            <div style="flex-grow: 1;">
-                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 6px; letter-spacing: 0.5px;">BUSCAR ORDEN / SKU</label>
-                <input type="text" name="q" value="{{ query_search }}" placeholder="Ej. ML-12345..." class="input-filtro">
-            </div>
-            <button type="submit" class="btn-buscar">
-                <i class="fas fa-search"></i> Buscar
-            </button>
-            {% if query_search or request.GET.fecha_inicio or request.GET.fecha_fin %}
-            <a href="?" class="btn-limpiar">
-                <i class="fas fa-times"></i> Limpiar
-            </a>
-            {% endif %}
+        <div style="flex-grow: 1; min-width: 200px;">
+            <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 4px; letter-spacing: 0.5px;">BUSCAR ORDEN / SKU</label>
+            <input type="text" name="q" value="{{ query_search }}" placeholder="Ej. ML-12345..." class="input-filtro">
         </div>
+        <button type="submit" class="btn-buscar">
+            <i class="fas fa-search"></i> Buscar
+        </button>
+        {% if query_search or request.GET.fecha_inicio or request.GET.fecha_fin %}
+        <a href="?" class="btn-limpiar">
+            <i class="fas fa-times"></i> Limpiar
+        </a>
+        {% endif %}
     </form>
 
-    <div style="overflow-x: auto; overflow-y: auto; max-height: 60vh; border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+    <div style="overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 220px); border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
         <table id="tablaReporte" style="width: max-content; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap; table-layout: fixed;">
             <thead style="position: sticky; top: 0; z-index: 10;">
                 <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;">
@@ -88,7 +89,7 @@
                     <th class="th-premium" style="width: 220px;">CATEGORIA</th>
                     <th class="th-premium" style="width: 160px; color: #60a5fa;">SKU ALMACEN</th>
                     <th class="th-premium" style="width: 140px;">MODELO</th>
-                    <th class="th-premium" style="width: 300px;">PRODUCTO <i class="fas fa-magic" style="color: #34d399; font-size: 0.9em; margin-left: 5px;"></i></th>
+                    <th class="th-premium" style="width: 300px;">PRODUCTO <i class="fas fa-magic" style="color: #34d399; font-size: 0.9em; margin-left: 5px;" title="Autocompletado BUSCARV"></i></th>
                     <th class="th-premium" style="width: 60px;">CANT.</th>
                     
                     <th class="th-premium" style="width: 90px; background-color: #064e3b; white-space: normal; line-height: 1.1;">PRECIO</th>
@@ -379,25 +380,21 @@
     </div>
 
     {% if page_obj %}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 12px 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-        <span style="color: #475569; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 10px 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <span style="color: #475569; font-weight: 600; font-size: 0.85rem;">
             Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
             {% if query_search or request.GET.fecha_inicio %}&nbsp; <span style="color: #64748b; font-style: italic;">(Resultados filtrados)</span>{% endif %}
-            
-            <span id="indicador-cambios" style="margin-left: 15px; background-color: #f59e0b; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; display: none; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);">
-                <i class="fas fa-exclamation-circle" style="margin-right: 5px;"></i> Tienes cambios sin guardar
-            </span>
         </span>
         
         <div style="display: flex; gap: 8px;">
             {% if page_obj.has_previous %}
-                <a href="?page=1{% if query_search %}&q={{ query_search }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" class="btn-pag">&laquo; Primera</a>
+                <a href="?page=1{% if query_search %}&q={{ query_search }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" class="btn-pag">« Primera</a>
                 <a href="?page={{ page_obj.previous_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" class="btn-pag">Anterior</a>
             {% endif %}
 
             {% if page_obj.has_next %}
                 <a href="?page={{ page_obj.next_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" class="btn-pag">Siguiente</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}{% if query_search %}&q={{ query_search }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" class="btn-pag">Última &raquo;</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if query_search %}&q={{ query_search }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" class="btn-pag">Última »</a>
             {% endif %}
         </div>
     </div>
@@ -407,12 +404,26 @@
 
 <style>
     /* ========================================================
+       COMPACTACIÓN DE BOTONES SUPERIORES Y PANEL BÚSQUEDA
+       ======================================================== */
+    .btn-top { color: white; border: none; padding: 0 12px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s; font-size: 0.8rem; text-decoration: none; height: 32px;}
+    .btn-top:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    .input-filtro { width: 100%; padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none; box-sizing: border-box; font-size: 0.85rem; color: #334155; transition: border-color 0.2s; height: 32px; }
+    .input-filtro:focus { border-color: var(--color-principal); box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.2); }
+    .btn-buscar, .btn-limpiar { padding: 0 12px; border-radius: 4px; font-weight: bold; height: 32px; margin-top: auto; display: flex; align-items: center; gap: 6px; font-size: 0.8rem; border: none; cursor: pointer; text-decoration: none; color: white;}
+    .btn-buscar { background: var(--color-principal); }
+    .btn-buscar:hover { opacity: 0.9; }
+    .btn-limpiar { background: #ef4444; }
+    .btn-limpiar:hover { background: #dc2626; }
+
+    /* ========================================================
        DISEÑO TIPO EXCEL (GRID MARCADOS ESTRICTOS)
        ======================================================== */
     #tablaReporte { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-collapse: collapse; }
     
-    .th-premium { padding: 12px 10px; border: 1px solid #334155; text-align: center; }
-    .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; }
+    .th-premium { padding: 10px 8px; border: 1px solid #334155; text-align: center; }
+    .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 36px; vertical-align: middle; }
     
     /* Efecto Cebra y Hover Excel */
     .fila-ventas:nth-child(even) { background-color: #f8fafc; }
@@ -438,7 +449,7 @@
     .simbolo-porcentaje { color: #94a3b8; font-weight: 800; font-size: 0.8rem; user-select: none; flex-shrink: 0; }
 
     /* Inputs Fantasma */
-    .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
+    .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 8px 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
     .celda-input:not([readonly]):focus { background-color: #fff; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; position: relative; z-index: 1; border-radius: 2px;}
     .wrapper-moneda .celda-input { padding-left: 4px; padding-right: 4px; text-align: right; width: 100%; }
 
@@ -459,23 +470,11 @@
     .text-red { color: #991b1b; }
     .text-orange { color: #ea580c; }
 
-    /* Elementos del Panel de Filtros */
-    .input-filtro { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; box-sizing: border-box; font-size: 0.9rem; color: #334155; transition: border-color 0.2s; }
-    .input-filtro:focus { border-color: var(--color-principal); box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.2); }
-    .btn-buscar { background: var(--color-principal); color: white; border: none; padding: 0 18px; border-radius: 6px; cursor: pointer; font-weight: bold; height: 38px; margin-top: auto; transition: opacity 0.2s; display: flex; align-items: center; gap: 8px; }
-    .btn-buscar:hover { opacity: 0.9; }
-    .btn-limpiar { background: #ef4444; color: white; border: none; padding: 0 18px; border-radius: 6px; text-decoration: none; font-weight: bold; height: 38px; margin-top: auto; display: flex; align-items: center; gap: 8px; box-sizing: border-box; transition: background 0.2s; }
-    .btn-limpiar:hover { background: #dc2626; }
-
-    /* Botones Superiores */
-    .btn-premium { color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s, filter 0.2s; text-decoration: none; font-size: 0.85rem; font-family: inherit;}
-    .btn-premium:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
     /* Selectores Custom (Combobox) */
     .select-premium { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px top 50%; background-size: 8px auto; padding-right: 20px; }
 
     /* Eliminar y Ocultar Spinners */
-    .btn-eliminar { background: none; border: none; color: #ef4444; cursor: pointer; padding: 10px; border-radius: 4px; transition: background 0.2s; display: block; margin: 0 auto;}
+    .btn-eliminar { background: none; border: none; color: #ef4444; cursor: pointer; padding: 6px; border-radius: 4px; transition: background 0.2s; display: block; margin: 0 auto;}
     .btn-eliminar:hover { background: #fee2e2; color: #b91c1c; }
     .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .celda-input[type=number] { -moz-appearance: textfield; }
@@ -484,7 +483,7 @@
     .check-opcion { width: 16px; height: 16px; accent-color: var(--color-principal); cursor: pointer; }
 
     /* Paginación */
-    .btn-pag { padding: 6px 14px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; }
+    .btn-pag { padding: 4px 12px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; font-size: 0.8rem; }
     .btn-pag:hover { background: var(--color-principal); color: white; border-color: var(--color-principal); }
 </style>
 
