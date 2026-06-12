@@ -2,56 +2,56 @@
 {% load static %}
 
 {% block content %}
-<div class="card" style="max-width: 1100px; margin: auto; border-top: 4px solid var(--color-principal); padding: 20px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+<div class="card" style="border-top: 4px solid var(--color-principal); padding: 12px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-        <h2 style="margin: 0; color: #1e293b; text-transform: uppercase; display: flex; align-items: center; gap: 10px; font-size: 1.25rem; font-weight: 700;">
-            <i class="fas fa-dollar-sign" style="color: var(--color-principal);"></i> Referencia: COSTOS
-        </h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
         
-        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-            <a href="{% url 'descargar_plantilla_costos' %}" class="btn-premium" style="background-color: #3b82f6;">
-                <i class="fas fa-download"></i> Bajar Plantilla
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-size: 1.1rem; white-space: nowrap;">
+                <i class="fas fa-dollar-sign" style="color: var(--color-principal);"></i> Costos
+                <span id="indicador-cambios" style="background-color: #f59e0b; color: white; padding: 3px 8px; border-radius: 20px; font-size: 0.7rem; display: none; font-weight: bold; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);">
+                    <i class="fas fa-exclamation-circle"></i> Sin guardar
+                </span>
+            </h2>
+
+            <form method="GET" action="" style="display: flex; align-items: center; height: 32px; margin-left: 5px;">
+                <div style="position: relative;">
+                    <i class="fas fa-search" style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.8rem;"></i>
+                    <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar por código o producto..." style="padding: 0 10px 0 26px; height: 32px; border: 1px solid #cbd5e1; border-radius: 4px 0 0 4px; outline: none; font-family: inherit; box-sizing: border-box; font-size: 0.8rem; width: 220px; transition: border-color 0.2s;">
+                </div>
+                <button type="submit" style="background: var(--color-principal); color: {% if canal == 'Mercado Libre' %}#0f172a{% else %}white{% endif %}; border: none; height: 32px; padding: 0 12px; border-radius: 0 4px 4px 0; cursor: pointer; font-weight: bold; font-size: 0.8rem; transition: opacity 0.2s;">
+                    Buscar
+                </button>
+                {% if query_search %}
+                <a href="?" style="background: #ef4444; color: white; height: 32px; padding: 0 10px; border-radius: 4px; display: flex; align-items: center; text-decoration: none; font-weight: bold; font-size: 0.8rem; margin-left: 6px;">
+                    <i class="fas fa-times"></i>
+                </a>
+                {% endif %}
+            </form>
+        </div>
+        
+        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            <a href="{% url 'descargar_plantilla_costos' %}" class="btn-top" style="background-color: #3b82f6;" title="Bajar Plantilla">
+                <i class="fas fa-download"></i> Plantilla
             </a>
 
-            <button type="button" onclick="eliminarTodosLosCostos()" class="btn-premium" style="background-color: #ef4444;">
-                <i class="fas fa-trash-alt"></i> Borrar Todo
-            </button>
-
             <input type="file" id="csvCostos" accept=".csv" style="display: none;">
-            <button type="button" onclick="document.getElementById('csvCostos').click()" class="btn-premium" style="background-color: #10b981;">
-                <i class="fas fa-upload"></i> Importar Masivo
+            <button type="button" onclick="document.getElementById('csvCostos').click()" class="btn-top" style="background-color: #10b981;" title="Importar Excel">
+                <i class="fas fa-file-import"></i> Importar
             </button>
 
-            <button type="button" id="btnGuardarCostos" onclick="guardarDatosPendientes()" class="btn-premium" style="background-color: #f59e0b;">
-                <i class="fas fa-save"></i> Guardar Modificaciones
+            <button type="button" id="btnGuardarCostos" onclick="guardarDatosPendientes()" class="btn-top" style="background-color: var(--color-principal); color: {% if canal == 'Mercado Libre' %}#0f172a{% else %}white{% endif %};" title="Guardar Cambios">
+                <i class="fas fa-save"></i> Guardar
+            </button>
+
+            <button type="button" onclick="eliminarTodosLosCostos()" class="btn-top" style="background-color: #ef4444;" title="Borrar Todo">
+                <i class="fas fa-trash-alt"></i> Borrar Todo
             </button>
         </div>
     </div>
     
-    <div style="background-color: #f8fafc; border-left: 4px solid var(--color-principal); padding: 15px 20px; border-radius: 6px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; flex-wrap: wrap; gap: 15px;">
-        <form method="GET" action="" style="display: flex; gap: 15px; width: 100%; max-width: 500px; align-items: center;">
-            <div style="position: relative; flex-grow: 1;">
-                <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
-                <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar por código o producto..." style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-family: inherit; box-sizing: border-box; font-size: 0.9rem; transition: border-color 0.2s;">
-            </div>
-            <button type="submit" class="btn-premium" style="background-color: var(--color-principal); flex-shrink: 0; padding: 10px 20px;">
-                Buscar
-            </button>
-            {% if query_search %}
-            <a href="?" class="btn-premium" style="background-color: #ef4444; flex-shrink: 0; padding: 10px 15px;">
-                <i class="fas fa-times"></i> Limpiar
-            </a>
-            {% endif %}
-        </form>
-
-        <span id="indicador-cambios" style="background-color: #f59e0b; color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; display: none; font-weight: bold; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);">
-            <i class="fas fa-exclamation-circle" style="margin-right: 5px;"></i> Cambios sin guardar
-        </span>
-    </div>
-    
-    <div style="overflow-x: auto; overflow-y: auto; max-height: 60vh; border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-        <table id="tablaCostos" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap;">
+    <div style="position: relative; overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 145px); border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+        <table id="tablaCostos" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap; table-layout: fixed;">
             <thead style="position: sticky; top: 0; z-index: 10;">
                 <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;">
                     <th class="th-premium" style="width: 150px; text-align: center;">CÓDIGO</th>
@@ -95,20 +95,20 @@
     </div>
 
     {% if page_obj %}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 12px 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-        <span style="color: #475569; font-weight: 600; font-size: 0.9rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 6px 15px; background: #f8fafc; border-radius: 4px; border: 1px solid #e2e8f0;">
+        <span style="color: #475569; font-weight: 600; font-size: 0.85rem;">
             Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
             {% if query_search %}<span style="color: #64748b; font-style: italic; margin-left: 5px;">(Resultados filtrados)</span>{% endif %}
         </span>
         <div style="display: flex; gap: 8px;">
             {% if page_obj.has_previous %}
-                <a href="?page=1{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">&laquo; Primera</a>
+                <a href="?page=1{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">« Primera</a>
                 <a href="?page={{ page_obj.previous_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">Anterior</a>
             {% endif %}
 
             {% if page_obj.has_next %}
                 <a href="?page={{ page_obj.next_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">Siguiente</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">Última &raquo;</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">Última »</a>
             {% endif %}
         </div>
     </div>
@@ -118,12 +118,18 @@
 
 <style>
     /* ========================================================
+       BOTONES SUPERIORES COMPACTOS
+       ======================================================== */
+    .btn-top { color: white; border: none; padding: 0 10px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s; font-size: 0.8rem; text-decoration: none; height: 32px;}
+    .btn-top:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    /* ========================================================
        DISEÑO TIPO EXCEL (GRID MARCADOS ESTRICTOS)
        ======================================================== */
     #tablaCostos { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-collapse: collapse; }
     
-    .th-premium { padding: 12px 10px; border: 1px solid #334155; }
-    .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; }
+    .th-premium { padding: 10px 10px; border: 1px solid #334155; }
+    .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 36px; vertical-align: middle; }
     
     /* Efecto Cebra y Hover Excel */
     .fila-simulador:nth-child(even) { background-color: #f8fafc; }
@@ -137,7 +143,7 @@
     .fila-editada > td:first-child { border-left: 4px solid #f59e0b; }
 
     /* Inputs Fantasma (Llenan el 100% de la celda) */
-    .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 10px 15px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
+    .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 6px 15px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
     .celda-input:not([readonly]):focus { background-color: #fef9c3; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; position: relative; z-index: 1; border-radius: 2px; }
     
     /* Inputs Bloqueados (Readonly) */
@@ -159,13 +165,9 @@
     .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .celda-input[type=number] { -moz-appearance: textfield; }
 
-    /* Botones Premium */
-    .btn-premium { color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s, filter 0.2s; text-decoration: none; font-size: 0.85rem; font-family: inherit; }
-    .btn-premium:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
     /* Paginación */
-    .btn-pag { padding: 6px 14px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; }
-    .btn-pag:hover { background: var(--color-principal); color: white; border-color: var(--color-principal); }
+    .btn-pag { padding: 4px 10px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; font-size: 0.8rem;}
+    .btn-pag:hover { background: var(--color-principal); color: {% if canal == 'Mercado Libre' %}#0f172a{% else %}white{% endif %}; border-color: var(--color-principal); }
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -251,7 +253,7 @@
                 localStorage.setItem('memoriaCostosTemp', JSON.stringify(memoriaCostos));
                 document.getElementById('csvCostos').value = "";
                 
-                alert("Vista previa lista. Se guardó en memoria. ¡No olvides hacer clic en 'Guardar Modificaciones'!");
+                alert("Vista previa lista. Se guardó en memoria. ¡No olvides hacer clic en 'Guardar'!");
                 window.location.reload();
             }
         });
