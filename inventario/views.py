@@ -1301,10 +1301,7 @@ def borrar_todos_los_ingresos(request):
 def percheron_mercadolibre(request):
     canal = request.session.get('canal_activo', 'Mercado Libre')
     
-    # === NOVEDAD: Obtenemos los SKUs que YA se vendieron ===
     skus_usados = SalidaMercadoLibre.objects.values_list('sku', flat=True)
-    
-    # 1. Traemos los datos para el BUSCADOR (Ocultando los que ya salieron)
     ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
     
     productos_db = Producto.objects.all()
@@ -1329,17 +1326,14 @@ def percheron_mercadolibre(request):
             'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
         }
         
-    # 2. HISTORIAL: Traemos LAS SALIDAS GUARDADAS para pintarlas en la tabla de abajo
-    salidas_lista = SalidaMercadoLibre.objects.all().order_by('-id')
-    paginator = Paginator(salidas_lista, 100)
-    page_obj = paginator.get_page(request.GET.get('page'))
+    # === CAMBIO CLAVE: Eliminamos el Paginator para enviar la lista completa de corrido ===
+    page_obj = SalidaMercadoLibre.objects.all().order_by('-id')
 
     return render(request, 'inventario/percheron_mercadolibre.html', {
         'canal': canal,
         'skus_json': json.dumps(dict_skus),
         'page_obj': page_obj 
     })
-
 
 
 

@@ -104,11 +104,11 @@
                         <td class="td-premium" style="background-color: #f8fafc;">
                             <div style="display: flex; align-items: center; padding: 0 5px; justify-content: center;">
                                 <span style="color: #94a3b8; font-weight: bold; margin-right: 2px;">S/</span>
-                                <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" style="padding-left: 2px; width: 60px;" tabindex="-1">
+                                <input type="number" class="celda-input derecha bold val-costo" style="padding-left: 2px; width: 60px;">
                             </div>
                         </td>
                         <td class="td-premium" style="background-color: #fef2f2;">
-                            <input type="number" value="1" readonly class="celda-input central val-desc input-readonly input-badge-rojo" tabindex="-1">
+                            <input type="number" value="1" class="celda-input central val-desc input-badge-rojo">
                         </td>
                         <td class="td-premium"><input type="text" placeholder="Nro. Venta..." class="celda-input central bold text-dark val-ventas"></td>
                         <td class="td-premium">
@@ -146,23 +146,22 @@
                         {% for item in page_obj %}
                         <tr class="fila-salida" data-id="{{ item.id }}">
                             <td class="td-premium">
-                                <input type="text" readonly class="celda-input central text-blue text-mono val-sku input-readonly" value="{{ item.sku }}" tabindex="-1">
+                                <input type="text" class="celda-input central text-blue text-mono val-sku" value="{{ item.sku }}" oninput="autocompletarBUSCARV(this)">
                             </td>
                             <td class="td-premium"><input type="text" readonly class="celda-input central bold val-modelo input-readonly" value="{{ item.modelo }}" tabindex="-1"></td>
                             <td class="td-premium"><input type="text" readonly class="celda-input val-titulo input-readonly" value="{{ item.titulo }}" tabindex="-1"></td>
-                            
                             <td class="td-premium"><input type="date" class="celda-input central val-fecha" value="{{ item.fecha_salida|date:'Y-m-d' }}"></td>
                             <td class="td-premium"><input type="text" readonly class="celda-input central text-blue text-mono val-serie input-readonly" value="{{ item.serie|default:'-' }}" tabindex="-1"></td>
                             
                             <td class="td-premium" style="background-color: #f8fafc;">
                                 <div style="display: flex; align-items: center; padding: 0 5px; justify-content: center;">
                                     <span style="color: #94a3b8; font-weight: bold; margin-right: 2px;">S/</span>
-                                    <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" value="{{ item.costo|floatformat:2|default:'0.00' }}" style="padding-left: 2px; width: 60px;" tabindex="-1">
+                                    <input type="number" class="celda-input derecha bold val-costo" value="{{ item.costo|floatformat:2|default:'0.00' }}" style="padding-left: 2px; width: 60px;">
                                 </div>
                             </td>
                             
                             <td class="td-premium" style="background-color: #fef2f2;">
-                                <input type="number" readonly class="celda-input central val-desc input-readonly input-badge-rojo" value="{{ item.descuento }}" tabindex="-1">
+                                <input type="number" class="celda-input central val-desc input-badge-rojo" value="{{ item.descuento|default:'1' }}">
                             </td>
                             
                             <td class="td-premium"><input type="text" class="celda-input central bold text-dark val-ventas" value="{{ item.nro_venta|default:'' }}"></td>
@@ -342,7 +341,7 @@
         nuevaFila.style.display = ""; 
         tbody.appendChild(nuevaFila);
         
-        // Scroll hacia el final de la tabla de salidas
+        // Scroll hacia el final
         const contenedorTabla = document.querySelector("div[style*='flex-grow: 1'] > div[style*='overflow: auto']");
         if(contenedorTabla) {
             setTimeout(() => { contenedorTabla.scrollTop = contenedorTabla.scrollHeight; }, 50);
@@ -382,11 +381,12 @@
         let hayIncompletos = false;
 
         filas.forEach(fila => {
-            // IGNORAR FILAS QUE YA FUERON PROCESADAS PREVIAMENTE (Tienen atributo data-id asignado desde la base de datos)
+            // IGNORAR FILAS QUE YA FUERON PROCESADAS PREVIAMENTE
+            // (Para no duplicar descuentos en la Base de Datos si haces clic otra vez)
             if (fila.hasAttribute('data-id')) return;
 
             const inputSku = fila.querySelector('.val-sku');
-            if (inputSku) {
+            if (inputSku && inputSku.type !== 'hidden') {
                 const sku = inputSku.value.trim();
                 const modelo = fila.querySelector('.val-modelo').value.trim();
                 const titulo = fila.querySelector('.val-titulo').value.trim();
