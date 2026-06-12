@@ -144,30 +144,52 @@
 
                     {% if page_obj %}
                         {% for item in page_obj %}
-                        <tr class="fila-salida">
+                        <tr class="fila-salida" data-id="{{ item.id }}">
                             <td class="td-premium">
-                                <input type="hidden" class="val-sku" value="{{ item.sku }}">
-                                <input type="text" readonly class="celda-input central text-blue text-mono input-readonly" value="{{ item.sku }}" tabindex="-1">
+                                <input type="text" readonly class="celda-input central text-blue text-mono val-sku input-readonly" value="{{ item.sku }}" tabindex="-1">
                             </td>
                             <td class="td-premium"><input type="text" readonly class="celda-input central bold val-modelo input-readonly" value="{{ item.modelo }}" tabindex="-1"></td>
                             <td class="td-premium"><input type="text" readonly class="celda-input val-titulo input-readonly" value="{{ item.titulo }}" tabindex="-1"></td>
-                            <td class="td-premium"><input type="date" readonly class="celda-input central val-fecha input-readonly" value="{{ item.fecha_salida|date:'Y-m-d' }}" tabindex="-1"></td>
+                            
+                            <td class="td-premium"><input type="date" class="celda-input central val-fecha" value="{{ item.fecha_salida|date:'Y-m-d' }}"></td>
                             <td class="td-premium"><input type="text" readonly class="celda-input central text-blue text-mono val-serie input-readonly" value="{{ item.serie|default:'-' }}" tabindex="-1"></td>
                             
                             <td class="td-premium" style="background-color: #f8fafc;">
                                 <div style="display: flex; align-items: center; padding: 0 5px; justify-content: center;">
                                     <span style="color: #94a3b8; font-weight: bold; margin-right: 2px;">S/</span>
-                                    <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" value="{{ item.costo|floatformat:2 }}" style="padding-left: 2px; width: 60px;" tabindex="-1">
+                                    <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" value="{{ item.costo|floatformat:2|default:'0.00' }}" style="padding-left: 2px; width: 60px;" tabindex="-1">
                                 </div>
                             </td>
                             
                             <td class="td-premium" style="background-color: #fef2f2;">
-                                <input type="text" readonly class="celda-input central val-desc input-readonly input-badge-rojo" value="{{ item.descuento }}" tabindex="-1">
+                                <input type="number" readonly class="celda-input central val-desc input-readonly input-badge-rojo" value="{{ item.descuento }}" tabindex="-1">
                             </td>
                             
-                            <td class="td-premium"><input type="text" readonly class="celda-input central bold text-dark val-ventas input-readonly" value="{{ item.nro_venta }}" tabindex="-1"></td>
-                            <td class="td-premium"><input type="text" readonly class="celda-input central bold val-tipo input-readonly" value="{{ item.tipo_venta }}" tabindex="-1"></td>
-                            <td class="td-premium"><input type="text" readonly class="celda-input central text-orange val-by input-readonly" value="{{ item.creado_por }}" tabindex="-1"></td>
+                            <td class="td-premium"><input type="text" class="celda-input central bold text-dark val-ventas" value="{{ item.nro_venta|default:'' }}"></td>
+                            <td class="td-premium">
+                                <select class="celda-input central bold val-tipo select-premium">
+                                    <option value="" disabled {% if not item.tipo_venta %}selected{% endif %}>-- TIPO --</option>
+                                    <option value="FLEX" {% if item.tipo_venta == 'FLEX' %}selected{% endif %}>FLEX</option>
+                                    <option value="URBANO" {% if item.tipo_venta == 'URBANO' %}selected{% endif %}>URBANO</option>
+                                    <option value="ACUERDO" {% if item.tipo_venta == 'ACUERDO' %}selected{% endif %}>ACUERDO</option>
+                                    <option value="POST VENTA" {% if item.tipo_venta == 'POST VENTA' %}selected{% endif %}>POST VENTA</option>
+                                </select>
+                            </td>
+                            <td class="td-premium">
+                                <select class="celda-input central text-orange val-by select-premium">
+                                    <option value="" disabled {% if not item.creado_por %}selected{% endif %}>-- BY --</option>
+                                    <option value="MILAGROS" {% if item.creado_por == 'MILAGROS' %}selected{% endif %}>MILAGROS</option>
+                                    <option value="PABLO" {% if item.creado_por == 'PABLO' %}selected{% endif %}>PABLO</option>
+                                    <option value="DENISE" {% if item.creado_por == 'DENISE' %}selected{% endif %}>DENISE</option>
+                                    <option value="JOSHUA" {% if item.creado_por == 'JOSHUA' %}selected{% endif %}>JOSHUA</option>
+                                    <option value="ALDO" {% if item.creado_por == 'ALDO' %}selected{% endif %}>ALDO</option>
+                                    <option value="ADAMARI" {% if item.creado_por == 'ADAMARI' %}selected{% endif %}>ADAMARI</option>
+                                    <option value="CARLOS" {% if item.creado_por == 'CARLOS' %}selected{% endif %}>CARLOS</option>
+                                    <option value="DAVID" {% if item.creado_por == 'DAVID' %}selected{% endif %}>DAVID</option>
+                                    <option value="EDUARDO" {% if item.creado_por == 'EDUARDO' %}selected{% endif %}>EDUARDO</option>
+                                    <option value="KEVIN" {% if item.creado_por == 'KEVIN' %}selected{% endif %}>KEVIN</option>
+                                </select>
+                            </td>
                             
                             <td class="td-premium" style="text-align: center; vertical-align: middle;">
                                 <i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2em;" title="Guardado Exitosamente"></i>
@@ -257,7 +279,7 @@
         document.getElementById('bciStock').value = '0';
         
         if (query === '') {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 15px; color: #94a3b8; font-size: 0.9rem; border: 1px solid #cbd5e1;"><i class="fas fa-barcode" style="font-size: 1.5em; color: #cbd5e1; margin-bottom: 5px; display: block;"></i>Escribe un modelo arriba para buscar los SKUs disponibles</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #94a3b8; font-size: 0.95rem; border: 1px solid #cbd5e1;"><i class="fas fa-barcode" style="font-size: 2em; color: #cbd5e1; margin-bottom: 10px; display: block;"></i>Escribe un modelo arriba para buscar los SKUs disponibles</td></tr>';
             return;
         }
 
@@ -290,7 +312,7 @@
         }
 
         if (html === '') {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 15px; color: #ef4444; font-weight: bold; font-size: 0.9rem; border: 1px solid #cbd5e1;"><i class="fas fa-exclamation-circle" style="margin-bottom: 5px; display: block; font-size: 1.2rem;"></i>No hay SKUs disponibles (o todos ya fueron agregados).</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #ef4444; font-weight: bold; font-size: 0.95rem; border: 1px solid #cbd5e1;"><i class="fas fa-exclamation-circle" style="margin-bottom: 5px; display: block; font-size: 1.5rem;"></i>No hay SKUs disponibles (o todos ya fueron agregados).</td></tr>';
         } else {
             tbody.innerHTML = html;
         }
@@ -360,8 +382,11 @@
         let hayIncompletos = false;
 
         filas.forEach(fila => {
+            // IGNORAR FILAS QUE YA FUERON PROCESADAS PREVIAMENTE (Tienen atributo data-id asignado desde la base de datos)
+            if (fila.hasAttribute('data-id')) return;
+
             const inputSku = fila.querySelector('.val-sku');
-            if (inputSku && inputSku.type !== 'hidden') {
+            if (inputSku) {
                 const sku = inputSku.value.trim();
                 const modelo = fila.querySelector('.val-modelo').value.trim();
                 const titulo = fila.querySelector('.val-titulo').value.trim();
@@ -390,12 +415,12 @@
         });
 
         if (hayIncompletos) {
-            alert("Hay filas con SKUs no registrados o incompletos. Bórralas o corrígelas antes de procesar.");
+            alert("Hay filas NUEVAS con SKUs no registrados o incompletos. Bórralas o corrígelas antes de procesar.");
             return;
         }
 
         if(datos.length === 0) {
-            alert("No hay nuevas salidas para procesar.");
+            alert("No hay salidas NUEVAS para procesar.");
             return;
         }
 
