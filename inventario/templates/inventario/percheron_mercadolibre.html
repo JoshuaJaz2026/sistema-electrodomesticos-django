@@ -59,6 +59,9 @@
                 <span style="background-color: #fff7ed; color: #9a3412; padding: 3px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; border: 1px solid #fed7aa; margin-left: 5px; display: flex; align-items: center; gap: 5px;">
                     <i class="fas fa-exclamation-triangle"></i> Restará del stock
                 </span>
+                <span id="indicador-cambios-salidas" style="background-color: #f59e0b; color: white; padding: 3px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; display: none; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3); margin-left: 5px;">
+                    <i class="fas fa-exclamation-circle"></i> Cambios sin guardar
+                </span>
             </h3>
             <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                 <button type="button" onclick="descargarPlantillaSalidas()" class="btn-top" style="background-color: #3b82f6;">
@@ -104,11 +107,11 @@
                         <td class="td-premium" style="background-color: #f8fafc;">
                             <div style="display: flex; align-items: center; padding: 0 5px; justify-content: center;">
                                 <span style="color: #94a3b8; font-weight: bold; margin-right: 2px;">S/</span>
-                                <input type="number" class="celda-input derecha bold val-costo" style="padding-left: 2px; width: 60px;">
+                                <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" style="padding-left: 2px; width: 60px;" tabindex="-1">
                             </div>
                         </td>
                         <td class="td-premium" style="background-color: #fef2f2;">
-                            <input type="number" value="1" class="celda-input central val-desc input-badge-rojo">
+                            <input type="number" value="1" readonly class="celda-input central val-desc input-readonly input-badge-rojo" tabindex="-1">
                         </td>
                         <td class="td-premium"><input type="text" placeholder="Nro. Venta..." class="celda-input central bold text-dark val-ventas"></td>
                         <td class="td-premium">
@@ -150,18 +153,19 @@
                             </td>
                             <td class="td-premium"><input type="text" readonly class="celda-input central bold val-modelo input-readonly" value="{{ item.modelo }}" tabindex="-1"></td>
                             <td class="td-premium"><input type="text" readonly class="celda-input val-titulo input-readonly" value="{{ item.titulo }}" tabindex="-1"></td>
+                            
                             <td class="td-premium"><input type="date" class="celda-input central val-fecha" value="{{ item.fecha_salida|date:'Y-m-d' }}"></td>
                             <td class="td-premium"><input type="text" readonly class="celda-input central text-blue text-mono val-serie input-readonly" value="{{ item.serie|default:'-' }}" tabindex="-1"></td>
                             
                             <td class="td-premium" style="background-color: #f8fafc;">
                                 <div style="display: flex; align-items: center; padding: 0 5px; justify-content: center;">
                                     <span style="color: #94a3b8; font-weight: bold; margin-right: 2px;">S/</span>
-                                    <input type="number" class="celda-input derecha bold val-costo" value="{{ item.costo|floatformat:2|default:'0.00' }}" style="padding-left: 2px; width: 60px;">
+                                    <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" value="{{ item.costo|floatformat:2|default:'0.00' }}" style="padding-left: 2px; width: 60px;" tabindex="-1">
                                 </div>
                             </td>
                             
                             <td class="td-premium" style="background-color: #fef2f2;">
-                                <input type="number" class="celda-input central val-desc input-badge-rojo" value="{{ item.descuento|default:'1' }}">
+                                <input type="number" readonly class="celda-input central val-desc input-badge-rojo input-readonly" value="{{ item.descuento|default:'1' }}" tabindex="-1">
                             </td>
                             
                             <td class="td-premium"><input type="text" class="celda-input central bold text-dark val-ventas" value="{{ item.nro_venta|default:'' }}"></td>
@@ -191,7 +195,9 @@
                             </td>
                             
                             <td class="td-premium" style="text-align: center; vertical-align: middle;">
-                                <i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2em;" title="Guardado Exitosamente"></i>
+                                <button type="button" onclick="eliminarFilaSalida(this)" class="btn-eliminar" title="Eliminar registro y devolver stock">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -259,6 +265,9 @@
 
 <script>
     const diccionarioSKUs = {{ skus_json|safe|default:"{}" }};
+    
+    // VARIABLE GLOBAL PARA ALMACENAR LOS IDs A ELIMINAR
+    let salidasAEliminar = [];
 
     function getSKUsUsados() {
         const inputs = document.querySelectorAll('#cuerpoSalidas .val-sku');
@@ -341,15 +350,25 @@
         nuevaFila.style.display = ""; 
         tbody.appendChild(nuevaFila);
         
-        // Scroll hacia el final
         const contenedorTabla = document.querySelector("div[style*='flex-grow: 1'] > div[style*='overflow: auto']");
         if(contenedorTabla) {
             setTimeout(() => { contenedorTabla.scrollTop = contenedorTabla.scrollHeight; }, 50);
         }
     }
 
+    // === FUNCIÓN ELIMINAR ACTUALIZADA ===
     function eliminarFilaSalida(btn) {
-        btn.closest('tr').remove();
+        const fila = btn.closest('tr');
+        
+        // Verificamos si es una fila de la Base de Datos
+        const dbId = fila.getAttribute('data-id');
+        if (dbId) {
+            salidasAEliminar.push(dbId);
+            // Mostramos alerta visual de que hay algo pendiente por guardar/procesar
+            document.getElementById('indicador-cambios-salidas').style.display = 'inline-flex';
+        }
+
+        fila.remove();
         ejecutarBusqueda();
     }
 
@@ -382,7 +401,7 @@
 
         filas.forEach(fila => {
             // IGNORAR FILAS QUE YA FUERON PROCESADAS PREVIAMENTE
-            // (Para no duplicar descuentos en la Base de Datos si haces clic otra vez)
+            // Si tiene data-id, significa que no es una fila nueva
             if (fila.hasAttribute('data-id')) return;
 
             const inputSku = fila.querySelector('.val-sku');
@@ -419,8 +438,9 @@
             return;
         }
 
-        if(datos.length === 0) {
-            alert("No hay salidas NUEVAS para procesar.");
+        // Validación inteligente: Verificar si hay datos nuevos O eliminaciones pendientes
+        if(datos.length === 0 && salidasAEliminar.length === 0) {
+            alert("No hay salidas nuevas ni registros eliminados para procesar.");
             return;
         }
 
@@ -432,7 +452,8 @@
         fetch("{% url 'procesar_salidas_ml' %}", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
-            body: JSON.stringify({ salidas: datos })
+            // === AQUÍ ENVIAMOS TAMBIÉN LA LISTA DE ELIMINADOS AL SERVIDOR ===
+            body: JSON.stringify({ salidas: datos, eliminadas: salidasAEliminar })
         })
         .then(res => res.json())
         .then(data => {
