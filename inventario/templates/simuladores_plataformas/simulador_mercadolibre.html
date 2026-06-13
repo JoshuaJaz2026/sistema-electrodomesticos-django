@@ -160,38 +160,38 @@
                         <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-mpe input-readonly" readonly tabindex="-1" value="{{ sim.mpe|default:'MPE' }}"></td>
                     </tr>
                     {% endfor %}
-                {% else %}
-                    <tr class="fila-simulador" data-original-key="molde">
-                        <td class="td-premium"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype"></td>
-                        <td class="td-premium td-link-container">
-                            <input type="text" class="celda-input val-link text-blue input-readonly" readonly placeholder="Link..." tabindex="-1">
-                            <a href="#" target="_blank" class="btn-link" style="display: none;"><i class="fas fa-external-link-alt"></i></a>
-                        </td>
-                        <td class="td-premium"><input list="list-estado" class="celda-input central val-estado"></td>
-                        <td class="td-premium bg-yellow-light"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub text-mono" style="color: #b45309;" placeholder="Ej. 123456"></td>
-                        <td class="td-premium"><input list="list-tipopub" class="celda-input central val-tipo"></td>
-                        <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-codprod" oninput="buscarCosto(this)"></td>
-                        <td class="td-premium"><input list="list-categoria" class="celda-input val-categoria" oninput="buscarComision(this)"></td>
-                        <td class="td-premium"><input list="list-marca" class="celda-input val-marca bold text-dark"></td>
-                        <td class="td-premium"><input type="text" class="celda-input val-producto"></td>
-                        
-                        <td class="td-premium"><input type="text" class="celda-input derecha bold val-ptachado input-readonly" readonly tabindex="-1"></td>
-                        <td class="td-premium"><input type="number" step="0.01" class="celda-input central bold val-dscto text-dark" oninput="calcularFila(this)"></td>
-                        <td class="td-premium bg-green-light"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)"></td>
-                        
-                        <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-envio" oninput="calcularFila(this)"></td>
-                        <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input central bold text-red val-porc-com input-readonly" readonly tabindex="-1" value="0.00"></td>
-                        <td class="td-premium bg-red-light"><input type="text" class="celda-input derecha text-red val-com-soles input-readonly" readonly tabindex="-1"></td>
-                        
-                        <td class="td-premium bg-green-light"><input type="text" class="celda-input derecha bold text-green-dark val-pago-neto input-readonly" readonly tabindex="-1"></td>
-                        <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-costo input-readonly" readonly tabindex="-1" value="0.00"></td>
-                        
-                        <td class="td-premium bg-blue-light"><input type="text" class="celda-input derecha bold val-ganancia input-readonly" readonly tabindex="-1"></td>
-                        <td class="td-premium bg-blue-light"><input type="text" class="celda-input central bold val-rentabilidad input-readonly" readonly tabindex="-1"></td>
-                        
-                        <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-mpe input-readonly" readonly tabindex="-1" value="MPE"></td>
-                    </tr>
                 {% endif %}
+                
+                <tr class="fila-simulador" id="fila-molde" style="display: none;" data-original-key="molde">
+                    <td class="td-premium"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype"></td>
+                    <td class="td-premium td-link-container">
+                        <input type="text" class="celda-input val-link text-blue input-readonly" readonly placeholder="Link..." tabindex="-1">
+                        <a href="#" target="_blank" class="btn-link" style="display: none;"><i class="fas fa-external-link-alt"></i></a>
+                    </td>
+                    <td class="td-premium"><input list="list-estado" class="celda-input central val-estado"></td>
+                    <td class="td-premium bg-yellow-light"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub text-mono" style="color: #b45309;" placeholder="Ej. 123456"></td>
+                    <td class="td-premium"><input list="list-tipopub" class="celda-input central val-tipo"></td>
+                    <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-codprod" oninput="buscarCosto(this)"></td>
+                    <td class="td-premium"><input list="list-categoria" class="celda-input val-categoria" oninput="buscarComision(this)"></td>
+                    <td class="td-premium"><input list="list-marca" class="celda-input val-marca bold text-dark"></td>
+                    <td class="td-premium"><input type="text" class="celda-input val-producto"></td>
+                    
+                    <td class="td-premium"><input type="text" class="celda-input derecha bold val-ptachado input-readonly" readonly tabindex="-1"></td>
+                    <td class="td-premium"><input type="number" step="0.01" class="celda-input central bold val-dscto text-dark" oninput="calcularFila(this)"></td>
+                    <td class="td-premium bg-green-light"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)"></td>
+                    
+                    <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-envio" oninput="calcularFila(this)"></td>
+                    <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input central bold text-red val-porc-com input-readonly" readonly tabindex="-1" value="0.00"></td>
+                    <td class="td-premium bg-red-light"><input type="text" class="celda-input derecha text-red val-com-soles input-readonly" readonly tabindex="-1"></td>
+                    
+                    <td class="td-premium bg-green-light"><input type="text" class="celda-input derecha bold text-green-dark val-pago-neto input-readonly" readonly tabindex="-1"></td>
+                    <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-costo input-readonly" readonly tabindex="-1" value="0.00"></td>
+                    
+                    <td class="td-premium bg-blue-light"><input type="text" class="celda-input derecha bold val-ganancia input-readonly" readonly tabindex="-1"></td>
+                    <td class="td-premium bg-blue-light"><input type="text" class="celda-input central bold val-rentabilidad input-readonly" readonly tabindex="-1"></td>
+                    
+                    <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-mpe input-readonly" readonly tabindex="-1" value="MPE"></td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -291,11 +291,14 @@
     document.querySelector('#tablaReporte').addEventListener('input', function(e) {
         if (e.target.tagName === 'INPUT') {
             const fila = e.target.closest('tr.fila-simulador');
-            if (fila) registrarCambioFilaML(fila);
+            // Ignoramos la fila molde para que no guarde basura
+            if (fila && fila.id !== 'fila-molde') registrarCambioFilaML(fila);
         }
     });
 
     function registrarCambioFilaML(fila) {
+        if (fila.id === 'fila-molde') return;
+        
         let key = fila.dataset.originalKey;
         if (!key || key === 'molde') {
             key = 'temp-' + Math.random().toString(36).substr(2, 9);
@@ -343,7 +346,8 @@
         }
 
         let hayCambiosPrevios = false;
-        const filas = document.querySelectorAll('#tablaReporte tbody .fila-simulador');
+        // Solo restauramos filas que NO sean el molde
+        const filas = document.querySelectorAll('#tablaReporte tbody .fila-simulador:not(#fila-molde)');
         
         filas.forEach(fila => {
             const key = fila.dataset.originalKey;
@@ -508,17 +512,26 @@
 
     function agregarFila() {
         const tbody = document.querySelector('#tablaReporte tbody');
-        const primeraFila = tbody.querySelector('tr.fila-simulador');
-        const nuevaFila = primeraFila.cloneNode(true);
+        const filaMolde = document.getElementById('fila-molde');
+        const nuevaFila = filaMolde.cloneNode(true);
+        
+        nuevaFila.id = ""; // Quitamos el ID para que no hayan duplicados
+        nuevaFila.style.display = ""; // La hacemos visible
         nuevaFila.dataset.originalKey = 'temp-' + Math.random().toString(36).substr(2, 9);
         nuevaFila.classList.remove('fila-editada');
-        nuevaFila.querySelectorAll('input').forEach(input => input.value = '');
+        
+        nuevaFila.querySelectorAll('input').forEach(input => {
+            if (!input.classList.contains('input-readonly')) input.value = '';
+        });
+        
         nuevaFila.querySelector('.val-mpe').value = 'MPE';
+        nuevaFila.querySelector('.val-porc-com').value = '0.00';
+        nuevaFila.querySelector('.val-costo').value = '0.00';
         nuevaFila.querySelector('.btn-link').style.display = 'none';
         nuevaFila.querySelector('.val-ganancia').style.color = '#1e40af';
         nuevaFila.querySelector('.val-rentabilidad').style.color = '#1e40af';
         
-        // Insertamos al inicio y scrolleamos arriba
+        // Insertamos al inicio de la tabla (después del thead)
         tbody.insertBefore(nuevaFila, tbody.firstChild);
         const contenedorTabla = document.querySelector("div[style*='flex-grow: 1']");
         if(contenedorTabla) {
@@ -527,7 +540,8 @@
     }
 
     function exportarSimulador() {
-        const filas = document.querySelectorAll('.fila-simulador');
+        // Excluimos la fila molde de la exportación
+        const filas = document.querySelectorAll('.fila-simulador:not(#fila-molde)');
         let data = [];
         filas.forEach(fila => {
             data.push({
@@ -573,11 +587,11 @@
                 const json = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
 
                 const tbody = document.querySelector('#tablaReporte tbody');
-                let filaMolde = tbody.querySelector('.fila-simulador');
+                let filaMolde = document.getElementById('fila-molde');
                 if (!filaMolde) return alert("Error: No se encontró la fila base.");
-                filaMolde = filaMolde.cloneNode(true);
                 
-                tbody.innerHTML = ''; 
+                // Borramos las filas visibles, pero mantenemos intacto nuestro molde oculto
+                tbody.querySelectorAll('.fila-simulador:not(#fila-molde)').forEach(f => f.remove());
 
                 function limpiarMonto(valor) {
                     if (valor === undefined || valor === null || valor === '') return '0.00';
@@ -595,6 +609,8 @@
 
                 json.forEach(row => {
                     const nuevaFila = filaMolde.cloneNode(true);
+                    nuevaFila.id = "";
+                    nuevaFila.style.display = "";
                     nuevaFila.dataset.originalKey = 'temp-' + Math.random().toString(36).substr(2, 9);
                     
                     if (nuevaFila.querySelector('.val-itemtype')) nuevaFila.querySelector('.val-itemtype').value = row["ITEM TYPE"] || '';
@@ -635,8 +651,7 @@
                     registrarCambioFilaML(nuevaFila);
                 });
                 
-                if(json.length > 0) tbody.appendChild(fragmento);
-                else tbody.appendChild(filaMolde);
+                if(json.length > 0) tbody.insertBefore(fragmento, tbody.firstChild);
 
                 alert("✅ ¡Simulación importada con éxito! Revisa la tabla y presiona Guardar.");
 
