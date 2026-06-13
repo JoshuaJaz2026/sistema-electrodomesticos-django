@@ -54,6 +54,10 @@
             <button type="button" id="btnGuardar" onclick="guardarSimulaciones()" class="btn-top" style="background-color: var(--color-principal, #eab308); color: #0f172a;" title="Guardar Cambios">
                 <i class="fas fa-save"></i> Guardar
             </button>
+
+            <button type="button" id="btnBorrarSimulador" onclick="borrarTodoSimulador()" class="btn-top" style="background-color: #ef4444;" title="Borrar Todo">
+                <i class="fas fa-trash-alt"></i> Borrar Todo
+            </button>
             
             <div style="position: relative;">
                 <button type="button" onclick="togglePanelColumnas()" class="btn-top" style="background-color: #334155;" title="Personalizar Columnas">
@@ -679,6 +683,37 @@
             btn.innerHTML = textoOriginal;
             btn.disabled = false;
         });
+    }
+
+    // === NUEVA FUNCIÓN: BORRAR TODO EL SIMULADOR ===
+    function borrarTodoSimulador() {
+        if (confirm("¡ATENCIÓN PELIGRO! ⚠️ ¿Estás totalmente seguro de borrar TODOS los datos del Simulador de Costos? Esta acción dejará tu tabla en blanco y no se puede deshacer.")) {
+            const btn = document.getElementById('btnBorrarSimulador');
+            const textOriginal = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Borrando...';
+            btn.disabled = true;
+
+            fetch("{% url 'borrar_todos_simulador_ml' %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'ok') { 
+                    localStorage.removeItem('memoriaSimuladorML'); 
+                    memoriaSimulador = {};
+                    alert(data.message); 
+                    window.location.reload(); 
+                } else { 
+                    alert("Error: " + data.message); 
+                }
+            })
+            .catch(err => alert("Ocurrió un error de conexión."))
+            .finally(() => { 
+                btn.innerHTML = textOriginal; 
+                btn.disabled = false; 
+            });
+        }
     }
 </script>
 {% endblock %}

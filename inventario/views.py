@@ -1543,3 +1543,17 @@ def borrar_todos_los_reportes_ml(request):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'error', 'message': 'Solo permitido POST'})
+
+@login_required
+@csrf_exempt
+def borrar_todos_simulador_ml(request):
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                # Reemplaza 'SimuladorMercadoLibre' por el nombre de tu modelo de la BD
+                SimuladorMercadoLibre.objects.all().delete()
+            
+            return JsonResponse({'status': 'ok', 'message': '¡Datos del simulador limpiados con éxito!'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Solo permitido POST'})
