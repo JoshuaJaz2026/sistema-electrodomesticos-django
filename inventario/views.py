@@ -1406,54 +1406,93 @@ def procesar_salidas_ml(request):
     try:
         data = json.loads(request.body)
         salidas = data.get('salidas', [])
+        eliminadas = data.get('eliminadas', []) # Recibimos los IDs a borrar
 
-        if not salidas:
-            return JsonResponse({'status': 'error', 'message': 'No hay salidas para procesar.'})
+        # VALIDACIÓN INTELIGENTE: Falla solo si NO hay salidas nuevas Y TAMPOCO hay eliminaciones
+        if not salidas and not eliminadas:
+            return JsonResponse({'status': 'error', 'message': 'No hay nuevas salidas ni registros eliminados para procesar.'})
 
         with transaction.atomic():
             conteo_descuentos = {}
+            conteo_restauraciones = {}
 
-            # Guardar historial y acumular descuentos por modelo
-            for sal in salidas:
-                sku = sal.get('sku', '').strip()
-                modelo = sal.get('modelo', '').strip()
-                titulo = sal.get('titulo', '').strip()
-                fecha_salida = sal.get('fecha_salida') or datetime.now().date()
-                serie = sal.get('serie', '')
-                costo = float(sal.get('costo') or 0)
-                descuento = int(float(sal.get('desc_1und') or 1))
-                nro_venta = sal.get('nro_ventas', '')
-                tipo_venta = sal.get('tipo_venta', '')
-                by_usuario = sal.get('by', request.user.username)
+            # ==========================================================
+            # 1. PROCESAR ELIMINACIONES (Recuperar stock y borrar bd)
+            # ==========================================================
+            if eliminadas:
+                registros_viejos = SalidaMercadoLibre.objects.filter(id__in=eliminadas)
+                for registro in registros_viejos:
+                    if registro.modelo:
+                        # Limpiamos el modelo igual que en la creación para asegurar que coincida
+                        key = str(registro.modelo).upper().replace(" ", "").replace("-", "")
+                        conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.descuento
+                    
+                    # Destruimos el registro de la base de datos
+                    registro.delete()
 
-                SalidaMercadoLibre.objects.create(
-                    sku=sku,
-                    modelo=modelo,
-                    titulo=titulo,
-                    fecha_salida=fecha_salida,
-                    serie=serie,
-                    costo=costo,
-                    descuento=descuento,
-                    nro_venta=nro_venta,
-                    tipo_venta=tipo_venta,
-                    creado_por=by_usuario
-                )
+            # ==========================================================
+            # 2. PROCESAR NUEVAS SALIDAS (Guardar historial y acumular descuentos)
+            # ==========================================================
+            if salidas:
+                for sal in salidas:
+                    sku = sal.get('sku', '').strip()
+                    modelo = sal.get('modelo', '').strip()
+                    titulo = sal.get('titulo', '').strip()
+                    fecha_salida = sal.get('fecha_salida') or datetime.now().date()
+                    serie = sal.get('serie', '')
+                    costo = float(sal.get('costo') or 0)
+                    descuento = int(float(sal.get('desc_1und') or 1))
+                    nro_venta = sal.get('nro_ventas', '')
+                    tipo_venta = sal.get('tipo_venta', '')
+                    by_usuario = sal.get('by', request.user.username)
 
-                key = modelo.upper().replace(" ", "").replace("-", "")
-                if key:
-                    conteo_descuentos[key] = conteo_descuentos.get(key, 0) + descuento
+                    SalidaMercadoLibre.objects.create(
+                        sku=sku,
+                        modelo=modelo,
+                        titulo=titulo,
+                        fecha_salida=fecha_salida,
+                        serie=serie,
+                        costo=costo,
+                        descuento=descuento,
+                        nro_venta=nro_venta,
+                        tipo_venta=tipo_venta,
+                        creado_por=by_usuario
+                    )
 
-            # Actualizar stock de productos
+                    key = modelo.upper().replace(" ", "").replace("-", "")
+                    if key:
+                        conteo_descuentos[key] = conteo_descuentos.get(key, 0) + descuento
+
+            # ==========================================================
+            # 3. ACTUALIZAR STOCK DE PRODUCTOS (Sumas y Restas en un solo paso)
+            # ==========================================================
             modelos_afectados = 0
-            for prod in Producto.objects.all():
-                if prod.modelo:
-                    key = prod.modelo.upper().replace(" ", "").replace("-", "")
-                    if key in conteo_descuentos:
-                        prod.stock_actual = max(prod.stock_actual - conteo_descuentos[key], 0)
-                        prod.save(update_fields=['stock_actual'])
-                        modelos_afectados += 1
+            modelos_restaurados = 0
+            
+            if conteo_descuentos or conteo_restauraciones:
+                for prod in Producto.objects.all():
+                    if prod.modelo:
+                        key = prod.modelo.upper().replace(" ", "").replace("-", "")
+                        cambio = False
+                        
+                        # A. Devolvemos el stock de las filas eliminadas
+                        if key in conteo_restauraciones:
+                            prod.stock_actual += conteo_restauraciones[key]
+                            modelos_restaurados += 1
+                            cambio = True
+                            
+                        # B. Restamos el stock de las filas nuevas
+                        if key in conteo_descuentos:
+                            prod.stock_actual = max(prod.stock_actual - conteo_descuentos[key], 0)
+                            modelos_afectados += 1
+                            cambio = True
+                            
+                        # C. Si el producto sufrió algún cambio, lo guardamos
+                        if cambio:
+                            prod.save(update_fields=['stock_actual'])
 
-        return JsonResponse({'status': 'ok', 'message': f'Salidas registradas y stock actualizado de {modelos_afectados} modelos.'})
+        mensaje_final = f'Proceso completado. Salidas nuevas guardadas: {modelos_afectados}. Stock devuelto (filas borradas): {modelos_restaurados}.'
+        return JsonResponse({'status': 'ok', 'message': mensaje_final})
 
     except Exception as e:
         import traceback
