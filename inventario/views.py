@@ -1082,94 +1082,127 @@ def guardar_reportes_masivos_ml(request):
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
 
 @login_required
+@csrf_exempt
 def guardar_ingresos_masivos(request):
     if request.method == 'POST':
         try:
-            # Importación de emergencia por si olvidaste poner "import uuid" arriba del todo
-            import uuid 
-            
             data = json.loads(request.body)
             filas_ingresos = data.get('referencias', [])
             eliminadas = data.get('eliminadas', [])
 
-            # 1. ELIMINAR LOS REGISTROS SOLICITADOS
-            if eliminadas:
-                # Nos aseguramos de eliminar solo los que tienen ID real en la BD
-                ids_a_eliminar = [int(i) for i in eliminadas if str(i).isdigit()]
-                if ids_a_eliminar:
-                    IngresoPercheron.objects.filter(id__in=ids_a_eliminar).delete()
+            if not filas_ingresos and not eliminadas:
+                return JsonResponse({'status': 'error', 'message': 'No hay datos para procesar.'})
 
-            objetos_a_crear = []
-            
-            # 2. PROCESAR DATOS
-            for fila in filas_ingresos:
-                modelo = str(fila.get('MODELO') or '').strip()
-                titulo = str(fila.get('TÍTULO') or fila.get('TITULO') or '').strip()
-                codigo_ean = str(fila.get('CÓDIGO EAN') or fila.get('CODIGO EAN') or '').strip()
+            with transaction.atomic():
+                # =========================================================
+                # PRE-CARGAR PRODUCTOS PARA BÚSQUEDA Y ACTUALIZACIÓN RÁPIDA
+                # =========================================================
+                productos_db = Producto.objects.all()
+                dict_productos = {}
+                for p in productos_db:
+                    if p.modelo:
+                        key_prod = p.modelo.upper().replace(" ", "").replace("-", "")
+                        dict_productos[key_prod] = p
                 
-                serie_nro = str(fila.get('SERIE / N°') or fila.get('SERIE') or '').strip() or None
+                productos_a_actualizar = set() # Aquí guardaremos los productos que cambiaron su stock
+
+                # =========================================================
+                # 1. ELIMINAR LOS REGISTROS SOLICITADOS Y RESTAR STOCK
+                # =========================================================
+                if eliminadas:
+                    ids_a_eliminar = [int(i) for i in eliminadas if str(i).isdigit()]
+                    if ids_a_eliminar:
+                        registros_viejos = IngresoPercheron.objects.filter(id__in=ids_a_eliminar)
+                        
+                        # Restamos el stock antes de borrarlos
+                        for reg in registros_viejos:
+                            if reg.modelo:
+                                key_reg = str(reg.modelo).upper().replace(" ", "").replace("-", "")
+                                prod = dict_productos.get(key_reg)
+                                if prod:
+                                    prod.stock_actual = max(prod.stock_actual - (reg.cantidad or 1), 0)
+                                    productos_a_actualizar.add(prod)
+                        
+                        # Ahora sí, los eliminamos de la BD
+                        registros_viejos.delete()
+
+                objetos_a_crear = []
                 
                 # =========================================================
-                # PLAN B: RESPALDO DE SKU
+                # 2. PROCESAR DATOS NUEVOS Y SUMAR STOCK
                 # =========================================================
-                sku_leido = str(fila.get('SKU') or '').strip()
-                
-                if not sku_leido and modelo:
-                    # Si el HTML por algún motivo no mandó el SKU, lo inventamos aquí
-                    # Le ponemos "AUTO" más 4 letras/números al azar para que no choque nunca
-                    sku_leido = f"{modelo}-AUTO{uuid.uuid4().hex[:4].upper()}"
-                elif not sku_leido:
-                    sku_leido = None
+                for fila in filas_ingresos:
+                    modelo = str(fila.get('MODELO') or '').strip()
+                    titulo = str(fila.get('TÍTULO') or fila.get('TITULO') or '').strip()
+                    codigo_ean = str(fila.get('CÓDIGO EAN') or fila.get('CODIGO EAN') or '').strip()
+                    serie_nro = str(fila.get('SERIE / N°') or fila.get('SERIE') or '').strip() or None
+                    
+                    sku_leido = str(fila.get('SKU') or '').strip()
+                    
+                    if not sku_leido and modelo:
+                        sku_leido = f"{modelo}-AUTO{uuid.uuid4().hex[:4].upper()}"
+                    elif not sku_leido:
+                        sku_leido = None
+                    
+                    proveedor_motivo = str(fila.get('PROVEEDOR / MOTIVO') or '').strip()
+                    by_usuario = str(fila.get('BY:') or '').strip()
+
+                    if not serie_nro and not modelo and not titulo:
+                        continue
+
+                    fecha_raw = str(fila.get('FECHA INGRESO') or fila.get('FECHA') or '').strip()
+                    fecha_formateada = datetime.now().date()
+                    if fecha_raw:
+                        try:
+                            if '/' in fecha_raw:
+                                fecha_formateada = datetime.strptime(fecha_raw, '%d/%m/%Y').date()
+                            elif '-' in fecha_raw:
+                                fecha_formateada = datetime.strptime(fecha_raw, '%Y-%m-%d').date()
+                        except:
+                            pass 
+
+                    def to_float(val):
+                        try: return float(str(val).replace(',', '').strip() or 0)
+                        except: return 0.0
+
+                    def to_int(val):
+                        try: return int(float(str(val).strip() or 1))
+                        except: return 1
+
+                    cantidad_val = to_int(fila.get('ING. x 1 und') or fila.get('CANTIDAD') or 1)
+
+                    obj = IngresoPercheron(
+                        sku=sku_leido,
+                        modelo=modelo,
+                        titulo=titulo,
+                        fecha_ingreso=fecha_formateada,
+                        codigo_ean=codigo_ean,
+                        serie_nro=serie_nro,
+                        costo_unitario=to_float(fila.get('COSTO UNT.') or fila.get('COSTO') or 0),
+                        cantidad=cantidad_val,
+                        proveedor_motivo=proveedor_motivo,
+                        creado_por=by_usuario
+                    )
+                    objetos_a_crear.append(obj)
+
+                    # Aumentar stock en el diccionario
+                    if modelo:
+                        key_ingreso = str(modelo).upper().replace(" ", "").replace("-", "")
+                        prod = dict_productos.get(key_ingreso)
+                        if prod:
+                            prod.stock_actual += cantidad_val
+                            productos_a_actualizar.add(prod)
+
                 # =========================================================
-                
-                proveedor_motivo = str(fila.get('PROVEEDOR / MOTIVO') or '').strip()
-                by_usuario = str(fila.get('BY:') or '').strip()
-
-                if not serie_nro and not modelo and not titulo:
-                    continue
-
-                fecha_raw = str(fila.get('FECHA INGRESO') or fila.get('FECHA') or '').strip()
-                fecha_formateada = datetime.now().date()
-                if fecha_raw:
-                    try:
-                        if '/' in fecha_raw:
-                            fecha_formateada = datetime.strptime(fecha_raw, '%d/%m/%Y').date()
-                        elif '-' in fecha_raw:
-                            fecha_formateada = datetime.strptime(fecha_raw, '%Y-%m-%d').date()
-                    except:
-                        pass 
-
-                def to_float(val):
-                    try: return float(str(val).replace(',', '').strip() or 0)
-                    except: return 0.0
-
-                def to_int(val):
-                    try: return int(float(str(val).strip() or 1))
-                    except: return 1
-
-                obj = IngresoPercheron(
-                    sku=sku_leido,
-                    modelo=modelo,
-                    titulo=titulo,
-                    fecha_ingreso=fecha_formateada,
-                    codigo_ean=codigo_ean,
-                    serie_nro=serie_nro,
-                    costo_unitario=to_float(fila.get('COSTO UNT.') or fila.get('COSTO') or 0),
-                    cantidad=to_int(fila.get('ING. x 1 und') or fila.get('CANTIDAD') or 1),
-                    proveedor_motivo=proveedor_motivo,
-                    creado_por=by_usuario
-                )
-                
-                objetos_a_crear.append(obj)
-
-            # 3. GUARDADO EN MASA 
-            if objetos_a_crear:
-                with transaction.atomic():
-                    # Usamos bulk_create simple sin buscar conflictos (update_conflicts=True)
-                    # porque la columna ya no es strictamente unique=True en models.py
+                # 3. GUARDADO EN MASA DE TODO (Ingresos y Modelos)
+                # =========================================================
+                if objetos_a_crear:
                     IngresoPercheron.objects.bulk_create(objetos_a_crear)
 
-            return JsonResponse({'status': 'ok', 'message': f'Guardado correctamente. Se subieron {len(objetos_a_crear)} registros.'})
+                for prod in productos_a_actualizar:
+                    prod.save(update_fields=['stock_actual'])
+
+            return JsonResponse({'status': 'ok', 'message': f'Guardado correctamente. Se subieron {len(objetos_a_crear)} registros y se actualizó el stock.'})
 
         except Exception as e:
             import traceback
@@ -1177,7 +1210,6 @@ def guardar_ingresos_masivos(request):
             return JsonResponse({'status': 'error', 'message': f'Error: {str(e)}'}, status=400)
 
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
-
 @login_required
 def descargar_plantilla_ingresos(request):
     # Preparamos el archivo para descargar
@@ -1291,11 +1323,10 @@ def borrar_todos_los_ingresos(request):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                # 1. Borramos todos los ingresos
+                # 1. Borramos el historial de ingresos
                 IngresoPercheron.objects.all().delete()
                 
-                # EL CAMBIO ESTÁ AQUÍ: Usamos "stock" en lugar de "stock_actual"
-                # Cámbialo de nuevo a esto:
+                # 2. Reseteamos el stock actual de TODOS los modelos a cero
                 Producto.objects.all().update(stock_actual=0)
             
             return JsonResponse({'status': 'ok', 'message': '¡Base de datos de ingresos limpiada y stocks reseteados a 0!'})
