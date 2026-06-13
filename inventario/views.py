@@ -1529,3 +1529,17 @@ def procesar_salidas_ml(request):
         import traceback
         print(traceback.format_exc())
         return JsonResponse({'status': 'error', 'message': str(e)})
+    
+@login_required
+@csrf_exempt
+def borrar_todos_los_reportes_ml(request):
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                # Reemplaza 'ReporteMercadoLibre' por el nombre exacto de tu modelo si es diferente
+                ReporteMercadoLibre.objects.all().delete()
+            
+            return JsonResponse({'status': 'ok', 'message': '¡Base de datos de reportes limpiada con éxito!'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Solo permitido POST'})

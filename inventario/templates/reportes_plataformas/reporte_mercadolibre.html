@@ -34,6 +34,10 @@
             <button type="button" id="btnGuardarVentas" onclick="guardarDatosPendientes()" class="btn-top" style="background-color: var(--color-principal); color: #0f172a;">
                 <i class="fas fa-save"></i> Guardar Modificaciones
             </button>
+
+            <button type="button" id="btnBorrarReportes" onclick="borrarTodosLosReportes()" class="btn-top" style="background-color: #ef4444;">
+                <i class="fas fa-trash-alt"></i> Borrar Todo
+            </button>
             
             <div style="position: relative;">
                 <button type="button" onclick="togglePanelColumnas()" class="btn-top" style="background-color: #334155;">
@@ -977,6 +981,37 @@
             btn.innerHTML = textoOriginal;
             btn.disabled = false;
         });
+    }
+
+    // === NUEVA FUNCIÓN: BORRAR TODOS LOS REPORTES ===
+    function borrarTodosLosReportes() {
+        if (confirm("¡ATENCIÓN PELIGRO! ⚠️ ¿Estás totalmente seguro de borrar TODOS los reportes de ventas de Mercado Libre? Esta acción no se puede deshacer.")) {
+            const btn = document.getElementById('btnBorrarReportes');
+            const textOriginal = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Borrando...';
+            btn.disabled = true;
+
+            fetch("{% url 'borrar_todos_los_reportes_ml' %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'ok') { 
+                    localStorage.removeItem('memoriaVentasTemp');
+                    localStorage.removeItem('ventasAEliminarTemp');
+                    alert(data.message); 
+                    window.location.reload(); 
+                } else { 
+                    alert("Error: " + data.message); 
+                }
+            })
+            .catch(err => alert("Ocurrió un error de conexión."))
+            .finally(() => { 
+                btn.innerHTML = textOriginal; 
+                btn.disabled = false; 
+            });
+        }
     }
 </script>
 {% endblock %}
