@@ -16,7 +16,7 @@ from django.contrib.auth.views import LoginView
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre,SimuladorMercadoLibre
+from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre,SimulacionMercadoLibre
 
 # =========================================================
 # 1. EL PRE-LOGIN (Portal público)
@@ -1550,8 +1550,8 @@ def borrar_todos_simulador_ml(request):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                # Reemplaza 'SimuladorMercadoLibre' por el nombre de tu modelo de la BD
-                SimuladorMercadoLibre.objects.all().delete()
+                # ¡AHORA SÍ USA EL NOMBRE CORRECTO DEL MODELO!
+                SimulacionMercadoLibre.objects.all().delete()
             
             return JsonResponse({'status': 'ok', 'message': '¡Datos del simulador limpiados con éxito!'})
         except Exception as e:
