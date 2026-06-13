@@ -10,11 +10,15 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='producto',
-            name='stock_actual',
-            field=models.IntegerField(default=0, verbose_name='Stock Actual'),
-        ),
+        # BLOQUE COMENTADO: Lo ocultamos porque la columna stock_actual ya existe en Render
+        # y no queremos que Django intente crearla de nuevo y nos tire error.
+        # migrations.AddField(
+        #     model_name='producto',
+        #     name='stock_actual',
+        #     field=models.IntegerField(default=0, verbose_name='Stock Actual'),
+        # ),
+        
+        # BLOQUE ACTIVO: Este sí lo dejamos para que convierta tu columna MPE a texto.
         migrations.AlterField(
             model_name='simulacionmercadolibre',
             name='mpe',
