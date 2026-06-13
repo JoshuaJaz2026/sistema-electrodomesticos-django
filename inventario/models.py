@@ -143,7 +143,8 @@ class SimulacionMercadoLibre(models.Model):
     
     # AMPLIADO: max_digits=10 
     rentabilidad_porc = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    mpe = models.BooleanField(default=False)
+    # Cámbialo a esto en tu models.py:
+    mpe = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
         verbose_name = "Simulación Mercado Libre"

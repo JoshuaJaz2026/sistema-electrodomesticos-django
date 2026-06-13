@@ -132,7 +132,7 @@
                     <tr class="fila-simulador" data-original-key="{{ sim.id|default_if_none:'' }}">
                         <td class="td-premium"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype" value="{{ sim.item_type|default_if_none:'' }}"></td>
                         <td class="td-premium td-link-container">
-                            <input type="text" class="celda-input val-link text-blue input-readonly" readonly value="{{ sim.link|default_if_none:'' }}" tabindex="-1">
+                            <input type="text" class="celda-input val-link text-blue" value="{{ sim.link|default_if_none:'' }}">
                             <a href="{{ sim.link|default:'#' }}" target="_blank" class="btn-link" style="{% if sim.link %}display: inline-block;{% else %}display: none;{% endif %}"><i class="fas fa-external-link-alt"></i></a>
                         </td>
                         <td class="td-premium"><input list="list-estado" class="celda-input central val-estado" value="{{ sim.estado_publicacion|default_if_none:'' }}"></td>
@@ -143,21 +143,21 @@
                         <td class="td-premium"><input list="list-marca" class="celda-input val-marca bold text-dark" value="{{ sim.marca|default_if_none:'' }}"></td>
                         <td class="td-premium"><input type="text" class="celda-input val-producto" value="{{ sim.producto|default_if_none:'' }}"></td>
                         
-                        <td class="td-premium"><input type="text" class="celda-input derecha bold val-ptachado input-readonly" readonly tabindex="-1" value="{{ sim.precio_tachado|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-premium"><input type="text" class="celda-input derecha bold val-ptachado" value="{{ sim.precio_tachado|stringformat:'.2f'|default:'' }}"></td>
                         <td class="td-premium"><input type="number" step="0.01" class="celda-input central bold val-dscto text-dark" oninput="calcularFila(this)" value="{{ sim.porc_descuento|stringformat:'.2f'|default:'' }}"></td>
                         <td class="td-premium bg-green-light"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)" value="{{ sim.precio_venta|stringformat:'.2f'|default:'' }}"></td>
                         
                         <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-envio" oninput="calcularFila(this)" value="{{ sim.costo_envio|stringformat:'.2f'|default:'' }}"></td>
-                        <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input central bold text-red val-porc-com input-readonly" readonly tabindex="-1" value="{% if sim.nueva_comision_ref %}{{ sim.nueva_comision_ref|stringformat:'.2f' }}{% elif sim.porc_comision %}{{ sim.porc_comision|stringformat:'.2f' }}{% else %}0.00{% endif %}"></td>
-                        <td class="td-premium bg-red-light"><input type="text" class="celda-input derecha text-red val-com-soles input-readonly" readonly tabindex="-1" value="{{ sim.comision_soles|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input central bold text-red val-porc-com" oninput="calcularFila(this)" value="{% if sim.nueva_comision_ref %}{{ sim.nueva_comision_ref|stringformat:'.2f' }}{% elif sim.porc_comision %}{{ sim.porc_comision|stringformat:'.2f' }}{% else %}0.00{% endif %}"></td>
+                        <td class="td-premium bg-red-light"><input type="text" class="celda-input derecha text-red val-com-soles" value="{{ sim.comision_soles|stringformat:'.2f'|default:'' }}"></td>
                         
-                        <td class="td-premium bg-green-light"><input type="text" class="celda-input derecha bold text-green-dark val-pago-neto input-readonly" readonly tabindex="-1" value="{{ sim.pago_neto|stringformat:'.2f'|default:'' }}"></td>
-                        <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-costo input-readonly" readonly tabindex="-1" value="{% if sim.nuevo_costo_ref %}{{ sim.nuevo_costo_ref|stringformat:'.2f' }}{% elif sim.costo_producto %}{{ sim.costo_producto|stringformat:'.2f' }}{% else %}0.00{% endif %}"></td>
+                        <td class="td-premium bg-green-light"><input type="text" class="celda-input derecha bold text-green-dark val-pago-neto" value="{{ sim.pago_neto|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-costo" oninput="calcularFila(this)" value="{% if sim.nuevo_costo_ref %}{{ sim.nuevo_costo_ref|stringformat:'.2f' }}{% elif sim.costo_producto %}{{ sim.costo_producto|stringformat:'.2f' }}{% else %}0.00{% endif %}"></td>
                         
-                        <td class="td-premium bg-blue-light"><input type="text" class="celda-input derecha bold val-ganancia input-readonly" readonly tabindex="-1" value="{{ sim.ganancia|stringformat:'.2f'|default:'' }}" style="color: {% if sim.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
-                        <td class="td-premium bg-blue-light"><input type="text" class="celda-input central bold val-rentabilidad input-readonly" readonly tabindex="-1" value="{{ sim.rentabilidad_porc|stringformat:'.2f'|default:'' }}%" style="color: {% if sim.rentabilidad_porc < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
+                        <td class="td-premium bg-blue-light"><input type="text" class="celda-input derecha bold val-ganancia" value="{{ sim.ganancia|stringformat:'.2f'|default:'' }}" style="color: {% if sim.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
+                        <td class="td-premium bg-blue-light"><input type="text" class="celda-input central bold val-rentabilidad" value="{{ sim.rentabilidad_porc|stringformat:'.2f'|default:'' }}%" style="color: {% if sim.rentabilidad_porc < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
                         
-                        <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-mpe input-readonly" readonly tabindex="-1" value="{{ sim.mpe|default:'MPE' }}"></td>
+                        <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-mpe" value="{{ sim.mpe|default:'MPE' }}"></td>
                     </tr>
                     {% endfor %}
                 {% endif %}
@@ -165,7 +165,7 @@
                 <tr class="fila-simulador" id="fila-molde" style="display: none;" data-original-key="molde">
                     <td class="td-premium"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype"></td>
                     <td class="td-premium td-link-container">
-                        <input type="text" class="celda-input val-link text-blue input-readonly" readonly placeholder="Link..." tabindex="-1">
+                        <input type="text" class="celda-input val-link text-blue" placeholder="Link...">
                         <a href="#" target="_blank" class="btn-link" style="display: none;"><i class="fas fa-external-link-alt"></i></a>
                     </td>
                     <td class="td-premium"><input list="list-estado" class="celda-input central val-estado"></td>
@@ -176,21 +176,21 @@
                     <td class="td-premium"><input list="list-marca" class="celda-input val-marca bold text-dark"></td>
                     <td class="td-premium"><input type="text" class="celda-input val-producto"></td>
                     
-                    <td class="td-premium"><input type="text" class="celda-input derecha bold val-ptachado input-readonly" readonly tabindex="-1"></td>
+                    <td class="td-premium"><input type="text" class="celda-input derecha bold val-ptachado"></td>
                     <td class="td-premium"><input type="number" step="0.01" class="celda-input central bold val-dscto text-dark" oninput="calcularFila(this)"></td>
                     <td class="td-premium bg-green-light"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)"></td>
                     
                     <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-envio" oninput="calcularFila(this)"></td>
-                    <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input central bold text-red val-porc-com input-readonly" readonly tabindex="-1" value="0.00"></td>
-                    <td class="td-premium bg-red-light"><input type="text" class="celda-input derecha text-red val-com-soles input-readonly" readonly tabindex="-1"></td>
+                    <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input central bold text-red val-porc-com" oninput="calcularFila(this)" value="0.00"></td>
+                    <td class="td-premium bg-red-light"><input type="text" class="celda-input derecha text-red val-com-soles"></td>
                     
-                    <td class="td-premium bg-green-light"><input type="text" class="celda-input derecha bold text-green-dark val-pago-neto input-readonly" readonly tabindex="-1"></td>
-                    <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-costo input-readonly" readonly tabindex="-1" value="0.00"></td>
+                    <td class="td-premium bg-green-light"><input type="text" class="celda-input derecha bold text-green-dark val-pago-neto"></td>
+                    <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-costo" oninput="calcularFila(this)" value="0.00"></td>
                     
-                    <td class="td-premium bg-blue-light"><input type="text" class="celda-input derecha bold val-ganancia input-readonly" readonly tabindex="-1"></td>
-                    <td class="td-premium bg-blue-light"><input type="text" class="celda-input central bold val-rentabilidad input-readonly" readonly tabindex="-1"></td>
+                    <td class="td-premium bg-blue-light"><input type="text" class="celda-input derecha bold val-ganancia"></td>
+                    <td class="td-premium bg-blue-light"><input type="text" class="celda-input central bold val-rentabilidad"></td>
                     
-                    <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-mpe input-readonly" readonly tabindex="-1" value="MPE"></td>
+                    <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-mpe" value="MPE"></td>
                 </tr>
             </tbody>
         </table>
@@ -246,9 +246,7 @@
 
     /* Inputs Fantasma (Llenan 100% de celda) */
     .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 6px 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
-    .celda-input:not([readonly]):focus { background-color: #fff; box-shadow: inset 0 0 0 2px var(--color-principal, #eab308); color: #000; position: relative; z-index: 1; border-radius: 2px;}
-    .input-readonly { color: #94a3b8; cursor: not-allowed; }
-    .input-readonly:focus { box-shadow: none; background-color: transparent; }
+    .celda-input:focus { background-color: #fff; box-shadow: inset 0 0 0 2px var(--color-principal, #eab308); color: #000; position: relative; z-index: 1; border-radius: 2px;}
 
     /* Tipografías Especiales */
     .central { text-align: center; }
@@ -521,7 +519,7 @@
         nuevaFila.classList.remove('fila-editada');
         
         nuevaFila.querySelectorAll('input').forEach(input => {
-            if (!input.classList.contains('input-readonly')) input.value = '';
+            input.value = ''; // Limpiamos todo porque ya no hay bloqueos
         });
         
         nuevaFila.querySelector('.val-mpe').value = 'MPE';
