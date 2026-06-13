@@ -228,13 +228,13 @@
     .th-premium { padding: 10px 8px; border: 1px solid #334155; text-align: center; }
     .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 36px; vertical-align: middle; }
     
-    /* Zonas de Color Codificadas (!important para que sobresalgan) */
+    /* Zonas de Color Codificadas */
     .bg-green-light { background-color: #f0fdf4 !important; }
     .bg-red-light { background-color: #fef2f2 !important; }
     .bg-blue-light { background-color: #eff6ff !important; }
     .bg-yellow-light { background-color: #fef9c3 !important; }
     
-    /* Efecto Cebra y Hover Fuerte */
+    /* Efecto Cebra y Hover */
     .fila-simulador:nth-child(even) { background-color: #f8fafc; }
     .fila-simulador:nth-child(odd) { background-color: #ffffff; }
     .fila-simulador:hover td { filter: brightness(0.96); background-color: #e2e8f0; }
@@ -244,7 +244,7 @@
     .fila-editada > td { background-color: #fffbeb !important; filter: none !important; }
     .fila-editada > td:first-child { border-left: 4px solid #f59e0b; }
 
-    /* Inputs Fantasma (Llenan 100% de celda) */
+    /* Inputs Fantasma */
     .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 6px 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
     .celda-input:focus { background-color: #fff; box-shadow: inset 0 0 0 2px var(--color-principal, #eab308); color: #000; position: relative; z-index: 1; border-radius: 2px;}
 
@@ -289,7 +289,6 @@
     document.querySelector('#tablaReporte').addEventListener('input', function(e) {
         if (e.target.tagName === 'INPUT') {
             const fila = e.target.closest('tr.fila-simulador');
-            // Ignoramos la fila molde para que no guarde basura
             if (fila && fila.id !== 'fila-molde') registrarCambioFilaML(fila);
         }
     });
@@ -344,7 +343,6 @@
         }
 
         let hayCambiosPrevios = false;
-        // Solo restauramos filas que NO sean el molde
         const filas = document.querySelectorAll('#tablaReporte tbody .fila-simulador:not(#fila-molde)');
         
         filas.forEach(fila => {
@@ -385,6 +383,9 @@
 
     const mapaComisiones = {{ mapa_comisiones_json|safe|default:"{}" }};
     const mapaCostos = {{ mapa_costos_json|safe|default:"{}" }};
+    
+    // === NUEVA VARIABLE PARA LOS NOMBRES DE PRODUCTO ===
+    const mapaNombres = {{ mapa_nombres_json|safe|default:"{}" }};
 
     function buscarComision(inputCat) {
         const fila = inputCat.closest('tr');
@@ -400,14 +401,21 @@
 
     function buscarCosto(inputCodProd) {
         const fila = inputCodProd.closest('tr');
-        const codigoSeleccionado = inputCodProd.value.trim();
-        const inputCosto = fila.querySelector('.val-costo');
+        const codigoSeleccionado = inputCodProd.value.trim().toUpperCase();
         
-        if (codigoSeleccionado && mapaCostos[codigoSeleccionado.toUpperCase()] !== undefined) {
-            inputCosto.value = mapaCostos[codigoSeleccionado.toUpperCase()].toFixed(2);
-        } else {
-            inputCosto.value = '0.00';
+        const inputCosto = fila.querySelector('.val-costo');
+        const inputProducto = fila.querySelector('.val-producto');
+        
+        // Autocompletamos el Costo
+        if (codigoSeleccionado && mapaCostos[codigoSeleccionado] !== undefined) {
+            inputCosto.value = mapaCostos[codigoSeleccionado].toFixed(2);
         }
+        
+        // Autocompletamos el Nombre del Producto
+        if (codigoSeleccionado && mapaNombres[codigoSeleccionado] !== undefined) {
+            inputProducto.value = mapaNombres[codigoSeleccionado];
+        }
+
         calcularFila(inputCodProd);
     }
 
@@ -513,13 +521,13 @@
         const filaMolde = document.getElementById('fila-molde');
         const nuevaFila = filaMolde.cloneNode(true);
         
-        nuevaFila.id = ""; // Quitamos el ID para que no hayan duplicados
-        nuevaFila.style.display = ""; // La hacemos visible
+        nuevaFila.id = ""; 
+        nuevaFila.style.display = ""; 
         nuevaFila.dataset.originalKey = 'temp-' + Math.random().toString(36).substr(2, 9);
         nuevaFila.classList.remove('fila-editada');
         
         nuevaFila.querySelectorAll('input').forEach(input => {
-            input.value = ''; // Limpiamos todo porque ya no hay bloqueos
+            input.value = ''; // Limpiamos todo porque ya no hay columnas bloqueadas
         });
         
         nuevaFila.querySelector('.val-mpe').value = 'MPE';
@@ -529,7 +537,6 @@
         nuevaFila.querySelector('.val-ganancia').style.color = '#1e40af';
         nuevaFila.querySelector('.val-rentabilidad').style.color = '#1e40af';
         
-        // Insertamos al inicio de la tabla (después del thead)
         tbody.insertBefore(nuevaFila, tbody.firstChild);
         const contenedorTabla = document.querySelector("div[style*='flex-grow: 1']");
         if(contenedorTabla) {
@@ -538,7 +545,6 @@
     }
 
     function exportarSimulador() {
-        // Excluimos la fila molde de la exportación
         const filas = document.querySelectorAll('.fila-simulador:not(#fila-molde)');
         let data = [];
         filas.forEach(fila => {
@@ -588,7 +594,6 @@
                 let filaMolde = document.getElementById('fila-molde');
                 if (!filaMolde) return alert("Error: No se encontró la fila base.");
                 
-                // Borramos las filas visibles, pero mantenemos intacto nuestro molde oculto
                 tbody.querySelectorAll('.fila-simulador:not(#fila-molde)').forEach(f => f.remove());
 
                 function limpiarMonto(valor) {
@@ -698,7 +703,6 @@
         });
     }
 
-    // === NUEVA FUNCIÓN: BORRAR TODO EL SIMULADOR ===
     function borrarTodoSimulador() {
         if (confirm("¡ATENCIÓN PELIGRO! ⚠️ ¿Estás totalmente seguro de borrar TODOS los datos del Simulador de Costos? Esta acción dejará tu tabla en blanco y no se puede deshacer.")) {
             const btn = document.getElementById('btnBorrarSimulador');

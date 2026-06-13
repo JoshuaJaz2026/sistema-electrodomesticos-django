@@ -562,15 +562,20 @@ def simulador_mercadolibre(request):
         if ref.categoria and ref.categoria.upper().strip() not in mapa_comisiones:
             mapa_comisiones[ref.categoria.upper().strip()] = float(ref.comision)
 
-    # 2. MAPA DE COSTOS
+    # 2. MAPA DE COSTOS Y NOMBRES DE PRODUCTOS (¡LO NUEVO AQUÍ!)
     costos_ref = ReferenciaCosto.objects.all()
     mapa_costos = {}
+    mapa_nombres = {}
     for ref in costos_ref:
         if ref.codigo:
-            mapa_costos[ref.codigo.upper().strip()] = float(ref.costo_cero)
+            clave = ref.codigo.upper().strip()
+            mapa_costos[clave] = float(ref.costo_cero)
+            # Extraemos el nombre del producto de Costos Referenciales
+            mapa_nombres[clave] = str(ref.producto) if getattr(ref, 'producto', None) else ""
 
     mapa_comisiones_json = json.dumps(mapa_comisiones)
     mapa_costos_json = json.dumps(mapa_costos)
+    mapa_nombres_json = json.dumps(mapa_nombres) # Empaquetamos los nombres para el HTML
     
     # 🚀 PAGINACIÓN: Dividimos la lista (filtrada o completa) en bloques de 50
     paginator = Paginator(simulaciones_todas, 50) 
@@ -590,6 +595,7 @@ def simulador_mercadolibre(request):
         'page_obj': page_obj, 
         'mapa_comisiones_json': mapa_comisiones_json,
         'mapa_costos_json': mapa_costos_json,
+        'mapa_nombres_json': mapa_nombres_json, # Pasamos los nombres al template
         'query_search': query_search  # Pasamos la búsqueda al HTML para mantenerla en la cajita
     })
 
