@@ -2,7 +2,6 @@
 
 from django.db import migrations, models
 
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -10,9 +9,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='producto',
-            name='stock_actual',
-            field=models.IntegerField(default=0, verbose_name='Stock Actual'),
-        ),
+        # comentamos esta parte porque la columna stock_actual ya existe en neon
+        # migrations.AddField(
+        #     model_name='producto',
+        #     name='stock_actual',
+        #     field=models.IntegerField(default=0, verbose_name='Stock Actual'),
+        # ),
     ]
