@@ -16,6 +16,7 @@ from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Sum, Count
 from django.utils import timezone
+from datetime import timedelta
 
 from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre
 
@@ -145,32 +146,101 @@ class LoginCamaleonicoView(LoginView):
 def inicio(request):
     canal = request.session.get('canal_activo', 'Web')
     
+    # variables por defecto por si entra a otra plataforma vacía
     ventas_totales = 0
+    progreso_meta = 0
     categorias_nombres = []
     categorias_cantidades = []
-    
+    stock_labels = ['Sin datos']
+    stock_data = [100]
+    crecimiento_porc = 0
+    tendencia_crecimiento = [0,0,0,0,0,0,0]
+    clientes_promedio = 0
+    tendencia_clientes = [0,0,0,0,0,0,0]
+    tasa_devoluciones = 0
+    tendencia_devoluciones = [0,0,0,0,0,0,0]
+
     if canal == 'Mercado Libre':
         hoy = timezone.now().date()
+        inicio_mes = hoy.replace(day=1)
         
+        # 1. ventas totales del mes
         ventas_mes = ReporteMercadoLibre.objects.filter(
-            fecha__month=hoy.month, 
-            fecha__year=hoy.year
+            fecha__gte=inicio_mes, fecha__lte=hoy
         ).aggregate(total=Sum('cantidad'))
-        
         ventas_totales = int(ventas_mes['total'] or 0)
         
-        ventas_por_categoria = ReporteMercadoLibre.objects.values('categoria').annotate(
+        # meta del mes (puedes cambiar este 1000 por lo que te pida tu jefe)
+        meta_mensual = 1000
+        progreso_meta = min(int((ventas_totales / meta_mensual) * 100), 100) if ventas_totales > 0 else 0
+
+        # 2. top 5 categorías más vendidas
+        ventas_por_categoria = ReporteMercadoLibre.objects.filter(
+            fecha__gte=inicio_mes, fecha__lte=hoy
+        ).values('categoria').annotate(
             total_vendido=Sum('cantidad')
         ).order_by('-total_vendido')[:5]
         
-        categorias_nombres = [v['categoria'] for v in ventas_por_categoria if v['categoria']]
-        categorias_cantidades = [float(v['total_vendido']) for v in ventas_por_categoria if v['categoria']]
+        categorias_nombres = [v['categoria'] or 'Sin Cat' for v in ventas_por_categoria]
+        categorias_cantidades = [float(v['total_vendido']) for v in ventas_por_categoria]
+
+        # 3. distribución de stock (cruza con maestro percherón)
+        stock_activo = Producto.objects.filter(activo_ml=True, stock_actual__gt=0).count()
+        stock_agotado = Producto.objects.filter(activo_ml=True, stock_actual__lte=0).count()
+        stock_labels = ['Con Stock (ML)', 'Agotados (ML)']
+        stock_data = [stock_activo, stock_agotado]
+
+        # 4. cálculo de tendencias de los últimos 7 días
+        tendencia_crecimiento = []
+        tendencia_clientes = []
+        
+        for i in range(6, -1, -1):
+            dia = hoy - timedelta(days=i)
+            
+            # ventas por día para la gráfica 1
+            v_dia = ReporteMercadoLibre.objects.filter(fecha=dia).aggregate(total=Sum('cantidad'))['total'] or 0
+            tendencia_crecimiento.append(int(v_dia))
+            
+            # clientes únicos por día (usamos el celular para no repetir al mismo cliente)
+            c_dia = ReporteMercadoLibre.objects.filter(fecha=dia).exclude(celular='').values('celular').distinct().count()
+            tendencia_clientes.append(c_dia)
+            
+        # 5. porcentaje de crecimiento vs mes pasado
+        try:
+            inicio_mes_pasado = (inicio_mes - timedelta(days=1)).replace(day=1)
+            fin_mes_pasado = inicio_mes - timedelta(days=1)
+            ventas_pasadas = ReporteMercadoLibre.objects.filter(
+                fecha__gte=inicio_mes_pasado, fecha__lte=fin_mes_pasado
+            ).aggregate(total=Sum('cantidad'))['total'] or 0
+            
+            if ventas_pasadas > 0:
+                crecimiento_porc = int(((ventas_totales - ventas_pasadas) / ventas_pasadas) * 100)
+            else:
+                crecimiento_porc = 100 if ventas_totales > 0 else 0
+        except:
+            pass
+
+        # 6. promedio de clientes diarios
+        dias_transcurridos = hoy.day
+        total_clientes_mes = ReporteMercadoLibre.objects.filter(
+            fecha__gte=inicio_mes, fecha__lte=hoy
+        ).exclude(celular='').values('celular').distinct().count()
+        clientes_promedio = int(total_clientes_mes / dias_transcurridos) if dias_transcurridos > 0 else 0
 
     context = {
         'canal': canal,
         'ventas_totales': ventas_totales,
+        'progreso_meta': progreso_meta,
         'categorias_nombres_json': json.dumps(categorias_nombres),
         'categorias_cantidades_json': json.dumps(categorias_cantidades),
+        'stock_labels_json': json.dumps(stock_labels),
+        'stock_data_json': json.dumps(stock_data),
+        'crecimiento_porc': crecimiento_porc,
+        'tendencia_crecimiento_json': json.dumps(tendencia_crecimiento),
+        'clientes_promedio': clientes_promedio,
+        'tendencia_clientes_json': json.dumps(tendencia_clientes),
+        'tasa_devoluciones': tasa_devoluciones,
+        'tendencia_devoluciones_json': json.dumps(tendencia_devoluciones)
     }
     
     return render(request, 'inventario/inicio.html', context)
