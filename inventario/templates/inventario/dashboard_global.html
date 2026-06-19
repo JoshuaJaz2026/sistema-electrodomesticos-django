@@ -52,7 +52,7 @@
         .submenu-item i { margin-right: 10px; font-size: 0.8em; width: 15px; text-align: center; }
         .rotate { transform: rotate(180deg); transition: transform 0.3s ease; }
         
-        /* === FOOTER DE LA BARRA LATERAL (NUEVO) === */
+        /* === FOOTER DE LA BARRA LATERAL === */
         .sidebar-footer {
             background: #1a252f;
             padding: 15px 20px;
@@ -79,10 +79,7 @@
 
         /* === CONTENIDO PRINCIPAL === */
         .main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; height: 100vh; }
-        
-        /* El padding se redujo a 15px para maximizar el espacio de las tablas */
         .container { padding: 15px 20px; overflow-y: auto; flex: 1; box-sizing: border-box; }
-        
     </style>
 </head>
 <body>
@@ -94,7 +91,7 @@
         </div>
         
         <nav class="sidebar-menu">
-            <a href="{% url 'inicio' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-home"></i> Inicio</a>
+            <a href="{% url 'inicio' %}" class="menu-item"><i class="fas fa-home"></i> Inicio</a>
             
             <div class="menu-category">Inventario Principal</div>
 
@@ -106,31 +103,43 @@
                 </div>
                 
                 <div class="submenu" id="percheron-menu">
-                    <a href="{% url 'percheron_ingresos' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-box-open"></i> Ingresos</a>
-                    <a href="{% url 'percheron_registros' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-clipboard-list"></i> Registros</a>
-                    <a href="{% url 'percheron_modelos' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-tags"></i> Modelos</a>
+                    <a href="{% url 'percheron_ingresos' %}" class="submenu-item"><i class="fas fa-box-open"></i> Ingresos</a>
+                    <a href="{% url 'percheron_registros' %}" class="submenu-item"><i class="fas fa-clipboard-list"></i> Registros</a>
+                    <a href="{% url 'percheron_modelos' %}" class="submenu-item"><i class="fas fa-tags"></i> Modelos</a>
                     
                     <hr style="border: 0.5px solid #3e4f5f; margin: 10px 20px;">
 
-                    {% if canal == 'Mercado Libre' %}
-                        <a href="{% url 'percheron_mercadolibre' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-handshake"></i> Percherón Mercado Libre</a>
-                    {% elif canal == 'Mercado Libre - Junior' %}
-                        <a href="{% url 'percheron_mercadolibre_junior' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-seedling"></i> Percherón ML Junior</a>
-                    {% elif canal == 'Falabella' %}
-                        <a href="{% url 'percheron_falabella' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-store"></i> Percherón Falabella</a>
-                    {% elif canal == 'Creditienda' %}
-                        <a href="{% url 'percheron_creditienda' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-credit-card"></i> Percherón Creditienda</a>
-                    {% elif canal == 'Intercorp' %}
-                        <a href="{% url 'percheron_intercorp' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-building"></i> Percherón Intercorp</a>
-                    {% elif canal == 'Tik tok' or canal == 'Tiktok' %}
-                        <a href="{% url 'percheron_tiktok' %}?canal={{ canal }}" class="submenu-item"><i class="fab fa-tiktok"></i> Percherón Tiktok</a>
-                    {% elif canal == 'Venta Libre' %}
-                        <a href="{% url 'percheron_ventalibre' %}?canal={{ canal }}" class="submenu-item"><i class="fas fa-shopping-cart"></i> Percherón Venta Libre</a>
+                    {% if user.is_superuser %}
+                        <a href="{% url 'percheron_mercadolibre' %}" class="submenu-item"><i class="fas fa-handshake"></i> Percherón Mercado Libre</a>
+                        <a href="{% url 'percheron_mercadolibre_junior' %}" class="submenu-item"><i class="fas fa-seedling"></i> Percherón ML Junior</a>
+                        <a href="{% url 'percheron_falabella' %}" class="submenu-item"><i class="fas fa-store"></i> Percherón Falabella</a>
+                        <a href="{% url 'percheron_creditienda' %}" class="submenu-item"><i class="fas fa-credit-card"></i> Percherón Creditienda</a>
+                        <a href="{% url 'percheron_intercorp' %}" class="submenu-item"><i class="fas fa-building"></i> Percherón Intercorp</a>
+                        <a href="{% url 'percheron_tiktok' %}" class="submenu-item"><i class="fab fa-tiktok"></i> Percherón Tiktok</a>
+                        <a href="{% url 'percheron_ventalibre' %}" class="submenu-item"><i class="fas fa-shopping-cart"></i> Percherón Venta Libre</a>
+                    {% else %}
+                        {% for plat in user.perfil.plataformas.all %}
+                            {% if plat.nombre == 'Mercado Libre' %}
+                                <a href="{% url 'percheron_mercadolibre' %}" class="submenu-item"><i class="fas fa-handshake"></i> Percherón Mercado Libre</a>
+                            {% elif plat.nombre == 'Mercado Libre - Junior' %}
+                                <a href="{% url 'percheron_mercadolibre_junior' %}" class="submenu-item"><i class="fas fa-seedling"></i> Percherón ML Junior</a>
+                            {% elif plat.nombre == 'Falabella' %}
+                                <a href="{% url 'percheron_falabella' %}" class="submenu-item"><i class="fas fa-store"></i> Percherón Falabella</a>
+                            {% elif plat.nombre == 'Creditienda' %}
+                                <a href="{% url 'percheron_creditienda' %}" class="submenu-item"><i class="fas fa-credit-card"></i> Percherón Creditienda</a>
+                            {% elif plat.nombre == 'Intercorp' %}
+                                <a href="{% url 'percheron_intercorp' %}" class="submenu-item"><i class="fas fa-building"></i> Percherón Intercorp</a>
+                            {% elif plat.nombre == 'Tik tok' or plat.nombre == 'Tiktok' %}
+                                <a href="{% url 'percheron_tiktok' %}" class="submenu-item"><i class="fab fa-tiktok"></i> Percherón Tiktok</a>
+                            {% elif plat.nombre == 'Venta Libre' %}
+                                <a href="{% url 'percheron_ventalibre' %}" class="submenu-item"><i class="fas fa-shopping-cart"></i> Percherón Venta Libre</a>
+                            {% endif %}
+                        {% endfor %}
                     {% endif %}
 
                     {% if user.is_superuser %}
                         <hr style="border: 0.5px solid #3e4f5f; margin: 10px 20px;">
-                        <a href="{% url 'percheron_bci' %}?canal={{ canal }}" class="submenu-item" style="color: #f59e0b;"><i class="fas fa-user-shield"></i> BCI Personal Autoriz.</a>
+                        <a href="{% url 'percheron_bci' %}" class="submenu-item" style="color: #f59e0b;"><i class="fas fa-user-shield"></i> BCI Personal Autoriz.</a>
                     {% endif %}
                 </div>
             </div>
@@ -140,34 +149,34 @@
             <div class="menu-category">Operaciones {{ canal }}</div>
             
             {% if canal == 'Mercado Libre' or canal == 'Mercado Libre - Junior' %}
-                <a href="{% if canal == 'Mercado Libre' %}{% url 'reporte_mercadolibre' %}{% else %}{% url 'reporte_mercadolibre_junior' %}{% endif %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
-                <a href="{% if canal == 'Mercado Libre' %}{% url 'simulador_mercadolibre' %}{% else %}{% url 'simulador_mercadolibre_junior' %}{% endif %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
-                <a href="{% url 'referencia_comisiones' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-list-ul"></i> Referencia Marca y Categ</a>
-                <a href="{% url 'referencia_costos' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-dollar-sign"></i> Costos Referenciales</a>
+                <a href="{% if canal == 'Mercado Libre' %}{% url 'reporte_mercadolibre' %}{% else %}{% url 'reporte_mercadolibre_junior' %}{% endif %}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+                <a href="{% if canal == 'Mercado Libre' %}{% url 'simulador_mercadolibre' %}{% else %}{% url 'simulador_mercadolibre_junior' %}{% endif %}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
+                <a href="{% url 'referencia_comisiones' %}" class="menu-item"><i class="fas fa-list-ul"></i> Referencia Marca y Categ</a>
+                <a href="{% url 'referencia_costos' %}" class="menu-item"><i class="fas fa-dollar-sign"></i> Costos Referenciales</a>
             
             {% elif canal == 'Falabella' %}
-                <a href="{% url 'reporte_falabella' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
-                <a href="{% url 'simulador_falabella' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
+                <a href="{% url 'reporte_falabella' %}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+                <a href="{% url 'simulador_falabella' %}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
             
             {% elif canal == 'Creditienda' %}
-                <a href="{% url 'reporte_creditienda' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
-                <a href="{% url 'simulador_creditienda' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
+                <a href="{% url 'reporte_creditienda' %}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+                <a href="{% url 'simulador_creditienda' %}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
             
             {% elif canal == 'Intercorp' %}
-                <a href="{% url 'reporte_intercorp' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
-                <a href="{% url 'simulador_intercorp' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
+                <a href="{% url 'reporte_intercorp' %}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+                <a href="{% url 'simulador_intercorp' %}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
             
             {% elif canal == 'Tik tok' or canal == 'Tiktok' %}
-                <a href="{% url 'reporte_tiktok' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
-                <a href="{% url 'simulador_tiktok' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
+                <a href="{% url 'reporte_tiktok' %}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+                <a href="{% url 'simulador_tiktok' %}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
             
             {% elif canal == 'Venta Libre' %}
-                <a href="{% url 'reporte_ventalibre' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
-                <a href="{% url 'simulador_ventalibre' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
+                <a href="{% url 'reporte_ventalibre' %}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+                <a href="{% url 'simulador_ventalibre' %}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
             
             {% else %}
-                <a href="{% url 'reporte_web' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
-                <a href="{% url 'simulador_web' %}?canal={{ canal }}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
+                <a href="{% url 'reporte_web' %}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
+                <a href="{% url 'simulador_web' %}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
             {% endif %}
 
         </nav>

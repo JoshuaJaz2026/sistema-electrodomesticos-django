@@ -1,12 +1,11 @@
 import json
 import uuid
 import csv
-import json
 import os
 from datetime import datetime
-from django.db.models import Q
+from functools import wraps
+from django.db.models import Q, Sum
 from django.http import JsonResponse, HttpResponse, FileResponse, Http404
-from django.http import HttpResponse
 from django.core.paginator import Paginator
 from django.conf import settings
 from django.shortcuts import render, redirect
@@ -16,7 +15,66 @@ from django.contrib.auth.views import LoginView
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre,SimulacionMercadoLibre
+from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre
+
+# =========================================================
+# CONFIGURACIÓN MAESTRA DE ESTILOS Y COLORES
+# =========================================================
+ESTILOS_PLATAFORMAS = {
+    "Mercado Libre": {"color": "#F1C40F", "icono": "fa-handshake"},
+    "Mercado Libre - Junior": {"color": "#F39C12", "icono": "fa-seedling"},
+    "Creditienda": {"color": "#E74C3C", "icono": "fa-credit-card"},
+    "Falabella": {"color": "#2ECC71", "icono": "fa-store"},
+    "Intercorp": {"color": "#2980B9", "icono": "fa-building"},
+    "Venta Libre": {"color": "#9B59B6", "icono": "fa-tags"},
+    "Tik tok": {"color": "#2C3E50", "icono": "fa-tiktok"},
+    "Web": {"color": "#3498DB", "icono": "fa-globe"}
+}
+
+# =========================================================
+# EL GUARDIA DE SEGURIDAD (DECORADOR RBAC)
+# =========================================================
+def verificar_acceso_plataforma(*plataformas_requeridas):
+    def decorator(view_func):
+        @wraps(view_func)
+        def _wrapped_view(request, *args, **kwargs):
+            tiene_permiso = False
+            plataforma_detectada = None
+            
+            # Superusuario tiene acceso total a todo
+            if request.user.is_superuser:
+                tiene_permiso = True
+                plataforma_detectada = plataformas_requeridas[0]
+            # Revisar si el perfil tiene el acceso a alguna de las plataformas requeridas
+            elif hasattr(request.user, 'perfil'):
+                for plat in plataformas_requeridas:
+                    if request.user.perfil.plataformas.filter(nombre=plat).exists():
+                        tiene_permiso = True
+                        plataforma_detectada = plat
+                        break
+                        
+            if tiene_permiso:
+                # Actualiza automáticamente la plataforma activa si el usuario cambia de menú
+                canal_actual = request.session.get('canal_activo')
+                if canal_actual not in plataformas_requeridas:
+                    request.session['canal_activo'] = plataforma_detectada
+                    tema = ESTILOS_PLATAFORMAS.get(plataforma_detectada, ESTILOS_PLATAFORMAS["Web"])
+                    request.session['color_actual'] = tema['color']
+                    prefix = "fab" if "tiktok" in tema['icono'].lower() else "fas"
+                    request.session['icono_actual'] = f"{prefix} {tema['icono']}"
+                
+                return view_func(request, *args, **kwargs)
+            
+            # BLOQUEO Y EXPULSIÓN SI NO TIENE PERMISO
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'message': 'Acceso denegado.'}, status=403)
+            
+            nombres = " o ".join(plataformas_requeridas)
+            messages.error(request, f"⚠️ Acceso denegado: Tu perfil no tiene autorización para {nombres}.")
+            return redirect('inicio')
+        return _wrapped_view
+    return decorator
+
 
 # =========================================================
 # 1. EL PRE-LOGIN (Portal público)
@@ -36,6 +94,48 @@ def selector_plataformas(request):
 
 
 # =========================================================
+# 8. EL CEREBRO: Login Camaleónico (Movido aquí para orden)
+# =========================================================
+class LoginCamaleonicoView(LoginView):
+    template_name = 'inventario/login.html'
+
+    def get_success_url(self):
+        return '/loading/'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        canal = self.request.GET.get('canal', 'Web') 
+        tema_actual = ESTILOS_PLATAFORMAS.get(canal, ESTILOS_PLATAFORMAS["Web"])
+        context['nombre_canal'] = canal
+        context['color_principal'] = tema_actual['color']
+        icon_prefix = "fab" if "tiktok" in tema_actual['icono'] else "fas"
+        context['icono_canal'] = f"{icon_prefix} {tema_actual['icono']}"
+        return context
+
+    def form_valid(self, form):
+        usuario = form.get_user()
+        canal_solicitado = self.request.GET.get('canal', 'Web')
+
+        if not usuario.is_superuser:
+            if hasattr(usuario, 'perfil'):
+                permitido = usuario.perfil.plataformas.filter(nombre=canal_solicitado).exists()
+                if not permitido:
+                    form.add_error(None, f"Acceso denegado: Tu usuario no tiene permiso para {canal_solicitado}.")
+                    return self.form_invalid(form)
+            else:
+                form.add_error(None, "Usuario sin perfil asignado.")
+                return self.form_invalid(form)
+
+        tema = ESTILOS_PLATAFORMAS.get(canal_solicitado, ESTILOS_PLATAFORMAS["Web"])
+        self.request.session['canal_activo'] = canal_solicitado
+        self.request.session['color_actual'] = tema['color']
+        icon_prefix = "fab" if "tiktok" in tema['icono'] else "fas"
+        self.request.session['icono_actual'] = f"{icon_prefix} {tema['icono']}"
+        
+        return super().form_valid(form)
+
+
+# =========================================================
 # 2. VISTAS DEL SISTEMA (Post-Login)
 # =========================================================
 
@@ -44,7 +144,6 @@ def inicio(request):
     canal = request.session.get('canal_activo', 'Web')
     return render(request, 'inventario/inicio.html', {'canal': canal})
 
-# INVENTARIO GLOBAL: MAGAZZINO
 @login_required
 def inventario_magazzino(request):
     productos = Electrodomestico.objects.all()
@@ -63,57 +162,41 @@ def inventario_magazzino(request):
 def percheron_ingresos(request):
     canal = request.session.get('canal_activo', 'Percheron')
     
-    # Paginación normal de los ingresos
     registros_lista = IngresoPercheron.objects.all().order_by('id')
     paginator = Paginator(registros_lista, 100) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # === NUEVA LÓGICA: DICCIONARIO DE TÍTULOS ===
-    # Traemos todos los productos y armamos un diccionario { 'EPS10': 'VAPORIZADOR...', ... }
     productos_db = Producto.objects.all()
     dict_titulos = {p.modelo: p.titulo for p in productos_db if p.modelo}
 
     return render(request, 'inventario/percheron_ingresos.html', {
         'canal': canal,
         'page_obj': page_obj,
-        'titulos_json': json.dumps(dict_titulos) # Lo enviamos al HTML
+        'titulos_json': json.dumps(dict_titulos) 
     })
 
-from django.db.models import Sum
 
 @login_required
 def percheron_registros(request):
     canal = request.session.get('canal_activo', 'Percheron')
     
-    # 1. Obtenemos TODOS los ingresos (La hoja IN)
     ingresos_db = IngresoPercheron.objects.all().order_by('id')
-    
-    # 2. Obtenemos los Modelos para hacer el BUSCARV de Marca/Ubicación
     productos_db = Producto.objects.all()
     dict_productos = {p.modelo: p for p in productos_db if p.modelo}
     
-    # =========================================================
-    # 3. LA MAGIA: CONECTAMOS LAS SALIDAS DE MERCADO LIBRE
-    # =========================================================
-    # Agrupamos todas las salidas de ML y sumamos el descuento por cada SKU
     salidas_ml_agrupadas = SalidaMercadoLibre.objects.values('sku').annotate(total_desc=Sum('descuento'))
     dict_out_ml = {s['sku']: s['total_desc'] for s in salidas_ml_agrupadas if s['sku']}
     
     registros_data = []
     
-    # 4. Recorremos fila por fila cruzando la información
     for ing in ingresos_db:
         prod = dict_productos.get(ing.modelo)
         
         marca_val = prod.marca if prod else 'SIN MARCA'
         ubicacion_val = prod.ubicacion if prod else 'SIN UBICACIÓN'
         
-        # === AQUI SE APLICA EL DESCUENTO AUTOMÁTICO ===
-        # Va a buscar el SKU en el diccionario de salidas de Mercado Libre
         out_ml = dict_out_ml.get(ing.sku, 0)
-        
-        # Las demás plataformas siguen en 0 hasta que las vayamos programando
         out_fbl = 0
         out_cdt = 0
         out_vl = 0
@@ -147,8 +230,7 @@ def percheron_registros(request):
             'stock': stock_val
         })
         
-    # 5. Paginación
-    paginator = Paginator(registros_data, 100) # Muestra 100 registros por página
+    paginator = Paginator(registros_data, 100) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -162,7 +244,6 @@ def percheron_modelos(request):
     canal = request.session.get('canal_activo', 'Percheron')
     query_search = request.GET.get('q', '')
     
-    # 1. ORDENAMOS POR ID (Respeta el orden de tu Excel)
     if query_search:
         modelos_db = Producto.objects.filter(
             modelo__icontains=query_search
@@ -170,9 +251,6 @@ def percheron_modelos(request):
     else:
         modelos_db = Producto.objects.all().order_by('id')
     
-    # 2. DEVOLVEMOS LA PAGINACIÓN (Carga rápida sin lag de CSS)
-    # 100 es un número perfecto: carga rápido y muestra bastantes datos
-    from django.core.paginator import Paginator
     paginator = Paginator(modelos_db, 50)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -198,51 +276,95 @@ def exportar_registros_excel(request):
         'OUT (VL)', 'OUT (TK)', 'OUT (INTCP)', 'OUT (ML 2)', 'STOCK'
     ])
     
-    # Dejamos la exportación vacía también por ahora
     registros = []
-    
     for r in registros:
         pass
         
     return response
 
 # =========================================================
-# 4. SECCIÓN PERCHERÓN: PLATAFORMAS ESPECÍFICAS
+# 4. SECCIÓN PERCHERÓN: PLATAFORMAS ESPECÍFICAS PROTEGIDAS
 # =========================================================
 
+@login_required
+@verificar_acceso_plataforma('Mercado Libre')
+def percheron_mercadolibre(request):
+    canal = request.session.get('canal_activo', 'Mercado Libre')
+    
+    skus_usados = SalidaMercadoLibre.objects.values_list('sku', flat=True)
+    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
+    
+    productos_db = Producto.objects.all()
+    dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
+    
+    dict_skus = {}
+    for ing in ingresos_db:
+        mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
+        prod = dict_prods.get(mod_limpio)
+        marca_val = prod.marca if prod else 'S/N MARCA'
+        stock_val = prod.stock_actual if prod else 0
+        
+        fecha_str = '-'
+        if ing.fecha_ingreso:
+            try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
+            except: fecha_str = str(ing.fecha_ingreso)
+
+        dict_skus[ing.sku] = {
+            'modelo': ing.modelo or '', 'titulo': ing.titulo or '', 'serie': ing.serie_nro or '-',
+            'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
+            'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
+            'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
+        }
+        
+    page_obj = SalidaMercadoLibre.objects.all().order_by('-id')
+
+    return render(request, 'inventario/percheron_mercadolibre.html', {
+        'canal': canal,
+        'skus_json': json.dumps(dict_skus),
+        'page_obj': page_obj 
+    })
 
 @login_required
+@verificar_acceso_plataforma('Mercado Libre - Junior')
 def percheron_mercadolibre_junior(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'inventario/percheron_mercadolibre_junior.html', {'canal': canal})
 
 @login_required
+@verificar_acceso_plataforma('Falabella')
 def percheron_falabella(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'inventario/percheron_falabella.html', {'canal': canal})
 
 @login_required
+@verificar_acceso_plataforma('Creditienda')
 def percheron_creditienda(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'inventario/percheron_creditienda.html', {'canal': canal})
 
 @login_required
+@verificar_acceso_plataforma('Intercorp')
 def percheron_intercorp(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'inventario/percheron_intercorp.html', {'canal': canal})
 
 @login_required
+@verificar_acceso_plataforma('Tik tok', 'Tiktok')
 def percheron_tiktok(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'inventario/percheron_tiktok.html', {'canal': canal})
 
 @login_required
+@verificar_acceso_plataforma('Venta Libre')
 def percheron_ventalibre(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'inventario/percheron_ventalibre.html', {'canal': canal})
 
 @login_required
 def percheron_bci(request):
+    if not request.user.is_superuser:
+        messages.error(request, "Acceso exclusivo para BCI Autorizados.")
+        return redirect('inicio')
     canal = request.session.get('canal_activo', 'Web')
     return render(request, 'inventario/percheron_bci.html', {'canal': canal})
 
@@ -375,6 +497,7 @@ def guardar_kardex_percheron(request):
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
 
 @login_required
+@verificar_acceso_plataforma('Mercado Libre', 'Mercado Libre - Junior')
 def api_guardar_simulador(request):
     if request.method == 'POST':
         try:
@@ -383,8 +506,6 @@ def api_guardar_simulador(request):
             datos_simulacion = data.get('datos', [])
             
             if plataforma == 'Mercado Libre':
-                # 🚀 YA NO BORRAMOS LA BASE DE DATOS AQUÍ
-                
                 for fila in datos_simulacion:
                     p_venta = float(fila.get('p_venta') or 0)
                     envio = float(fila.get('envio') or 0)
@@ -398,7 +519,6 @@ def api_guardar_simulador(request):
 
                     cod_pub = fila.get('cod_pub', '').strip()
 
-                    # Preparamos los datos a guardar
                     datos_diccionario = {
                         'item_type': fila.get('item_type', ''),
                         'link': fila.get('link', ''),
@@ -421,7 +541,6 @@ def api_guardar_simulador(request):
                         'mpe': fila.get('mpe', False)
                     }
 
-                    # Si el producto ya existe (por código MPE), se actualiza. Si no, se crea.
                     if cod_pub:
                         SimulacionMercadoLibre.objects.update_or_create(
                             usuario=request.user,
@@ -446,44 +565,35 @@ def api_guardar_simulador(request):
 # =========================================================
 
 @login_required
+@verificar_acceso_plataforma('Mercado Libre')
 def reporte_mercadolibre(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     
-    # 1. Capturamos los parámetros de búsqueda y fechas que vienen del HTML
     query_search = request.GET.get('q', '')
     fecha_inicio = request.GET.get('fecha_inicio', '')
     fecha_fin = request.GET.get('fecha_fin', '')
 
-    # 2. Obtenemos todas las ventas ordenadas por FECHA (de la más antigua a la más nueva)
-    # y luego por ID para mantener un orden consistente en ventas del mismo día
     ventas_todas = ReporteMercadoLibre.objects.all().order_by('fecha', 'id')
 
-    # 3. Aplicamos el filtro de búsqueda por NRO. ORDEN o SKU
     if query_search:
         ventas_todas = ventas_todas.filter(
             Q(nro_orden__icontains=query_search) | 
             Q(sku_almacen__icontains=query_search)
         )
     
-    # 4. Aplicamos los filtros de fecha (desde - hasta)
     if fecha_inicio:
         ventas_todas = ventas_todas.filter(fecha__gte=fecha_inicio)
     if fecha_fin:
         ventas_todas = ventas_todas.filter(fecha__lte=fecha_fin)
 
-    # 5. PAGINACIÓN: Dividimos los resultados en bloques de 40
     paginator = Paginator(ventas_todas, 40) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # === NUEVO: AÑADIR ESTAS LÍNEAS PARA EL BUSCARV DE PRODUCTO ===
-    # Extraemos todos los modelos (códigos) y su descripción de producto
     costos_db = ReferenciaCosto.objects.all()
     diccionario_productos = {str(c.codigo).strip().upper(): c.producto for c in costos_db if c.codigo}
     diccionario_productos_json = json.dumps(diccionario_productos)
-    # ===============================================================
 
-    # 6. Pasamos las variables al HTML (incluyendo la ruta de tu carpeta que es reportes_plataformas)
     return render(request, 'reportes_plataformas/reporte_mercadolibre.html', {
         'canal': canal, 
         'page_obj': page_obj,
@@ -492,38 +602,45 @@ def reporte_mercadolibre(request):
     })
 
 @login_required
+@verificar_acceso_plataforma('Mercado Libre - Junior')
 def reporte_mercadolibre_junior(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'reportes_plataformas/reporte_mercadolibre_junior.html', {'canal': canal})
 
 @login_required
+@verificar_acceso_plataforma('Creditienda')
 def reporte_creditienda(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'reportes_plataformas/reporte_creditienda.html', {'canal': canal})
 
 @login_required
+@verificar_acceso_plataforma('Falabella')
 def reporte_falabella(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'reportes_plataformas/reporte_falabella.html', {'canal': canal})
 
 @login_required
+@verificar_acceso_plataforma('Intercorp')
 def reporte_intercorp(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'reportes_plataformas/reporte_intercorp.html', {'canal': canal})
 
 @login_required
+@verificar_acceso_plataforma('Tik tok', 'Tiktok')
 def reporte_tiktok(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'reportes_plataformas/reporte_tiktok.html', {'canal': canal})
 
 @login_required
+@verificar_acceso_plataforma('Venta Libre')
 def reporte_ventalibre(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'reportes_plataformas/reporte_ventalibre.html', {'canal': canal})
 
 @login_required
+@verificar_acceso_plataforma('Web')
 def reporte_web(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'reportes_plataformas/reporte_web.html', {'canal': canal})
 
 
@@ -531,29 +648,22 @@ def reporte_web(request):
 # 7. SIMULADORES Y REFERENCIAS
 # =========================================================
 
-from django.db.models import Q
-
 @login_required
+@verificar_acceso_plataforma('Mercado Libre')
 def simulador_mercadolibre(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     
-    # 1. Capturamos lo que el usuario escriba en el buscador
     query_search = request.GET.get('q', '')
-
-    # 2. Obtenemos las simulaciones base del usuario
     simulaciones_todas = SimulacionMercadoLibre.objects.filter(usuario=request.user)
     
-    # 3. Aplicamos el filtro si el usuario buscó algún código (Cód. Pub o Cód. Prod)
     if query_search:
         simulaciones_todas = simulaciones_todas.filter(
             Q(cod_publicacion__icontains=query_search) | 
             Q(cod_producto__icontains=query_search)
         )
         
-    # 4. Ordenamos para la paginación (vital para que no se rompa al cambiar de página)
     simulaciones_todas = simulaciones_todas.order_by('id')
     
-    # 1. MAPA DE COMISIONES
     comisiones_ref = ReferenciaComision.objects.all()
     mapa_comisiones = {}
     for ref in comisiones_ref:
@@ -562,7 +672,6 @@ def simulador_mercadolibre(request):
         if ref.categoria and ref.categoria.upper().strip() not in mapa_comisiones:
             mapa_comisiones[ref.categoria.upper().strip()] = float(ref.comision)
 
-    # 2. MAPA DE COSTOS Y NOMBRES DE PRODUCTOS (¡LO NUEVO AQUÍ!)
     costos_ref = ReferenciaCosto.objects.all()
     mapa_costos = {}
     mapa_nombres = {}
@@ -570,19 +679,16 @@ def simulador_mercadolibre(request):
         if ref.codigo:
             clave = ref.codigo.upper().strip()
             mapa_costos[clave] = float(ref.costo_cero)
-            # Extraemos el nombre del producto de Costos Referenciales
             mapa_nombres[clave] = str(ref.producto) if getattr(ref, 'producto', None) else ""
 
     mapa_comisiones_json = json.dumps(mapa_comisiones)
     mapa_costos_json = json.dumps(mapa_costos)
-    mapa_nombres_json = json.dumps(mapa_nombres) # Empaquetamos los nombres para el HTML
+    mapa_nombres_json = json.dumps(mapa_nombres) 
     
-    # 🚀 PAGINACIÓN: Dividimos la lista (filtrada o completa) en bloques de 50
     paginator = Paginator(simulaciones_todas, 50) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    # Pre-cruzamos los datos SOLO para los 50 de esta página (Súper rápido)
     for sim in page_obj:
         cat_buscar = sim.categoria.upper().strip() if sim.categoria else ""
         sim.nueva_comision_ref = mapa_comisiones.get(cat_buscar, 0.00)
@@ -595,33 +701,28 @@ def simulador_mercadolibre(request):
         'page_obj': page_obj, 
         'mapa_comisiones_json': mapa_comisiones_json,
         'mapa_costos_json': mapa_costos_json,
-        'mapa_nombres_json': mapa_nombres_json, # Pasamos los nombres al template
-        'query_search': query_search  # Pasamos la búsqueda al HTML para mantenerla en la cajita
+        'mapa_nombres_json': mapa_nombres_json, 
+        'query_search': query_search  
     })
 
 @login_required
+@verificar_acceso_plataforma('Mercado Libre', 'Mercado Libre - Junior')
 def referencia_comisiones(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     
-    # 1. Buscador
     query_search = request.GET.get('q', '')
-
-    # 2. Obtenemos todas las referencias ordenadas
     comisiones_todas = ReferenciaComision.objects.all().order_by('id')
 
-    # 3. Aplicamos el filtro si se buscó algo
     if query_search:
         comisiones_todas = comisiones_todas.filter(
             Q(sub_categoria__icontains=query_search) | 
             Q(categoria__icontains=query_search)
         )
 
-    # 4. Paginación de 40 en 40
     paginator = Paginator(comisiones_todas, 40) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # 5. Pasamos todo al HTML
     return render(request, 'inventario/referencia_comisiones.html', {
         'canal': canal, 
         'page_obj': page_obj,
@@ -629,6 +730,7 @@ def referencia_comisiones(request):
     })
 
 @login_required
+@verificar_acceso_plataforma('Mercado Libre', 'Mercado Libre - Junior')
 def guardar_comisiones(request):
     if request.method == 'POST':
         messages.success(request, "Las comisiones han sido actualizadas.")
@@ -636,6 +738,8 @@ def guardar_comisiones(request):
     return redirect('referencia_comisiones')
 
 @login_required
+@verificar_acceso_plataforma('Mercado Libre', 'Mercado Libre - Junior')
+@csrf_exempt
 def guardar_comisiones_masivas(request):
     if request.method == 'POST':
         try:
@@ -686,6 +790,8 @@ def descargar_plantilla_comisiones(request):
     return response
 
 @login_required
+@verificar_acceso_plataforma('Mercado Libre', 'Mercado Libre - Junior')
+@csrf_exempt
 def eliminar_comisiones_masivas(request):
     if request.method == 'POST':
         try:
@@ -700,28 +806,23 @@ def eliminar_comisiones_masivas(request):
 # NUEVAS FUNCIONES: REFERENCIA DE COSTOS
 # ---------------------------------------------------------
 @login_required
+@verificar_acceso_plataforma('Mercado Libre', 'Mercado Libre - Junior')
 def referencia_costos(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     
-    # 1. Capturamos lo que el usuario escriba en el buscador
     query_search = request.GET.get('q', '')
-
-    # 2. Obtenemos todos los costos ordenados por código
     costos_todos = ReferenciaCosto.objects.all().order_by('codigo')
 
-    # 3. Aplicamos el filtro a la base de datos si el usuario buscó algo
     if query_search:
         costos_todos = costos_todos.filter(
             Q(codigo__icontains=query_search) | 
             Q(producto__icontains=query_search)
         )
 
-    # 4. PAGINACIÓN: Dividimos la lista (filtrada o completa) en bloques de 50
     paginator = Paginator(costos_todos, 50) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # 5. Pasamos 'page_obj' y 'query_search' al HTML
     return render(request, 'inventario/referencia_costos.html', {
         'canal': canal, 
         'page_obj': page_obj,
@@ -729,6 +830,8 @@ def referencia_costos(request):
     })
 
 @login_required
+@verificar_acceso_plataforma('Mercado Libre', 'Mercado Libre - Junior')
+@csrf_exempt
 def guardar_costos_masivos(request):
     if request.method == 'POST':
         try:
@@ -739,7 +842,6 @@ def guardar_costos_masivos(request):
                 codigo = fila.get('CÓDIGO', '').strip()
                 producto = fila.get('PRODUCTO', '').strip()
                 
-                # Función para limpiar números de cualquier símbolo de moneda
                 def limpiar_numero(valor):
                     texto = str(valor).replace('$', '').replace('S/.', '').replace(',', '.').strip()
                     try:
@@ -768,6 +870,8 @@ def guardar_costos_masivos(request):
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
 
 @login_required
+@verificar_acceso_plataforma('Mercado Libre', 'Mercado Libre - Junior')
+@csrf_exempt
 def eliminar_costos_masivos(request):
     if request.method == 'POST':
         try:
@@ -779,38 +883,45 @@ def eliminar_costos_masivos(request):
 
 
 @login_required
+@verificar_acceso_plataforma('Mercado Libre - Junior')
 def simulador_mercadolibre_junior(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'simuladores_plataformas/simulador_mercadolibre_junior.html', {'canal': canal})
 
 @login_required
+@verificar_acceso_plataforma('Creditienda')
 def simulador_creditienda(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'simuladores_plataformas/simulador_creditienda.html', {'canal': canal})
 
 @login_required
+@verificar_acceso_plataforma('Falabella')
 def simulador_falabella(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'simuladores_plataformas/simulador_falabella.html', {'canal': canal})
 
 @login_required
+@verificar_acceso_plataforma('Intercorp')
 def simulador_intercorp(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'simuladores_plataformas/simulador_intercorp.html', {'canal': canal})
 
 @login_required
+@verificar_acceso_plataforma('Tik tok', 'Tiktok')
 def simulador_tiktok(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'simuladores_plataformas/simulador_tiktok.html', {'canal': canal})
 
 @login_required
+@verificar_acceso_plataforma('Venta Libre')
 def simulador_ventalibre(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'simuladores_plataformas/simulador_ventalibre.html', {'canal': canal})
 
 @login_required
+@verificar_acceso_plataforma('Web')
 def simulador_web(request):
-    canal = request.session.get('canal_activo', 'Web')
+    canal = request.session.get('canal_activo')
     return render(request, 'simuladores_plataformas/simulador_web.html', {'canal': canal})
 
 @login_required
@@ -818,110 +929,35 @@ def pantalla_carga(request):
     canal = request.session.get('canal_activo', 'Web')
     return render(request, 'inventario/loading.html', {'canal': canal})
 
-
-# =========================================================
-# 8. EL CEREBRO: Login Camaleónico
-# =========================================================
-class LoginCamaleonicoView(LoginView):
-    template_name = 'inventario/login.html'
-    
-    estilos = {
-        "Mercado Libre": {"color": "#F1C40F", "icono": "fa-handshake"},
-        "Mercado Libre - Junior": {"color": "#F39C12", "icono": "fa-seedling"},
-        "Creditienda": {"color": "#E74C3C", "icono": "fa-credit-card"},
-        "Falabella": {"color": "#2ECC71", "icono": "fa-store"},
-        "Intercorp": {"color": "#2980B9", "icono": "fa-building"},
-        "Venta Libre": {"color": "#9B59B6", "icono": "fa-tags"},
-        "Tik tok": {"color": "#2C3E50", "icono": "fa-tiktok"},
-        "Web": {"color": "#3498DB", "icono": "fa-globe"}
-    }
-
-    def get_success_url(self):
-        return '/loading/'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        canal = self.request.GET.get('canal', 'Web') 
-        tema_actual = self.estilos.get(canal, self.estilos["Web"])
-        context['nombre_canal'] = canal
-        context['color_principal'] = tema_actual['color']
-        icon_prefix = "fab" if "tiktok" in tema_actual['icono'] else "fas"
-        context['icono_canal'] = f"{icon_prefix} {tema_actual['icono']}"
-        return context
-
-    def form_valid(self, form):
-        usuario = form.get_user()
-        canal_solicitado = self.request.GET.get('canal', 'Web')
-
-        if not usuario.is_superuser:
-            if hasattr(usuario, 'perfil'):
-                permitido = usuario.perfil.plataformas.filter(nombre=canal_solicitado).exists()
-                if not permitido:
-                    form.add_error(None, f"Acceso denegado: Tu usuario no tiene permiso para {canal_solicitado}.")
-                    return self.form_invalid(form)
-            else:
-                form.add_error(None, "Usuario sin perfil asignado.")
-                return self.form_invalid(form)
-
-        tema = self.estilos.get(canal_solicitado, self.estilos["Web"])
-        self.request.session['canal_activo'] = canal_solicitado
-        self.request.session['color_actual'] = tema['color']
-        icon_prefix = "fab" if "tiktok" in tema['icono'] else "fas"
-        self.request.session['icono_actual'] = f"{icon_prefix} {tema['icono']}"
-        
-        return super().form_valid(form)
-
 @login_required
 def descargar_plantilla_simulador(request):
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="plantilla_simulador_mercadolibre.csv"'
-
-    # Esto es crucial para que Excel abra bien los caracteres especiales
     response.write('\ufeff'.encode('utf8'))
-
     writer = csv.writer(response, delimiter=';')
-
-    # ¡AQUÍ ESTÁ LA CORRECCIÓN! 
-    # Estas son las verdaderas columnas de tu Simulador de Costos
     writer.writerow([
         'ITEM TYPE', 'LINK', 'ESTADO', 'CÓD. PUB', 'TIPO', 
         'CÓD. PROD', 'CATEGORIA', 'MARCA', 'PRODUCTO', 'P. TACHADO', 
         '% DSCTO', 'P. VENTA', 'ENVÍO', '% NUEVA COM', 'COM (S/)', 
         'PAGO NETO', 'COSTO', 'GANANCIA', 'RTBLD%', 'MPE'
     ])
-
     return response
 
 @login_required
 def descargar_plantilla_costos(request):
-    # Configuramos la respuesta para que el navegador sepa que es un archivo descargable
     response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
     response['Content-Disposition'] = 'attachment; filename="plantilla_referencia_costos.csv"'
-
-    # Creamos el escritor CSV
     writer = csv.writer(response)
-    
-    # Escribimos la fila principal con los títulos exactos que lee tu JavaScript
     writer.writerow(['CÓDIGO', 'PRODUCTO', 'COSTO CERO', 'COSTO U. ($)', 'COSTO U. ($ ► S/.)'])
-    
-    # (Opcional) Agregamos una fila de ejemplo para guiar al usuario
     writer.writerow(['SKU-EJEMPLO', 'Producto de Prueba', '10.50', '15.00', ''])
-
     return response
-
 
 @login_required
 def descargar_plantilla_reporte_ml(request):
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="plantilla_reportes_mercadolibre.csv"'
-
-    # Esto es crucial para que Excel abra bien los caracteres especiales como la "Ñ" y tildes
     response.write('\ufeff'.encode('utf8'))
-    
-    # AQUÍ ESTÁ LA MAGIA: delimiter=';' fuerza a Excel a separar las celdas
     writer = csv.writer(response, delimiter=';')
-    
-    # Cabeceras exactas de tu reporte
     writer.writerow([
         'FECHA', 'MES Y AÑO', 'NRO. ORDEN', 'COMPROBANTE', 'TIPO DE VENTA', 
         'MARCA', 'CATEGORIA', 'SKU ALMACEN', 'MODELO', 'PRODUCTO', 
@@ -930,8 +966,6 @@ def descargar_plantilla_reporte_ml(request):
         'COSTO ENTREGA FLEX', 'GANANCIA', 'RENTABILIDAD %', 'DISTRITO', 
         'DIRECCIÓN', 'REPARTIDOR', 'CELULAR DEL CLIENTE', 'MSJ DE AGRADECIMIENTO'
     ])
-    
-    # Fila de ejemplo
     writer.writerow([
         '15/06/2026', 'JUNIO 2026', 'ML-123456789', 'B001-00123', 'CATALOGO', 
         'OSTER', 'LICUADORA', 'SKU-OST-001', 'MOD-123', 'Licuadora Oster Clásica', 
@@ -940,7 +974,6 @@ def descargar_plantilla_reporte_ml(request):
         '10.00', '39.50', '49.37%', 'San Juan de Lurigancho', 
         'Av. Próceres 123', 'Juan Pérez', '987654321', 'Gracias por su compra'
     ])
-
     return response
 
 @login_required
@@ -954,20 +987,15 @@ def guardar_reportes_masivos_ml(request):
             if eliminadas:
                 ReporteMercadoLibre.objects.filter(id__in=eliminadas).delete()
 
-            # --- MAGIA ANTI-BORRADO Y ANTI ALT+ENTER ---
             def get_best_val(val_antiguo, val_nuevo):
-                # Elimina saltos de linea (Alt+Enter) y limpia el texto
                 v_antiguo = str(val_antiguo or '').replace('\n', '').replace('\r', '').strip()
                 v_nuevo = str(val_nuevo or '').replace('\n', '').replace('\r', '').strip()
                 
-                # Considera vacíos los "---" o nulos
                 if v_antiguo in ['', '---', '-', 'None', 'null', 'NaN']: v_antiguo = ''
                 if v_nuevo in ['', '---', '-', 'None', 'null', 'NaN']: v_nuevo = ''
                 
-                # Si el nuevo dato es válido, lo usamos. Si viene vacío, RESCATAMOS el antiguo.
                 return v_nuevo if v_nuevo else v_antiguo
 
-            # Obtenemos los números de orden limpios
             nros_ordenes_entrantes = [str(f.get('NRO. ORDEN', '')).replace('\n', '').strip() for f in filas_ventas if f.get('NRO. ORDEN', '').strip()]
             
             existentes_en_db = {
@@ -978,14 +1006,12 @@ def guardar_reportes_masivos_ml(request):
             ventas_unicas = {}
             
             for fila in filas_ventas:
-                # Limpiamos el Nro de Orden por si trae un salto de línea invisible
                 nro_orden = str(fila.get('NRO. ORDEN', '')).replace('\n', '').strip()
                 if not nro_orden: 
                     continue
 
                 db_obj = existentes_en_db.get(nro_orden)
                 
-                # Aplicamos la protección a tus campos clave
                 val_comprobante = get_best_val(db_obj.comprobante if db_obj else '', fila.get('COMPROBANTE', ''))
                 val_tipo_venta = get_best_val(db_obj.tipo_venta if db_obj else '', fila.get('TIPO DE VENTA', ''))
                 val_marca = get_best_val(db_obj.marca if db_obj else '', fila.get('MARCA', ''))
@@ -1006,16 +1032,12 @@ def guardar_reportes_masivos_ml(request):
                         fecha_formateada = '2026-01-01'
 
                 def to_float(val):
-                    try:
-                        return float(str(val).replace(',', '').strip() or 0)
-                    except ValueError:
-                        return 0.00
+                    try: return float(str(val).replace(',', '').strip() or 0)
+                    except ValueError: return 0.00
                         
                 def to_int(val):
-                    try:
-                        return int(str(val).strip() or 0)
-                    except ValueError:
-                        return 0
+                    try: return int(str(val).strip() or 0)
+                    except ValueError: return 0
 
                 obj = ReporteMercadoLibre(
                     nro_orden=nro_orden,
@@ -1048,7 +1070,6 @@ def guardar_reportes_masivos_ml(request):
                     mensaje=fila.get('MSJ DE AGRADECIMIENTO', '').strip(),
                 )
                 
-                # Fusión de filas duplicadas dentro del mismo Excel
                 if nro_orden in ventas_unicas:
                     existente = ventas_unicas[nro_orden]
                     existente.comprobante = get_best_val(existente.comprobante, obj.comprobante)
@@ -1100,9 +1121,6 @@ def guardar_ingresos_masivos(request):
                 return JsonResponse({'status': 'error', 'message': 'No hay datos para procesar.'})
 
             with transaction.atomic():
-                # =========================================================
-                # PRE-CARGAR PRODUCTOS PARA BÚSQUEDA Y ACTUALIZACIÓN RÁPIDA
-                # =========================================================
                 productos_db = Producto.objects.all()
                 dict_productos = {}
                 for p in productos_db:
@@ -1110,17 +1128,13 @@ def guardar_ingresos_masivos(request):
                         key_prod = p.modelo.upper().replace(" ", "").replace("-", "")
                         dict_productos[key_prod] = p
                 
-                productos_a_actualizar = set() # Aquí guardaremos los productos que cambiaron su stock
+                productos_a_actualizar = set() 
 
-                # =========================================================
-                # 1. ELIMINAR LOS REGISTROS SOLICITADOS Y RESTAR STOCK
-                # =========================================================
                 if eliminadas:
                     ids_a_eliminar = [int(i) for i in eliminadas if str(i).isdigit()]
                     if ids_a_eliminar:
                         registros_viejos = IngresoPercheron.objects.filter(id__in=ids_a_eliminar)
                         
-                        # Restamos el stock antes de borrarlos
                         for reg in registros_viejos:
                             if reg.modelo:
                                 key_reg = str(reg.modelo).upper().replace(" ", "").replace("-", "")
@@ -1129,14 +1143,10 @@ def guardar_ingresos_masivos(request):
                                     prod.stock_actual = max(prod.stock_actual - (reg.cantidad or 1), 0)
                                     productos_a_actualizar.add(prod)
                         
-                        # Ahora sí, los eliminamos de la BD
                         registros_viejos.delete()
 
                 objetos_a_crear = []
                 
-                # =========================================================
-                # 2. PROCESAR DATOS NUEVOS Y SUMAR STOCK
-                # =========================================================
                 for fila in filas_ingresos:
                     modelo = str(fila.get('MODELO') or '').strip()
                     titulo = str(fila.get('TÍTULO') or fila.get('TITULO') or '').strip()
@@ -1191,7 +1201,6 @@ def guardar_ingresos_masivos(request):
                     )
                     objetos_a_crear.append(obj)
 
-                    # Aumentar stock en el diccionario
                     if modelo:
                         key_ingreso = str(modelo).upper().replace(" ", "").replace("-", "")
                         prod = dict_productos.get(key_ingreso)
@@ -1199,9 +1208,6 @@ def guardar_ingresos_masivos(request):
                             prod.stock_actual += cantidad_val
                             productos_a_actualizar.add(prod)
 
-                # =========================================================
-                # 3. GUARDADO EN MASA DE TODO (Ingresos y Modelos)
-                # =========================================================
                 if objetos_a_crear:
                     IngresoPercheron.objects.bulk_create(objetos_a_crear)
 
@@ -1216,32 +1222,17 @@ def guardar_ingresos_masivos(request):
             return JsonResponse({'status': 'error', 'message': f'Error: {str(e)}'}, status=400)
 
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
 @login_required
 def descargar_plantilla_ingresos(request):
-    # Preparamos el archivo para descargar
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="Plantilla_Ingresos_Percheron.csv"'
-    
-    # Esto asegura que Excel lea las tildes y la letra "N°" correctamente
     response.write('\ufeff'.encode('utf8'))
-    
-    # EL TRUCO PARA EXCEL EN ESPAÑOL: Usar punto y coma (;) como separador
     writer = csv.writer(response, delimiter=';')
-    
-    # Escribimos las cabeceras
     writer.writerow([
-        'SKU', 
-        'MODELO', 
-        'TÍTULO', 
-        'FECHA INGRESO', 
-        'CÓDIGO EAN', 
-        'SERIE / N°', 
-        'COSTO UNT.', 
-        'ING. x 1 und', 
-        'PROVEEDOR / MOTIVO', 
-        'BY:'
+        'SKU', 'MODELO', 'TÍTULO', 'FECHA INGRESO', 'CÓDIGO EAN', 
+        'SERIE / N°', 'COSTO UNT.', 'ING. x 1 und', 'PROVEEDOR / MOTIVO', 'BY:'
     ])
-    
     return response
 
 
@@ -1252,7 +1243,6 @@ def exportar_modelos_excel(request):
     response.write('\ufeff'.encode('utf8'))
     
     writer = csv.writer(response, delimiter=';')
-    # NUEVO ORDEN DE COLUMNAS EXACTO
     writer.writerow([
         'MODELO', 'MARCA', 'CATEGORÍA', 'TÍTULO', 'STOCK', 
         'INVENTARIADO POR LOS PERCHERONES', 'MERCADO LIBRE', 'FALABELLA', 'CREDITIENDA', 'PÁGINA WEB'
@@ -1264,7 +1254,7 @@ def exportar_modelos_excel(request):
             p.marca or '', 
             p.categoria or '', 
             p.titulo or '', 
-            p.stock_actual, # Bloqueado, solo lectura
+            p.stock_actual, 
             'TRUE' if p.activo_intercorp else 'FALSE',
             'TRUE' if p.activo_ml else 'FALSE',
             'TRUE' if p.activo_falabella else 'FALSE',
@@ -1290,8 +1280,6 @@ def guardar_modelos_masivos(request):
                     if not modelo_val:
                         continue
                     
-                    # Buscamos si el modelo ya existe. Si no existe, lo crea.
-                    # Le asignamos un SKU temporal autogenerado si es nuevo.
                     obj, created = Producto.objects.get_or_create(
                         modelo=modelo_val, 
                         defaults={
@@ -1300,12 +1288,10 @@ def guardar_modelos_masivos(request):
                         }
                     )
                     
-                    # Actualizamos todos sus datos con lo que viene de la tabla/Excel
                     obj.marca = item.get('MARCA', '')
                     obj.categoria = item.get('CATEGORÍA', '')
                     obj.titulo = item.get('TÍTULO', '')
                     
-                    # Actualizamos los checks de disponibilidad (True o False)
                     obj.activo_intercorp = True if item.get('INVENTARIADO POR LOS PERCHERONES') == 'TRUE' else False
                     obj.activo_ml = True if item.get('MERCADO LIBRE') == 'TRUE' else False
                     obj.activo_falabella = True if item.get('FALABELLA') == 'TRUE' else False
@@ -1318,7 +1304,7 @@ def guardar_modelos_masivos(request):
             
         except Exception as e:
             import traceback
-            print(traceback.format_exc()) # Esto imprimirá el error en la consola negra si algo más falla
+            print(traceback.format_exc()) 
             return JsonResponse({'status': 'error', 'message': f'Error en el servidor: {str(e)}'})
             
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
@@ -1329,58 +1315,12 @@ def borrar_todos_los_ingresos(request):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                # 1. Borramos el historial de ingresos
                 IngresoPercheron.objects.all().delete()
-                
-                # 2. Reseteamos el stock actual de TODOS los modelos a cero
                 Producto.objects.all().update(stock_actual=0)
-            
             return JsonResponse({'status': 'ok', 'message': '¡Base de datos de ingresos limpiada y stocks reseteados a 0!'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'error', 'message': 'Solo permitido POST'})
-
-
-@login_required
-def percheron_mercadolibre(request):
-    canal = request.session.get('canal_activo', 'Mercado Libre')
-    
-    skus_usados = SalidaMercadoLibre.objects.values_list('sku', flat=True)
-    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
-    
-    productos_db = Producto.objects.all()
-    dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
-    
-    dict_skus = {}
-    for ing in ingresos_db:
-        mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
-        prod = dict_prods.get(mod_limpio)
-        marca_val = prod.marca if prod else 'S/N MARCA'
-        stock_val = prod.stock_actual if prod else 0
-        
-        fecha_str = '-'
-        if ing.fecha_ingreso:
-            try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
-            except: fecha_str = str(ing.fecha_ingreso)
-
-        dict_skus[ing.sku] = {
-            'modelo': ing.modelo or '', 'titulo': ing.titulo or '', 'serie': ing.serie_nro or '-',
-            'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
-            'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
-            'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
-        }
-        
-    # === CAMBIO CLAVE: Eliminamos el Paginator para enviar la lista completa de corrido ===
-    page_obj = SalidaMercadoLibre.objects.all().order_by('-id')
-
-    return render(request, 'inventario/percheron_mercadolibre.html', {
-        'canal': canal,
-        'skus_json': json.dumps(dict_skus),
-        'page_obj': page_obj 
-    })
-
-
-
 
 @login_required
 @csrf_exempt
@@ -1388,20 +1328,16 @@ def sincronizar_stock_modelos(request):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                # 1. Resetear todo a 0
                 Producto.objects.all().update(stock_actual=0)
                 
-                # 2. Crear un mapa de stock basado en el modelo limpio
                 conteo_stock = {}
                 todos_ingresos = IngresoPercheron.objects.all()
                 
                 for ing in todos_ingresos:
-                    # Usamos el modelo tal cual viene en la base de datos de ingresos
                     modelo_key = str(ing.modelo).strip().upper()
                     if modelo_key:
                         conteo_stock[modelo_key] = conteo_stock.get(modelo_key, 0) + (ing.cantidad or 0)
 
-                # 3. Comparar con el Directorio de Modelos
                 modelos_db = Producto.objects.all()
                 modelos_actualizados = 0
                 
@@ -1424,7 +1360,6 @@ def borrar_todos_los_modelos(request):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                # Borra absolutamente todos los registros de la tabla Producto (Directorio de Modelos)
                 Producto.objects.all().delete()
                 
             return JsonResponse({'status': 'ok', 'message': '¡Directorio de Modelos borrado completamente!'})
@@ -1443,9 +1378,8 @@ def procesar_salidas_ml(request):
     try:
         data = json.loads(request.body)
         salidas = data.get('salidas', [])
-        eliminadas = data.get('eliminadas', []) # Recibimos los IDs a borrar
+        eliminadas = data.get('eliminadas', []) 
 
-        # VALIDACIÓN INTELIGENTE: Falla solo si NO hay salidas nuevas Y TAMPOCO hay eliminaciones
         if not salidas and not eliminadas:
             return JsonResponse({'status': 'error', 'message': 'No hay nuevas salidas ni registros eliminados para procesar.'})
 
@@ -1453,23 +1387,15 @@ def procesar_salidas_ml(request):
             conteo_descuentos = {}
             conteo_restauraciones = {}
 
-            # ==========================================================
-            # 1. PROCESAR ELIMINACIONES (Recuperar stock y borrar bd)
-            # ==========================================================
             if eliminadas:
                 registros_viejos = SalidaMercadoLibre.objects.filter(id__in=eliminadas)
                 for registro in registros_viejos:
                     if registro.modelo:
-                        # Limpiamos el modelo igual que en la creación para asegurar que coincida
                         key = str(registro.modelo).upper().replace(" ", "").replace("-", "")
                         conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.descuento
                     
-                    # Destruimos el registro de la base de datos
                     registro.delete()
 
-            # ==========================================================
-            # 2. PROCESAR NUEVAS SALIDAS (Guardar historial y acumular descuentos)
-            # ==========================================================
             if salidas:
                 for sal in salidas:
                     sku = sal.get('sku', '').strip()
@@ -1500,9 +1426,6 @@ def procesar_salidas_ml(request):
                     if key:
                         conteo_descuentos[key] = conteo_descuentos.get(key, 0) + descuento
 
-            # ==========================================================
-            # 3. ACTUALIZAR STOCK DE PRODUCTOS (Sumas y Restas en un solo paso)
-            # ==========================================================
             modelos_afectados = 0
             modelos_restaurados = 0
             
@@ -1512,19 +1435,16 @@ def procesar_salidas_ml(request):
                         key = prod.modelo.upper().replace(" ", "").replace("-", "")
                         cambio = False
                         
-                        # A. Devolvemos el stock de las filas eliminadas
                         if key in conteo_restauraciones:
                             prod.stock_actual += conteo_restauraciones[key]
                             modelos_restaurados += 1
                             cambio = True
                             
-                        # B. Restamos el stock de las filas nuevas
                         if key in conteo_descuentos:
                             prod.stock_actual = max(prod.stock_actual - conteo_descuentos[key], 0)
                             modelos_afectados += 1
                             cambio = True
                             
-                        # C. Si el producto sufrió algún cambio, lo guardamos
                         if cambio:
                             prod.save(update_fields=['stock_actual'])
 
@@ -1542,9 +1462,7 @@ def borrar_todos_los_reportes_ml(request):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                # Reemplaza 'ReporteMercadoLibre' por el nombre exacto de tu modelo si es diferente
                 ReporteMercadoLibre.objects.all().delete()
-            
             return JsonResponse({'status': 'ok', 'message': '¡Base de datos de reportes limpiada con éxito!'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
@@ -1556,9 +1474,7 @@ def borrar_todos_simulador_ml(request):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                # ¡AHORA SÍ USA EL NOMBRE CORRECTO DEL MODELO!
                 SimulacionMercadoLibre.objects.all().delete()
-            
             return JsonResponse({'status': 'ok', 'message': '¡Datos del simulador limpiados con éxito!'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
