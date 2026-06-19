@@ -14,6 +14,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Sum, Count
+from django.utils import timezone
 
 from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre
 
@@ -142,7 +144,36 @@ class LoginCamaleonicoView(LoginView):
 @login_required
 def inicio(request):
     canal = request.session.get('canal_activo', 'Web')
-    return render(request, 'inventario/inicio.html', {'canal': canal})
+    
+    ventas_totales = 0
+    categorias_nombres = []
+    categorias_cantidades = []
+    
+    if canal == 'Mercado Libre':
+        hoy = timezone.now().date()
+        
+        ventas_mes = ReporteMercadoLibre.objects.filter(
+            fecha__month=hoy.month, 
+            fecha__year=hoy.year
+        ).aggregate(total=Sum('cantidad'))
+        
+        ventas_totales = int(ventas_mes['total'] or 0)
+        
+        ventas_por_categoria = ReporteMercadoLibre.objects.values('categoria').annotate(
+            total_vendido=Sum('cantidad')
+        ).order_by('-total_vendido')[:5]
+        
+        categorias_nombres = [v['categoria'] for v in ventas_por_categoria if v['categoria']]
+        categorias_cantidades = [float(v['total_vendido']) for v in ventas_por_categoria if v['categoria']]
+
+    context = {
+        'canal': canal,
+        'ventas_totales': ventas_totales,
+        'categorias_nombres_json': json.dumps(categorias_nombres),
+        'categorias_cantidades_json': json.dumps(categorias_cantidades),
+    }
+    
+    return render(request, 'inventario/inicio.html', context)
 
 @login_required
 def inventario_magazzino(request):
