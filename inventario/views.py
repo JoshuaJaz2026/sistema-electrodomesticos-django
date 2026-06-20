@@ -19,7 +19,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 # Importación corregida de SimulacionMercadoLibreJunior
-from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre, ReporteMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior
+from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre, ReporteMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SalidaFalabella, SalidaCreditienda, SalidaIntercorp, SalidaTiktok, SalidaVentaLibre
 
 # =========================================================
 # CONFIGURACIÓN MAESTRA DE ESTILOS Y COLORES
@@ -287,8 +287,27 @@ def percheron_registros(request):
     productos_db = Producto.objects.all()
     dict_productos = {p.modelo: p for p in productos_db if p.modelo}
     
-    salidas_ml_agrupadas = SalidaMercadoLibre.objects.values('sku').annotate(total_desc=Sum('descuento'))
-    dict_out_ml = {s['sku']: s['total_desc'] for s in salidas_ml_agrupadas if s['sku']}
+    # === RECOPILACIÓN MASIVA DE TODAS LAS PLATAFORMAS ===
+    out_ml_qs = SalidaMercadoLibre.objects.values('sku').annotate(total=Sum('descuento'))
+    dict_out_ml = {s['sku']: s['total'] for s in out_ml_qs if s['sku']}
+    
+    out_ml_jr_qs = SalidaMercadoLibreJunior.objects.values('sku').annotate(total=Sum('descuento'))
+    dict_out_ml_jr = {s['sku']: s['total'] for s in out_ml_jr_qs if s['sku']}
+
+    out_fbl_qs = SalidaFalabella.objects.values('sku').annotate(total=Sum('descuento'))
+    dict_out_fbl = {s['sku']: s['total'] for s in out_fbl_qs if s['sku']}
+
+    out_cdt_qs = SalidaCreditienda.objects.values('sku').annotate(total=Sum('descuento'))
+    dict_out_cdt = {s['sku']: s['total'] for s in out_cdt_qs if s['sku']}
+
+    out_int_qs = SalidaIntercorp.objects.values('sku').annotate(total=Sum('descuento'))
+    dict_out_int = {s['sku']: s['total'] for s in out_int_qs if s['sku']}
+
+    out_tk_qs = SalidaTiktok.objects.values('sku').annotate(total=Sum('descuento'))
+    dict_out_tk = {s['sku']: s['total'] for s in out_tk_qs if s['sku']}
+
+    out_vl_qs = SalidaVentaLibre.objects.values('sku').annotate(total=Sum('descuento'))
+    dict_out_vl = {s['sku']: s['total'] for s in out_vl_qs if s['sku']}
     
     registros_data = []
     
@@ -298,14 +317,16 @@ def percheron_registros(request):
         marca_val = prod.marca if prod else 'SIN MARCA'
         ubicacion_val = prod.ubicacion if prod else 'SIN UBICACIÓN'
         
+        # Asignar salidas extraídas por plataforma
         out_ml = dict_out_ml.get(ing.sku, 0)
-        out_fbl = 0
-        out_cdt = 0
-        out_vl = 0
-        out_tk = 0
-        out_intcp = 0
-        out_ml2 = 0
+        out_ml2 = dict_out_ml_jr.get(ing.sku, 0)
+        out_fbl = dict_out_fbl.get(ing.sku, 0)
+        out_cdt = dict_out_cdt.get(ing.sku, 0)
+        out_intcp = dict_out_int.get(ing.sku, 0)
+        out_tk = dict_out_tk.get(ing.sku, 0)
+        out_vl = dict_out_vl.get(ing.sku, 0)
         
+        # Balance Final Automático
         total_out = out_ml + out_fbl + out_cdt + out_vl + out_tk + out_intcp + out_ml2
         stock_val = ing.cantidad - total_out
         
@@ -1970,3 +1991,6 @@ def procesar_salidas_ml_junior(request):
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
+    
+
+
