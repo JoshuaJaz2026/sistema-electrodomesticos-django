@@ -13,10 +13,16 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='producto',
-            name='stock_actual',
-            field=models.IntegerField(default=0, verbose_name='Stock Actual'),
+        # === SOLUCIÓN APLICADA: SE USA RUNSQL PARA EVITAR EL ERROR DE COLUMNA EXISTENTE ===
+        migrations.RunSQL(
+            sql='ALTER TABLE "inventario_producto" ADD COLUMN IF NOT EXISTS "stock_actual" integer DEFAULT 0;',
+            state_operations=[
+                migrations.AddField(
+                    model_name='producto',
+                    name='stock_actual',
+                    field=models.IntegerField(default=0, verbose_name='Stock Actual'),
+                ),
+            ]
         ),
         migrations.AddField(
             model_name='reportemercadolibre',
