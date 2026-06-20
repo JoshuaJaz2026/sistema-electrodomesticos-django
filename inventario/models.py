@@ -155,7 +155,6 @@ class SimulacionMercadoLibre(models.Model):
     
     # AMPLIADO: max_digits=10 
     rentabilidad_porc = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    # Cámbialo a esto en tu models.py:
     mpe = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
@@ -165,6 +164,41 @@ class SimulacionMercadoLibre(models.Model):
 
     def __str__(self):
         return f"{self.producto if self.producto else 'Sin nombre'} - S/ {self.precio_venta} ({self.usuario.username})"
+
+# =========================================================
+# MODELO CLONADO: SIMULADOR MERCADO LIBRE JUNIOR
+# =========================================================
+class SimulacionMercadoLibreJunior(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='simulaciones_mercadolibre_junior')
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+    item_type = models.CharField(max_length=20, blank=True, null=True) 
+    link = models.URLField(max_length=500, blank=True, null=True)
+    estado_publicacion = models.CharField(max_length=20, blank=True, null=True)
+    cod_publicacion = models.CharField(max_length=50, blank=True, null=True)
+    tipo_publicacion = models.CharField(max_length=30, blank=True, null=True) 
+    cod_producto = models.CharField(max_length=50, blank=True, null=True)
+    categoria = models.CharField(max_length=150, blank=True, null=True)
+    marca = models.CharField(max_length=100, blank=True, null=True)
+    producto = models.CharField(max_length=255, blank=True, null=True)
+    precio_tachado = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    porc_descuento = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    precio_venta = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    costo_envio = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    porc_comision = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    comision_soles = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    pago_neto = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    costo_producto = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    ganancia = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    rentabilidad_porc = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    mpe = models.CharField(max_length=100, null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Simulación Mercado Libre Junior"
+        verbose_name_plural = "Simulaciones Mercado Libre Junior"
+        ordering = ['-fecha_registro']
+
+    def __str__(self):
+        return f"Junior: {self.producto if self.producto else 'Sin nombre'} - S/ {self.precio_venta} ({self.usuario.username})"
     
 class Comision(models.Model):
     sub_categoria = models.CharField(max_length=100)
@@ -197,6 +231,11 @@ class ReporteMercadoLibre(models.Model):
     fecha = models.DateField()
     mes_anio = models.CharField(max_length=100)
     nro_orden = models.CharField(max_length=255, unique=True)
+    
+    # Restauradas las columnas nuevas que faltaban en tu archivo
+    nro_operacion = models.CharField(max_length=255, blank=True, null=True)
+    estado_pago = models.CharField(max_length=100, blank=True, null=True)
+    
     comprobante = models.CharField(max_length=255)
     tipo_venta = models.CharField(max_length=255)
     marca = models.CharField(max_length=255)

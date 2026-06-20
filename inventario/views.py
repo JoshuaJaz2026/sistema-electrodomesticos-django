@@ -18,7 +18,8 @@ from django.db.models import Sum, Count
 from django.utils import timezone
 from datetime import timedelta
 
-from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre,ReporteMercadoLibreJunior
+# Importación corregida de SimulacionMercadoLibreJunior
+from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre, ReporteMercadoLibreJunior, SimulacionMercadoLibreJunior
 
 # =========================================================
 # CONFIGURACIÓN MAESTRA DE ESTILOS Y COLORES
@@ -1024,7 +1025,58 @@ def eliminar_costos_masivos(request):
 @verificar_acceso_plataforma('Mercado Libre - Junior')
 def simulador_mercadolibre_junior(request):
     canal = request.session.get('canal_activo')
-    return render(request, 'simuladores_plataformas/simulador_mercadolibre_junior.html', {'canal': canal})
+    
+    query_search = request.GET.get('q', '')
+    simulaciones_todas = SimulacionMercadoLibreJunior.objects.filter(usuario=request.user)
+    
+    if query_search:
+        simulaciones_todas = simulaciones_todas.filter(
+            Q(cod_publicacion__icontains=query_search) | 
+            Q(cod_producto__icontains=query_search)
+        )
+        
+    simulaciones_todas = simulaciones_todas.order_by('id')
+    
+    comisiones_ref = ReferenciaComision.objects.all()
+    mapa_comisiones = {}
+    for ref in comisiones_ref:
+        if ref.sub_categoria:
+            mapa_comisiones[ref.sub_categoria.upper().strip()] = float(ref.comision)
+        if ref.categoria and ref.categoria.upper().strip() not in mapa_comisiones:
+            mapa_comisiones[ref.categoria.upper().strip()] = float(ref.comision)
+
+    costos_ref = ReferenciaCosto.objects.all()
+    mapa_costos = {}
+    mapa_nombres = {}
+    for ref in costos_ref:
+        if ref.codigo:
+            clave = ref.codigo.upper().strip()
+            mapa_costos[clave] = float(ref.costo_cero)
+            mapa_nombres[clave] = str(ref.producto) if getattr(ref, 'producto', None) else ""
+
+    mapa_comisiones_json = json.dumps(mapa_comisiones)
+    mapa_costos_json = json.dumps(mapa_costos)
+    mapa_nombres_json = json.dumps(mapa_nombres) 
+    
+    paginator = Paginator(simulaciones_todas, 50) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    for sim in page_obj:
+        cat_buscar = sim.categoria.upper().strip() if sim.categoria else ""
+        sim.nueva_comision_ref = mapa_comisiones.get(cat_buscar, 0.00)
+        
+        cod_buscar = sim.cod_producto.upper().strip() if sim.cod_producto else ""
+        sim.nuevo_costo_ref = mapa_costos.get(cod_buscar, float(sim.costo_producto or 0.00))
+        
+    return render(request, 'simuladores_plataformas/simulador_mercadolibre_junior.html', {
+        'canal': canal, 
+        'page_obj': page_obj, 
+        'mapa_comisiones_json': mapa_comisiones_json,
+        'mapa_costos_json': mapa_costos_json,
+        'mapa_nombres_json': mapa_nombres_json, 
+        'query_search': query_search  
+    })
 
 @login_required
 @verificar_acceso_plataforma('Creditienda')
@@ -1728,6 +1780,84 @@ def borrar_todos_simulador_ml(request):
             with transaction.atomic():
                 SimulacionMercadoLibre.objects.all().delete()
             return JsonResponse({'status': 'ok', 'message': '¡Datos del simulador limpiados con éxito!'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Solo permitido POST'})
+
+# ---------------------------------------------------------
+# FUNCIONES DE GUARDADO Y BORRADO MASIVO: SIMULADOR ML JUNIOR
+# ---------------------------------------------------------
+@login_required
+@verificar_acceso_plataforma('Mercado Libre - Junior')
+@csrf_exempt
+def guardar_simulador_masivo_ml_junior(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            datos_simulacion = data.get('datos', [])
+            
+            for fila in datos_simulacion:
+                p_venta = float(fila.get('p_venta') or 0)
+                envio = float(fila.get('envio') or 0)
+                porc_com = float(fila.get('porc_comision') or 0)
+                costo = float(fila.get('costo') or 0)
+                
+                com_soles = p_venta * (porc_com / 100)
+                pago_neto = p_venta - com_soles - envio
+                ganancia = pago_neto - costo
+                rentabilidad = (ganancia / p_venta * 100) if p_venta > 0 else 0
+
+                cod_pub = fila.get('cod_pub', '').strip()
+
+                datos_diccionario = {
+                    'item_type': fila.get('item_type', ''),
+                    'link': fila.get('link', ''),
+                    'estado_publicacion': fila.get('estado', ''),
+                    'tipo_publicacion': fila.get('tipo', ''),
+                    'cod_producto': fila.get('cod_prod', ''),
+                    'categoria': fila.get('categoria', ''),
+                    'marca': fila.get('marca', ''),
+                    'producto': fila.get('producto', ''),
+                    'precio_tachado': float(fila.get('p_tachado') or 0),
+                    'porc_descuento': float(fila.get('dscto') or 0),
+                    'precio_venta': p_venta,
+                    'costo_envio': envio,
+                    'porc_comision': porc_com,
+                    'comision_soles': com_soles,
+                    'pago_neto': pago_neto,
+                    'costo_producto': costo,
+                    'ganancia': ganancia,
+                    'rentabilidad_porc': rentabilidad,
+                    'mpe': fila.get('mpe', False)
+                }
+
+                if cod_pub:
+                    SimulacionMercadoLibreJunior.objects.update_or_create(
+                        usuario=request.user,
+                        cod_publicacion=cod_pub,
+                        defaults=datos_diccionario
+                    )
+                else:
+                    SimulacionMercadoLibreJunior.objects.create(
+                        usuario=request.user,
+                        cod_publicacion='',
+                        **datos_diccionario
+                    )
+            
+            return JsonResponse({'status': 'ok', 'message': 'Simulación Junior guardada/actualizada exitosamente.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
+@login_required
+@csrf_exempt
+def borrar_todos_simulador_ml_junior(request):
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                SimulacionMercadoLibreJunior.objects.filter(usuario=request.user).delete()
+            return JsonResponse({'status': 'ok', 'message': '¡Datos del simulador Junior limpiados con éxito!'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'error', 'message': 'Solo permitido POST'})

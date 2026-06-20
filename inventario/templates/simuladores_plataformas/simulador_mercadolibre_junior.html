@@ -1,0 +1,734 @@
+{% extends 'inventario/dashboard_global.html' %}
+{% load static %}
+
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<div class="card" style="border-top: 4px solid var(--color-principal, #eab308); padding: 12px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); height: calc(100vh - 90px); display: flex; flex-direction: column;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; flex-shrink: 0;">
+        
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-size: 1.1rem; white-space: nowrap;">
+                <i class="fas fa-calculator" style="color: var(--color-principal, #eab308);"></i> Simulador - {{ canal }}
+                <span id="indicador-cambios" style="background-color: #f59e0b; color: white; padding: 3px 8px; border-radius: 20px; font-size: 0.7rem; display: none; font-weight: bold; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);">
+                    <i class="fas fa-exclamation-circle"></i> Sin guardar
+                </span>
+            </h2>
+
+            <form method="GET" action="" style="display: flex; align-items: center; height: 32px; margin-left: 5px;">
+                <div style="position: relative;">
+                    <i class="fas fa-search" style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.8rem;"></i>
+                    <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar CÓD. PUB o SKU..." style="padding: 0 10px 0 26px; height: 32px; border: 1px solid #cbd5e1; border-radius: 4px 0 0 4px; outline: none; font-size: 0.8rem; width: 220px; box-sizing: border-box;">
+                </div>
+                <button type="submit" style="background: var(--color-principal, #eab308); color: #0f172a; border: none; height: 32px; padding: 0 12px; border-radius: 0 4px 4px 0; cursor: pointer; font-weight: bold; font-size: 0.8rem; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); transition: opacity 0.2s;">
+                    Buscar
+                </button>
+                {% if query_search %}
+                <a href="?" style="background: #ef4444; color: white; height: 32px; padding: 0 10px; border-radius: 4px; display: flex; align-items: center; text-decoration: none; font-weight: bold; font-size: 0.8rem; margin-left: 6px;">
+                    <i class="fas fa-times"></i>
+                </a>
+                {% endif %}
+            </form>
+        </div>
+        
+        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            <a href="{% url 'descargar_plantilla' %}" class="btn-top" style="background-color: #3b82f6;" title="Bajar Plantilla">
+                <i class="fas fa-download"></i> Plantilla
+            </a>
+
+            <button type="button" onclick="agregarFila()" class="btn-top" style="background-color: #8b5cf6;" title="Agregar nueva fila">
+                <i class="fas fa-plus"></i> Fila
+            </button>
+
+            <input type="file" id="fileImportExcel" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importarSimulador(event)">
+            <button type="button" onclick="document.getElementById('fileImportExcel').click()" class="btn-top" style="background-color: #10b981;" title="Importar desde Excel">
+                <i class="fas fa-file-import"></i> Importar
+            </button>
+
+            <button type="button" onclick="exportarSimulador()" class="btn-top" style="background-color: #0ea5e9;" title="Exportar a Excel">
+                <i class="fas fa-file-excel"></i> Exportar
+            </button>
+
+            <button type="button" id="btnGuardar" onclick="guardarSimulaciones()" class="btn-top" style="background-color: var(--color-principal, #eab308); color: #0f172a;" title="Guardar Cambios">
+                <i class="fas fa-save"></i> Guardar
+            </button>
+
+            <button type="button" id="btnBorrarSimulador" onclick="borrarTodoSimulador()" class="btn-top" style="background-color: #ef4444;" title="Borrar Todo">
+                <i class="fas fa-trash-alt"></i> Borrar Todo
+            </button>
+            
+            <div style="position: relative;">
+                <button type="button" onclick="togglePanelColumnas()" class="btn-top" style="background-color: #334155;" title="Personalizar Columnas">
+                    <i class="fas fa-columns"></i> Opción
+                </button>
+                
+                <div id="panelPersonalizarColumnas" style="display: none; position: absolute; right: 0; top: 115%; background: white; border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 100; width: 650px; animation: slideInDown 0.2s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
+                        <h4 style="margin: 0; color: #1e293b; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-tasks" style="color: var(--color-principal, #eab308);"></i> Elementos en pantalla
+                        </h4>
+                        <button onclick="togglePanelColumnas()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.4rem; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; transition: background 0.2s;">&times;</button>
+                    </div>
+                    <div id="columnCheckboxes" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <datalist id="list-itemtype"><option value="KILLER"><option value="NORMAL"><option value="SLOW"><option value="NUEVO"></datalist>
+    <datalist id="list-estado"><option value="ACTIVO"><option value="PAUSADO"></datalist>
+    <datalist id="list-tipopub"><option value="CATALOGO"><option value="TRADICIONAL"></datalist>
+    <datalist id="list-categoria">
+        <option value="MAQUINA DE CORTAR PELO"><option value="ARROCERA"><option value="AUDIFONOS"><option value="BATIDORA DE INMERSIÓN"><option value="BATIDORA DE MANO"><option value="BATIDORA DE TAZÓN"><option value="CACEROLA"><option value="CAFETERA"><option value="COCINA DE INDUCCIÓN"><option value="COCINA ELÉCTRICA"><option value="COMBO BLACK"><option value="COMBO CHERRY"><option value="COMBO OSTER"><option value="DISPENSADOR DE AGUA"><option value="EXTRACTOR DE JUGOS"><option value="FREIDORA DE AIRE"><option value="HERVIDOR ELÉCTRICO"><option value="JUEGO DE OLLAS"><option value="LAVADORA"><option value="LICUADORA"><option value="LAVASECA"><option value="MICRÓFONO"><option value="MICROONDAS"><option value="MOLEDOR DE CARNE"><option value="MOLINILLO"><option value="OLLA A PRESIÓN"><option value="PANIFICADORA"><option value="PARLANTE"><option value="SARTÉN"><option value="SET DE CUBIERTOS"><option value="SET DE OLLAS"><option value="TERMO BOMBA"><option value="TERMORADIADOR"><option value="TERMO HERVIDOR"><option value="TETERA"><option value="TRICOMBO OSTER"><option value="TV"><option value="WAFLERA ELÉCTRICA"><option value="YOGURT MAKER"><option value="SARTÉN ELÉCTRICA"><option value="VAPORIZADOR DE PRENDAS"><option value="JVC"><option value="ONDULADOR"><option value="PLANCHA GRILL"><option value="PROCESADOR DE ALIMENTOS"><option value="CUATRICOMBO OSTER"><option value="MULTI OLLA"><option value="CUCHILLA DE LICUADORA"><option value="PERFUME"><option value="OLLA DE ACERO"><option value="PARRILLA ELÉCTRICA"><option value="SANDWICHERA"><option value="HORNO CON FREIDORA DE AIRE"><option value="HORNO ELÉCTRICO"><option value="REFRIGERADORA"><option value="CONGELADORA"><option value="PARRILLA PORTÁTIL"><option value="MINICOMPONENTE"><option value="EXTRACTOR POR PRENSADO"><option value="CONTROL DE TV"><option value="SOUNDBAR"><option value="HIERRO FUNDIDO"><option value="HORNO MICROONDAS"><option value="TETERA ELÉCTRICA"><option value="BATIDORA MULTIUSOS"><option value="OLLA ANTIHADERENTE"><option value="DESHUMEDECEDOR"><option value="PLANCHA A VAPOR"><option value="FRIGOBAR"><option value="ASPIRADORA"><option value="ESPUMADERA"><option value="KIT DE ACCESORIOS"><option value="PLANCHA DE PELO"><option value="SET DE MÁQUINAS PARA CORTAR PELO"><option value="ESPÁTULA"><option value="TABLET"><option value="COMBO FINEZZA"><option value="BLOQUEADOR"><option value="PACK CUIDADO PERSONAL"><option value="AFEITADOR"><option value="BISUTERÍA"><option value="MOLDES"><option value="LUSTRADORA"><option value="BOWLS"><option value="CUIDADO PERSONAL"><option value="BATIDORA DE MANO Y PEDESTAL"><option value="SARTÉN ANTIHADERENTE"><option value="VASO"><option value="COCINA A GAS"><option value="HORNO TOSTADOR"><option value="TAPA DE LICUADORA"><option value="DEPILADORA"><option value="EXPRIMIDOR CÍTRICO"><option value="MÁQUINA PARA HACER PASTA"><option value="PLANCHA CLÁSICA"><option value="TOSTADORA"><option value="OLLA"><option value="PARRILLA Y PLANCHA"><option value="COMBO RECORD"><option value="PATINES"><option value="JARRA"><option value="ASADOR ELÉCTRICO"><option value="CARGADOR PORTATIL"><option value="AIRE ACONDICIONADO"><option value="KIT OSTER"><option value="EXHIBIDORA"><option value="CAMPANA"><option value="ESTUFA"><option value="IMPRESORA"><option value="COCINA ENCIMERA"><option value="VENTILADOR"><option value="AMPLIFICADOR"><option value="FUNDA DE PARLANTE"><option value="CEPILLO MODELADOR"><option value="ESCOBA ELECTRICA"><option value="CREEPERA"><option value="MAQUINA DE DONDAS"><option value="MAQUINA DE HIELO">
+    </datalist>
+    <datalist id="list-marca">
+        <option value="WAHL"><option value="OSTER"><option value="FINEZZA"><option value="RECORD"><option value="IMACO"><option value="BOSSKO"><option value="TAURUS"><option value="LG"><option value="SAMSUNG"><option value="INDURAMA"><option value="ELECTROLUX"><option value="JBO"><option value="TREVELY"><option value="JVC"><option value="BGH"><option value="PHILIPS"><option value="FUJITEC"><option value="PANASONIC"><option value="SONY"><option value="TCL"><option value="HALION"><option value="MIRAY"><option value="EVOLUTION"><option value="YANBAL"><option value="DSP"><option value="MASTERTECH"><option value="CREST"><option value="GAMA"><option value="WHITELINE"><option value="REMINGTONE"><option value="MAGIC CLIP"><option value="ILUMI"><option value="MABE"><option value="AOC"><option value="TRAMONTINA"><option value="PREMIER"><option value="IMPERIAL"><option value="VISIONNER"><option value="SILVER CREST"><option value="BORD"><option value="EPSON"><option value="SOLE">
+    </datalist>
+
+    <div style="position: relative; overflow-x: auto; overflow-y: auto; flex-grow: 1; border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+        
+        <div id="pantalla-carga-tabla" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); z-index: 50; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: opacity 0.4s ease;">
+            <div style="width: 200px; height: 6px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; margin-bottom: 12px;">
+                <div class="barra-animada" style="height: 100%; width: 40%; background-color: var(--color-principal, #eab308); border-radius: 10px;"></div>
+            </div>
+            <span style="color: #475569; font-weight: 600; font-size: 0.9rem;">Preparando datos...</span>
+        </div>
+
+        <table id="tablaReporte" style="width: max-content; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap; table-layout: fixed; height: max-content;">
+            <thead style="position: sticky; top: 0; z-index: 10;">
+                <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem; letter-spacing: 0.5px;">
+                    <th class="th-premium" style="width: 100px;">ITEM TYPE</th>
+                    <th class="th-premium" style="width: 220px;">LINK</th>
+                    <th class="th-premium" style="width: 100px;">ESTADO</th>
+                    <th class="th-premium" style="width: 120px; color: #60a5fa;">CÓD. PUB</th>
+                    <th class="th-premium" style="width: 120px;">TIPO</th>
+                    <th class="th-premium" style="width: 120px; color: #60a5fa;">CÓD. PROD</th>
+                    <th class="th-premium" style="width: 200px;">CATEGORIA</th>
+                    <th class="th-premium" style="width: 140px;">MARCA</th>
+                    <th class="th-premium" style="width: 320px;">PRODUCTO</th>
+                    
+                    <th class="th-premium" style="width: 100px; background-color: #1e293b;">P. TACHADO</th>
+                    <th class="th-premium" style="width: 90px; background-color: #1e293b;">% DSCTO</th>
+                    <th class="th-premium" style="width: 100px; background-color: #064e3b;">P. VENTA</th>
+                    
+                    <th class="th-premium" style="width: 90px; background-color: #7f1d1d;">ENVÍO</th>
+                    <th class="th-premium" style="width: 110px; background-color: #7f1d1d;">% NUEVA COM</th>
+                    <th class="th-premium" style="width: 100px; background-color: #7f1d1d;">COM (S/)</th>
+                    
+                    <th class="th-premium" style="width: 110px; background-color: #064e3b;">PAGO NETO</th>
+                    <th class="th-premium" style="width: 100px; background-color: #7f1d1d;">COSTO</th>
+                    
+                    <th class="th-premium" style="width: 110px; background-color: #1e3a8a;">GANANCIA</th>
+                    <th class="th-premium" style="width: 100px; background-color: #1e3a8a;">RTBLD%</th>
+                    
+                    <th class="th-premium" style="width: 140px; color: #60a5fa;">MPE</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if page_obj %}
+                    {% for sim in page_obj %}
+                    <tr class="fila-simulador" data-original-key="{{ sim.id|default_if_none:'' }}">
+                        <td class="td-premium"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype" value="{{ sim.item_type|default_if_none:'' }}"></td>
+                        <td class="td-premium td-link-container">
+                            <input type="text" class="celda-input val-link text-blue" value="{{ sim.link|default_if_none:'' }}">
+                            <a href="{{ sim.link|default:'#' }}" target="_blank" class="btn-link" style="{% if sim.link %}display: inline-block;{% else %}display: none;{% endif %}"><i class="fas fa-external-link-alt"></i></a>
+                        </td>
+                        <td class="td-premium"><input list="list-estado" class="celda-input central val-estado" value="{{ sim.estado_publicacion|default_if_none:'' }}"></td>
+                        <td class="td-premium bg-yellow-light"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub text-mono" style="color: #b45309;" value="{{ sim.cod_publicacion|default_if_none:'' }}"></td>
+                        <td class="td-premium"><input list="list-tipopub" class="celda-input central val-tipo" value="{{ sim.tipo_publicacion|default_if_none:'' }}"></td>
+                        <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-codprod" oninput="buscarCosto(this)" value="{{ sim.cod_producto|default_if_none:'' }}"></td>
+                        <td class="td-premium"><input list="list-categoria" class="celda-input val-categoria" oninput="buscarComision(this)" value="{{ sim.categoria|default_if_none:'' }}"></td>
+                        <td class="td-premium"><input list="list-marca" class="celda-input val-marca bold text-dark" value="{{ sim.marca|default_if_none:'' }}"></td>
+                        <td class="td-premium"><input type="text" class="celda-input val-producto" value="{{ sim.producto|default_if_none:'' }}"></td>
+                        
+                        <td class="td-premium"><input type="text" class="celda-input derecha bold val-ptachado" value="{{ sim.precio_tachado|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-premium"><input type="number" step="0.01" class="celda-input central bold val-dscto text-dark" oninput="calcularFila(this)" value="{{ sim.porc_descuento|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-premium bg-green-light"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)" value="{{ sim.precio_venta|stringformat:'.2f'|default:'' }}"></td>
+                        
+                        <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-envio" oninput="calcularFila(this)" value="{{ sim.costo_envio|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input central bold text-red val-porc-com" oninput="calcularFila(this)" value="{% if sim.nueva_comision_ref %}{{ sim.nueva_comision_ref|stringformat:'.2f' }}{% elif sim.porc_comision %}{{ sim.porc_comision|stringformat:'.2f' }}{% else %}0.00{% endif %}"></td>
+                        <td class="td-premium bg-red-light"><input type="text" class="celda-input derecha text-red val-com-soles" value="{{ sim.comision_soles|stringformat:'.2f'|default:'' }}"></td>
+                        
+                        <td class="td-premium bg-green-light"><input type="text" class="celda-input derecha bold text-green-dark val-pago-neto" value="{{ sim.pago_neto|stringformat:'.2f'|default:'' }}"></td>
+                        <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-costo" oninput="calcularFila(this)" value="{% if sim.nuevo_costo_ref %}{{ sim.nuevo_costo_ref|stringformat:'.2f' }}{% elif sim.costo_producto %}{{ sim.costo_producto|stringformat:'.2f' }}{% else %}0.00{% endif %}"></td>
+                        
+                        <td class="td-premium bg-blue-light"><input type="text" class="celda-input derecha bold val-ganancia" value="{{ sim.ganancia|stringformat:'.2f'|default:'' }}" style="color: {% if sim.ganancia < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
+                        <td class="td-premium bg-blue-light"><input type="text" class="celda-input central bold val-rentabilidad" value="{{ sim.rentabilidad_porc|stringformat:'.2f'|default:'' }}%" style="color: {% if sim.rentabilidad_porc < 0 %}#dc2626{% else %}#1e40af{% endif %};"></td>
+                        
+                        <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-mpe" value="{{ sim.mpe|default:'MPE' }}"></td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+                
+                <tr class="fila-simulador" id="fila-molde" style="display: none;" data-original-key="molde">
+                    <td class="td-premium"><input list="list-itemtype" class="celda-input central bold text-dark val-itemtype"></td>
+                    <td class="td-premium td-link-container">
+                        <input type="text" class="celda-input val-link text-blue" placeholder="Link...">
+                        <a href="#" target="_blank" class="btn-link" style="display: none;"><i class="fas fa-external-link-alt"></i></a>
+                    </td>
+                    <td class="td-premium"><input list="list-estado" class="celda-input central val-estado"></td>
+                    <td class="td-premium bg-yellow-light"><input type="text" oninput="generarLink(this)" class="celda-input central bold val-codpub text-mono" style="color: #b45309;" placeholder="Ej. 123456"></td>
+                    <td class="td-premium"><input list="list-tipopub" class="celda-input central val-tipo"></td>
+                    <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-codprod" oninput="buscarCosto(this)"></td>
+                    <td class="td-premium"><input list="list-categoria" class="celda-input val-categoria" oninput="buscarComision(this)"></td>
+                    <td class="td-premium"><input list="list-marca" class="celda-input val-marca bold text-dark"></td>
+                    <td class="td-premium"><input type="text" class="celda-input val-producto"></td>
+                    
+                    <td class="td-premium"><input type="text" class="celda-input derecha bold val-ptachado"></td>
+                    <td class="td-premium"><input type="number" step="0.01" class="celda-input central bold val-dscto text-dark" oninput="calcularFila(this)"></td>
+                    <td class="td-premium bg-green-light"><input type="number" step="0.01" class="celda-input derecha bold text-green val-venta" oninput="calcularFila(this)"></td>
+                    
+                    <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-envio" oninput="calcularFila(this)"></td>
+                    <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input central bold text-red val-porc-com" oninput="calcularFila(this)" value="0.00"></td>
+                    <td class="td-premium bg-red-light"><input type="text" class="celda-input derecha text-red val-com-soles"></td>
+                    
+                    <td class="td-premium bg-green-light"><input type="text" class="celda-input derecha bold text-green-dark val-pago-neto"></td>
+                    <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-costo" oninput="calcularFila(this)" value="0.00"></td>
+                    
+                    <td class="td-premium bg-blue-light"><input type="text" class="celda-input derecha bold val-ganancia"></td>
+                    <td class="td-premium bg-blue-light"><input type="text" class="celda-input central bold val-rentabilidad"></td>
+                    
+                    <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-mpe" value="MPE"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 6px 15px; background: #f8fafc; border-radius: 4px; border: 1px solid #e2e8f0; flex-shrink: 0;">
+        <span style="color: #475569; font-weight: 600; font-size: 0.85rem;">
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            {% if query_search %}<span style="color: #64748b; font-style: italic; margin-left: 5px;">(Resultados filtrados)</span>{% endif %}
+        </span>
+        <div style="display: flex; gap: 8px;">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">« Primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">Anterior</a>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">Siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if query_search %}&q={{ query_search }}{% endif %}" class="btn-pag">Última »</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<style>
+    /* BOTONES SUPERIORES COMPACTOS */
+    .btn-top { color: white; border: none; padding: 0 10px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s; font-size: 0.8rem; text-decoration: none; height: 32px;}
+    .btn-top:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    /* Estructura de Tabla Excel Estricta */
+    #tablaReporte { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-collapse: collapse; }
+    .th-premium { padding: 10px 8px; border: 1px solid #334155; text-align: center; }
+    .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 36px; vertical-align: middle; }
+    
+    /* Zonas de Color Codificadas */
+    .bg-green-light { background-color: #f0fdf4 !important; }
+    .bg-red-light { background-color: #fef2f2 !important; }
+    .bg-blue-light { background-color: #eff6ff !important; }
+    .bg-yellow-light { background-color: #fef9c3 !important; }
+    
+    /* Efecto Cebra y Hover */
+    .fila-simulador:nth-child(even) { background-color: #f8fafc; }
+    .fila-simulador:nth-child(odd) { background-color: #ffffff; }
+    .fila-simulador:hover td { filter: brightness(0.96); background-color: #e2e8f0; }
+
+    /* Fila Seleccionada / Editada */
+    .fila-seleccionada > td { background-color: #fef9c3 !important; filter: none !important; }
+    .fila-editada > td { background-color: #fffbeb !important; filter: none !important; }
+    .fila-editada > td:first-child { border-left: 4px solid #f59e0b; }
+
+    /* Inputs Fantasma */
+    .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 6px 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
+    .celda-input:focus { background-color: #fff; box-shadow: inset 0 0 0 2px var(--color-principal, #eab308); color: #000; position: relative; z-index: 1; border-radius: 2px;}
+
+    /* Tipografías Especiales */
+    .central { text-align: center; }
+    .derecha { text-align: right; }
+    .bold { font-weight: bold; }
+    .text-dark { color: #0f172a; }
+    .text-mono { font-family: 'Courier New', Courier, monospace; letter-spacing: -0.5px; font-weight: 800; font-size: 0.9rem; }
+    .text-blue { color: #2563eb; }
+    .text-green { color: #166534; }
+    .text-green-dark { color: #064e3b; }
+    .text-red { color: #dc2626; }
+
+    /* Link Externo */
+    .td-link-container { display: flex; align-items: center; padding-right: 5px; height: 100%; }
+    .btn-link { color: #3b82f6; text-decoration: none; font-size: 0.95rem; padding: 0 8px; transition: transform 0.2s; }
+    .btn-link:hover { transform: scale(1.2); color: #2563eb; }
+
+    /* Inputs Numéricos sin flechas */
+    .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .celda-input[type=number] { -moz-appearance: textfield; }
+
+    /* Paginación y Opciones */
+    .btn-pag { padding: 4px 10px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; font-size: 0.8rem;}
+    .btn-pag:hover { background: var(--color-principal, #eab308); color: white; border-color: var(--color-principal, #eab308); }
+    .label-columna { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: bold; color: #475569; cursor: pointer; }
+    .check-opcion { width: 16px; height: 16px; accent-color: var(--color-principal, #eab308); cursor: pointer; }
+    @keyframes slideInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Animación del Loader */
+    .barra-animada { animation: moverBarra 1.2s infinite linear; }
+    @keyframes moverBarra { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+</style>
+
+<script>
+    // -------------------------------------------------------------------------
+    // 1. SISTEMA DE MEMORIA TEMPORAL (Persistencia)
+    // -------------------------------------------------------------------------
+    let memoriaSimulador = JSON.parse(localStorage.getItem('memoriaSimuladorMLJunior')) || {};
+
+    document.querySelector('#tablaReporte').addEventListener('input', function(e) {
+        if (e.target.tagName === 'INPUT') {
+            const fila = e.target.closest('tr.fila-simulador');
+            if (fila && fila.id !== 'fila-molde') registrarCambioFilaML(fila);
+        }
+    });
+
+    function registrarCambioFilaML(fila) {
+        if (fila.id === 'fila-molde') return;
+        
+        let key = fila.dataset.originalKey;
+        if (!key || key === 'molde') {
+            key = 'temp-' + Math.random().toString(36).substr(2, 9);
+            fila.dataset.originalKey = key;
+        }
+
+        const codPub = fila.querySelector('.val-codpub')?.value.trim() || '';
+        const producto = fila.querySelector('.val-producto')?.value.trim() || '';
+        if (codPub === '' && producto === '') return; 
+
+        memoriaSimulador[key] = {
+            item_type: fila.querySelector('.val-itemtype').value,
+            link: fila.querySelector('.val-link').value,
+            estado: fila.querySelector('.val-estado').value,
+            cod_pub: codPub,
+            tipo: fila.querySelector('.val-tipo').value,
+            cod_prod: fila.querySelector('.val-codprod').value,
+            categoria: fila.querySelector('.val-categoria').value,
+            marca: fila.querySelector('.val-marca').value,
+            producto: producto,
+            p_tachado: fila.querySelector('.val-ptachado').value || 0,
+            dscto: fila.querySelector('.val-dscto').value || 0,
+            p_venta: fila.querySelector('.val-venta').value || 0,
+            envio: fila.querySelector('.val-envio').value || 0,
+            porc_comision: fila.querySelector('.val-porc-com').value || 0,
+            costo: fila.querySelector('.val-costo').value || 0,
+            mpe: fila.querySelector('.val-mpe').value.trim() !== 'MPE' && fila.querySelector('.val-mpe').value.trim() !== '' ? fila.querySelector('.val-mpe').value : ''
+        };
+
+        localStorage.setItem('memoriaSimuladorMLJunior', JSON.stringify(memoriaSimulador));
+        fila.classList.add('fila-editada');
+        
+        const indicador = document.getElementById('indicador-cambios');
+        if (indicador) indicador.style.display = 'inline-flex';
+    }
+
+    // -------------------------------------------------------------------------
+    // 2. RESTAURAR DATOS AL CARGAR LA PÁGINA
+    // -------------------------------------------------------------------------
+    window.addEventListener('load', function() {
+        const loader = document.getElementById('pantalla-carga-tabla');
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => { loader.style.display = 'none'; }, 400);
+        }
+
+        let hayCambiosPrevios = false;
+        const filas = document.querySelectorAll('#tablaReporte tbody .fila-simulador:not(#fila-molde)');
+        
+        filas.forEach(fila => {
+            const key = fila.dataset.originalKey;
+            
+            if (key && memoriaSimulador[key]) {
+                const mem = memoriaSimulador[key];
+                
+                if(fila.querySelector('.val-itemtype')) fila.querySelector('.val-itemtype').value = mem.item_type || '';
+                if(fila.querySelector('.val-link')) fila.querySelector('.val-link').value = mem.link || '';
+                if(fila.querySelector('.val-estado')) fila.querySelector('.val-estado').value = mem.estado || '';
+                if(fila.querySelector('.val-codpub')) fila.querySelector('.val-codpub').value = mem.cod_pub || '';
+                if(fila.querySelector('.val-tipo')) fila.querySelector('.val-tipo').value = mem.tipo || '';
+                if(fila.querySelector('.val-codprod')) fila.querySelector('.val-codprod').value = mem.cod_prod || '';
+                if(fila.querySelector('.val-categoria')) fila.querySelector('.val-categoria').value = mem.categoria || '';
+                if(fila.querySelector('.val-marca')) fila.querySelector('.val-marca').value = mem.marca || '';
+                if(fila.querySelector('.val-producto')) fila.querySelector('.val-producto').value = mem.producto || '';
+                if(fila.querySelector('.val-ptachado')) fila.querySelector('.val-ptachado').value = mem.p_tachado || '';
+                if(fila.querySelector('.val-dscto')) fila.querySelector('.val-dscto').value = mem.dscto || '';
+                if(fila.querySelector('.val-venta')) fila.querySelector('.val-venta').value = mem.p_venta || '';
+                if(fila.querySelector('.val-envio')) fila.querySelector('.val-envio').value = mem.envio || '';
+                if(fila.querySelector('.val-porc-com')) fila.querySelector('.val-porc-com').value = mem.porc_comision || '';
+                if(fila.querySelector('.val-costo')) fila.querySelector('.val-costo').value = mem.costo || '';
+                
+                if (mem.cod_pub && fila.querySelector('.val-codpub')) generarLink(fila.querySelector('.val-codpub'));
+                if (fila.querySelector('.val-venta')) calcularFila(fila.querySelector('.val-venta'));
+
+                fila.classList.add('fila-editada');
+                hayCambiosPrevios = true;
+            }
+        });
+
+        if (hayCambiosPrevios || Object.keys(memoriaSimulador).length > 0) {
+            const indicador = document.getElementById('indicador-cambios');
+            if(indicador) indicador.style.display = 'inline-flex';
+        }
+    });
+
+    const mapaComisiones = {{ mapa_comisiones_json|safe|default:"{}" }};
+    const mapaCostos = {{ mapa_costos_json|safe|default:"{}" }};
+    const mapaNombres = {{ mapa_nombres_json|safe|default:"{}" }};
+
+    function buscarComision(inputCat) {
+        const fila = inputCat.closest('tr');
+        const categoriaSeleccionada = inputCat.value.toUpperCase().trim();
+        const inputComision = fila.querySelector('.val-porc-com');
+        if (categoriaSeleccionada && mapaComisiones[categoriaSeleccionada] !== undefined) {
+            inputComision.value = mapaComisiones[categoriaSeleccionada].toFixed(2);
+        } else {
+            inputComision.value = '0.00';
+        }
+        calcularFila(inputCat);
+    }
+
+    function buscarCosto(inputCodProd) {
+        const fila = inputCodProd.closest('tr');
+        const codigoSeleccionado = inputCodProd.value.trim().toUpperCase();
+        
+        const inputCosto = fila.querySelector('.val-costo');
+        const inputProducto = fila.querySelector('.val-producto');
+        
+        // Autocompletamos el Costo
+        if (codigoSeleccionado && mapaCostos[codigoSeleccionado] !== undefined) {
+            inputCosto.value = mapaCostos[codigoSeleccionado].toFixed(2);
+        }
+        
+        // Autocompletamos el Nombre del Producto
+        if (codigoSeleccionado && mapaNombres[codigoSeleccionado] !== undefined) {
+            inputProducto.value = mapaNombres[codigoSeleccionado];
+        }
+
+        calcularFila(inputCodProd);
+    }
+
+    function togglePanelColumnas() {
+        const panel = document.getElementById("panelPersonalizarColumnas");
+        panel.style.display = panel.style.display === "none" ? "block" : "none";
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const ths = document.querySelectorAll("#tablaReporte th.th-premium");
+        const container = document.getElementById("columnCheckboxes");
+        ths.forEach((th, index) => {
+            const colName = th.innerText.trim();
+            if (!colName) return;
+            const label = document.createElement("label");
+            label.className = "label-columna";
+            const cb = document.createElement("input");
+            cb.type = "checkbox"; cb.checked = true; cb.className = "check-opcion"; cb.dataset.colIndex = index + 1;
+            cb.addEventListener("change", function() {
+                const colIdx = this.dataset.colIndex;
+                const displayState = this.checked ? "" : "none";
+                const header = document.querySelector(`#tablaReporte th:nth-child(${colIdx})`);
+                if(header) header.style.display = displayState;
+                document.querySelectorAll(`#tablaReporte tbody tr`).forEach(tr => {
+                    const cell = tr.querySelector(`td:nth-child(${colIdx})`);
+                    if(cell) cell.style.display = displayState;
+                });
+            });
+            label.appendChild(cb); label.appendChild(document.createTextNode(colName)); container.appendChild(label);
+        });
+
+        document.querySelectorAll('.fila-simulador').forEach(fila => {
+            const inputCodPub = fila.querySelector('.val-codpub');
+            const inputMPE = fila.querySelector('.val-mpe');
+            if (inputCodPub && inputMPE) {
+                let codigo = inputCodPub.value.trim().replace(/^MPE-?/i, '');
+                if (codigo !== '') inputMPE.value = 'MPE' + codigo;
+                else inputMPE.value = 'MPE';
+            }
+        });
+
+        const tbodySeleccion = document.querySelector('#tablaReporte tbody');
+        if (tbodySeleccion) {
+            tbodySeleccion.addEventListener('click', function(e) {
+                const filaClickeada = e.target.closest('tr.fila-simulador');
+                if (filaClickeada) {
+                    document.querySelectorAll('.fila-simulador').forEach(f => f.classList.remove('fila-seleccionada'));
+                    filaClickeada.classList.add('fila-seleccionada');
+                }
+            });
+        }
+    });
+
+    function generarLink(inputCodigo) {
+        const fila = inputCodigo.closest('tr');
+        let codigo = inputCodigo.value.trim().replace(/^MPE-?/i, '');
+        const inputLink = fila.querySelector('.val-link');
+        const botonLink = fila.querySelector('.btn-link');
+        const inputMPE = fila.querySelector('.val-mpe');
+
+        if (codigo !== '') {
+            const urlCompleta = `http://articulo.mercadolibre.com.pe/MPE-${codigo}`;
+            inputLink.value = urlCompleta;
+            botonLink.href = urlCompleta;
+            botonLink.style.display = 'inline-block';
+            if(inputMPE) inputMPE.value = 'MPE' + codigo;
+        } else {
+            inputLink.value = ''; botonLink.href = '#'; botonLink.style.display = 'none';
+            if(inputMPE) inputMPE.value = 'MPE';
+        }
+    }
+
+    function calcularFila(elemento) {
+        const fila = elemento.closest('tr');
+        const pVenta = parseFloat(fila.querySelector('.val-venta').value) || 0;
+        const dscto = parseFloat(fila.querySelector('.val-dscto').value) || 0;
+        const envio = parseFloat(fila.querySelector('.val-envio').value) || 0;
+        const porcCom = parseFloat(fila.querySelector('.val-porc-com').value) || 0;
+        const costo = parseFloat(fila.querySelector('.val-costo').value) || 0;
+
+        let pTachado = (pVenta > 0 && dscto < 100) ? (pVenta / ((100 - dscto) / 100)).toFixed(2) : (pVenta > 0 ? pVenta.toFixed(2) : '');
+        fila.querySelector('.val-ptachado').value = pTachado;
+
+        const comSoles = pVenta * (porcCom / 100);
+        const pagoNeto = pVenta - comSoles - envio;
+        const ganancia = pagoNeto - costo;
+        const rentabilidad = costo > 0 ? (ganancia / costo) * 100 : 0;
+
+        fila.querySelector('.val-com-soles').value = comSoles.toFixed(2);
+        fila.querySelector('.val-pago-neto').value = pagoNeto.toFixed(2);
+        
+        const inputGanancia = fila.querySelector('.val-ganancia');
+        inputGanancia.value = ganancia.toFixed(2);
+        inputGanancia.style.color = ganancia < 0 ? '#dc2626' : '#1e40af';
+        
+        const inputRentabilidad = fila.querySelector('.val-rentabilidad');
+        inputRentabilidad.value = rentabilidad.toFixed(2) + '%';
+        inputRentabilidad.style.color = rentabilidad < 0 ? '#dc2626' : '#1e40af';
+    }
+
+    function agregarFila() {
+        const tbody = document.querySelector('#tablaReporte tbody');
+        const filaMolde = document.getElementById('fila-molde');
+        const nuevaFila = filaMolde.cloneNode(true);
+        
+        nuevaFila.id = ""; 
+        nuevaFila.style.display = ""; 
+        nuevaFila.dataset.originalKey = 'temp-' + Math.random().toString(36).substr(2, 9);
+        nuevaFila.classList.remove('fila-editada');
+        
+        nuevaFila.querySelectorAll('input').forEach(input => {
+            input.value = ''; // Limpiamos todo porque ya no hay columnas bloqueadas
+        });
+        
+        nuevaFila.querySelector('.val-mpe').value = 'MPE';
+        nuevaFila.querySelector('.val-porc-com').value = '0.00';
+        nuevaFila.querySelector('.val-costo').value = '0.00';
+        nuevaFila.querySelector('.btn-link').style.display = 'none';
+        nuevaFila.querySelector('.val-ganancia').style.color = '#1e40af';
+        nuevaFila.querySelector('.val-rentabilidad').style.color = '#1e40af';
+        
+        tbody.insertBefore(nuevaFila, tbody.firstChild);
+        const contenedorTabla = document.querySelector("div[style*='flex-grow: 1']");
+        if(contenedorTabla) {
+            setTimeout(() => { contenedorTabla.scrollTop = 0; }, 50);
+        }
+    }
+
+    function exportarSimulador() {
+        const filas = document.querySelectorAll('.fila-simulador:not(#fila-molde)');
+        let data = [];
+        filas.forEach(fila => {
+            data.push({
+                "ITEM TYPE": fila.querySelector('.val-itemtype')?.value || '',
+                "LINK": fila.querySelector('.val-link')?.value || '',
+                "ESTADO": fila.querySelector('.val-estado')?.value || '',
+                "CÓD. PUB": fila.querySelector('.val-codpub')?.value || '',
+                "TIPO": fila.querySelector('.val-tipo')?.value || '',
+                "CÓD. PROD": fila.querySelector('.val-codprod')?.value || '',
+                "CATEGORIA": fila.querySelector('.val-categoria')?.value || '',
+                "MARCA": fila.querySelector('.val-marca')?.value || '',
+                "PRODUCTO": fila.querySelector('.val-producto')?.value || '',
+                "P. TACHADO": fila.querySelector('.val-ptachado')?.value || '',
+                "% DSCTO": fila.querySelector('.val-dscto')?.value || '',
+                "P. VENTA": fila.querySelector('.val-venta')?.value || '',
+                "ENVÍO": fila.querySelector('.val-envio')?.value || '',
+                "% NUEVA COM": fila.querySelector('.val-porc-com')?.value || '',
+                "COM (S/)": fila.querySelector('.val-com-soles')?.value || '',
+                "PAGO NETO": fila.querySelector('.val-pago-neto')?.value || '',
+                "COSTO": fila.querySelector('.val-costo')?.value || '',
+                "GANANCIA": fila.querySelector('.val-ganancia')?.value || '',
+                "RTBLD%": fila.querySelector('.val-rentabilidad')?.value || '',
+                "MPE": fila.querySelector('.val-mpe')?.value || ''
+            });
+        });
+        if(data.length === 0) return alert("No hay datos para exportar.");
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Simulador ML");
+        XLSX.writeFile(wb, "Simulador_MercadoLibre_Junior.xlsx");
+    }
+
+    function importarSimulador(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
+
+                const tbody = document.querySelector('#tablaReporte tbody');
+                let filaMolde = document.getElementById('fila-molde');
+                if (!filaMolde) return alert("Error: No se encontró la fila base.");
+                
+                tbody.querySelectorAll('.fila-simulador:not(#fila-molde)').forEach(f => f.remove());
+
+                function limpiarMonto(valor) {
+                    if (valor === undefined || valor === null || valor === '') return '0.00';
+                    let texto = valor.toString().trim().replace(/S\/\.|S\/|\$|\s/g, '');
+                    let posComa = texto.lastIndexOf(',');
+                    let posPunto = texto.lastIndexOf('.');
+                    if (posComa > posPunto) texto = texto.replace(/\./g, '').replace(',', '.');
+                    else if (posPunto > posComa) texto = texto.replace(/,/g, '');
+                    else if (posComa !== -1 && posPunto === -1) texto = texto.replace(',', '.');
+                    let numero = parseFloat(texto);
+                    return isNaN(numero) ? '0.00' : numero.toFixed(2);
+                }
+
+                const fragmento = document.createDocumentFragment();
+
+                json.forEach(row => {
+                    const nuevaFila = filaMolde.cloneNode(true);
+                    nuevaFila.id = "";
+                    nuevaFila.style.display = "";
+                    nuevaFila.dataset.originalKey = 'temp-' + Math.random().toString(36).substr(2, 9);
+                    
+                    if (nuevaFila.querySelector('.val-itemtype')) nuevaFila.querySelector('.val-itemtype').value = row["ITEM TYPE"] || '';
+                    if (nuevaFila.querySelector('.val-link')) nuevaFila.querySelector('.val-link').value = row["LINK"] || '';
+                    if (nuevaFila.querySelector('.val-estado')) nuevaFila.querySelector('.val-estado').value = row["ESTADO"] || '';
+                    if (nuevaFila.querySelector('.val-codpub')) nuevaFila.querySelector('.val-codpub').value = row["CÓD. PUB"] || '';
+                    if (nuevaFila.querySelector('.val-tipo')) nuevaFila.querySelector('.val-tipo').value = row["TIPO"] || '';
+                    if (nuevaFila.querySelector('.val-codprod')) nuevaFila.querySelector('.val-codprod').value = row["CÓD. PROD"] || '';
+                    if (nuevaFila.querySelector('.val-categoria')) nuevaFila.querySelector('.val-categoria').value = row["CATEGORIA"] || '';
+                    if (nuevaFila.querySelector('.val-marca')) nuevaFila.querySelector('.val-marca').value = row["MARCA"] || '';
+                    if (nuevaFila.querySelector('.val-producto')) nuevaFila.querySelector('.val-producto').value = row["PRODUCTO"] || '';
+                    
+                    if (nuevaFila.querySelector('.val-ptachado')) nuevaFila.querySelector('.val-ptachado').value = limpiarMonto(row["P. TACHADO"]);
+                    if (nuevaFila.querySelector('.val-dscto')) nuevaFila.querySelector('.val-dscto').value = limpiarMonto(row["% DSCTO"]);
+                    if (nuevaFila.querySelector('.val-venta')) nuevaFila.querySelector('.val-venta').value = limpiarMonto(row["P. VENTA"]);
+                    if (nuevaFila.querySelector('.val-envio')) nuevaFila.querySelector('.val-envio').value = limpiarMonto(row["ENVÍO"]);
+                    if (nuevaFila.querySelector('.val-porc-com')) nuevaFila.querySelector('.val-porc-com').value = limpiarMonto(row["% NUEVA COM"]);
+                    if (nuevaFila.querySelector('.val-com-soles')) nuevaFila.querySelector('.val-com-soles').value = limpiarMonto(row["COM (S/)"]);
+                    if (nuevaFila.querySelector('.val-pago-neto')) nuevaFila.querySelector('.val-pago-neto').value = limpiarMonto(row["PAGO NETO"]);
+                    if (nuevaFila.querySelector('.val-costo')) nuevaFila.querySelector('.val-costo').value = limpiarMonto(row["COSTO"]);
+                    if (nuevaFila.querySelector('.val-ganancia')) nuevaFila.querySelector('.val-ganancia').value = limpiarMonto(row["GANANCIA"]);
+                    if (nuevaFila.querySelector('.val-rentabilidad')) nuevaFila.querySelector('.val-rentabilidad').value = limpiarMonto(row["RTBLD%"]);
+                    if (nuevaFila.querySelector('.val-mpe')) nuevaFila.querySelector('.val-mpe').value = row["MPE"] || '';
+
+                    const inputCodPub = nuevaFila.querySelector('.val-codpub');
+                    if (inputCodPub && inputCodPub.value.trim() !== '') generarLink(inputCodPub); 
+
+                    const inputCodProd = nuevaFila.querySelector('.val-codprod');
+                    if (inputCodProd && inputCodProd.value.trim() !== '') buscarCosto(inputCodProd);
+
+                    const inputCategoria = nuevaFila.querySelector('.val-categoria');
+                    if (inputCategoria && inputCategoria.value.trim() !== '') buscarComision(inputCategoria);
+
+                    const inputVenta = nuevaFila.querySelector('.val-venta');
+                    if(inputVenta) calcularFila(inputVenta);
+                    
+                    fragmento.appendChild(nuevaFila);
+                    registrarCambioFilaML(nuevaFila);
+                });
+                
+                if(json.length > 0) tbody.insertBefore(fragmento, tbody.firstChild);
+
+                alert("✅ ¡Simulación importada con éxito! Revisa la tabla y presiona Guardar.");
+
+            } catch (error) {
+                console.error("Error al importar el archivo:", error);
+                alert("Ocurrió un error al importar. Revisa la consola para más detalles.");
+            }
+        };
+        reader.readAsArrayBuffer(file);
+        event.target.value = ""; 
+    }
+
+    function guardarSimulaciones() {
+        let datosAguardar = Object.values(memoriaSimulador);
+
+        if (datosAguardar.length === 0) return alert("No hay cambios pendientes para guardar.");
+
+        const btn = document.getElementById('btnGuardar');
+        const textoOriginal = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        btn.disabled = true;
+
+        fetch("{% url 'guardar_simulador_masivo_ml_junior' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+            body: JSON.stringify({ plataforma: 'Mercado Libre Junior', datos: datosAguardar })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === 'ok') {
+                localStorage.removeItem('memoriaSimuladorMLJunior');
+                memoriaSimulador = {};
+                alert("¡Simulación guardada con éxito en la Base de Datos Junior!");
+                window.location.reload();
+            } else {
+                alert("Error al guardar: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Ocurrió un error en el guardado.");
+        })
+        .finally(() => {
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+        });
+    }
+
+    function borrarTodoSimulador() {
+        if (confirm("¡ATENCIÓN PELIGRO! ⚠️ ¿Estás totalmente seguro de borrar TODOS los datos del Simulador de Costos Junior? Esta acción dejará tu tabla en blanco y no se puede deshacer.")) {
+            const btn = document.getElementById('btnBorrarSimulador');
+            const textOriginal = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Borrando...';
+            btn.disabled = true;
+
+            fetch("{% url 'borrar_todos_simulador_ml_junior' %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'ok') { 
+                    localStorage.removeItem('memoriaSimuladorMLJunior'); 
+                    memoriaSimulador = {};
+                    alert(data.message); 
+                    window.location.reload(); 
+                } else { 
+                    alert("Error: " + data.message); 
+                }
+            })
+            .catch(err => alert("Ocurrió un error de conexión."))
+            .finally(() => { 
+                btn.innerHTML = textOriginal; 
+                btn.disabled = false; 
+            });
+        }
+    }
+</script>
+{% endblock %}

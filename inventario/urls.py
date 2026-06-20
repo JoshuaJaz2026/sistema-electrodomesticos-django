@@ -83,10 +83,11 @@ urlpatterns = [
     path('eliminar-costos-masivos/', views.eliminar_costos_masivos, name='eliminar_costos_masivos'),
     path('descargar/plantilla/', views.descargar_plantilla_simulador, name='descargar_plantilla'),
     
-    # Rutas para Reportes de Mercado Libre (Principal y Junior)
+    # Rutas para Reportes y Simuladores de Mercado Libre (Principal y Junior)
     path('descargar-plantilla-reporte-ml/', views.descargar_plantilla_reporte_ml, name='descargar_plantilla_reporte_ml'),
     path('guardar-reportes-masivos-ml/', views.guardar_reportes_masivos_ml, name='guardar_reportes_masivos_ml'),
     path('guardar-reportes-masivos-ml-junior/', views.guardar_reportes_masivos_ml_junior, name='guardar_reportes_masivos_ml_junior'),
+    path('guardar-simulador-masivo-ml-junior/', views.guardar_simulador_masivo_ml_junior, name='guardar_simulador_masivo_ml_junior'), # NUEVA RUTA
     
     # Rutas de Ingresos y Modelos
     path('percheron/ingresos/guardar/', views.guardar_ingresos_masivos, name='guardar_ingresos_masivos'),
@@ -105,4 +106,5 @@ urlpatterns = [
     path('borrar-todos-los-reportes-ml/', views.borrar_todos_los_reportes_ml, name='borrar_todos_los_reportes_ml'),
     path('borrar-todos-los-reportes-ml-junior/', views.borrar_todos_los_reportes_ml_junior, name='borrar_todos_los_reportes_ml_junior'),
     path('borrar-todos-simulador-ml/', views.borrar_todos_simulador_ml, name='borrar_todos_simulador_ml'),
+    path('borrar-todos-simulador-ml-junior/', views.borrar_todos_simulador_ml_junior, name='borrar_todos_simulador_ml_junior'), # NUEVA RUTA
 ]
