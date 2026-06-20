@@ -46,9 +46,11 @@ class Migration(migrations.Migration):
                 ('mensaje', models.CharField(blank=True, max_length=255, null=True)),
             ],
         ),
-        migrations.AddField(
-            model_name='producto',
-            name='stock_actual',
-            field=models.IntegerField(default=0, verbose_name='Stock Actual'),
-        ),
+        
+        # Bloque comentado para evitar el ProgrammingError (stock_actual ya existe en BD)
+        # migrations.AddField(
+        #     model_name='producto',
+        #     name='stock_actual',
+        #     field=models.IntegerField(default=0, verbose_name='Stock Actual'),
+        # ),
     ]
