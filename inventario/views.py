@@ -19,7 +19,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 # Importación corregida de SimulacionMercadoLibreJunior
-from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre, ReporteMercadoLibreJunior, SimulacionMercadoLibreJunior
+from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre, ReporteMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior
 
 # =========================================================
 # CONFIGURACIÓN MAESTRA DE ESTILOS Y COLORES
@@ -429,8 +429,40 @@ def percheron_mercadolibre(request):
 @login_required
 @verificar_acceso_plataforma('Mercado Libre - Junior')
 def percheron_mercadolibre_junior(request):
-    canal = request.session.get('canal_activo')
-    return render(request, 'inventario/percheron_mercadolibre_junior.html', {'canal': canal})
+    canal = request.session.get('canal_activo', 'Mercado Libre - Junior')
+    
+    skus_usados = SalidaMercadoLibreJunior.objects.values_list('sku', flat=True)
+    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
+    
+    productos_db = Producto.objects.all()
+    dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
+    
+    dict_skus = {}
+    for ing in ingresos_db:
+        mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
+        prod = dict_prods.get(mod_limpio)
+        marca_val = prod.marca if prod else 'S/N MARCA'
+        stock_val = prod.stock_actual if prod else 0
+        
+        fecha_str = '-'
+        if ing.fecha_ingreso:
+            try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
+            except: fecha_str = str(ing.fecha_ingreso)
+
+        dict_skus[ing.sku] = {
+            'modelo': ing.modelo or '', 'titulo': ing.titulo or '', 'serie': ing.serie_nro or '-',
+            'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
+            'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
+            'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
+        }
+        
+    page_obj = SalidaMercadoLibreJunior.objects.all().order_by('-id')
+
+    return render(request, 'inventario/percheron_mercadolibre_junior.html', {
+        'canal': canal,
+        'skus_json': json.dumps(dict_skus),
+        'page_obj': page_obj 
+    })
 
 @login_required
 @verificar_acceso_plataforma('Falabella')
@@ -1861,3 +1893,80 @@ def borrar_todos_simulador_ml_junior(request):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'error', 'message': 'Solo permitido POST'})
+
+
+@login_required
+@csrf_exempt
+def procesar_salidas_ml_junior(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
+
+    try:
+        data = json.loads(request.body)
+        salidas = data.get('salidas', [])
+        eliminadas = data.get('eliminadas', []) 
+
+        if not salidas and not eliminadas:
+            return JsonResponse({'status': 'error', 'message': 'No hay nuevas salidas ni registros eliminados para procesar.'})
+
+        with transaction.atomic():
+            conteo_descuentos = {}
+            conteo_restauraciones = {}
+
+            if eliminadas:
+                registros_viejos = SalidaMercadoLibreJunior.objects.filter(id__in=eliminadas)
+                for registro in registros_viejos:
+                    if registro.modelo:
+                        key = str(registro.modelo).upper().replace(" ", "").replace("-", "")
+                        conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.descuento
+                    registro.delete()
+
+            if salidas:
+                for sal in salidas:
+                    sku = sal.get('sku', '').strip()
+                    modelo = sal.get('modelo', '').strip()
+                    titulo = sal.get('titulo', '').strip()
+                    fecha_salida = sal.get('fecha_salida') or datetime.now().date()
+                    serie = sal.get('serie', '')
+                    costo = float(sal.get('costo') or 0)
+                    descuento = int(float(sal.get('desc_1und') or 1))
+                    nro_venta = sal.get('nro_ventas', '')
+                    tipo_venta = sal.get('tipo_venta', '')
+                    by_usuario = sal.get('by', request.user.username)
+
+                    SalidaMercadoLibreJunior.objects.create(
+                        sku=sku, modelo=modelo, titulo=titulo, fecha_salida=fecha_salida,
+                        serie=serie, costo=costo, descuento=descuento, nro_venta=nro_venta,
+                        tipo_venta=tipo_venta, creado_por=by_usuario
+                    )
+
+                    key = modelo.upper().replace(" ", "").replace("-", "")
+                    if key:
+                        conteo_descuentos[key] = conteo_descuentos.get(key, 0) + descuento
+
+            modelos_afectados = 0
+            modelos_restaurados = 0
+            
+            if conteo_descuentos or conteo_restauraciones:
+                for prod in Producto.objects.all():
+                    if prod.modelo:
+                        key = prod.modelo.upper().replace(" ", "").replace("-", "")
+                        cambio = False
+                        
+                        if key in conteo_restauraciones:
+                            prod.stock_actual += conteo_restauraciones[key]
+                            modelos_restaurados += 1
+                            cambio = True
+                            
+                        if key in conteo_descuentos:
+                            prod.stock_actual = max(prod.stock_actual - conteo_descuentos[key], 0)
+                            modelos_afectados += 1
+                            cambio = True
+                            
+                        if cambio:
+                            prod.save(update_fields=['stock_actual'])
+
+        return JsonResponse({'status': 'ok', 'message': f'Proceso completado. Salidas Junior guardadas: {modelos_afectados}. Stock devuelto: {modelos_restaurados}.'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})

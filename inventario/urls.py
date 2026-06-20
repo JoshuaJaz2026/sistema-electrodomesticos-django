@@ -101,6 +101,7 @@ urlpatterns = [
     path('percheron/modelos/sincronizar-stock/', views.sincronizar_stock_modelos, name='sincronizar_stock_modelos'),
     path('percheron/modelos/borrar-todos/', views.borrar_todos_los_modelos, name='borrar_todos_los_modelos'),
     path('percheron/mercado-libre/procesar/', views.procesar_salidas_ml, name='procesar_salidas_ml'),
+    path('percheron/mercado-libre-junior/procesar/', views.procesar_salidas_ml_junior, name='procesar_salidas_ml_junior'),
     
     # Rutas de borrado masivo
     path('borrar-todos-los-reportes-ml/', views.borrar_todos_los_reportes_ml, name='borrar_todos_los_reportes_ml'),
