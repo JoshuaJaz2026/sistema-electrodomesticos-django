@@ -11,8 +11,21 @@
         }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; background: #f4f7f6; overflow: hidden; }
         
-        /* === BARRA LATERAL === */
-        .sidebar { width: 260px; background: #2c3e50; color: white; display: flex; flex-direction: column; flex-shrink: 0; height: 100vh; }
+        /* === BARRA LATERAL (CON EFECTO SLIDE) === */
+        .sidebar { 
+            width: 260px; 
+            background: #2c3e50; 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            flex-shrink: 0; 
+            height: 100vh; 
+            transition: margin-left 0.3s ease; 
+        }
+        .sidebar.collapsed { 
+            margin-left: -260px; 
+        }
+        
         .sidebar-header { padding: 20px; text-align: center; background: rgba(0,0,0,0.1); border-bottom: 2px solid var(--color-principal); }
         .sidebar-menu { flex: 1; padding: 10px 0; overflow-y: auto; }
         
@@ -77,14 +90,39 @@
         }
         .btn-logout-sidebar:hover { background: #c0392b; }
 
-        /* === CONTENIDO PRINCIPAL === */
+        /* === CONTENIDO PRINCIPAL Y BOTON TOGGLE === */
         .main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; height: 100vh; }
+        
+        .top-bar {
+            background: white;
+            padding: 8px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            z-index: 10;
+        }
+        .btn-toggle-menu {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            color: #475569;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .btn-toggle-menu:hover { background: #f1f5f9; color: var(--color-principal); }
+
         .container { padding: 15px 20px; overflow-y: auto; flex: 1; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
+    <div class="sidebar" id="miSidebar">
         <div class="sidebar-header">
             <i class="{{ request.session.icono_actual|default:'fas fa-globe' }} fa-2x" style="color: var(--color-principal);"></i>
             <h3 style="margin-top: 10px;">{{ canal }}</h3>
@@ -205,6 +243,12 @@
     </div>
 
     <div class="main-content">
+        <div class="top-bar">
+            <button onclick="toggleSidebar()" class="btn-toggle-menu" title="Ocultar/Mostrar Menú">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
         <div class="container">
             {% block content %}
             {% endblock %}
@@ -212,7 +256,17 @@
     </div>
 
     <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('miSidebar');
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem('menuColapsado', sidebar.classList.contains('collapsed'));
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
+            if (localStorage.getItem('menuColapsado') === 'true') {
+                document.getElementById('miSidebar').classList.add('collapsed');
+            }
+
             const currentPath = window.location.pathname; 
             
             const submenuItems = document.querySelectorAll('.submenu-item');
