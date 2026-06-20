@@ -87,6 +87,10 @@
                     <th class="th-premium" style="width: 140px;">FECHA</th>
                     <th class="th-premium" style="width: 120px;">MES Y AÑO</th>
                     <th class="th-premium" style="width: 160px; color: #60a5fa;">NRO. ORDEN</th>
+                    
+                    <th class="th-premium" style="width: 160px; color: #60a5fa;">N.º DE OPERACIÓN</th>
+                    <th class="th-premium" style="width: 140px;">ESTADO DE PAGO</th>
+                    
                     <th class="th-premium" style="width: 130px;">COMPROBANTE</th>
                     <th class="th-premium" style="width: 180px;">TIPO DE VENTA</th>
                     <th class="th-premium" style="width: 180px;">MARCA</th>
@@ -127,6 +131,17 @@
                         <td class="td-premium"><input type="date" value="{{ item.fecha|date:'Y-m-d' }}" class="celda-input central val-fecha" oninput="actualizarMesAnio(this); registrarCambioVenta(this)"></td>
                         <td class="td-premium"><input type="text" value="{{ item.mes_anio|default:'' }}" class="celda-input central bold val-mes input-readonly" readonly tabindex="-1"></td>
                         <td class="td-premium"><input type="text" value="{{ item.nro_orden|default:'' }}" class="celda-input central text-mono text-blue val-orden" oninput="registrarCambioVenta(this)"></td>
+                        
+                        <td class="td-premium"><input type="text" value="{{ item.nro_operacion|default:'' }}" class="celda-input central text-mono text-blue val-nrooperacion" oninput="registrarCambioVenta(this)"></td>
+                        <td class="td-premium" style="padding: 4px;">
+                            <select class="celda-input central bold val-estadopago select-estado" style="height: 100%; border-radius: 12px; transition: all 0.2s;" data-valor-actual="{{ item.estado_pago|default:'' }}" onchange="cambiarColorEstado(this); registrarCambioVenta(this)">
+                                <option value=""></option>
+                                <option value="APROBADO" {% if item.estado_pago == 'APROBADO' %}selected{% endif %}>APROBADO</option>
+                                <option value="PENDIENTE" {% if item.estado_pago == 'PENDIENTE' %}selected{% endif %}>PENDIENTE</option>
+                                <option value="RETENCIÓN" {% if item.estado_pago == 'RETENCIÓN' %}selected{% endif %}>RETENCIÓN</option>
+                            </select>
+                        </td>
+
                         <td class="td-premium"><input type="text" value="{{ item.comprobante|default:'' }}" class="celda-input central val-comprobante" oninput="registrarCambioVenta(this)"></td>
                         
                         <td class="td-premium">
@@ -261,6 +276,17 @@
                     <td class="td-premium"><input type="date" class="celda-input central val-fecha" oninput="actualizarMesAnio(this); registrarCambioVenta(this)"></td>
                     <td class="td-premium"><input type="text" class="celda-input central bold val-mes input-readonly" readonly tabindex="-1"></td>
                     <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue bold val-orden" oninput="registrarCambioVenta(this)"></td>
+                    
+                    <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-nrooperacion" oninput="registrarCambioVenta(this)"></td>
+                    <td class="td-premium" style="padding: 4px;">
+                        <select class="celda-input central bold val-estadopago select-estado" style="height: 100%; border-radius: 12px; transition: all 0.2s;" onchange="cambiarColorEstado(this); registrarCambioVenta(this)">
+                            <option value=""></option>
+                            <option value="APROBADO">APROBADO</option>
+                            <option value="PENDIENTE">PENDIENTE</option>
+                            <option value="RETENCIÓN">RETENCIÓN</option>
+                        </select>
+                    </td>
+
                     <td class="td-premium"><input type="text" class="celda-input central val-comprobante" oninput="registrarCambioVenta(this)"></td>
                     
                     <td class="td-premium">
@@ -477,6 +503,11 @@
     /* Selectores Custom (Combobox) */
     .select-premium { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px top 50%; background-size: 8px auto; padding-right: 20px; }
 
+    /* COLORES ESTADO PAGO (NUEVO) */
+    .estado-aprobado { background-color: #198754 !important; color: white !important; font-weight: bold; }
+    .estado-pendiente { background-color: #bae6fd !important; color: #0369a1 !important; font-weight: bold; }
+    .estado-retencion { background-color: #b91c1c !important; color: white !important; font-weight: bold; }
+
     /* Eliminar y Ocultar Spinners */
     .btn-eliminar { background: none; border: none; color: #ef4444; cursor: pointer; padding: 6px; border-radius: 4px; transition: background 0.2s; display: block; margin: 0 auto;}
     .btn-eliminar:hover { background: #fee2e2; color: #b91c1c; }
@@ -494,21 +525,25 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
 <script>
-    // === DICCIONARIO PARA EL BUSCARV DE PRODUCTOS (Desde Django) ===
     const diccionarioProductos = {{ diccionario_productos_json|safe|default:"{}" }};
 
     const listaMarcas = ["OSTER", "BEHRINGER", "BORD", "BOSSKO", "DSP", "ELECTROLUX", "EVOLUTION", "FINEZZA", "FUJITEC", "GAMA", "IMACO", "INDURAMA", "JVC", "Kitchenaid", "LG", "PANASONIC", "PHILIPS", "RECORD", "REMINGTON", "SAMSUNG", "SOLE", "SONY", "TAURUS", "TCL", "TRAMONTINA", "TREVELY", "VISIONNER", "WAHL", "WHITELINE", "YANBAL", "BLACKLINE", "VANHOFF", "EPSON", "BGH", "MOTOROLA", "HISENSE", "ILUMI", "DAJU", "XIAOMI", "Whirlpool", "IMPERIAL", "HYUNDAI", "JBL", "COLDEX"];
     const listaCategorias = ["HORNO ELECTRICO", "AFEITADORA", "ARROCERA", "ASPIRADORA", "AUDIFONOS", "BATIDORA DE INMERSION", "BATIDORA DE MANO", "BATIDORA DE TAZÓN", "BATIDORA PLANETARIA", "BLOQUEADOR", "CACEROLA", "CAFETERA", "CAMPANA", "CATEGORIA", "CEPILLO", "COCINA", "COCINA DE INDUCCION", "COCINA ELÉCTRICA", "COLLAR Y ARETES", "COMBO CHERRY", "COMBO OSTER", "CONGELADORA", "CONTROL DE TV", "CUATRICOMBO", "CUCHILLA DE LICUADORA", "CUCHILLO", "DESHUMEDECEDOR", "DISPENSADOR DE AGUA", "EQUIPO DE SONIDO", "ESPATULA", "EXPRIMIDOR", "EXTRACTOR DE JUGOS", "FREIDORA DE AIRE", "FRIGOBAR", "HERVIDOR", "JUEGO DE OLLAS", "LAVADORA", "LAVASECA", "LICUADORA", "MAQUINA DE CORTAR PELO", "MICROONDAS", "MOLDE", "MOLEDOR DE CARNE", "MOLINILLO", "MULTI OLLA", "OLLA", "OLLA A PRESIÓN", "ONDULADOR", "PANIFICADORA", "PARLANTE", "PARRILLA", "PERFUME", "PICADOR DE ALIMENTOS", "PLANCHA A VAPOR", "PLANCHA DE CABELLO", "PLANCHA GRILL", "PROCESADOR DE ALIMENTOS", "PROTECTOR SOLAR", "REFRIGERADORA", "SANDWICHERA", "SARTEN", "SARTÉN ELÉCTRICA", "SET DE CUBIERTOS", "SET DE OLLAS", "SET DE PIZZA", "SOUNDBAR", "SPAGUETERA", "TERMO BOMBA", "TERMO HERVIDOR", "TERMORADIADOR", "TETERA", "TOSTADORA", "TRICOMBO OSTER", "TV", "VAPORIZADOR", "VAPORIZADOR DE ALIMENTOS", "VASO DE LICUADORA", "VENTILADOR", "WAFLERA", "YOGURT MAKER", "HORNO CON FREIDORA", "CUIDADO PERSONAL", "CALEFACTOR", "IMPRESORA", "MONITOR DE ESCENARIO", "DEPILADORA", "TERMOVENTILADOR", "TABLET", "VISICOOLER", "Westinghouse", "ENCIMERA", "MAQUINA PARA HIELO"];
     const listaTiposVenta = ["FLEX", "URBANO", "ACUERDO CON EL COMPRADOR"];
 
-    // =========================================================================
-    // NUEVO: MOTOR DE FÓRMULAS AUTOMÁTICAS
-    // =========================================================================
+    // === FUNCIÓN PARA PINTAR EL COMBO BOX DE ESTADO DE PAGO ===
+    function cambiarColorEstado(selectElement) {
+        selectElement.classList.remove('estado-aprobado', 'estado-pendiente', 'estado-retencion');
+        const val = selectElement.value.trim().toUpperCase();
+        if (val === 'APROBADO') selectElement.classList.add('estado-aprobado');
+        if (val === 'PENDIENTE') selectElement.classList.add('estado-pendiente');
+        if (val === 'RETENCIÓN' || val === 'RETENCION') selectElement.classList.add('estado-retencion');
+    }
+
     function calcularFilaVenta(elemento) {
         const fila = elemento.closest('tr');
         if (!fila || fila.id === 'fila-molde') return;
 
-        // 1. Extraemos los valores que el usuario ingresa manualmente
         const cant = parseFloat(fila.querySelector('.val-cant').value) || 0;
         const precio = parseFloat(fila.querySelector('.val-precio').value) || 0;
         const cargoSoles = parseFloat(fila.querySelector('.val-cargosoles').value) || 0;
@@ -517,32 +552,25 @@
         const costoProd = parseFloat(fila.querySelector('.val-costoproducto').value) || 0;
         const costoFlex = parseFloat(fila.querySelector('.val-costoflex').value) || 0;
 
-        // 2. FÓRMULA: TOTAL V. = PRECIO * CANT.
         const totalV = precio * cant;
         fila.querySelector('.val-totalv').value = totalV > 0 ? totalV.toFixed(2) : '0.00';
 
-        // 3. FÓRMULA: % CARGO V. = CARGO(S/) / TOTAL V.
         const porcCargo = totalV > 0 ? (cargoSoles / totalV) * 100 : 0;
         fila.querySelector('.val-cargoporc').value = porcCargo > 0 ? porcCargo.toFixed(2) : '0.00';
 
-        // 4. FÓRMULA: TOTAL PAGADO = (PRECIO - CARGO - URBANO + FLEX) * CANT.
         const totalPagado = (precio - cargoSoles - urbano + flex) * cant;
         fila.querySelector('.val-totalpagado').value = (totalPagado !== 0 || cant > 0) ? totalPagado.toFixed(2) : '0.00';
 
-        // 5. FÓRMULA: UND = CANT.
         fila.querySelector('.val-und').value = cant > 0 ? cant : '0';
 
-        // 6. FÓRMULA: COSTO TOTAL = COSTO PROD. * UND
         const costoTotal = costoProd * cant;
         fila.querySelector('.val-costototal').value = (costoTotal > 0 || cant > 0) ? costoTotal.toFixed(2) : '0.00';
 
-        // 7. FÓRMULA: GANANCIA = TOTAL PAGADO - COSTO TOTAL - C. ENTREGA FLEX
         const ganancia = totalPagado - costoTotal - costoFlex;
         const inputGanancia = fila.querySelector('.val-ganancia');
         inputGanancia.value = (totalPagado > 0 || costoTotal > 0) ? ganancia.toFixed(2) : '0.00';
         inputGanancia.style.color = ganancia < 0 ? '#dc2626' : '#1e40af';
 
-        // 8. FÓRMULA: RENTABILIDAD % = GANANCIA / COSTO TOTAL
         const rentabilidad = costoTotal > 0 ? (ganancia / costoTotal) * 100 : 0;
         const inputRentabilidad = fila.querySelector('.val-rentabilidad');
         inputRentabilidad.value = (costoTotal > 0) ? rentabilidad.toFixed(2) : '0.00';
@@ -592,6 +620,11 @@
         poblarSelect('.val-marca', listaMarcas);
         poblarSelect('.val-categoria', listaCategorias);
         poblarSelect('.val-tipoventa', listaTiposVenta);
+        
+        // Pinta los colores iniciales de Estado de Pago
+        document.querySelectorAll('.select-estado').forEach(select => {
+            cambiarColorEstado(select);
+        });
 
         const ths = document.querySelectorAll("#tablaReporte th.th-premium");
         const container = document.getElementById("columnCheckboxes");
@@ -650,7 +683,6 @@
                 inputMes.value = inputFecha.value.substring(0, 7);
             }
             
-            // BUSCARV EN TIEMPO REAL AL CARGAR
             const inputModelo = fila.querySelector('.val-modelo');
             const inputProducto = fila.querySelector('.val-producto');
             if (inputModelo && inputProducto) {
@@ -664,7 +696,6 @@
                 }
             }
 
-            // APLICAMOS FÓRMULAS A LAS FILAS EXISTENTES
             const inputCant = fila.querySelector('.val-cant');
             if (inputCant) calcularFilaVenta(inputCant);
 
@@ -693,11 +724,13 @@
         const orden = fila.querySelector('.val-orden').value.trim();
         if(!orden) return; 
 
-        // Se guarda en memoria el Cargo en Soles para mandarlo a la DB de Python sin errores
+        // GUARDADO DE COLUMNAS NUEVAS EN MEMORIA TEMP
         memoriaVentas[key] = {
             'NRO. ORDEN': orden,
             'FECHA': fila.querySelector('.val-fecha').value,
             'MES Y AÑO': fila.querySelector('.val-mes').value,
+            'N.º de operación': fila.querySelector('.val-nrooperacion').value,
+            'Estado de pago': fila.querySelector('.val-estadopago').value,
             'COMPROBANTE': fila.querySelector('.val-comprobante').value,
             'TIPO DE VENTA': fila.querySelector('.val-tipoventa').value,
             'MARCA': fila.querySelector('.val-marca').value,
@@ -780,6 +813,7 @@
         Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
+            // NORMALIZA LA CABECERA (Quita tildes, signos, ñ y espacios)
             transformHeader: function(header) {
                 return header.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z0-9]/g, '');
             },
@@ -834,12 +868,15 @@
                         mesAnioCalculado = fechaCalendario.substring(0, 7);
                     }
                     
+                    // COLUMNAS NUEVAS EN EL BUCLE DE CARGA MASIVA
+                    let nroOperacionLeido = limpiarValor(item['NODEOPERACION']);
+                    let estadoPagoLeido = limpiarValor(item['ESTADODEPAGO']);
+
                     let comprobanteLeido = limpiarValor(item['COMPROBANTE']);
                     let tipoVentaLeido = limpiarValor(item['TIPODEVENTA']).toUpperCase();
                     let marcaLeida = limpiarValor(item['MARCA']).toUpperCase();
                     let categoriaLeida = limpiarValor(item['CATEGORIA']).toUpperCase();
 
-                    // === BUSCARV MÁGICO DURANTE LA IMPORTACIÓN MASIVA ===
                     let modeloLeido = limpiarValor(item['MODELO']).toUpperCase();
                     let productoLeido = limpiarValor(item['PRODUCTO']);
                     
@@ -850,13 +887,14 @@
                     }
 
                     const key = 'import-' + Math.random().toString(36).substr(2, 9);
-                    
                     const cargoSolesImportado = formatNum(item['CARGOXVENTA']);
                     
                     memoriaVentas[key] = {
                         'NRO. ORDEN': orden,
                         'FECHA': fechaCalendario,
                         'MES Y AÑO': mesAnioCalculado,
+                        'N.º de operación': nroOperacionLeido,
+                        'Estado de pago': estadoPagoLeido,
                         'COMPROBANTE': comprobanteLeido,
                         'TIPO DE VENTA': tipoVentaLeido,
                         'MARCA': marcaLeida,
@@ -867,7 +905,7 @@
                         'CANT.': formatNum(item['CANT']),
                         'PRECIO': formatNum(item['PRECIO']),
                         'TOTAL V.': formatNum(item['TOTALV']),
-                        '%CARGO x VENTA': cargoSolesImportado, // Absolute value
+                        '%CARGO x VENTA': cargoSolesImportado,
                         'URBANO': formatNum(item['URBANO']),
                         'FLEX': formatNum(item['FLEX']),
                         'TOTAL PAGADO': formatNum(item['TOTALPAGADO']),
@@ -893,6 +931,13 @@
                     nuevaFila.querySelector('.val-fecha').value = fechaCalendario;
                     nuevaFila.querySelector('.val-mes').value = mesAnioCalculado;
                     nuevaFila.querySelector('.val-orden').value = orden;
+                    
+                    // LLENADO DE DATOS NUEVOS
+                    nuevaFila.querySelector('.val-nrooperacion').value = nroOperacionLeido;
+                    const selectEstado = nuevaFila.querySelector('.val-estadopago');
+                    setSelectDinamicamente(selectEstado, estadoPagoLeido);
+                    cambiarColorEstado(selectEstado); // Coloreamos automáticamente al cargar
+
                     nuevaFila.querySelector('.val-comprobante').value = comprobanteLeido;
                     
                     setSelectDinamicamente(nuevaFila.querySelector('.val-tipoventa'), tipoVentaLeido);
@@ -911,7 +956,6 @@
                     nuevaFila.querySelector('.val-costoproducto').value = formatNum(item['COSTOXPRODUCTO']).toFixed(2);
                     nuevaFila.querySelector('.val-costoflex').value = formatNum(item['COSTOENTREGAFLEX']).toFixed(2);
                     
-                    // EJECUTAMOS LA FÓRMULA AUTOMÁTICA EN LA FILA RECIÉN IMPORTADA
                     calcularFilaVenta(nuevaFila.querySelector('.val-cant'));
 
                     nuevaFila.querySelector('.val-distrito').value = limpiarValor(item['DISTRITO', 'UBICACION', 'DEPARTAMENTO']);
@@ -983,7 +1027,6 @@
         });
     }
 
-    // === NUEVA FUNCIÓN: BORRAR TODOS LOS REPORTES ===
     function borrarTodosLosReportes() {
         if (confirm("¡ATENCIÓN PELIGRO! ⚠️ ¿Estás totalmente seguro de borrar TODOS los reportes de ventas de Mercado Libre? Esta acción no se puede deshacer.")) {
             const btn = document.getElementById('btnBorrarReportes');

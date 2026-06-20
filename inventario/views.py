@@ -1059,19 +1059,22 @@ def descargar_plantilla_reporte_ml(request):
     response['Content-Disposition'] = 'attachment; filename="plantilla_reportes_mercadolibre.csv"'
     response.write('\ufeff'.encode('utf8'))
     writer = csv.writer(response, delimiter=';')
+    
+    # Agregamos las dos columnas nuevas aquí
     writer.writerow([
-        'FECHA', 'MES Y AÑO', 'NRO. ORDEN', 'COMPROBANTE', 'TIPO DE VENTA', 
-        'MARCA', 'CATEGORIA', 'SKU ALMACEN', 'MODELO', 'PRODUCTO', 
-        'CANT.', 'PRECIO', 'TOTAL V.', '%CARGO x VENTA', 'URBANO', 
-        'FLEX', 'TOTAL PAGADO', 'COSTO x PRODUCTO', 'UND', 'COSTO TOTAL', 
+        'FECHA', 'MES Y AÑO', 'NRO. ORDEN', 'N.º de operación', 'Estado de pago', 
+        'COMPROBANTE', 'TIPO DE VENTA', 'MARCA', 'CATEGORIA', 'SKU ALMACEN', 
+        'MODELO', 'PRODUCTO', 'CANT.', 'PRECIO', 'TOTAL V.', '%CARGO x VENTA', 
+        'URBANO', 'FLEX', 'TOTAL PAGADO', 'COSTO x PRODUCTO', 'UND', 'COSTO TOTAL', 
         'COSTO ENTREGA FLEX', 'GANANCIA', 'RENTABILIDAD %', 'DISTRITO', 
         'DIRECCIÓN', 'REPARTIDOR', 'CELULAR DEL CLIENTE', 'MSJ DE AGRADECIMIENTO'
     ])
+    
     writer.writerow([
-        '15/06/2026', 'JUNIO 2026', 'ML-123456789', 'B001-00123', 'CATALOGO', 
-        'OSTER', 'LICUADORA', 'SKU-OST-001', 'MOD-123', 'Licuadora Oster Clásica', 
-        '1', '150.00', '150.00', '10.50', '0.00', 
-        '10.00', '129.50', '80.00', '1', '80.00', 
+        '15/06/2026', 'JUNIO 2026', '#2000010827615105', '12345678', 'Aprobado',
+        'B001-00123', 'CATALOGO', 'OSTER', 'LICUADORA', 'SKU-OST-001', 
+        'MOD-123', 'Licuadora Oster Clásica', '1', '150.00', '150.00', '10.50', 
+        '0.00', '10.00', '129.50', '80.00', '1', '80.00', 
         '10.00', '39.50', '49.37%', 'San Juan de Lurigancho', 
         'Av. Próceres 123', 'Juan Pérez', '987654321', 'Gracias por su compra'
     ])
@@ -1091,10 +1094,8 @@ def guardar_reportes_masivos_ml(request):
             def get_best_val(val_antiguo, val_nuevo):
                 v_antiguo = str(val_antiguo or '').replace('\n', '').replace('\r', '').strip()
                 v_nuevo = str(val_nuevo or '').replace('\n', '').replace('\r', '').strip()
-                
                 if v_antiguo in ['', '---', '-', 'None', 'null', 'NaN']: v_antiguo = ''
                 if v_nuevo in ['', '---', '-', 'None', 'null', 'NaN']: v_nuevo = ''
-                
                 return v_nuevo if v_nuevo else v_antiguo
 
             nros_ordenes_entrantes = [str(f.get('NRO. ORDEN', '')).replace('\n', '').strip() for f in filas_ventas if f.get('NRO. ORDEN', '').strip()]
@@ -1112,6 +1113,10 @@ def guardar_reportes_masivos_ml(request):
                     continue
 
                 db_obj = existentes_en_db.get(nro_orden)
+                
+                # Leemos las dos columnas nuevas
+                val_nro_operacion = get_best_val(db_obj.nro_operacion if db_obj else '', fila.get('N.º de operación', ''))
+                val_estado_pago = get_best_val(db_obj.estado_pago if db_obj else '', fila.get('Estado de pago', ''))
                 
                 val_comprobante = get_best_val(db_obj.comprobante if db_obj else '', fila.get('COMPROBANTE', ''))
                 val_tipo_venta = get_best_val(db_obj.tipo_venta if db_obj else '', fila.get('TIPO DE VENTA', ''))
@@ -1144,6 +1149,8 @@ def guardar_reportes_masivos_ml(request):
                     nro_orden=nro_orden,
                     fecha=fecha_formateada or '2026-01-01',
                     mes_anio=fila.get('MES Y AÑO', '').strip(),
+                    nro_operacion=val_nro_operacion,  # Agregado
+                    estado_pago=val_estado_pago,      # Agregado
                     comprobante=val_comprobante,
                     tipo_venta=val_tipo_venta,
                     marca=val_marca,
@@ -1173,6 +1180,8 @@ def guardar_reportes_masivos_ml(request):
                 
                 if nro_orden in ventas_unicas:
                     existente = ventas_unicas[nro_orden]
+                    existente.nro_operacion = get_best_val(existente.nro_operacion, obj.nro_operacion) # Agregado
+                    existente.estado_pago = get_best_val(existente.estado_pago, obj.estado_pago)       # Agregado
                     existente.comprobante = get_best_val(existente.comprobante, obj.comprobante)
                     existente.tipo_venta = get_best_val(existente.tipo_venta, obj.tipo_venta)
                     existente.marca = get_best_val(existente.marca, obj.marca)
@@ -1187,9 +1196,9 @@ def guardar_reportes_masivos_ml(request):
 
             if objetos_a_guardar:
                 campos_actualizar = [
-                    'fecha', 'mes_anio', 'comprobante', 'tipo_venta', 'marca',
-                    'categoria', 'sku_almacen', 'modelo', 'producto', 'cantidad',
-                    'precio', 'total_venta', 'cargo_venta', 'urbano', 'flex',
+                    'fecha', 'mes_anio', 'nro_operacion', 'estado_pago', 'comprobante', 
+                    'tipo_venta', 'marca', 'categoria', 'sku_almacen', 'modelo', 'producto', 
+                    'cantidad', 'precio', 'total_venta', 'cargo_venta', 'urbano', 'flex',
                     'total_pagado', 'costo_producto', 'und', 'costo_total',
                     'costo_entrega_flex', 'ganancia', 'rentabilidad', 'distrito',
                     'direccion', 'repartidor', 'celular', 'mensaje'
