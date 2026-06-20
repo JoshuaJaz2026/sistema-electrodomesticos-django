@@ -1,0 +1,1060 @@
+{% extends 'inventario/dashboard_global.html' %}
+
+{% block content %}
+<div class="card" style="border-top: 4px solid var(--color-principal); padding: 12px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+        <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase; font-size: 1.1rem;">
+            <i class="{{ request.session.icono_actual|default:'fas fa-chart-line' }}" style="color: var(--color-principal);"></i> 
+            Reporte de Ventas - {{ canal }}
+            <span id="indicador-cambios" style="background-color: #f59e0b; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; display: none; font-weight: bold; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3); align-items: center; gap: 5px; margin-left: 10px;">
+                <i class="fas fa-exclamation-circle"></i> Sin guardar
+            </span>
+        </h2>
+        
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            
+            <a href="{% url 'descargar_plantilla_reporte_ml' %}" class="btn-top" style="background-color: #3b82f6;">
+                <i class="fas fa-download"></i> Bajar Plantilla
+            </a>
+
+            <button type="button" onclick="agregarNuevaVenta()" class="btn-top" style="background-color: #8b5cf6;">
+                <i class="fas fa-plus"></i> Nueva Venta
+            </button>
+
+            <input type="file" id="csvImportar" accept=".csv" style="display: none;">
+            <button type="button" onclick="document.getElementById('csvImportar').click()" class="btn-top" style="background-color: #10b981;">
+                <i class="fas fa-upload"></i> Importar Masivo
+            </button>
+
+            <button type="button" class="btn-top" style="background-color: #f59e0b;">
+                <i class="fas fa-file-excel"></i> Exportar
+            </button>
+            
+            <button type="button" id="btnGuardarVentas" onclick="guardarDatosPendientes()" class="btn-top" style="background-color: var(--color-principal); color: #0f172a;">
+                <i class="fas fa-save"></i> Guardar Modificaciones
+            </button>
+
+            <button type="button" id="btnBorrarReportes" onclick="borrarTodosLosReportes()" class="btn-top" style="background-color: #ef4444;">
+                <i class="fas fa-trash-alt"></i> Borrar Todo
+            </button>
+            
+            <div style="position: relative;">
+                <button type="button" onclick="togglePanelColumnas()" class="btn-top" style="background-color: #334155;">
+                    <i class="fas fa-columns"></i> Opciones Pantalla
+                </button>
+                
+                <div id="panelPersonalizarColumnas" style="display: none; position: absolute; right: 0; top: 115%; background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 100; width: 750px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
+                        <h4 style="margin: 0; color: #1e293b; font-size: 0.95rem;">
+                            <i class="fas fa-tasks" style="color: var(--color-principal);"></i> Elementos en pantalla
+                        </h4>
+                        <button onclick="togglePanelColumnas()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2rem;">&times;</button>
+                    </div>
+                    <div id="columnCheckboxes" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="GET" action="" style="display: flex; gap: 12px; margin-bottom: 15px; background-color: #f8fafc; padding: 10px 15px; border-radius: 6px; border: 1px solid #e2e8f0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); align-items: flex-end; flex-wrap: wrap;">
+        <div style="width: 140px;">
+            <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 4px; letter-spacing: 0.5px;">DESDE</label>
+            <input type="date" name="fecha_inicio" value="{{ request.GET.fecha_inicio }}" class="input-filtro">
+        </div>
+        <div style="width: 140px;">
+            <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 4px; letter-spacing: 0.5px;">HASTA</label>
+            <input type="date" name="fecha_fin" value="{{ request.GET.fecha_fin }}" class="input-filtro">
+        </div>
+        <div style="flex-grow: 1; min-width: 200px;">
+            <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 4px; letter-spacing: 0.5px;">BUSCAR ORDEN / SKU</label>
+            <input type="text" name="q" value="{{ query_search }}" placeholder="Ej. ML-12345..." class="input-filtro">
+        </div>
+        <button type="submit" class="btn-buscar">
+            <i class="fas fa-search"></i> Buscar
+        </button>
+        {% if query_search or request.GET.fecha_inicio or request.GET.fecha_fin %}
+        <a href="?" class="btn-limpiar">
+            <i class="fas fa-times"></i> Limpiar
+        </a>
+        {% endif %}
+    </form>
+
+    <div style="overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 220px); border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+        <table id="tablaReporte" style="width: max-content; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap; table-layout: fixed;">
+            <thead style="position: sticky; top: 0; z-index: 10;">
+                <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;">
+                    <th class="th-premium" style="width: 140px;">FECHA</th>
+                    <th class="th-premium" style="width: 120px;">MES Y AÑO</th>
+                    <th class="th-premium" style="width: 160px; color: #60a5fa;">NRO. ORDEN</th>
+                    
+                    <th class="th-premium" style="width: 160px; color: #60a5fa;">N.º DE OPERACIÓN</th>
+                    <th class="th-premium" style="width: 140px;">ESTADO DE PAGO</th>
+                    
+                    <th class="th-premium" style="width: 130px;">COMPROBANTE</th>
+                    <th class="th-premium" style="width: 180px;">TIPO DE VENTA</th>
+                    <th class="th-premium" style="width: 180px;">MARCA</th>
+                    <th class="th-premium" style="width: 220px;">CATEGORIA</th>
+                    <th class="th-premium" style="width: 160px; color: #60a5fa;">SKU ALMACEN</th>
+                    <th class="th-premium" style="width: 140px;">MODELO</th>
+                    <th class="th-premium" style="width: 300px;">PRODUCTO <i class="fas fa-magic" style="color: #34d399; font-size: 0.9em; margin-left: 5px;" title="Autocompletado BUSCARV"></i></th>
+                    <th class="th-premium" style="width: 60px;">CANT.</th>
+                    
+                    <th class="th-premium" style="width: 90px; background-color: #064e3b; white-space: normal; line-height: 1.1;">PRECIO</th>
+                    <th class="th-premium" style="width: 90px; background-color: #064e3b; white-space: normal; line-height: 1.1;">TOTAL V. <i class="fas fa-lock" style="color:#94a3b8; font-size:0.8em;"></i></th>
+                    <th class="th-premium" style="width: 90px; background-color: #064e3b; white-space: normal; line-height: 1.1;">CARGO V.</th>
+                    <th class="th-premium" style="width: 90px; background-color: #064e3b; white-space: normal; line-height: 1.1;">% CARGO V. <i class="fas fa-lock" style="color:#94a3b8; font-size:0.8em;"></i></th>
+                    <th class="th-premium" style="width: 90px; background-color: #064e3b; white-space: normal; line-height: 1.1;">URBANO</th>
+                    <th class="th-premium" style="width: 90px; background-color: #064e3b; white-space: normal; line-height: 1.1;">FLEX</th>
+                    <th class="th-premium" style="width: 90px; background-color: #10b981; color: #022c22; white-space: normal; line-height: 1.1;">TOTAL PAGADO <i class="fas fa-lock" style="color:#022c22; font-size:0.8em;"></i></th>
+                    
+                    <th class="th-premium" style="width: 90px; background-color: #7f1d1d; white-space: normal; line-height: 1.1;">COSTO x PROD</th>
+                    <th class="th-premium" style="width: 50px; background-color: #7f1d1d;">UND <i class="fas fa-lock" style="color:#94a3b8; font-size:0.8em;"></i></th>
+                    <th class="th-premium" style="width: 90px; background-color: #7f1d1d; white-space: normal; line-height: 1.1;">COSTO TOTAL <i class="fas fa-lock" style="color:#94a3b8; font-size:0.8em;"></i></th>
+                    <th class="th-premium" style="width: 90px; background-color: #7f1d1d; white-space: normal; line-height: 1.1;">C. ENTREGA FLEX</th>
+                    
+                    <th class="th-premium" style="width: 90px; background-color: #1e3a8a; white-space: normal; line-height: 1.1;">GANANCIA <i class="fas fa-lock" style="color:#94a3b8; font-size:0.8em;"></i></th>
+                    <th class="th-premium" style="width: 90px; background-color: #1e3a8a; white-space: normal; line-height: 1.1;">RENTABILIDAD % <i class="fas fa-lock" style="color:#94a3b8; font-size:0.8em;"></i></th>
+                    
+                    <th class="th-premium" style="width: 220px;">UBICACIÓN</th>
+                    <th class="th-premium" style="width: 250px;">DIRECCIÓN</th>
+                    <th class="th-premium" style="width: 160px;">REPARTIDOR</th>
+                    <th class="th-premium" style="width: 140px;">CELULAR</th>
+                    <th class="th-premium" style="width: 150px;">MSJ AGRADECIMIENTO</th>
+                    <th class="th-premium" style="width: 50px; text-align: center;"><i class="fas fa-trash-alt" style="color: #f87171;"></i></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if page_obj %}
+                    {% for item in page_obj %}
+                    <tr class="fila-ventas" data-original-key="{{ item.id }}">
+                        <td class="td-premium"><input type="date" value="{{ item.fecha|date:'Y-m-d' }}" class="celda-input central val-fecha" oninput="actualizarMesAnio(this); registrarCambioVenta(this)"></td>
+                        <td class="td-premium"><input type="text" value="{{ item.mes_anio|default:'' }}" class="celda-input central bold val-mes input-readonly" readonly tabindex="-1"></td>
+                        <td class="td-premium"><input type="text" value="{{ item.nro_orden|default:'' }}" class="celda-input central text-mono text-blue val-orden" oninput="registrarCambioVenta(this)"></td>
+                        
+                        <td class="td-premium"><input type="text" value="{{ item.nro_operacion|default:'' }}" class="celda-input central text-mono text-blue val-nrooperacion" oninput="registrarCambioVenta(this)"></td>
+                        <td class="td-premium" style="padding: 4px;">
+                            <select class="celda-input central bold val-estadopago select-estado" style="height: 100%; border-radius: 12px; transition: all 0.2s;" data-valor-actual="{{ item.estado_pago|default:'' }}" onchange="cambiarColorEstado(this); registrarCambioVenta(this)">
+                                <option value=""></option>
+                                <option value="APROBADO" {% if item.estado_pago == 'APROBADO' %}selected{% endif %}>APROBADO</option>
+                                <option value="PENDIENTE" {% if item.estado_pago == 'PENDIENTE' %}selected{% endif %}>PENDIENTE</option>
+                                <option value="RETENCIÓN" {% if item.estado_pago == 'RETENCIÓN' %}selected{% endif %}>RETENCIÓN</option>
+                            </select>
+                        </td>
+
+                        <td class="td-premium"><input type="text" value="{{ item.comprobante|default:'' }}" class="celda-input central val-comprobante" oninput="registrarCambioVenta(this)"></td>
+                        
+                        <td class="td-premium">
+                            <select class="celda-input central bold val-tipoventa select-premium" data-valor-actual="{{ item.tipo_venta|default:'' }}" onchange="registrarCambioVenta(this)">
+                                <option value="">---</option>
+                            </select>
+                        </td>
+                        <td class="td-premium">
+                            <select class="celda-input bold text-dark val-marca select-premium" data-valor-actual="{{ item.marca|default:'' }}" onchange="registrarCambioVenta(this)">
+                                <option value="">---</option>
+                            </select>
+                        </td>
+                        <td class="td-premium">
+                            <select class="celda-input text-dark val-categoria select-premium" data-valor-actual="{{ item.categoria|default:'' }}" onchange="registrarCambioVenta(this)">
+                                <option value="">---</option>
+                            </select>
+                        </td>
+
+                        <td class="td-premium"><input type="text" value="{{ item.sku_almacen|default:'' }}" class="celda-input central text-mono text-blue val-sku" oninput="registrarCambioVenta(this)"></td>
+                        <td class="td-premium"><input type="text" value="{{ item.modelo|default:'' }}" class="celda-input central bold text-dark val-modelo" oninput="buscarProductoPorModelo(this)"></td>
+                        
+                        <td class="td-premium bg-locked">
+                            <input type="text" value="{{ item.producto|default:'' }}" class="celda-input val-producto input-readonly" readonly tabindex="-1" placeholder="Esperando modelo...">
+                        </td>
+                        
+                        <td class="td-premium"><input type="number" value="{{ item.cantidad|floatformat:'0'|default:'' }}" class="celda-input central bold val-cant" oninput="calcularFilaVenta(this); registrarCambioVenta(this)"></td>
+                        
+                        <td class="td-premium bg-green-light">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda">S/</span>
+                                <input type="number" step="0.01" value="{{ item.precio|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-green val-precio" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-green-light bg-locked">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda">S/</span>
+                                <input type="text" value="{{ item.total_venta|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-green val-totalv input-readonly" readonly tabindex="-1">
+                            </div>
+                        </td>
+
+                        <td class="td-premium bg-green-light">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda">S/</span>
+                                <input type="number" step="0.01" value="{{ item.cargo_venta|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha text-red val-cargosoles" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-green-light bg-locked">
+                            <div class="wrapper-moneda">
+                                <input type="text" class="celda-input derecha text-red val-cargoporc input-readonly" readonly tabindex="-1">
+                                <span class="simbolo-porcentaje">%</span>
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-green-light">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda">S/</span>
+                                <input type="number" step="0.01" value="{{ item.urbano|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha val-urbano" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-green-light">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda">S/</span>
+                                <input type="number" step="0.01" value="{{ item.flex|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha val-flex" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-green-medium bg-locked">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda text-green-dark">S/</span>
+                                <input type="text" value="{{ item.total_pagado|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-green-dark val-totalpagado input-readonly" readonly tabindex="-1">
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-red-light">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda">S/</span>
+                                <input type="number" step="0.01" value="{{ item.costo_producto|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-red val-costoproducto" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-red-light bg-locked">
+                            <input type="text" value="{{ item.und|default:'0' }}" class="celda-input central val-und input-readonly" readonly tabindex="-1">
+                        </td>
+                        
+                        <td class="td-premium bg-red-light bg-locked">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda">S/</span>
+                                <input type="text" value="{{ item.costo_total|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold text-red val-costototal input-readonly" readonly tabindex="-1">
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-red-light">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda">S/</span>
+                                <input type="number" step="0.01" value="{{ item.costo_entrega_flex|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha text-red val-costoflex" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-blue-light bg-locked">
+                            <div class="wrapper-moneda">
+                                <span class="simbolo-moneda" style="color: #60a5fa;">S/</span>
+                                <input type="text" value="{{ item.ganancia|stringformat:'.2f'|default:'0.00' }}" class="celda-input derecha bold val-ganancia input-readonly" readonly tabindex="-1">
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium bg-blue-light bg-locked">
+                            <div class="wrapper-moneda">
+                                <input type="text" value="{{ item.rentabilidad|default:'0.00' }}" class="celda-input derecha bold val-rentabilidad input-readonly" readonly tabindex="-1">
+                                <span class="simbolo-porcentaje">%</span>
+                            </div>
+                        </td>
+                        
+                        <td class="td-premium"><input type="text" value="{{ item.distrito|default:'' }}" placeholder="Dep/Prov/Dist" class="celda-input val-distrito" oninput="registrarCambioVenta(this)"></td>
+                        <td class="td-premium"><input type="text" value="{{ item.direccion|default:'' }}" class="celda-input val-direccion" oninput="registrarCambioVenta(this)"></td>
+                        <td class="td-premium"><input type="text" value="{{ item.repartidor|default:'' }}" class="celda-input bold text-dark val-repartidor" oninput="registrarCambioVenta(this)"></td>
+                        <td class="td-premium"><input type="text" value="{{ item.celular|default:'' }}" class="celda-input central text-mono text-blue val-celular" oninput="registrarCambioVenta(this)"></td>
+                        <td class="td-premium"><input type="text" value="{{ item.mensaje|default:'' }}" class="celda-input central val-mensaje" oninput="registrarCambioVenta(this)"></td>
+                        
+                        <td class="td-premium" style="text-align: center; vertical-align: middle;">
+                            <button type="button" onclick="eliminarFilaVenta(this)" class="btn-eliminar" title="Eliminar fila">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+
+                <tr class="fila-ventas" id="fila-molde" style="display: none;">
+                    <td class="td-premium"><input type="date" class="celda-input central val-fecha" oninput="actualizarMesAnio(this); registrarCambioVenta(this)"></td>
+                    <td class="td-premium"><input type="text" class="celda-input central bold val-mes input-readonly" readonly tabindex="-1"></td>
+                    <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue bold val-orden" oninput="registrarCambioVenta(this)"></td>
+                    
+                    <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-nrooperacion" oninput="registrarCambioVenta(this)"></td>
+                    <td class="td-premium" style="padding: 4px;">
+                        <select class="celda-input central bold val-estadopago select-estado" style="height: 100%; border-radius: 12px; transition: all 0.2s;" onchange="cambiarColorEstado(this); registrarCambioVenta(this)">
+                            <option value=""></option>
+                            <option value="APROBADO">APROBADO</option>
+                            <option value="PENDIENTE">PENDIENTE</option>
+                            <option value="RETENCIÓN">RETENCIÓN</option>
+                        </select>
+                    </td>
+
+                    <td class="td-premium"><input type="text" class="celda-input central val-comprobante" oninput="registrarCambioVenta(this)"></td>
+                    
+                    <td class="td-premium">
+                        <select class="celda-input central bold val-tipoventa select-premium" onchange="registrarCambioVenta(this)">
+                            <option value="">---</option>
+                        </select>
+                    </td>
+                    <td class="td-premium">
+                        <select class="celda-input bold text-dark val-marca select-premium" onchange="registrarCambioVenta(this)">
+                            <option value="">---</option>
+                        </select>
+                    </td>
+                    <td class="td-premium">
+                        <select class="celda-input text-dark val-categoria select-premium" onchange="registrarCambioVenta(this)">
+                            <option value="">---</option>
+                        </select>
+                    </td>
+
+                    <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-sku" oninput="registrarCambioVenta(this)"></td>
+                    
+                    <td class="td-premium"><input type="text" class="celda-input central bold text-dark val-modelo" oninput="buscarProductoPorModelo(this)"></td>
+                    
+                    <td class="td-premium bg-locked">
+                        <input type="text" class="celda-input val-producto input-readonly" readonly tabindex="-1" placeholder="Esperando modelo...">
+                    </td>
+                    
+                    <td class="td-premium"><input type="number" class="celda-input central bold val-cant" oninput="calcularFilaVenta(this); registrarCambioVenta(this)"></td>
+                    
+                    <td class="td-premium bg-green-light">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha bold text-green val-precio" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
+                        </div>
+                    </td>
+                    <td class="td-premium bg-green-light bg-locked">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda">S/</span>
+                            <input type="text" class="celda-input derecha bold text-green val-totalv input-readonly" readonly tabindex="-1">
+                        </div>
+                    </td>
+                    <td class="td-premium bg-green-light">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha text-red val-cargosoles" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
+                        </div>
+                    </td>
+                    <td class="td-premium bg-green-light bg-locked">
+                        <div class="wrapper-moneda">
+                            <input type="text" class="celda-input derecha text-red val-cargoporc input-readonly" readonly tabindex="-1">
+                            <span class="simbolo-porcentaje">%</span>
+                        </div>
+                    </td>
+                    <td class="td-premium bg-green-light">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha val-urbano" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
+                        </div>
+                    </td>
+                    <td class="td-premium bg-green-light">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha val-flex" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
+                        </div>
+                    </td>
+                    <td class="td-premium bg-green-medium bg-locked">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda text-green-dark">S/</span>
+                            <input type="text" class="celda-input derecha bold text-green-dark val-totalpagado input-readonly" readonly tabindex="-1">
+                        </div>
+                    </td>
+                    
+                    <td class="td-premium bg-red-light">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha bold text-red val-costoproducto" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
+                        </div>
+                    </td>
+                    <td class="td-premium bg-red-light bg-locked">
+                        <input type="text" class="celda-input central val-und input-readonly" readonly tabindex="-1">
+                    </td>
+                    <td class="td-premium bg-red-light bg-locked">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda">S/</span>
+                            <input type="text" class="celda-input derecha bold text-red val-costototal input-readonly" readonly tabindex="-1">
+                        </div>
+                    </td>
+                    <td class="td-premium bg-red-light">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha text-red val-costoflex" oninput="calcularFilaVenta(this); registrarCambioVenta(this)">
+                        </div>
+                    </td>
+                    
+                    <td class="td-premium bg-blue-light bg-locked">
+                        <div class="wrapper-moneda">
+                            <span class="simbolo-moneda" style="color: #60a5fa;">S/</span>
+                            <input type="text" class="celda-input derecha bold val-ganancia input-readonly" readonly tabindex="-1">
+                        </div>
+                    </td>
+                    <td class="td-premium bg-blue-light bg-locked">
+                        <div class="wrapper-moneda">
+                            <input type="text" class="celda-input derecha bold val-rentabilidad input-readonly" readonly tabindex="-1">
+                            <span class="simbolo-porcentaje">%</span>
+                        </div>
+                    </td>
+                    
+                    <td class="td-premium"><input type="text" placeholder="Dep/Prov/Dist" class="celda-input val-distrito" oninput="registrarCambioVenta(this)"></td>
+                    <td class="td-premium"><input type="text" class="celda-input val-direccion" oninput="registrarCambioVenta(this)"></td>
+                    <td class="td-premium"><input type="text" class="celda-input bold text-dark val-repartidor" oninput="registrarCambioVenta(this)"></td>
+                    <td class="td-premium"><input type="text" class="celda-input central text-mono text-blue val-celular" oninput="registrarCambioVenta(this)"></td>
+                    <td class="td-premium"><input type="text" class="celda-input central val-mensaje" oninput="registrarCambioVenta(this)"></td>
+                    
+                    <td class="td-premium" style="text-align: center; vertical-align: middle;">
+                        <button type="button" onclick="eliminarFilaVenta(this)" class="btn-eliminar" title="Eliminar fila">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 10px 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <span style="color: #475569; font-weight: 600; font-size: 0.85rem;">
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            {% if query_search or request.GET.fecha_inicio %}&nbsp; <span style="color: #64748b; font-style: italic;">(Resultados filtrados)</span>{% endif %}
+        </span>
+        
+        <div style="display: flex; gap: 8px;">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if query_search %}&q={{ query_search }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" class="btn-pag">« Primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" class="btn-pag">Anterior</a>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if query_search %}&q={{ query_search }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" class="btn-pag">Siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if query_search %}&q={{ query_search }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" class="btn-pag">Última »</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<style>
+    /* ========================================================
+       COMPACTACIÓN DE BOTONES SUPERIORES Y PANEL BÚSQUEDA
+       ======================================================== */
+    .btn-top { color: white; border: none; padding: 0 12px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s; font-size: 0.8rem; text-decoration: none; height: 32px;}
+    .btn-top:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    .input-filtro { width: 100%; padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none; box-sizing: border-box; font-size: 0.85rem; color: #334155; transition: border-color 0.2s; height: 32px; }
+    .input-filtro:focus { border-color: var(--color-principal); box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.2); }
+    .btn-buscar, .btn-limpiar { padding: 0 12px; border-radius: 4px; font-weight: bold; height: 32px; margin-top: auto; display: flex; align-items: center; gap: 6px; font-size: 0.8rem; border: none; cursor: pointer; text-decoration: none; color: white;}
+    .btn-buscar { background: var(--color-principal); }
+    .btn-buscar:hover { opacity: 0.9; }
+    .btn-limpiar { background: #ef4444; }
+    .btn-limpiar:hover { background: #dc2626; }
+
+    /* ========================================================
+       DISEÑO TIPO EXCEL (GRID MARCADOS ESTRICTOS)
+       ======================================================== */
+    #tablaReporte { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-collapse: collapse; }
+    
+    .th-premium { padding: 10px 8px; border: 1px solid #334155; text-align: center; }
+    .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 36px; vertical-align: middle; }
+    
+    /* Efecto Cebra y Hover Excel */
+    .fila-ventas:nth-child(even) { background-color: #f8fafc; }
+    .fila-ventas:nth-child(odd) { background-color: #ffffff; }
+    .fila-ventas:hover td { filter: brightness(0.96); background-color: #e2e8f0; }
+
+    /* Fila Editada temporalmente */
+    .fila-editada > td { background-color: #fffbeb !important; filter: none !important; }
+    .fila-editada > td:first-child { border-left: 4px solid #f59e0b; }
+
+    /* Fondos Zonas Financieras */
+    .bg-green-light { background-color: #f0fdf4 !important; }
+    .bg-green-medium { background-color: #dcfce7 !important; }
+    .bg-red-light { background-color: #fef2f2 !important; }
+    .bg-blue-light { background-color: #eff6ff !important; }
+    
+    /* Celdas Bloqueadas (Fórmulas) */
+    .bg-locked { filter: brightness(0.96) contrast(0.95); }
+
+    /* FORMATO DE MONEDA Y PORCENTAJE (Flexbox) */
+    .wrapper-moneda { display: flex; align-items: center; padding: 0 4px; height: 100%; box-sizing: border-box; }
+    .simbolo-moneda { color: #94a3b8; font-weight: 800; font-size: 0.8rem; user-select: none; flex-shrink: 0; }
+    .simbolo-porcentaje { color: #94a3b8; font-weight: 800; font-size: 0.8rem; user-select: none; flex-shrink: 0; }
+
+    /* Inputs Fantasma */
+    .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 8px 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
+    .celda-input:not([readonly]):focus { background-color: #fff; box-shadow: inset 0 0 0 2px var(--color-principal); color: #000; position: relative; z-index: 1; border-radius: 2px;}
+    .wrapper-moneda .celda-input { padding-left: 4px; padding-right: 4px; text-align: right; width: 100%; }
+
+    /* Inputs Bloqueados (Readonly) */
+    .input-readonly { color: #475569; font-weight: bold; cursor: not-allowed; }
+    .input-readonly:focus { box-shadow: none; background-color: transparent; }
+
+    /* Tipografías y Colores Específicos */
+    .central { text-align: center; }
+    .derecha { text-align: right; }
+    .bold { font-weight: bold; }
+    .text-dark { color: #0f172a; }
+    .text-mono { font-family: 'Courier New', Courier, monospace; letter-spacing: -0.5px; font-weight: 800; font-size: 0.9rem; }
+    .text-blue { color: #2563eb; }
+    .text-blue-dark { color: #1e40af; }
+    .text-green { color: #166534; }
+    .text-green-dark { color: #064e3b; }
+    .text-red { color: #991b1b; }
+    .text-orange { color: #ea580c; }
+
+    /* Selectores Custom (Combobox) */
+    .select-premium { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px top 50%; background-size: 8px auto; padding-right: 20px; }
+
+    /* COLORES ESTADO PAGO (NUEVO) */
+    .estado-aprobado { background-color: #198754 !important; color: white !important; font-weight: bold; }
+    .estado-pendiente { background-color: #bae6fd !important; color: #0369a1 !important; font-weight: bold; }
+    .estado-retencion { background-color: #b91c1c !important; color: white !important; font-weight: bold; }
+
+    /* Eliminar y Ocultar Spinners */
+    .btn-eliminar { background: none; border: none; color: #ef4444; cursor: pointer; padding: 6px; border-radius: 4px; transition: background 0.2s; display: block; margin: 0 auto;}
+    .btn-eliminar:hover { background: #fee2e2; color: #b91c1c; }
+    .celda-input::-webkit-outer-spin-button, .celda-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .celda-input[type=number] { -moz-appearance: textfield; }
+
+    /* Checkboxes Menú Flotante */
+    .check-opcion { width: 16px; height: 16px; accent-color: var(--color-principal); cursor: pointer; }
+
+    /* Paginación */
+    .btn-pag { padding: 4px 12px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; font-size: 0.8rem; }
+    .btn-pag:hover { background: var(--color-principal); color: white; border-color: var(--color-principal); }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
+<script>
+    const diccionarioProductos = {{ diccionario_productos_json|safe|default:"{}" }};
+
+    const listaMarcas = ["OSTER", "BEHRINGER", "BORD", "BOSSKO", "DSP", "ELECTROLUX", "EVOLUTION", "FINEZZA", "FUJITEC", "GAMA", "IMACO", "INDURAMA", "JVC", "Kitchenaid", "LG", "PANASONIC", "PHILIPS", "RECORD", "REMINGTON", "SAMSUNG", "SOLE", "SONY", "TAURUS", "TCL", "TRAMONTINA", "TREVELY", "VISIONNER", "WAHL", "WHITELINE", "YANBAL", "BLACKLINE", "VANHOFF", "EPSON", "BGH", "MOTOROLA", "HISENSE", "ILUMI", "DAJU", "XIAOMI", "Whirlpool", "IMPERIAL", "HYUNDAI", "JBL", "COLDEX"];
+    const listaCategorias = ["HORNO ELECTRICO", "AFEITADORA", "ARROCERA", "ASPIRADORA", "AUDIFONOS", "BATIDORA DE INMERSION", "BATIDORA DE MANO", "BATIDORA DE TAZÓN", "BATIDORA PLANETARIA", "BLOQUEADOR", "CACEROLA", "CAFETERA", "CAMPANA", "CATEGORIA", "CEPILLO", "COCINA", "COCINA DE INDUCCION", "COCINA ELÉCTRICA", "COLLAR Y ARETES", "COMBO CHERRY", "COMBO OSTER", "CONGELADORA", "CONTROL DE TV", "CUATRICOMBO", "CUCHILLA DE LICUADORA", "CUCHILLO", "DESHUMEDECEDOR", "DISPENSADOR DE AGUA", "EQUIPO DE SONIDO", "ESPATULA", "EXPRIMIDOR", "EXTRACTOR DE JUGOS", "FREIDORA DE AIRE", "FRIGOBAR", "HERVIDOR", "JUEGO DE OLLAS", "LAVADORA", "LAVASECA", "LICUADORA", "MAQUINA DE CORTAR PELO", "MICROONDAS", "MOLDE", "MOLEDOR DE CARNE", "MOLINILLO", "MULTI OLLA", "OLLA", "OLLA A PRESIÓN", "ONDULADOR", "PANIFICADORA", "PARLANTE", "PARRILLA", "PERFUME", "PICADOR DE ALIMENTOS", "PLANCHA A VAPOR", "PLANCHA DE CABELLO", "PLANCHA GRILL", "PROCESADOR DE ALIMENTOS", "PROTECTOR SOLAR", "REFRIGERADORA", "SANDWICHERA", "SARTEN", "SARTÉN ELÉCTRICA", "SET DE CUBIERTOS", "SET DE OLLAS", "SET DE PIZZA", "SOUNDBAR", "SPAGUETERA", "TERMO BOMBA", "TERMO HERVIDOR", "TERMORADIADOR", "TETERA", "TOSTADORA", "TRICOMBO OSTER", "TV", "VAPORIZADOR", "VAPORIZADOR DE ALIMENTOS", "VASO DE LICUADORA", "VENTILADOR", "WAFLERA", "YOGURT MAKER", "HORNO CON FREIDORA", "CUIDADO PERSONAL", "CALEFACTOR", "IMPRESORA", "MONITOR DE ESCENARIO", "DEPILADORA", "TERMOVENTILADOR", "TABLET", "VISICOOLER", "Westinghouse", "ENCIMERA", "MAQUINA PARA HIELO"];
+    const listaTiposVenta = ["FLEX", "URBANO", "ACUERDO CON EL COMPRADOR"];
+
+    // === FUNCIÓN PARA PINTAR EL COMBO BOX DE ESTADO DE PAGO ===
+    function cambiarColorEstado(selectElement) {
+        selectElement.classList.remove('estado-aprobado', 'estado-pendiente', 'estado-retencion');
+        const val = selectElement.value.trim().toUpperCase();
+        if (val === 'APROBADO') selectElement.classList.add('estado-aprobado');
+        if (val === 'PENDIENTE') selectElement.classList.add('estado-pendiente');
+        if (val === 'RETENCIÓN' || val === 'RETENCION') selectElement.classList.add('estado-retencion');
+    }
+
+    function calcularFilaVenta(elemento) {
+        const fila = elemento.closest('tr');
+        if (!fila || fila.id === 'fila-molde') return;
+
+        const cant = parseFloat(fila.querySelector('.val-cant').value) || 0;
+        const precio = parseFloat(fila.querySelector('.val-precio').value) || 0;
+        const cargoSoles = parseFloat(fila.querySelector('.val-cargosoles').value) || 0;
+        const urbano = parseFloat(fila.querySelector('.val-urbano').value) || 0;
+        const flex = parseFloat(fila.querySelector('.val-flex').value) || 0;
+        const costoProd = parseFloat(fila.querySelector('.val-costoproducto').value) || 0;
+        const costoFlex = parseFloat(fila.querySelector('.val-costoflex').value) || 0;
+
+        const totalV = precio * cant;
+        fila.querySelector('.val-totalv').value = totalV > 0 ? totalV.toFixed(2) : '0.00';
+
+        const porcCargo = totalV > 0 ? (cargoSoles / totalV) * 100 : 0;
+        fila.querySelector('.val-cargoporc').value = porcCargo > 0 ? porcCargo.toFixed(2) : '0.00';
+
+        const totalPagado = (precio - cargoSoles - urbano + flex) * cant;
+        fila.querySelector('.val-totalpagado').value = (totalPagado !== 0 || cant > 0) ? totalPagado.toFixed(2) : '0.00';
+
+        fila.querySelector('.val-und').value = cant > 0 ? cant : '0';
+
+        const costoTotal = costoProd * cant;
+        fila.querySelector('.val-costototal').value = (costoTotal > 0 || cant > 0) ? costoTotal.toFixed(2) : '0.00';
+
+        const ganancia = totalPagado - costoTotal - costoFlex;
+        const inputGanancia = fila.querySelector('.val-ganancia');
+        inputGanancia.value = (totalPagado > 0 || costoTotal > 0) ? ganancia.toFixed(2) : '0.00';
+        inputGanancia.style.color = ganancia < 0 ? '#dc2626' : '#1e40af';
+
+        const rentabilidad = costoTotal > 0 ? (ganancia / costoTotal) * 100 : 0;
+        const inputRentabilidad = fila.querySelector('.val-rentabilidad');
+        inputRentabilidad.value = (costoTotal > 0) ? rentabilidad.toFixed(2) : '0.00';
+        inputRentabilidad.style.color = rentabilidad < 0 ? '#dc2626' : '#1e40af';
+    }
+
+    function buscarProductoPorModelo(inputModelo) {
+        const fila = inputModelo.closest('tr');
+        const inputProducto = fila.querySelector('.val-producto');
+        const modelo = inputModelo.value.trim().toUpperCase();
+
+        if (modelo !== '') {
+            if (diccionarioProductos[modelo]) {
+                inputProducto.value = diccionarioProductos[modelo];
+            } else {
+                inputProducto.value = 'NO ENCONTRADO';
+            }
+        } else {
+            inputProducto.value = '';
+        }
+        
+        registrarCambioVenta(inputModelo);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const poblarSelect = (claseSelector, listaPredeterminada) => {
+            document.querySelectorAll(claseSelector).forEach(select => {
+                const valorActual = (select.getAttribute('data-valor-actual') || '').trim().toUpperCase();
+                let encontrado = false;
+                
+                listaPredeterminada.forEach(item => {
+                    let opt = new Option(item, item);
+                    if (item === valorActual) { opt.selected = true; encontrado = true; }
+                    select.add(opt);
+                });
+                
+                if (valorActual && !encontrado) {
+                    let opt = new Option(valorActual, valorActual);
+                    opt.selected = true;
+                    select.add(opt);
+                }
+
+                if (valorActual) { select.value = valorActual; }
+            });
+        };
+
+        poblarSelect('.val-marca', listaMarcas);
+        poblarSelect('.val-categoria', listaCategorias);
+        poblarSelect('.val-tipoventa', listaTiposVenta);
+        
+        // Pinta los colores iniciales de Estado de Pago
+        document.querySelectorAll('.select-estado').forEach(select => {
+            cambiarColorEstado(select);
+        });
+
+        const ths = document.querySelectorAll("#tablaReporte th.th-premium");
+        const container = document.getElementById("columnCheckboxes");
+        
+        ths.forEach((th, index) => {
+            const colName = th.innerText.trim();
+            if (!colName || colName === "") return;
+            const label = document.createElement("label");
+            label.style.display = "flex"; label.style.alignItems = "center"; label.style.gap = "8px";
+            label.style.fontSize = "0.75rem"; label.style.fontWeight = "bold"; label.style.color = "#475569"; label.style.cursor = "pointer";
+            const cb = document.createElement("input");
+            cb.type = "checkbox"; cb.checked = true; cb.className = "check-opcion"; cb.dataset.colIndex = index + 1; 
+            cb.addEventListener("change", function() {
+                const colIdx = this.dataset.colIndex;
+                const displayState = this.checked ? "" : "none";
+                const header = document.querySelector(`#tablaReporte th:nth-child(${colIdx})`);
+                if(header) header.style.display = displayState;
+                document.querySelectorAll(`#tablaReporte tbody tr`).forEach(tr => {
+                    const cell = tr.querySelector(`td:nth-child(${colIdx})`);
+                    if(cell) cell.style.display = displayState;
+                });
+            });
+            label.appendChild(cb); label.appendChild(document.createTextNode(colName)); container.appendChild(label);
+        });
+    });
+
+    function togglePanelColumnas() {
+        const panel = document.getElementById("panelPersonalizarColumnas");
+        panel.style.display = panel.style.display === "none" ? "block" : "none";
+    }
+
+    function actualizarMesAnio(inputFecha) {
+        const fila = inputFecha.closest('tr');
+        const inputMes = fila.querySelector('.val-mes');
+        const fechaSeleccionada = inputFecha.value; 
+        if (fechaSeleccionada && fechaSeleccionada.length >= 7) {
+            inputMes.value = fechaSeleccionada.substring(0, 7);
+            registrarCambioVenta(inputMes); 
+        } else {
+            inputMes.value = "";
+        }
+    }
+
+    let memoriaVentas = JSON.parse(localStorage.getItem('memoriaVentasTemp')) || {};
+    let ventasAEliminar = JSON.parse(localStorage.getItem('ventasAEliminarTemp')) || [];
+
+    window.addEventListener('load', function() {
+        const filas = document.querySelectorAll('#tablaReporte tbody .fila-ventas');
+        let hayCambiosPrevios = false;
+
+        filas.forEach(fila => {
+            if(fila.id === 'fila-molde') return;
+            const inputFecha = fila.querySelector('.val-fecha');
+            const inputMes = fila.querySelector('.val-mes');
+            if (inputFecha && inputFecha.value && (!inputMes.value || inputMes.value === '')) {
+                inputMes.value = inputFecha.value.substring(0, 7);
+            }
+            
+            const inputModelo = fila.querySelector('.val-modelo');
+            const inputProducto = fila.querySelector('.val-producto');
+            if (inputModelo && inputProducto) {
+                const mod = inputModelo.value.trim().toUpperCase();
+                if (mod !== '' && (inputProducto.value.trim() === '' || inputProducto.value === 'NO ENCONTRADO' || inputProducto.value === 'None')) {
+                    if (diccionarioProductos[mod]) {
+                        inputProducto.value = diccionarioProductos[mod];
+                    } else {
+                        inputProducto.value = 'NO ENCONTRADO';
+                    }
+                }
+            }
+
+            const inputCant = fila.querySelector('.val-cant');
+            if (inputCant) calcularFilaVenta(inputCant);
+
+            const key = fila.dataset.originalKey;
+            if (key && memoriaVentas[key]) {
+                fila.classList.add('fila-editada');
+                hayCambiosPrevios = true;
+            }
+        });
+
+        if (hayCambiosPrevios || Object.keys(memoriaVentas).length > 0 || ventasAEliminar.length > 0) {
+            const indicador = document.getElementById('indicador-cambios');
+            if(indicador) indicador.style.display = 'inline-flex';
+        }
+    });
+
+    function registrarCambioVenta(elemento) {
+        const fila = elemento.closest('tr');
+        if (fila.id === 'fila-molde') return;
+        let key = fila.dataset.originalKey;
+        if (!key || key === '') {
+            key = 'temp-' + Math.random().toString(36).substr(2, 9);
+            fila.dataset.originalKey = key;
+        }
+
+        const orden = fila.querySelector('.val-orden').value.trim();
+        if(!orden) return; 
+
+        // GUARDADO DE COLUMNAS NUEVAS EN MEMORIA TEMP
+        memoriaVentas[key] = {
+            'NRO. ORDEN': orden,
+            'FECHA': fila.querySelector('.val-fecha').value,
+            'MES Y AÑO': fila.querySelector('.val-mes').value,
+            'N.º de operación': fila.querySelector('.val-nrooperacion').value,
+            'Estado de pago': fila.querySelector('.val-estadopago').value,
+            'COMPROBANTE': fila.querySelector('.val-comprobante').value,
+            'TIPO DE VENTA': fila.querySelector('.val-tipoventa').value,
+            'MARCA': fila.querySelector('.val-marca').value,
+            'CATEGORIA': fila.querySelector('.val-categoria').value,
+            'SKU ALMACEN': fila.querySelector('.val-sku').value,
+            'MODELO': fila.querySelector('.val-modelo').value,
+            'PRODUCTO': fila.querySelector('.val-producto').value,
+            'CANT.': parseFloat(fila.querySelector('.val-cant').value) || 0,
+            'PRECIO': parseFloat(fila.querySelector('.val-precio').value) || 0,
+            'TOTAL V.': parseFloat(fila.querySelector('.val-totalv').value) || 0,
+            '%CARGO x VENTA': parseFloat(fila.querySelector('.val-cargosoles').value) || 0, 
+            'URBANO': parseFloat(fila.querySelector('.val-urbano').value) || 0,
+            'FLEX': parseFloat(fila.querySelector('.val-flex').value) || 0,
+            'TOTAL PAGADO': parseFloat(fila.querySelector('.val-totalpagado').value) || 0,
+            'COSTO x PRODUCTO': parseFloat(fila.querySelector('.val-costoproducto').value) || 0,
+            'UND': parseFloat(fila.querySelector('.val-und').value) || 0,
+            'COSTO TOTAL': parseFloat(fila.querySelector('.val-costototal').value) || 0,
+            'COSTO ENTREGA FLEX': parseFloat(fila.querySelector('.val-costoflex').value) || 0,
+            'GANANCIA': parseFloat(fila.querySelector('.val-ganancia').value) || 0,
+            'RENTABILIDAD %': fila.querySelector('.val-rentabilidad').value,
+            'DISTRITO': fila.querySelector('.val-distrito').value,
+            'DIRECCIÓN': fila.querySelector('.val-direccion').value,
+            'REPARTIDOR': fila.querySelector('.val-repartidor').value,
+            'CELULAR DEL CLIENTE': fila.querySelector('.val-celular').value,
+            'MSJ DE AGRADECIMIENTO': fila.querySelector('.val-mensaje').value
+        };
+
+        localStorage.setItem('memoriaVentasTemp', JSON.stringify(memoriaVentas));
+        fila.classList.add('fila-editada');
+        
+        const indicador = document.getElementById('indicador-cambios');
+        if(indicador) indicador.style.display = 'inline-flex';
+    }
+
+    function eliminarFilaVenta(btn) {
+        const fila = btn.closest('tr');
+        if (fila.id === 'fila-molde') return;
+        const key = fila.dataset.originalKey;
+
+        if (key && !key.startsWith('temp-') && !key.startsWith('import-')) {
+            if (!ventasAEliminar.includes(key)) {
+                ventasAEliminar.push(key);
+            }
+        }
+        if (memoriaVentas[key]) {
+            delete memoriaVentas[key];
+        }
+        fila.remove();
+        localStorage.setItem('ventasAEliminarTemp', JSON.stringify(ventasAEliminar));
+        localStorage.setItem('memoriaVentasTemp', JSON.stringify(memoriaVentas));
+        
+        const indicador = document.getElementById('indicador-cambios');
+        if(indicador) indicador.style.display = 'inline-flex';
+    }
+    
+    function agregarNuevaVenta() {
+        const tbody = document.querySelector("#tablaReporte tbody");
+        const filaMolde = document.getElementById('fila-molde');
+        
+        const nuevaFila = filaMolde.cloneNode(true);
+        nuevaFila.id = ""; 
+        nuevaFila.style.display = ""; 
+        
+        const key = 'temp-' + Math.random().toString(36).substr(2, 9);
+        nuevaFila.dataset.originalKey = key;
+        nuevaFila.classList.add('fila-editada');
+        
+        tbody.insertBefore(nuevaFila, tbody.firstChild);
+        
+        const indicador = document.getElementById('indicador-cambios');
+        if(indicador) indicador.style.display = 'inline-flex';
+        
+        nuevaFila.querySelector('.val-fecha').focus();
+    }
+
+    document.getElementById('csvImportar').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            // NORMALIZA LA CABECERA (Quita tildes, signos, ñ y espacios)
+            transformHeader: function(header) {
+                return header.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z0-9]/g, '');
+            },
+            complete: function(results) {
+                if (results.data.length > 0 && !('NROORDEN' in results.data[0])) {
+                    alert("Error: No se encontró la columna 'NRO. ORDEN'. Verifica tu Excel.");
+                    return;
+                }
+                
+                const tbody = document.querySelector("#tablaReporte tbody");
+                let filaMolde = document.getElementById('fila-molde');
+                const fragmento = document.createDocumentFragment();
+                let importadas = 0;
+
+                const setSelectDinamicamente = (selectElement, value) => {
+                    if (!value) { selectElement.value = ""; return; }
+                    let exists = Array.from(selectElement.options).some(opt => opt.value === value);
+                    if (!exists) { selectElement.add(new Option(value, value)); }
+                    selectElement.value = value;
+                };
+
+                const limpiarValor = (val) => {
+                    if (!val) return '';
+                    return String(val).replace(/[\r\n]+/g, ' ').trim();
+                };
+
+                const formatNum = (val) => {
+                    if (!val) return 0;
+                    let num = parseFloat(limpiarValor(val).replace(/[^0-9.-]+/g,""));
+                    return isNaN(num) ? 0 : num;
+                };
+
+                results.data.forEach(item => {
+                    const orden = limpiarValor(item['NROORDEN']);
+                    if (!orden) return; 
+
+                    let fechaRaw = limpiarValor(item['FECHA']);
+                    let fechaCalendario = '';
+                    let partes = fechaRaw.split(/[\/\-]/); 
+                    if (partes.length === 3) {
+                        let dia = partes[0].padStart(2, '0');
+                        let mes = partes[1].padStart(2, '0');
+                        let anio = partes[2];
+                        if (anio.length === 2) anio = "20" + anio; 
+                        fechaCalendario = `${anio}-${mes}-${dia}`;
+                    } else if (fechaRaw.includes('-') && fechaRaw.indexOf('-') === 4) {
+                        fechaCalendario = fechaRaw.substring(0, 10); 
+                    }
+
+                    let mesAnioCalculado = limpiarValor(item['MESYANO']);
+                    if (!mesAnioCalculado && fechaCalendario) {
+                        mesAnioCalculado = fechaCalendario.substring(0, 7);
+                    }
+                    
+                    // COLUMNAS NUEVAS EN EL BUCLE DE CARGA MASIVA
+                    let nroOperacionLeido = limpiarValor(item['NODEOPERACION']);
+                    let estadoPagoLeido = limpiarValor(item['ESTADODEPAGO']);
+
+                    let comprobanteLeido = limpiarValor(item['COMPROBANTE']);
+                    let tipoVentaLeido = limpiarValor(item['TIPODEVENTA']).toUpperCase();
+                    let marcaLeida = limpiarValor(item['MARCA']).toUpperCase();
+                    let categoriaLeida = limpiarValor(item['CATEGORIA']).toUpperCase();
+
+                    let modeloLeido = limpiarValor(item['MODELO']).toUpperCase();
+                    let productoLeido = limpiarValor(item['PRODUCTO']);
+                    
+                    if (!productoLeido && modeloLeido && diccionarioProductos[modeloLeido]) {
+                        productoLeido = diccionarioProductos[modeloLeido];
+                    } else if (!productoLeido && modeloLeido && !diccionarioProductos[modeloLeido]) {
+                        productoLeido = "NO ENCONTRADO";
+                    }
+
+                    const key = 'import-' + Math.random().toString(36).substr(2, 9);
+                    const cargoSolesImportado = formatNum(item['CARGOXVENTA']);
+                    
+                    memoriaVentas[key] = {
+                        'NRO. ORDEN': orden,
+                        'FECHA': fechaCalendario,
+                        'MES Y AÑO': mesAnioCalculado,
+                        'N.º de operación': nroOperacionLeido,
+                        'Estado de pago': estadoPagoLeido,
+                        'COMPROBANTE': comprobanteLeido,
+                        'TIPO DE VENTA': tipoVentaLeido,
+                        'MARCA': marcaLeida,
+                        'CATEGORIA': categoriaLeida,
+                        'SKU ALMACEN': limpiarValor(item['SKUALMACEN']),
+                        'MODELO': modeloLeido,
+                        'PRODUCTO': productoLeido,
+                        'CANT.': formatNum(item['CANT']),
+                        'PRECIO': formatNum(item['PRECIO']),
+                        'TOTAL V.': formatNum(item['TOTALV']),
+                        '%CARGO x VENTA': cargoSolesImportado,
+                        'URBANO': formatNum(item['URBANO']),
+                        'FLEX': formatNum(item['FLEX']),
+                        'TOTAL PAGADO': formatNum(item['TOTALPAGADO']),
+                        'COSTO x PRODUCTO': formatNum(item['COSTOXPRODUCTO']),
+                        'UND': formatNum(item['UND']),
+                        'COSTO TOTAL': formatNum(item['COSTOTOTAL']),
+                        'COSTO ENTREGA FLEX': formatNum(item['COSTOENTREGAFLEX']),
+                        'GANANCIA': formatNum(item['GANANCIA']),
+                        'RENTABILIDAD %': limpiarValor(item['RENTABILIDAD']),
+                        'DISTRITO': limpiarValor(item['DISTRITO', 'UBICACION', 'DEPARTAMENTO']),
+                        'DIRECCIÓN': limpiarValor(item['DIRECCION']),
+                        'REPARTIDOR': limpiarValor(item['REPARTIDOR']),
+                        'CELULAR DEL CLIENTE': limpiarValor(item['CELULARDELCLIENTE']),
+                        'MSJ DE AGRADECIMIENTO': limpiarValor(item['MSJDEAGRADECIMIENTO'])
+                    };
+
+                    const nuevaFila = filaMolde.cloneNode(true);
+                    nuevaFila.id = "";
+                    nuevaFila.style.display = "";
+                    nuevaFila.dataset.originalKey = key;
+                    nuevaFila.classList.add('fila-editada');
+
+                    nuevaFila.querySelector('.val-fecha').value = fechaCalendario;
+                    nuevaFila.querySelector('.val-mes').value = mesAnioCalculado;
+                    nuevaFila.querySelector('.val-orden').value = orden;
+                    
+                    // LLENADO DE DATOS NUEVOS
+                    nuevaFila.querySelector('.val-nrooperacion').value = nroOperacionLeido;
+                    const selectEstado = nuevaFila.querySelector('.val-estadopago');
+                    setSelectDinamicamente(selectEstado, estadoPagoLeido);
+                    cambiarColorEstado(selectEstado); // Coloreamos automáticamente al cargar
+
+                    nuevaFila.querySelector('.val-comprobante').value = comprobanteLeido;
+                    
+                    setSelectDinamicamente(nuevaFila.querySelector('.val-tipoventa'), tipoVentaLeido);
+                    setSelectDinamicamente(nuevaFila.querySelector('.val-marca'), marcaLeida);
+                    setSelectDinamicamente(nuevaFila.querySelector('.val-categoria'), categoriaLeida);
+
+                    nuevaFila.querySelector('.val-sku').value = limpiarValor(item['SKUALMACEN']);
+                    nuevaFila.querySelector('.val-modelo').value = modeloLeido;
+                    nuevaFila.querySelector('.val-producto').value = productoLeido;
+                    
+                    nuevaFila.querySelector('.val-cant').value = formatNum(item['CANT']);
+                    nuevaFila.querySelector('.val-precio').value = formatNum(item['PRECIO']).toFixed(2);
+                    nuevaFila.querySelector('.val-cargosoles').value = cargoSolesImportado.toFixed(2);
+                    nuevaFila.querySelector('.val-urbano').value = formatNum(item['URBANO']).toFixed(2);
+                    nuevaFila.querySelector('.val-flex').value = formatNum(item['FLEX']).toFixed(2);
+                    nuevaFila.querySelector('.val-costoproducto').value = formatNum(item['COSTOXPRODUCTO']).toFixed(2);
+                    nuevaFila.querySelector('.val-costoflex').value = formatNum(item['COSTOENTREGAFLEX']).toFixed(2);
+                    
+                    calcularFilaVenta(nuevaFila.querySelector('.val-cant'));
+
+                    nuevaFila.querySelector('.val-distrito').value = limpiarValor(item['DISTRITO', 'UBICACION', 'DEPARTAMENTO']);
+                    nuevaFila.querySelector('.val-direccion').value = limpiarValor(item['DIRECCION']);
+                    nuevaFila.querySelector('.val-repartidor').value = limpiarValor(item['REPARTIDOR']);
+                    nuevaFila.querySelector('.val-celular').value = limpiarValor(item['CELULARDELCLIENTE']);
+                    nuevaFila.querySelector('.val-mensaje').value = limpiarValor(item['MSJDEAGRADECIMIENTO']);
+
+                    fragmento.appendChild(nuevaFila);
+                    importadas++;
+                });
+                
+                tbody.appendChild(fragmento);
+                localStorage.setItem('memoriaVentasTemp', JSON.stringify(memoriaVentas));
+                document.getElementById('csvImportar').value = ""; 
+                
+                const indicador = document.getElementById('indicador-cambios');
+                if(indicador) indicador.style.display = 'inline-flex';
+
+                alert(`¡Se cargaron y calcularon ${importadas} ventas automáticamente! Revisa la tabla y presiona 'Guardar Modificaciones'.`);
+            }
+        });
+    });
+
+    function guardarDatosPendientes() {
+        let datosAguardar = Object.values(memoriaVentas);
+
+        if (datosAguardar.length === 0 && ventasAEliminar.length === 0) {
+            alert("No has cargado, editado ni eliminado ningún reporte para guardar.");
+            return;
+        }
+
+        const btn = document.getElementById('btnGuardarVentas');
+        const textoOriginal = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        btn.disabled = true;
+
+        fetch("{% url 'guardar_reportes_masivos_ml_junior' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ 
+                referencias: datosAguardar,
+                eliminadas: ventasAEliminar 
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                localStorage.removeItem('memoriaVentasTemp');
+                localStorage.removeItem('ventasAEliminarTemp');
+                memoriaVentas = {}; 
+                ventasAEliminar = [];
+                alert(data.message);
+                window.location.reload(); 
+            } else {
+                alert('Error al guardar: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Ocurrió un error en la conexión al servidor.");
+        })
+        .finally(() => {
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+        });
+    }
+
+    function borrarTodosLosReportes() {
+        if (confirm("¡ATENCIÓN PELIGRO! ⚠️ ¿Estás totalmente seguro de borrar TODOS los reportes de ventas de Mercado Libre Junior? Esta acción no se puede deshacer.")) {
+            const btn = document.getElementById('btnBorrarReportes');
+            const textOriginal = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Borrando...';
+            btn.disabled = true;
+
+            fetch("{% url 'borrar_todos_los_reportes_ml_junior' %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'ok') { 
+                    localStorage.removeItem('memoriaVentasTemp');
+                    localStorage.removeItem('ventasAEliminarTemp');
+                    alert(data.message); 
+                    window.location.reload(); 
+                } else { 
+                    alert("Error: " + data.message); 
+                }
+            })
+            .catch(err => alert("Ocurrió un error de conexión."))
+            .finally(() => { 
+                btn.innerHTML = textOriginal; 
+                btn.disabled = false; 
+            });
+        }
+    }
+</script>
+{% endblock %}

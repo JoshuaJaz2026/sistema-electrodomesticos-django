@@ -18,7 +18,7 @@ from django.db.models import Sum, Count
 from django.utils import timezone
 from datetime import timedelta
 
-from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre
+from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre,ReporteMercadoLibreJunior
 
 # =========================================================
 # CONFIGURACIÓN MAESTRA DE ESTILOS Y COLORES
@@ -706,7 +706,44 @@ def reporte_mercadolibre(request):
 @verificar_acceso_plataforma('Mercado Libre - Junior')
 def reporte_mercadolibre_junior(request):
     canal = request.session.get('canal_activo')
-    return render(request, 'reportes_plataformas/reporte_mercadolibre_junior.html', {'canal': canal})
+    
+    # 1. Capturamos los parámetros de búsqueda y fechas
+    query_search = request.GET.get('q', '')
+    fecha_inicio = request.GET.get('fecha_inicio', '')
+    fecha_fin = request.GET.get('fecha_fin', '')
+
+    # 2. Obtenemos todas las ventas de la tabla JUNIOR ordenadas por FECHA e ID
+    ventas_todas = ReporteMercadoLibreJunior.objects.all().order_by('fecha', 'id')
+
+    # 3. Aplicamos filtros de búsqueda por NRO. ORDEN o SKU
+    if query_search:
+        ventas_todas = ventas_todas.filter(
+            Q(nro_orden__icontains=query_search) | 
+            Q(sku_almacen__icontains=query_search)
+        )
+    
+    # 4. Aplicamos filtros de fecha
+    if fecha_inicio:
+        ventas_todas = ventas_todas.filter(fecha__gte=fecha_inicio)
+    if fecha_fin:
+        ventas_todas = ventas_todas.filter(fecha__lte=fecha_fin)
+
+    # 5. Paginación: 40 registros por página
+    paginator = Paginator(ventas_todas, 40) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # 6. Diccionario de productos para el BUSCARV automático
+    costos_db = ReferenciaCosto.objects.all()
+    diccionario_productos = {str(c.codigo).strip().upper(): c.producto for c in costos_db if c.codigo}
+    diccionario_productos_json = json.dumps(diccionario_productos)
+
+    return render(request, 'reportes_plataformas/reporte_mercadolibre_junior.html', {
+        'canal': canal, 
+        'page_obj': page_obj,
+        'query_search': query_search,
+        'diccionario_productos_json': diccionario_productos_json
+    })
 
 @login_required
 @verificar_acceso_plataforma('Creditienda')
@@ -1217,6 +1254,111 @@ def guardar_reportes_masivos_ml(request):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
             
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
+@login_required
+def guardar_reportes_masivos_ml_junior(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            filas_ventas = data.get('referencias', [])
+            eliminadas = data.get('eliminadas', [])
+
+            if eliminadas:
+                ReporteMercadoLibreJunior.objects.filter(id__in=eliminadas).delete()
+
+            def get_best_val(val_antiguo, val_nuevo):
+                v_antiguo = str(val_antiguo or '').replace('\n', '').replace('\r', '').strip()
+                v_nuevo = str(val_nuevo or '').replace('\n', '').replace('\r', '').strip()
+                if v_antiguo in ['', '---', '-', 'None', 'null', 'NaN']: v_antiguo = ''
+                if v_nuevo in ['', '---', '-', 'None', 'null', 'NaN']: v_nuevo = ''
+                return v_nuevo if v_nuevo else v_antiguo
+
+            nros_ordenes_entrantes = [str(f.get('NRO. ORDEN', '')).replace('\n', '').strip() for f in filas_ventas if f.get('NRO. ORDEN', '').strip()]
+            existentes_en_db = {
+                venta.nro_orden: venta for venta in ReporteMercadoLibreJunior.objects.filter(nro_orden__in=nros_ordenes_entrantes)
+            }
+
+            ventas_unicas = {}
+            for fila in filas_ventas:
+                nro_orden = str(fila.get('NRO. ORDEN', '')).replace('\n', '').strip()
+                if not nro_orden: continue
+
+                db_obj = existentes_en_db.get(nro_orden)
+                
+                fecha_raw = str(fila.get('FECHA', '')).strip()
+                fecha_formateada = '2026-01-01'
+                if fecha_raw:
+                    try:
+                        fecha_formateada = datetime.strptime(fecha_raw, '%d/%m/%Y').strftime('%Y-%m-%d') if '/' in fecha_raw else fecha_raw 
+                    except ValueError: pass
+
+                def to_float(val):
+                    try: return float(str(val).replace(',', '').strip() or 0)
+                    except ValueError: return 0.00
+                def to_int(val):
+                    try: return int(str(val).strip() or 0)
+                    except ValueError: return 0
+
+                obj = ReporteMercadoLibreJunior(
+                    nro_orden=nro_orden,
+                    fecha=fecha_formateada,
+                    mes_anio=fila.get('MES Y AÑO', '').strip(),
+                    nro_operacion=get_best_val(db_obj.nro_operacion if db_obj else '', fila.get('N.º de operación', '')),
+                    estado_pago=get_best_val(db_obj.estado_pago if db_obj else '', fila.get('Estado de pago', '')),
+                    comprobante=get_best_val(db_obj.comprobante if db_obj else '', fila.get('COMPROBANTE', '')),
+                    tipo_venta=get_best_val(db_obj.tipo_venta if db_obj else '', fila.get('TIPO DE VENTA', '')),
+                    marca=get_best_val(db_obj.marca if db_obj else '', fila.get('MARCA', '')),
+                    categoria=get_best_val(db_obj.categoria if db_obj else '', fila.get('CATEGORIA', '')),
+                    sku_almacen=get_best_val(db_obj.sku_almacen if db_obj else '', fila.get('SKU ALMACEN', '')),
+                    modelo=get_best_val(db_obj.modelo if db_obj else '', fila.get('MODELO', '')),
+                    producto=get_best_val(db_obj.producto if db_obj else '', fila.get('PRODUCTO', '')),
+                    cantidad=to_float(fila.get('CANT.', 0)),
+                    precio=to_float(fila.get('PRECIO', 0)),
+                    total_venta=to_float(fila.get('TOTAL V.', 0)),
+                    cargo_venta=to_float(fila.get('%CARGO x VENTA', 0)),
+                    urbano=to_float(fila.get('URBANO', 0)),
+                    flex=to_float(fila.get('FLEX', 0)),
+                    total_pagado=to_float(fila.get('TOTAL PAGADO', 0)),
+                    costo_producto=to_float(fila.get('COSTO x PRODUCTO', 0)),
+                    und=to_int(fila.get('UND', 0)),
+                    costo_total=to_float(fila.get('COSTO TOTAL', 0)),
+                    costo_entrega_flex=to_float(fila.get('COSTO ENTREGA FLEX', 0)),
+                    ganancia=to_float(fila.get('GANANCIA', 0)),
+                    rentabilidad=str(fila.get('RENTABILIDAD %', '')).strip(),
+                    distrito=fila.get('DISTRITO', '').strip(),
+                    direccion=fila.get('DIRECCIÓN', '').strip(),
+                    repartidor=fila.get('REPARTIDOR', '').strip(),
+                    celular=str(fila.get('CELULAR DEL CLIENTE', '')).strip(),
+                    mensaje=fila.get('MSJ DE AGRADECIMIENTO', '').strip(),
+                )
+                
+                if nro_orden in ventas_unicas:
+                    existente = ventas_unicas[nro_orden]
+                    existente.nro_operacion = get_best_val(existente.nro_operacion, obj.nro_operacion)
+                    existente.estado_pago = get_best_val(existente.estado_pago, obj.estado_pago)
+                    existente.comprobante = get_best_val(existente.comprobante, obj.comprobante)
+                    existente.modelo = get_best_val(existente.modelo, obj.modelo)
+                else:
+                    ventas_unicas[nro_orden] = obj
+
+            objetos_a_guardar = list(ventas_unicas.values())
+            if objetos_a_guardar:
+                ReporteMercadoLibreJunior.objects.bulk_create(
+                    objetos_a_guardar, update_conflicts=True, unique_fields=['nro_orden'],
+                    update_fields=[f.name for f in ReporteMercadoLibreJunior._meta.fields if f.name not in ['id', 'nro_orden']]
+                )
+            return JsonResponse({'status': 'ok', 'message': f'¡Éxito! Se guardaron {len(objetos_a_guardar)} ventas en Junior.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
+@login_required
+@csrf_exempt
+def borrar_todos_los_reportes_ml_junior(request):
+    if request.method == 'POST':
+        ReporteMercadoLibreJunior.objects.all().delete()
+        return JsonResponse({'status': 'ok', 'message': '¡Reportes Junior limpiados con éxito!'})
+    return JsonResponse({'status': 'error', 'message': 'Solo POST'})
 
 @login_required
 @csrf_exempt

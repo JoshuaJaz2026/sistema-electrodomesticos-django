@@ -259,3 +259,38 @@ class SalidaMercadoLibre(models.Model):
 
     def __str__(self):
         return str(self.sku)
+    
+class ReporteMercadoLibreJunior(models.Model):
+    nro_orden = models.CharField(max_length=255, unique=True)
+    fecha = models.DateField()
+    mes_anio = models.CharField(max_length=100, blank=True, null=True)
+    nro_operacion = models.CharField(max_length=255, blank=True, null=True)
+    estado_pago = models.CharField(max_length=100, blank=True, null=True)
+    comprobante = models.CharField(max_length=255, blank=True, null=True)
+    tipo_venta = models.CharField(max_length=255, blank=True, null=True)
+    marca = models.CharField(max_length=255, blank=True, null=True)
+    categoria = models.CharField(max_length=255, blank=True, null=True)
+    sku_almacen = models.CharField(max_length=255, blank=True, null=True)
+    modelo = models.CharField(max_length=255, blank=True, null=True)
+    producto = models.CharField(max_length=255, blank=True, null=True)
+    cantidad = models.FloatField(default=0)
+    precio = models.FloatField(default=0)
+    total_venta = models.FloatField(default=0)
+    cargo_venta = models.FloatField(default=0)
+    urbano = models.FloatField(default=0)
+    flex = models.FloatField(default=0)
+    total_pagado = models.FloatField(default=0)
+    costo_producto = models.FloatField(default=0)
+    und = models.IntegerField(default=0)
+    costo_total = models.FloatField(default=0)
+    costo_entrega_flex = models.FloatField(default=0)
+    ganancia = models.FloatField(default=0)
+    rentabilidad = models.CharField(max_length=100, blank=True, null=True)
+    distrito = models.CharField(max_length=255, blank=True, null=True)
+    direccion = models.CharField(max_length=255, blank=True, null=True)
+    repartidor = models.CharField(max_length=255, blank=True, null=True)
+    celular = models.CharField(max_length=255, blank=True, null=True)
+    mensaje = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return f"Junior: {self.nro_orden} - {self.fecha}"
