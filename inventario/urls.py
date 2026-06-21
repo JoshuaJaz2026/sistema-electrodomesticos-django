@@ -87,7 +87,7 @@ urlpatterns = [
     path('descargar-plantilla-reporte-ml/', views.descargar_plantilla_reporte_ml, name='descargar_plantilla_reporte_ml'),
     path('guardar-reportes-masivos-ml/', views.guardar_reportes_masivos_ml, name='guardar_reportes_masivos_ml'),
     path('guardar-reportes-masivos-ml-junior/', views.guardar_reportes_masivos_ml_junior, name='guardar_reportes_masivos_ml_junior'),
-    path('guardar-simulador-masivo-ml-junior/', views.guardar_simulador_masivo_ml_junior, name='guardar_simulador_masivo_ml_junior'), # NUEVA RUTA
+    path('guardar-simulador-masivo-ml-junior/', views.guardar_simulador_masivo_ml_junior, name='guardar_simulador_masivo_ml_junior'),
     
     # Rutas de Ingresos y Modelos
     path('percheron/ingresos/guardar/', views.guardar_ingresos_masivos, name='guardar_ingresos_masivos'),
@@ -97,7 +97,7 @@ urlpatterns = [
     path('percheron/modelos/guardar/', views.guardar_modelos_masivos, name='guardar_modelos_masivos'),
     path('borrar-ingresos/', views.borrar_todos_los_ingresos, name='borrar_todos_los_ingresos'),
     
-    # NUEVA RUTA DE SINCRONIZACIÓN DE STOCK
+    # Rutas de Sincronización de Stock
     path('percheron/modelos/sincronizar-stock/', views.sincronizar_stock_modelos, name='sincronizar_stock_modelos'),
     path('percheron/modelos/borrar-todos/', views.borrar_todos_los_modelos, name='borrar_todos_los_modelos'),
     path('percheron/mercado-libre/procesar/', views.procesar_salidas_ml, name='procesar_salidas_ml'),
@@ -107,7 +107,7 @@ urlpatterns = [
     path('borrar-todos-los-reportes-ml/', views.borrar_todos_los_reportes_ml, name='borrar_todos_los_reportes_ml'),
     path('borrar-todos-los-reportes-ml-junior/', views.borrar_todos_los_reportes_ml_junior, name='borrar_todos_los_reportes_ml_junior'),
     path('borrar-todos-simulador-ml/', views.borrar_todos_simulador_ml, name='borrar_todos_simulador_ml'),
-    path('borrar-todos-simulador-ml-junior/', views.borrar_todos_simulador_ml_junior, name='borrar_todos_simulador_ml_junior'), # NUEVA RUTA
+    path('borrar-todos-simulador-ml-junior/', views.borrar_todos_simulador_ml_junior, name='borrar_todos_simulador_ml_junior'),
     
     # Rutas para Reportes de Creditienda
     path('descargar-plantilla-reporte-creditienda/', views.descargar_plantilla_reporte_creditienda, name='descargar_plantilla_reporte_creditienda'),

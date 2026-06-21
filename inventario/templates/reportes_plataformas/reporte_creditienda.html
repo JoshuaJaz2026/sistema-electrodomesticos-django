@@ -41,39 +41,49 @@
         </div>
     </div>
 
+    <datalist id="list-estado-cred">
+        <option value="RETORNO"><option value="ENTREGADO"><option value="CANCELADO"><option value="EN DEVOLUCIÓN"><option value="PENDIENTE DE ENTREGA"><option value="(NO SE ENVIO) SIN STOCK"><option value="PROCESO DE GARANTÍA">
+    </datalist>
+    <datalist id="list-marca-cred">
+        <option value="ELECTROLUX"><option value="BEHRINGER"><option value="BGH"><option value="BOSSKO"><option value="FINEZZA"><option value="FUJITEC"><option value="GAMA"><option value="IMACO"><option value="INDURAMA"><option value="LG"><option value="MORLEY"><option value="OSTER"><option value="PANASONIC"><option value="PHILIPS"><option value="RECORD"><option value="SAMSUNG"><option value="SKULLCANDY"><option value="SONY"><option value="TAURUS"><option value="TREVELY"><option value="VANHOFF"><option value="TCL"><option value="Motorola"><option value="JVC"><option value="HISENSE"><option value="EVOLUTION"><option value="BLACKLINE"><option value="JBL"><option value="Ilumi"><option value="EKIPAR"><option value="HYUNDAI"><option value="MIRAY"><option value="SOLE"><option value="coldex"><option value="XIAOMI"><option value="DSP">
+    </datalist>
+    <datalist id="list-cat-cred">
+        <option value="FRIGOBAR"><option value="AFEITADOR"><option value="ALISADOR"><option value="ARROCERA"><option value="AUDIFONOS"><option value="BATIDORA DE INMERSION"><option value="BATIDORA DE MANO"><option value="BATIDORA DE TAZÓN"><option value="BATIDORA PLANETARIA"><option value="CACEROLA"><option value="CAFETERA"><option value="CALENTADOR"><option value="CEPILLO"><option value="COCINA DE INDUCCION"><option value="COCINA DE PIE"><option value="COCINA ELÉCTRICA"><option value="COLADOR"><option value="COMBO BLACK"><option value="COMBO BLACK SILVER"><option value="COMBO CHERRY"><option value="COMBO CUMBIA"><option value="COMBO OSTER"><option value="COMBOBLACKOSTER2"><option value="COMBOEXTRACTOR"><option value="COMBOOSTER"><option value="COMBORED"><option value="CONTROL TV"><option value="CREPERA"><option value="CUCHILLA"><option value="DEPILADOR"><option value="DESHUMEDECOR"><option value="DISPENSADOR ELÉCTRICO"><option value="ESPAGUETERA"><option value="ESTUFA"><option value="EXTRACTOR DE JUGOS"><option value="FREIDORA DE AIRE"><option value="HERVIDOR"><option value="HORNO CON FREIDORA"><option value="HORNO ELÉCTRICO"><option value="JARRA"><option value="JUEGO DE OLLAS"><option value="KITOSTER1"><option value="KITOSTER2"><option value="LAVADORA"><option value="LAVASECA"><option value="LICUADORA"><option value="MICROONDAS"><option value="MINICOMPONENTE"><option value="MOLDES"><option value="MOLEDOR DE CARNE"><option value="MULTI OLLA"><option value="OLLA"><option value="OLLA A PRESIÓN"><option value="PANIFICADORA"><option value="PARLANTE"><option value="PARRILLA CARBÓN"><option value="PICADOR"><option value="PLANCHA A VAPOR"><option value="PLANCHA ALISADOR"><option value="PLANCHA GRILL"><option value="PLANCHA Y PARRILLA"><option value="PROCESADOR DE ALIMENTOS"><option value="REFRIGERADORA"><option value="SANDWICHERA"><option value="SARTEN"><option value="SARTÉN ELÉCTRICA"><option value="SECADORA DE CABELLO"><option value="SET DE BOWLS"><option value="SET DE CUBIERTOS"><option value="SOUNDBAR"><option value="TABLET"><option value="TAZAS"><option value="TERMO BOMBA"><option value="TERMO HERVIDOR"><option value="TERMO VENTILADOR"><option value="TERMORADIADOR"><option value="TETERA"><option value="TOSTADORA"><option value="TRICOMBO AVOCADO"><option value="TRIPACK SARTÉN"><option value="TV"><option value="VAPORIZADOR DE TELAS"><option value="VASO DE VIDRIO"><option value="VENTILADOR"><option value="WAFLERA"><option value="COMBOBLACKOSTER4"><option value="CONGELADORA"><option value="EXPRIMIDOR"><option value="VISICOOLER"><option value="MINI LICUADORA"><option value="COMBOPOWERIMACO"><option value="COMBOFELIZIMACO"><option value="COCINA EMPOTRABLE"><option value="RECORTADORA DE BARBA"><option value="VASO MEZCLADOR">
+    </datalist>
+
     <div style="position: relative; overflow-x: auto; overflow-y: auto; flex-grow: 1; border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
         <table id="tablaReporte" style="width: max-content; border-collapse: collapse; background: white; font-size: 0.8rem; white-space: nowrap; table-layout: fixed;">
             <thead style="position: sticky; top: 0; z-index: 10;">
                 <tr style="background-color: #1e293b; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.7rem; letter-spacing: 0.5px;">
                     <th class="th-premium" style="width: 40px; text-align: center;"><input type="checkbox" id="checkAll" onchange="toggleAllChecks()"></th>
-                    <th class="th-premium bg-azul-header" style="width: 120px;">FECHA VENTA</th>
-                    <th class="th-premium bg-azul-header" style="width: 120px;">FECHA DESP.</th>
+                    <th class="th-premium bg-azul-header" style="width: 120px;">FECHA DE VENTA</th>
+                    <th class="th-premium bg-azul-header" style="width: 130px;">FECHA DE DESPACHO</th>
                     <th class="th-premium bg-azul-header" style="width: 110px;">MES Y AÑO</th>
-                    <th class="th-premium bg-azul-header" style="width: 130px;">ESTADO PEDIDO</th>
+                    <th class="th-premium bg-azul-header" style="width: 130px;">ESTADO DE PEDIDO</th>
                     <th class="th-premium bg-azul-header" style="width: 140px;">NRO. ORDEN</th>
                     <th class="th-premium bg-azul-header" style="width: 250px;">CLIENTE</th>
                     <th class="th-premium bg-azul-header" style="width: 110px;">BOLETA</th>
-                    <th class="th-premium bg-azul-header" style="width: 110px;">MARCA</th>
-                    <th class="th-premium bg-azul-header" style="width: 130px;">CATEGORÍA</th>
+                    <th class="th-premium bg-azul-header" style="width: 120px;">MARCA</th>
+                    <th class="th-premium bg-azul-header" style="width: 150px;">CATEGORÍA</th>
                     <th class="th-premium bg-azul-header" style="width: 130px;">SKU ALMACÉN</th>
-                    <th class="th-premium bg-azul-header" style="width: 110px;">CÓDIGO</th>
+                    <th class="th-premium bg-azul-header" style="width: 130px;">CÓDIGO</th>
                     <th class="th-premium bg-azul-header" style="width: 250px;">PRODUCTO</th>
                     <th class="th-premium bg-azul-header" style="width: 70px;">CANT.</th>
-                    <th class="th-premium bg-azul-header" style="width: 110px;">PRECIO VENTA</th>
-                    <th class="th-premium bg-azul-header" style="width: 110px;">TOTAL VENTA</th>
-                    <th class="th-premium bg-azul-header" style="width: 100px;">COMISIÓN %</th>
-                    <th class="th-premium bg-azul-header" style="width: 110px;">COMISIÓN (S/)</th>
-                    <th class="th-premium bg-azul-header" style="width: 120px;">PAGO PLATAF.</th>
+                    <th class="th-premium bg-azul-header" style="width: 120px;">PRECIO DE VENTA</th>
+                    <th class="th-premium bg-azul-header" style="width: 120px;">TOTAL DE VENTA</th>
+                    <th class="th-premium bg-azul-header" style="width: 100px;">COMISIÓN (%)</th>
+                    <th class="th-premium bg-azul-header" style="width: 110px;">COMISIÓN (S/,)</th>
+                    <th class="th-premium bg-azul-header" style="width: 130px;">PAGO DE PLATAFORMA</th>
                     <th class="th-premium bg-amarillo-header" style="width: 60px;"><i class="fas fa-check-square"></i></th>
                     <th class="th-premium bg-azul-header" style="width: 90px;">ENVÍO</th>
                     <th class="th-premium bg-rojo-header" style="width: 90px;">COSTO</th>
-                    <th class="th-premium bg-azul-header" style="width: 90px;">GANANCIA</th>
-                    <th class="th-premium bg-azul-header" style="width: 100px;">RENTAB. %</th>
-                    <th class="th-premium bg-azul-header" style="width: 120px;">VENTA PAGADA</th>
-                    <th class="th-premium bg-azul-header" style="width: 120px;">SE ADJUNTO</th>
-                    <th class="th-premium bg-amarillo-header" style="width: 130px;">FECHA VALID.</th>
-                    <th class="th-premium bg-amarillo-header" style="width: 130px;">NRO. OPER.</th>
-                    <th class="th-premium bg-amarillo-header" style="width: 110px;">N° TELÉF.</th>
+                    <th class="th-premium bg-azul-header" style="width: 100px;">GANANCIA</th>
+                    <th class="th-premium bg-azul-header" style="width: 100px;">RENTABILIDAD</th>
+                    <th class="th-premium bg-azul-header" style="width: 110px;">VENTA PAGADA</th>
+                    <th class="th-premium bg-azul-header" style="width: 100px;">SE ADJUNTO</th>
+                    <th class="th-premium bg-amarillo-header" style="width: 140px;">FECHA DE VALIDACIÓN</th>
+                    <th class="th-premium bg-amarillo-header" style="width: 120px;">NRO. OPERACIÓN</th>
+                    <th class="th-premium bg-amarillo-header" style="width: 120px;">N° TELÉFONO</th>
                 </tr>
             </thead>
             <tbody>
@@ -81,17 +91,17 @@
                     {% for v in page_obj %}
                     <tr class="fila-ventas" data-db-id="{{ v.id }}" data-original-key="{{ v.nro_orden|default:v.id }}">
                         <td class="td-premium central"><input type="checkbox" class="check-fila" onchange="checkFilaChange()"></td>
-                        <td class="td-premium"><input type="date" class="celda-input central val-fecha-venta" value="{{ v.fecha_venta|date:'Y-m-d' }}"></td>
+                        <td class="td-premium"><input type="date" class="celda-input central val-fecha-venta" oninput="calcularFila(this)" value="{{ v.fecha_venta|date:'Y-m-d' }}"></td>
                         <td class="td-premium"><input type="date" class="celda-input central val-fecha-despacho" value="{{ v.fecha_despacho|date:'Y-m-d' }}"></td>
                         <td class="td-premium"><input type="text" class="celda-input central val-mes" value="{{ v.mes_ano|default:'' }}"></td>
-                        <td class="td-premium"><input type="text" class="celda-input central val-estado" value="{{ v.estado_pedido|default:'' }}"></td>
+                        <td class="td-premium"><input list="list-estado-cred" class="celda-input central bold val-estado" value="{{ v.estado_pedido|default:'' }}"></td>
                         <td class="td-premium"><input type="text" class="celda-input central bold text-blue val-orden" value="{{ v.nro_orden|default:'' }}"></td>
                         <td class="td-premium"><input type="text" class="celda-input val-cliente" value="{{ v.cliente|default:'' }}"></td>
                         <td class="td-premium"><input type="text" class="celda-input central val-boleta" value="{{ v.boleta|default:'' }}"></td>
-                        <td class="td-premium"><input type="text" class="celda-input central val-marca" value="{{ v.marca|default:'' }}"></td>
-                        <td class="td-premium"><input type="text" class="celda-input central val-categoria" value="{{ v.categoria|default:'' }}"></td>
-                        <td class="td-premium bg-yellow-light"><input type="text" class="celda-input central text-mono val-sku" oninput="buscarProductoDesdeKardex(this)" value="{{ v.sku_almacen|default:'' }}"></td>
-                        <td class="td-premium"><input type="text" class="celda-input central text-mono val-codigo" value="{{ v.codigo|default:'' }}"></td>
+                        <td class="td-premium"><input list="list-marca-cred" class="celda-input central val-marca" value="{{ v.marca|default:'' }}"></td>
+                        <td class="td-premium"><input list="list-cat-cred" class="celda-input central val-categoria" value="{{ v.categoria|default:'' }}"></td>
+                        <td class="td-premium"><input type="text" class="celda-input central text-mono val-sku" value="{{ v.sku_almacen|default:'' }}"></td>
+                        <td class="td-premium bg-yellow-light"><input type="text" class="celda-input central text-mono val-codigo" oninput="buscarProductoDesdeKardex(this)" value="{{ v.codigo|default:'' }}"></td>
                         <td class="td-premium"><input type="text" class="celda-input val-producto" value="{{ v.producto|default:'' }}"></td>
                         
                         <td class="td-premium"><input type="number" class="celda-input central bold val-cant" oninput="calcularFila(this)" value="{{ v.cantidad|default:1 }}"></td>
@@ -102,15 +112,16 @@
                         <td class="td-premium"><input type="text" class="celda-input derecha text-red val-com-soles" readonly tabindex="-1" value="{{ v.comision_soles|stringformat:'.2f'|default:'0.00' }}"></td>
                         <td class="td-premium bg-blue-light"><input type="text" class="celda-input derecha bold text-blue val-pago-plat" readonly tabindex="-1" value="{{ v.pago_plataforma|stringformat:'.2f'|default:'0.00' }}"></td>
                         
-                        <td class="td-premium central"><input type="checkbox" class="check-opcion val-check" {% if v.check_pago %}checked{% endif %}></td>
-                        <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-envio" oninput="calcularFila(this)" value="{{ v.envio|stringformat:'.2f'|default:'0.00' }}"></td>
+                        <td class="td-premium central bg-yellow-light"><input type="checkbox" class="check-opcion val-check" {% if v.check_pago %}checked{% endif %}></td>
+                        <td class="td-premium bg-blue-light"><input type="number" step="0.01" class="celda-input derecha text-blue val-envio" oninput="calcularFila(this)" value="{{ v.envio|stringformat:'.2f'|default:'0.00' }}"></td>
                         <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red bold val-costo" oninput="calcularFila(this)" value="{{ v.costo|stringformat:'.2f'|default:'0.00' }}"></td>
                         
                         <td class="td-premium"><input type="text" class="celda-input derecha bold val-ganancia" readonly tabindex="-1" value="{{ v.ganancia|stringformat:'.2f'|default:'0.00' }}"></td>
                         <td class="td-premium"><input type="text" class="celda-input central bold val-rentabilidad" readonly tabindex="-1" value="{{ v.rentabilidad|stringformat:'.2f'|default:'0.00' }}%"></td>
                         
-                        <td class="td-premium"><input type="text" class="celda-input central val-venta-pagada" value="{{ v.venta_pagada|default:'' }}"></td>
-                        <td class="td-premium"><input type="text" class="celda-input central val-adjunto" value="{{ v.se_adjunto|default:'' }}"></td>
+                        <td class="td-premium central"><input type="checkbox" class="check-opcion val-venta-pagada" {% if v.venta_pagada == 'TRUE' %}checked{% endif %}></td>
+                        <td class="td-premium central"><input type="checkbox" class="check-opcion val-adjunto" {% if v.se_adjunto == 'TRUE' %}checked{% endif %}></td>
+                        
                         <td class="td-premium"><input type="date" class="celda-input central val-fecha-val" value="{{ v.fecha_validacion|date:'Y-m-d' }}"></td>
                         <td class="td-premium"><input type="text" class="celda-input central val-operacion" value="{{ v.nro_operacion|default:'' }}"></td>
                         <td class="td-premium"><input type="text" class="celda-input central val-telefono" value="{{ v.nro_telefono|default:'' }}"></td>
@@ -120,17 +131,17 @@
                 
                 <tr class="fila-ventas" id="fila-molde" style="display: none;" data-original-key="molde">
                     <td class="td-premium central"><input type="checkbox" class="check-fila" onchange="checkFilaChange()"></td>
-                    <td class="td-premium"><input type="date" class="celda-input central val-fecha-venta"></td>
+                    <td class="td-premium"><input type="date" class="celda-input central val-fecha-venta" oninput="calcularFila(this)"></td>
                     <td class="td-premium"><input type="date" class="celda-input central val-fecha-despacho"></td>
                     <td class="td-premium"><input type="text" class="celda-input central val-mes"></td>
-                    <td class="td-premium"><input type="text" class="celda-input central val-estado"></td>
+                    <td class="td-premium"><input list="list-estado-cred" class="celda-input central bold val-estado"></td>
                     <td class="td-premium"><input type="text" class="celda-input central bold text-blue val-orden"></td>
                     <td class="td-premium"><input type="text" class="celda-input val-cliente"></td>
                     <td class="td-premium"><input type="text" class="celda-input central val-boleta"></td>
-                    <td class="td-premium"><input type="text" class="celda-input central val-marca"></td>
-                    <td class="td-premium"><input type="text" class="celda-input central val-categoria"></td>
-                    <td class="td-premium bg-yellow-light"><input type="text" class="celda-input central text-mono val-sku" oninput="buscarProductoDesdeKardex(this)"></td>
-                    <td class="td-premium"><input type="text" class="celda-input central text-mono val-codigo"></td>
+                    <td class="td-premium"><input list="list-marca-cred" class="celda-input central val-marca"></td>
+                    <td class="td-premium"><input list="list-cat-cred" class="celda-input central val-categoria"></td>
+                    <td class="td-premium"><input type="text" class="celda-input central text-mono val-sku"></td>
+                    <td class="td-premium bg-yellow-light"><input type="text" class="celda-input central text-mono val-codigo" oninput="buscarProductoDesdeKardex(this)"></td>
                     <td class="td-premium"><input type="text" class="celda-input val-producto"></td>
                     <td class="td-premium"><input type="number" class="celda-input central bold val-cant" value="1" oninput="calcularFila(this)"></td>
                     <td class="td-premium bg-green-light"><input type="number" step="0.01" class="celda-input derecha text-green bold val-precio" value="0.00" oninput="calcularFila(this)"></td>
@@ -138,13 +149,13 @@
                     <td class="td-premium"><input type="number" step="0.01" class="celda-input central bold text-red val-porc-com" value="0.00" oninput="calcularFila(this)"></td>
                     <td class="td-premium"><input type="text" class="celda-input derecha text-red val-com-soles" value="0.00" readonly tabindex="-1"></td>
                     <td class="td-premium bg-blue-light"><input type="text" class="celda-input derecha bold text-blue val-pago-plat" value="0.00" readonly tabindex="-1"></td>
-                    <td class="td-premium central"><input type="checkbox" class="check-opcion val-check"></td>
-                    <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red val-envio" value="0.00" oninput="calcularFila(this)"></td>
+                    <td class="td-premium central bg-yellow-light"><input type="checkbox" class="check-opcion val-check"></td>
+                    <td class="td-premium bg-blue-light"><input type="number" step="0.01" class="celda-input derecha text-blue val-envio" value="0.00" oninput="calcularFila(this)"></td>
                     <td class="td-premium bg-red-light"><input type="number" step="0.01" class="celda-input derecha text-red bold val-costo" value="0.00" oninput="calcularFila(this)"></td>
                     <td class="td-premium"><input type="text" class="celda-input derecha bold val-ganancia" value="0.00" readonly tabindex="-1"></td>
                     <td class="td-premium"><input type="text" class="celda-input central bold val-rentabilidad" value="0.00%" readonly tabindex="-1"></td>
-                    <td class="td-premium"><input type="text" class="celda-input central val-venta-pagada"></td>
-                    <td class="td-premium"><input type="text" class="celda-input central val-adjunto"></td>
+                    <td class="td-premium central"><input type="checkbox" class="check-opcion val-venta-pagada"></td>
+                    <td class="td-premium central"><input type="checkbox" class="check-opcion val-adjunto"></td>
                     <td class="td-premium"><input type="date" class="celda-input central val-fecha-val"></td>
                     <td class="td-premium"><input type="text" class="celda-input central val-operacion"></td>
                     <td class="td-premium"><input type="text" class="celda-input central val-telefono"></td>
@@ -203,7 +214,7 @@
     const dictProductos = {{ diccionario_productos_json|safe|default:"{}" }};
 
     document.querySelector('#tablaReporte').addEventListener('input', function(e) {
-        if (e.target.tagName === 'INPUT') {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
             const fila = e.target.closest('tr.fila-ventas');
             if (fila && fila.id !== 'fila-molde') registrarCambio(fila);
         }
@@ -211,17 +222,27 @@
 
     function calcularFila(elem) {
         const fila = elem.closest('tr');
+        
+        // Auto-calcular MES Y AÑO si se cambia la Fecha de Venta
+        if (elem.classList.contains('val-fecha-venta')) {
+            const fechaVal = elem.value;
+            if (fechaVal) {
+                fila.querySelector('.val-mes').value = fechaVal.substring(0, 7); // Toma el YYYY-MM
+            }
+        }
+
         const cant = parseFloat(fila.querySelector('.val-cant').value) || 0;
         const precio = parseFloat(fila.querySelector('.val-precio').value) || 0;
         const porcCom = parseFloat(fila.querySelector('.val-porc-com').value) || 0;
         const envio = parseFloat(fila.querySelector('.val-envio').value) || 0;
         const costo = parseFloat(fila.querySelector('.val-costo').value) || 0;
 
+        // FÓRMULAS EXACTAS DE CREDITIENDA
         const totalVenta = cant * precio;
         const comSoles = totalVenta * (porcCom / 100);
         const pagoPlataforma = totalVenta - comSoles;
-        const ganancia = pagoPlataforma - envio - (costo * cant);
-        const rentabilidad = totalVenta > 0 ? (ganancia / totalVenta) * 100 : 0;
+        const ganancia = pagoPlataforma - envio - costo;
+        const rentabilidad = costo > 0 ? (ganancia / costo) * 100 : 0;
 
         fila.querySelector('.val-total').value = totalVenta.toFixed(2);
         fila.querySelector('.val-com-soles').value = comSoles.toFixed(2);
@@ -236,11 +257,12 @@
         inRentab.style.color = rentabilidad < 0 ? '#dc2626' : '#166534';
     }
 
-    function buscarProductoDesdeKardex(inputSKU) {
-        const fila = inputSKU.closest('tr');
-        const skuLimpio = inputSKU.value.trim().toUpperCase();
-        if (dictProductos[skuLimpio]) {
-            fila.querySelector('.val-producto').value = dictProductos[skuLimpio];
+    // AHORA EL BUSCARV SE DISPARA CON EL CÓDIGO (No el SKU)
+    function buscarProductoDesdeKardex(inputCodigo) {
+        const fila = inputCodigo.closest('tr');
+        const codigoLimpio = inputCodigo.value.trim().toUpperCase();
+        if (dictProductos[codigoLimpio]) {
+            fila.querySelector('.val-producto').value = dictProductos[codigoLimpio];
         }
     }
 
@@ -278,8 +300,8 @@
             'COSTO': fila.querySelector('.val-costo').value,
             'GANANCIA': fila.querySelector('.val-ganancia').value,
             'RENTABILIDAD': fila.querySelector('.val-rentabilidad').value.replace('%',''),
-            'VENTA PAGADA': fila.querySelector('.val-venta-pagada').value,
-            'SE ADJUNTO': fila.querySelector('.val-adjunto').value,
+            'VENTA PAGADA': fila.querySelector('.val-venta-pagada').checked ? 'TRUE' : 'FALSE',
+            'SE ADJUNTO': fila.querySelector('.val-adjunto').checked ? 'TRUE' : 'FALSE',
             'FECHA DE VALIDACIÓN': fila.querySelector('.val-fecha-val').value,
             'NRO. OPERACIÓN': fila.querySelector('.val-operacion').value,
             'N° TELÉFONO': fila.querySelector('.val-telefono').value
@@ -398,16 +420,19 @@
                 if (f.querySelector('.val-cant')) f.querySelector('.val-cant').value = row['CANT.'] || 1;
                 if (f.querySelector('.val-precio')) f.querySelector('.val-precio').value = limpiarMonto(row['PRECIO DE VENTA']);
                 if (f.querySelector('.val-porc-com')) f.querySelector('.val-porc-com').value = limpiarMonto(row['COMISIÓN (%)']);
+                
+                // Mapeo de los Checkboxes
                 if (f.querySelector('.val-check')) f.querySelector('.val-check').checked = (String(row['CHECK_PAGO']).toUpperCase() === 'TRUE');
+                if (f.querySelector('.val-venta-pagada')) f.querySelector('.val-venta-pagada').checked = (String(row['VENTA PAGADA']).toUpperCase() === 'TRUE');
+                if (f.querySelector('.val-adjunto')) f.querySelector('.val-adjunto').checked = (String(row['SE ADJUNTO']).toUpperCase() === 'TRUE');
+                
                 if (f.querySelector('.val-envio')) f.querySelector('.val-envio').value = limpiarMonto(row['ENVÍO']);
                 if (f.querySelector('.val-costo')) f.querySelector('.val-costo').value = limpiarMonto(row['COSTO']);
-                if (f.querySelector('.val-venta-pagada')) f.querySelector('.val-venta-pagada').value = row['VENTA PAGADA'] || '';
-                if (f.querySelector('.val-adjunto')) f.querySelector('.val-adjunto').value = row['SE ADJUNTO'] || '';
                 if (f.querySelector('.val-fecha-val')) f.querySelector('.val-fecha-val').value = formatExcelDate(row['FECHA DE VALIDACIÓN']);
                 if (f.querySelector('.val-operacion')) f.querySelector('.val-operacion').value = row['NRO. OPERACIÓN'] || '';
                 if (f.querySelector('.val-telefono')) f.querySelector('.val-telefono').value = row['N° TELÉFONO'] || '';
 
-                if (f.querySelector('.val-sku')) buscarProductoDesdeKardex(f.querySelector('.val-sku'));
+                if (f.querySelector('.val-codigo')) buscarProductoDesdeKardex(f.querySelector('.val-codigo'));
                 if (f.querySelector('.val-cant')) calcularFila(f.querySelector('.val-cant'));
                 
                 registrarCambio(f);
@@ -437,7 +462,45 @@
     }
 
     function exportarExcel() {
-        alert("En construcción para el siguiente bloque. Puedes usar la base de datos.");
+        const filas = document.querySelectorAll('.fila-ventas:not(#fila-molde)');
+        let data = [];
+        filas.forEach(fila => {
+            data.push({
+                "FECHA DE VENTA": fila.querySelector('.val-fecha-venta')?.value || '',
+                "FECHA DE DESPACHO": fila.querySelector('.val-fecha-despacho')?.value || '',
+                "MES Y AÑO": fila.querySelector('.val-mes')?.value || '',
+                "ESTADO DE PEDIDO": fila.querySelector('.val-estado')?.value || '',
+                "NRO. ORDEN": fila.querySelector('.val-orden')?.value || '',
+                "CLIENTE": fila.querySelector('.val-cliente')?.value || '',
+                "BOLETA": fila.querySelector('.val-boleta')?.value || '',
+                "MARCA": fila.querySelector('.val-marca')?.value || '',
+                "CATEGORÍA": fila.querySelector('.val-categoria')?.value || '',
+                "SKU ALMACÉN": fila.querySelector('.val-sku')?.value || '',
+                "CÓDIGO": fila.querySelector('.val-codigo')?.value || '',
+                "PRODUCTO": fila.querySelector('.val-producto')?.value || '',
+                "CANT.": fila.querySelector('.val-cant')?.value || '',
+                "PRECIO DE VENTA": fila.querySelector('.val-precio')?.value || '',
+                "TOTAL DE VENTA": fila.querySelector('.val-total')?.value || '',
+                "COMISIÓN (%)": fila.querySelector('.val-porc-com')?.value || '',
+                "COMISIÓN (S/.)": fila.querySelector('.val-com-soles')?.value || '',
+                "PAGO DE PLATAFORMA": fila.querySelector('.val-pago-plat')?.value || '',
+                "CHECK_PAGO": fila.querySelector('.val-check')?.checked ? 'TRUE' : 'FALSE',
+                "ENVÍO": fila.querySelector('.val-envio')?.value || '',
+                "COSTO": fila.querySelector('.val-costo')?.value || '',
+                "GANANCIA": fila.querySelector('.val-ganancia')?.value || '',
+                "RENTABILIDAD": fila.querySelector('.val-rentabilidad')?.value || '',
+                "VENTA PAGADA": fila.querySelector('.val-venta-pagada')?.checked ? 'TRUE' : 'FALSE',
+                "SE ADJUNTO": fila.querySelector('.val-adjunto')?.checked ? 'TRUE' : 'FALSE',
+                "FECHA DE VALIDACIÓN": fila.querySelector('.val-fecha-val')?.value || '',
+                "NRO. OPERACIÓN": fila.querySelector('.val-operacion')?.value || '',
+                "N° TELÉFONO": fila.querySelector('.val-telefono')?.value || ''
+            });
+        });
+        if(data.length === 0) return alert("No hay datos para exportar.");
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Creditienda_Ventas");
+        XLSX.writeFile(wb, "Reporte_Creditienda.xlsx");
     }
 </script>
 {% endblock %}
