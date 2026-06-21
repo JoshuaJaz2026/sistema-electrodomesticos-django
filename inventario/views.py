@@ -863,8 +863,8 @@ def reporte_falabella(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    costos_db = ReferenciaCosto.objects.all()
-    diccionario_productos = {str(c.codigo).strip().upper(): c.producto for c in costos_db if c.codigo}
+    directorio_db = DirectorioProducto.objects.all()
+    diccionario_productos = {str(d.codigo).strip().upper(): d.producto for d in directorio_db if d.codigo}
 
     return render(request, 'reportes_plataformas/reporte_falabella.html', {
         'canal': canal, 
@@ -2257,3 +2257,83 @@ def guardar_reportes_masivos_falabella(request):
             print(traceback.format_exc())
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
+
+
+
+@login_required
+def directorio_productos(request):
+    canal = request.session.get('canal_activo', 'Directorio Global')
+    query_search = request.GET.get('q', '')
+    
+    if query_search:
+        productos = DirectorioProducto.objects.filter(
+            Q(codigo__icontains=query_search) | 
+            Q(producto__icontains=query_search)
+        ).order_by('codigo')
+    else:
+        productos = DirectorioProducto.objects.all().order_by('codigo')
+        
+    paginator = Paginator(productos, 100)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'inventario/directorio_productos.html', {
+        'canal': canal,
+        'page_obj': page_obj,
+        'query_search': query_search
+    })
+
+@login_required
+def descargar_plantilla_directorio(request):
+    response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+    response['Content-Disposition'] = 'attachment; filename="plantilla_directorio.csv"'
+    writer = csv.writer(response, delimiter=';')
+    writer.writerow(['CODIGO', 'PRODUCTO', 'COSTO'])
+    return response
+
+@login_required
+@csrf_exempt
+def guardar_directorio_masivo(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            filas = data.get('referencias', [])
+            eliminadas = data.get('eliminadas', [])
+
+            if eliminadas:
+                DirectorioProducto.objects.filter(id__in=eliminadas).delete()
+
+            def to_float(val):
+                try: return float(str(val).replace('S/', '').replace(',', '').strip() or 0)
+                except: return 0.00
+
+            objetos_a_guardar = []
+            for fila in filas:
+                codigo = str(fila.get('CODIGO', '')).strip()
+                if not codigo: continue
+                
+                obj = DirectorioProducto(
+                    usuario=request.user,
+                    codigo=codigo,
+                    producto=str(fila.get('PRODUCTO', '')).strip(),
+                    costo=to_float(fila.get('COSTO'))
+                )
+                objetos_a_guardar.append(obj)
+
+            if objetos_a_guardar:
+                codigos = [o.codigo for o in objetos_a_guardar]
+                DirectorioProducto.objects.filter(codigo__in=codigos).delete()
+                DirectorioProducto.objects.bulk_create(objetos_a_guardar)
+
+            return JsonResponse({'status': 'ok', 'message': f'¡Éxito! Se guardaron/actualizaron {len(objetos_a_guardar)} productos en el Directorio.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Solo POST'})
+
+@login_required
+@csrf_exempt
+def borrar_todos_directorio(request):
+    if request.method == 'POST':
+        DirectorioProducto.objects.all().delete()
+        return JsonResponse({'status': 'ok', 'message': '¡Directorio borrado con éxito!'})
+    return JsonResponse({'status': 'error', 'message': 'Solo POST'})

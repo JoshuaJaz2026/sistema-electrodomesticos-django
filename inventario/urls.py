@@ -118,4 +118,10 @@ urlpatterns = [
     path('descargar-plantilla-reporte-falabella/', views.descargar_plantilla_reporte_falabella, name='descargar_plantilla_reporte_falabella'),
     path('guardar-reportes-masivos-falabella/', views.guardar_reportes_masivos_falabella, name='guardar_reportes_masivos_falabella'),
     path('borrar-todos-los-reportes-falabella/', views.borrar_todos_los_reportes_falabella, name='borrar_todos_los_reportes_falabella'),
+
+    # Rutas para el Directorio de Productos Global
+    path('directorio-productos/', views.directorio_productos, name='directorio_productos'),
+    path('descargar-plantilla-directorio/', views.descargar_plantilla_directorio, name='descargar_plantilla_directorio'),
+    path('guardar-directorio-masivo/', views.guardar_directorio_masivo, name='guardar_directorio_masivo'),
+    path('borrar-todos-directorio/', views.borrar_todos_directorio, name='borrar_todos_directorio'),
 ]

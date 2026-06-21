@@ -514,3 +514,19 @@ class ReporteFalabella(models.Model):
 
     def __str__(self):
         return f"{self.nro_orden} - {self.sku_almacen}"
+    
+class DirectorioProducto(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='directorios_productos', null=True, blank=True)
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+    
+    codigo = models.CharField(max_length=100, null=True, blank=True)
+    producto = models.CharField(max_length=255, null=True, blank=True)
+    costo = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    class Meta:
+        verbose_name = 'Directorio de Producto'
+        verbose_name_plural = 'Directorio de Productos'
+        ordering = ['codigo']
+
+    def __str__(self):
+        return f"{self.codigo} - {self.producto}"

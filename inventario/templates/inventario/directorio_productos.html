@@ -1,0 +1,260 @@
+{% extends 'inventario/dashboard_global.html' %}
+{% load static %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<div class="card" style="border-top: 4px solid #ef4444; padding: 12px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); height: calc(100vh - 90px); display: flex; flex-direction: column;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; flex-shrink: 0;">
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-size: 1.1rem; white-space: nowrap;">
+                <i class="fas fa-book" style="color: #ef4444;"></i> Directorio de Productos
+                <span id="indicador-cambios" style="background-color: #f59e0b; color: white; padding: 3px 8px; border-radius: 20px; font-size: 0.7rem; display: none; font-weight: bold; align-items: center; gap: 5px;">
+                    <i class="fas fa-exclamation-circle"></i> Sin guardar
+                </span>
+            </h2>
+
+            <form method="GET" action="" style="display: flex; align-items: center; height: 32px; margin-left: 5px;">
+                <div style="position: relative;">
+                    <i class="fas fa-search" style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.8rem;"></i>
+                    <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar código o producto..." style="padding: 0 10px 0 26px; height: 32px; border: 1px solid #cbd5e1; border-radius: 4px 0 0 4px; outline: none; font-size: 0.8rem; width: 250px;">
+                </div>
+                <button type="submit" class="btn-top" style="background: #3b82f6; border-radius: 0 4px 4px 0; height: 32px; margin: 0;">Buscar</button>
+                {% if query_search %}
+                <a href="?" class="btn-top" style="background: #ef4444; margin-left: 5px; height: 32px;"><i class="fas fa-times"></i></a>
+                {% endif %}
+            </form>
+        </div>
+
+        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            <a href="{% url 'descargar_plantilla_directorio' %}" class="btn-top" style="background-color: #3b82f6;"><i class="fas fa-download"></i> Plantilla</a>
+            <button type="button" onclick="agregarFila()" class="btn-top" style="background-color: #8b5cf6;"><i class="fas fa-plus"></i> Fila</button>
+            <input type="file" id="fileImportExcel" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importarDirectorio(event)">
+            <button type="button" onclick="document.getElementById('fileImportExcel').click()" class="btn-top" style="background-color: #10b981;"><i class="fas fa-file-import"></i> Importar</button>
+            <button type="button" id="btnGuardar" onclick="guardarDirectorio()" class="btn-top" style="background-color: #ef4444;"><i class="fas fa-save"></i> Guardar</button>
+            <button type="button" id="btnBorrarSeleccionados" onclick="borrarFilasSeleccionadas()" class="btn-top" style="background-color: #f97316; display: none;"><i class="fas fa-trash"></i> Borrar Sel.</button>
+            <button type="button" onclick="borrarTodoBD()" class="btn-top" style="background-color: #ef4444;"><i class="fas fa-trash-alt"></i> Borrar Todo</button>
+        </div>
+    </div>
+
+    <div style="position: relative; overflow-x: auto; overflow-y: auto; flex-grow: 1; border: 2px solid #94a3b8; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+        <table id="tablaDirectorio" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.85rem;">
+            <thead style="position: sticky; top: 0; z-index: 10;">
+                <tr style="background-color: #b91c1c; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.8rem;">
+                    <th class="th-premium" style="width: 40px; text-align: center;"><input type="checkbox" id="checkAll" onchange="toggleAllChecks()"></th>
+                    <th class="th-premium" style="width: 200px;">CÓDIGO</th>
+                    <th class="th-premium" style="width: auto;">PRODUCTO</th>
+                    <th class="th-premium" style="width: 150px;">COSTO (S/)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if page_obj %}
+                    {% for p in page_obj %}
+                    <tr class="fila-data" data-db-id="{{ p.id }}" data-original-key="{{ p.codigo|default:p.id }}">
+                        <td class="td-premium central"><input type="checkbox" class="check-fila" onchange="checkFilaChange()"></td>
+                        <td class="td-premium bg-yellow-light"><input type="text" class="celda-input central bold text-mono val-codigo" value="{{ p.codigo|default:'' }}"></td>
+                        <td class="td-premium"><input type="text" class="celda-input val-producto" value="{{ p.producto|default:'' }}"></td>
+                        <td class="td-premium">
+                            <div style="display: flex; align-items: center; padding: 0 5px;">
+                                <span style="color: #64748b; font-weight: bold; margin-right: 2px;">S/</span>
+                                <input type="number" step="0.01" class="celda-input derecha bold text-red val-costo" value="{{ p.costo|stringformat:'.2f'|default:'0.00' }}">
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+                
+                <tr class="fila-data" id="fila-molde" style="display: none;" data-original-key="molde">
+                    <td class="td-premium central"><input type="checkbox" class="check-fila" onchange="checkFilaChange()"></td>
+                    <td class="td-premium bg-yellow-light"><input type="text" class="celda-input central bold text-mono val-codigo"></td>
+                    <td class="td-premium"><input type="text" class="celda-input val-producto"></td>
+                    <td class="td-premium">
+                        <div style="display: flex; align-items: center; padding: 0 5px;">
+                            <span style="color: #64748b; font-weight: bold; margin-right: 2px;">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha bold text-red val-costo" value="0.00">
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    {% if page_obj %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 6px 15px; background: #f8fafc; border-radius: 4px; border: 1px solid #e2e8f0;">
+        <span style="color: #475569; font-size: 0.85rem;">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        <div style="display: flex; gap: 8px;">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="btn-pag">« Primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn-pag">Anterior</a>
+            {% endif %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn-pag">Siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn-pag">Última »</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .btn-top { color: white; border: none; padding: 0 10px; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.8rem; text-decoration: none; height: 32px;}
+    .th-premium { padding: 8px 5px; border: 1px solid #94a3b8; text-align: center; }
+    .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 34px; vertical-align: middle; }
+    .bg-yellow-light { background-color: #fef9c3 !important; }
+    
+    .fila-data:nth-child(even) { background-color: #f8fafc; }
+    .fila-data:hover td { background-color: #e2e8f0; }
+    .fila-editada > td { border-bottom: 2px solid #f59e0b !important; background-color: #fffbeb !important; }
+    
+    .celda-input { width: 100%; height: 100%; border: none; padding: 4px 8px; font-family: inherit; font-size: 13px; color: #334155; background: transparent; outline: none; }
+    .celda-input:focus { background-color: #fff; box-shadow: inset 0 0 0 2px #ef4444; }
+    
+    .central { text-align: center; } .derecha { text-align: right; } .bold { font-weight: bold; }
+    .text-red { color: #dc2626; } .text-mono { font-family: monospace; font-size: 14px; color: #2563eb;}
+    .btn-pag { padding: 4px 10px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; color: #334155; text-decoration: none; font-size: 0.8rem;}
+</style>
+
+<script>
+    let memoriaDirectorio = JSON.parse(localStorage.getItem('memoriaDirectorio')) || {};
+    let eliminadasDirectorio = JSON.parse(localStorage.getItem('eliminadasDirectorio')) || [];
+
+    document.querySelector('#tablaDirectorio').addEventListener('input', function(e) {
+        if (e.target.tagName === 'INPUT') {
+            const fila = e.target.closest('tr.fila-data');
+            if (fila && fila.id !== 'fila-molde') registrarCambio(fila);
+        }
+    });
+
+    function registrarCambio(fila) {
+        let key = fila.dataset.originalKey;
+        if (!key || key === 'molde') {
+            key = 'temp-' + Math.random().toString(36).substr(2, 9);
+            fila.dataset.originalKey = key;
+        }
+
+        const codigo = fila.querySelector('.val-codigo')?.value.trim() || '';
+        if (codigo === '') return;
+
+        memoriaDirectorio[key] = {
+            'CODIGO': codigo,
+            'PRODUCTO': fila.querySelector('.val-producto').value,
+            'COSTO': fila.querySelector('.val-costo').value
+        };
+
+        localStorage.setItem('memoriaDirectorio', JSON.stringify(memoriaDirectorio));
+        fila.classList.add('fila-editada');
+        document.getElementById('indicador-cambios').style.display = 'inline-flex';
+    }
+
+    function agregarFila() {
+        const tbody = document.querySelector('#tablaDirectorio tbody');
+        const molde = document.getElementById('fila-molde');
+        const nuevaFila = molde.cloneNode(true);
+        nuevaFila.id = ""; nuevaFila.style.display = "";
+        nuevaFila.dataset.originalKey = 'temp-' + Math.random().toString(36).substr(2, 9);
+        tbody.insertBefore(nuevaFila, tbody.firstChild);
+    }
+
+    function toggleAllChecks() {
+        const estado = document.getElementById('checkAll').checked;
+        document.querySelectorAll('.check-fila').forEach(cb => cb.checked = estado);
+        checkFilaChange();
+    }
+
+    function checkFilaChange() {
+        const haySeleccionados = document.querySelectorAll('.check-fila:checked').length > 0;
+        document.getElementById('btnBorrarSeleccionados').style.display = haySeleccionados ? 'inline-flex' : 'none';
+    }
+
+    function borrarFilasSeleccionadas() {
+        const checkboxes = document.querySelectorAll('.check-fila:checked');
+        checkboxes.forEach(cb => {
+            const fila = cb.closest('tr');
+            const dbId = fila.getAttribute('data-db-id');
+            const key = fila.dataset.originalKey;
+            
+            if (dbId) eliminadasDirectorio.push(dbId);
+            if (memoriaDirectorio[key]) delete memoriaDirectorio[key];
+            
+            fila.remove();
+        });
+        localStorage.setItem('memoriaDirectorio', JSON.stringify(memoriaDirectorio));
+        localStorage.setItem('eliminadasDirectorio', JSON.stringify(eliminadasDirectorio));
+        document.getElementById('indicador-cambios').style.display = 'inline-flex';
+        checkFilaChange();
+    }
+
+    function guardarDirectorio() {
+        let datosAguardar = Object.values(memoriaDirectorio);
+        if (datosAguardar.length === 0 && eliminadasDirectorio.length === 0) {
+            return alert("No hay cambios pendientes para guardar.");
+        }
+
+        const btn = document.getElementById('btnGuardar');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        btn.disabled = true;
+
+        fetch("{% url 'guardar_directorio_masivo' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+            body: JSON.stringify({ referencias: datosAguardar, eliminadas: eliminadasDirectorio })
+        }).then(r => r.json()).then(data => {
+            if(data.status === 'ok') {
+                localStorage.removeItem('memoriaDirectorio');
+                localStorage.removeItem('eliminadasDirectorio');
+                alert(data.message); window.location.reload();
+            } else { alert("Error: " + data.message); }
+        }).finally(() => { btn.innerHTML = '<i class="fas fa-save"></i> Guardar'; btn.disabled = false; });
+    }
+
+    function borrarTodoBD() {
+        if (confirm("⚠️ ¿Estás seguro de borrar TODO el Directorio? Se perderán las referencias de nombres en los reportes.")) {
+            fetch("{% url 'borrar_todos_directorio' %}", {
+                method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            }).then(r => r.json()).then(data => {
+                if(data.status === 'ok') {
+                    localStorage.removeItem('memoriaDirectorio');
+                    alert(data.message); window.location.reload();
+                }
+            });
+        }
+    }
+
+    function importarDirectorio(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
+            
+            const tbody = document.querySelector('#tablaDirectorio tbody');
+            const filaMolde = document.getElementById('fila-molde');
+            const fragmento = document.createDocumentFragment();
+
+            json.forEach(row => {
+                const f = filaMolde.cloneNode(true);
+                f.id = ""; f.style.display = "";
+                f.dataset.originalKey = 'temp-' + Math.random().toString(36).substr(2, 9);
+                
+                if (f.querySelector('.val-codigo')) f.querySelector('.val-codigo').value = row['CODIGO'] || row['CÓDIGO'] || '';
+                if (f.querySelector('.val-producto')) f.querySelector('.val-producto').value = row['PRODUCTO'] || '';
+                
+                let costoRaw = row['COSTO'] || '0.00';
+                let txt = costoRaw.toString().replace(/S\/\.|S\/|\$|%|\s/g, '');
+                if (f.querySelector('.val-costo')) f.querySelector('.val-costo').value = parseFloat(txt.replace(',','.')).toFixed(2);
+                
+                registrarCambio(f);
+                fragmento.appendChild(f);
+            });
+            tbody.insertBefore(fragmento, tbody.firstChild);
+            alert("¡Excel importado! Dale a Guardar para registrar todo.");
+        };
+        reader.readAsArrayBuffer(file);
+        event.target.value = "";
+    }
+</script>
+{% endblock %}
