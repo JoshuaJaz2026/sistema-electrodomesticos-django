@@ -469,3 +469,48 @@ class ReporteCreditienda(models.Model):
 
     def __str__(self):
         return f"{self.nro_orden} - {self.sku_almacen}"
+    
+class ReporteFalabella(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reportes_falabella')
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+
+    # Datos Generales
+    fecha = models.DateField(null=True, blank=True)
+    mes_ano = models.CharField(max_length=50, null=True, blank=True)
+    nro_orden = models.CharField(max_length=100, null=True, blank=True)
+    boleta_factura = models.CharField(max_length=100, null=True, blank=True)
+    marca = models.CharField(max_length=100, null=True, blank=True)
+    categoria = models.CharField(max_length=150, null=True, blank=True)
+    sku_almacen = models.CharField(max_length=100, null=True, blank=True)
+    codigo = models.CharField(max_length=100, null=True, blank=True)
+    
+    # Datos del Producto y Venta
+    producto = models.CharField(max_length=255, null=True, blank=True)
+    cant = models.IntegerField(default=1)
+    precio = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    v_total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    # Comisiones y Envíos
+    comision_porc = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    comision_soles = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    costo_envio = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    # Finanzas
+    total_pagado = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    costo_x_prod = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    cantidad = models.IntegerField(default=1) # Segunda columna de cantidad que viene en el Excel
+    c_total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    ganancia = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    rtbld = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    # Control
+    nro_operacion = models.CharField(max_length=100, null=True, blank=True)
+    estado_pago = models.CharField(max_length=100, null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Reporte Falabella'
+        verbose_name_plural = 'Reportes Falabella'
+        ordering = ['-fecha']
+
+    def __str__(self):
+        return f"{self.nro_orden} - {self.sku_almacen}"
