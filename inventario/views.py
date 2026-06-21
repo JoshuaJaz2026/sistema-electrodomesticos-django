@@ -19,7 +19,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 # Importación corregida de SimulacionMercadoLibreJunior
-from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre, ReporteMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SalidaFalabella, SalidaCreditienda, SalidaIntercorp, SalidaTiktok, SalidaVentaLibre, ReporteCreditienda, ReporteFalabella
+from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre, ReporteMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SalidaFalabella, SalidaCreditienda, SalidaIntercorp, SalidaTiktok, SalidaVentaLibre, ReporteCreditienda, ReporteFalabella, DirectorioProducto
 
 # =========================================================
 # CONFIGURACIÓN MAESTRA DE ESTILOS Y COLORES
