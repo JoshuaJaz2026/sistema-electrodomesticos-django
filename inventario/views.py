@@ -745,8 +745,9 @@ def reporte_mercadolibre(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    costos_db = ReferenciaCosto.objects.all()
-    diccionario_productos = {str(c.codigo).strip().upper(): c.producto for c in costos_db if c.codigo}
+    # --- CAMBIO APLICADO: CONEXIÓN AL DIRECTORIO DE PRODUCTOS ---
+    directorio_db = DirectorioProducto.objects.all()
+    diccionario_productos = {str(d.codigo).strip().upper(): d.producto for d in directorio_db if d.codigo}
     diccionario_productos_json = json.dumps(diccionario_productos)
 
     return render(request, 'reportes_plataformas/reporte_mercadolibre.html', {
@@ -761,35 +762,30 @@ def reporte_mercadolibre(request):
 def reporte_mercadolibre_junior(request):
     canal = request.session.get('canal_activo')
     
-    # 1. Capturamos los parámetros de búsqueda y fechas
     query_search = request.GET.get('q', '')
     fecha_inicio = request.GET.get('fecha_inicio', '')
     fecha_fin = request.GET.get('fecha_fin', '')
 
-    # 2. Obtenemos todas las ventas de la tabla JUNIOR ordenadas por FECHA e ID
     ventas_todas = ReporteMercadoLibreJunior.objects.all().order_by('fecha', 'id')
 
-    # 3. Aplicamos filtros de búsqueda por NRO. ORDEN o SKU
     if query_search:
         ventas_todas = ventas_todas.filter(
             Q(nro_orden__icontains=query_search) | 
             Q(sku_almacen__icontains=query_search)
         )
     
-    # 4. Aplicamos filtros de fecha
     if fecha_inicio:
         ventas_todas = ventas_todas.filter(fecha__gte=fecha_inicio)
     if fecha_fin:
         ventas_todas = ventas_todas.filter(fecha__lte=fecha_fin)
 
-    # 5. Paginación: 40 registros por página
     paginator = Paginator(ventas_todas, 40) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # 6. Diccionario de productos para el BUSCARV automático
-    costos_db = ReferenciaCosto.objects.all()
-    diccionario_productos = {str(c.codigo).strip().upper(): c.producto for c in costos_db if c.codigo}
+    # --- CAMBIO APLICADO: CONEXIÓN AL DIRECTORIO DE PRODUCTOS ---
+    directorio_db = DirectorioProducto.objects.all()
+    diccionario_productos = {str(d.codigo).strip().upper(): d.producto for d in directorio_db if d.codigo}
     diccionario_productos_json = json.dumps(diccionario_productos)
 
     return render(request, 'reportes_plataformas/reporte_mercadolibre_junior.html', {
