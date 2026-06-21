@@ -420,3 +420,52 @@ class SalidaVentaLibre(models.Model):
     creado_por = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self): return str(self.sku)
+
+
+class ReporteCreditienda(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reportes_creditienda')
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+
+    # Datos Generales
+    fecha_venta = models.DateField(null=True, blank=True)
+    fecha_despacho = models.DateField(null=True, blank=True)
+    mes_ano = models.CharField(max_length=50, null=True, blank=True)
+    estado_pedido = models.CharField(max_length=100, null=True, blank=True)
+    nro_orden = models.CharField(max_length=100, null=True, blank=True)
+    cliente = models.CharField(max_length=255, null=True, blank=True)
+    boleta = models.CharField(max_length=100, null=True, blank=True)
+    marca = models.CharField(max_length=100, null=True, blank=True)
+    categoria = models.CharField(max_length=150, null=True, blank=True)
+    
+    # Datos del Producto
+    sku_almacen = models.CharField(max_length=100, null=True, blank=True)
+    codigo = models.CharField(max_length=100, null=True, blank=True)
+    producto = models.CharField(max_length=255, null=True, blank=True)
+    cantidad = models.IntegerField(default=1)
+    
+    # Finanzas
+    precio_venta = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    total_venta = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    porc_comision = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    comision_soles = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    pago_plataforma = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    envio = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    costo = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    ganancia = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    rentabilidad = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    # Control de Pagos y Validación
+    check_pago = models.BooleanField(default=False) # Para la columna con el ícono de check
+    venta_pagada = models.CharField(max_length=50, null=True, blank=True)
+    se_adjunto = models.CharField(max_length=50, null=True, blank=True)
+    fecha_validacion = models.DateField(null=True, blank=True)
+    nro_operacion = models.CharField(max_length=100, null=True, blank=True)
+    nro_telefono = models.CharField(max_length=50, null=True, blank=True)
+    
+    class Meta:
+        verbose_name = 'Reporte Creditienda'
+        verbose_name_plural = 'Reportes Creditienda'
+        ordering = ['-fecha_venta']
+
+    def __str__(self):
+        return f"{self.nro_orden} - {self.sku_almacen}"

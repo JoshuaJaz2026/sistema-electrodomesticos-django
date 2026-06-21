@@ -108,4 +108,9 @@ urlpatterns = [
     path('borrar-todos-los-reportes-ml-junior/', views.borrar_todos_los_reportes_ml_junior, name='borrar_todos_los_reportes_ml_junior'),
     path('borrar-todos-simulador-ml/', views.borrar_todos_simulador_ml, name='borrar_todos_simulador_ml'),
     path('borrar-todos-simulador-ml-junior/', views.borrar_todos_simulador_ml_junior, name='borrar_todos_simulador_ml_junior'), # NUEVA RUTA
+    
+    # Rutas para Reportes de Creditienda
+    path('descargar-plantilla-reporte-creditienda/', views.descargar_plantilla_reporte_creditienda, name='descargar_plantilla_reporte_creditienda'),
+    path('guardar-reportes-masivos-creditienda/', views.guardar_reportes_masivos_creditienda, name='guardar_reportes_masivos_creditienda'),
+    path('borrar-todos-los-reportes-creditienda/', views.borrar_todos_los_reportes_creditienda, name='borrar_todos_los_reportes_creditienda'),
 ]

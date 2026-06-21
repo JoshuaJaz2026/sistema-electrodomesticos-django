@@ -19,7 +19,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 # Importación corregida de SimulacionMercadoLibreJunior
-from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre, ReporteMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SalidaFalabella, SalidaCreditienda, SalidaIntercorp, SalidaTiktok, SalidaVentaLibre
+from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre, ReporteMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SalidaFalabella, SalidaCreditienda, SalidaIntercorp, SalidaTiktok, SalidaVentaLibre, ReporteCreditienda
 
 # =========================================================
 # CONFIGURACIÓN MAESTRA DE ESTILOS Y COLORES
@@ -803,7 +803,38 @@ def reporte_mercadolibre_junior(request):
 @verificar_acceso_plataforma('Creditienda')
 def reporte_creditienda(request):
     canal = request.session.get('canal_activo')
-    return render(request, 'reportes_plataformas/reporte_creditienda.html', {'canal': canal})
+    
+    query_search = request.GET.get('q', '')
+    fecha_inicio = request.GET.get('fecha_inicio', '')
+    fecha_fin = request.GET.get('fecha_fin', '')
+
+    ventas_todas = ReporteCreditienda.objects.all().order_by('-fecha_venta', '-id')
+
+    if query_search:
+        ventas_todas = ventas_todas.filter(
+            Q(nro_orden__icontains=query_search) | 
+            Q(sku_almacen__icontains=query_search) |
+            Q(cliente__icontains=query_search)
+        )
+    
+    if fecha_inicio:
+        ventas_todas = ventas_todas.filter(fecha_venta__gte=fecha_inicio)
+    if fecha_fin:
+        ventas_todas = ventas_todas.filter(fecha_venta__lte=fecha_fin)
+
+    paginator = Paginator(ventas_todas, 40) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    costos_db = ReferenciaCosto.objects.all()
+    diccionario_productos = {str(c.codigo).strip().upper(): c.producto for c in costos_db if c.codigo}
+
+    return render(request, 'reportes_plataformas/reporte_creditienda.html', {
+        'canal': canal, 
+        'page_obj': page_obj,
+        'query_search': query_search,
+        'diccionario_productos_json': json.dumps(diccionario_productos)
+    })
 
 @login_required
 @verificar_acceso_plataforma('Falabella')
@@ -1994,3 +2025,107 @@ def procesar_salidas_ml_junior(request):
     
 
 
+@login_required
+def descargar_plantilla_reporte_creditienda(request):
+    response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+    response['Content-Disposition'] = 'attachment; filename="plantilla_creditienda.csv"'
+    writer = csv.writer(response, delimiter=';')
+    writer.writerow([
+        'FECHA DE VENTA', 'FECHA DE DESPACHO', 'MES Y AÑO', 'ESTADO DE PEDIDO', 'NRO. ORDEN', 
+        'CLIENTE', 'BOLETA', 'MARCA', 'CATEGORÍA', 'SKU ALMACÉN', 'CÓDIGO', 'PRODUCTO', 
+        'CANT.', 'PRECIO DE VENTA', 'TOTAL DE VENTA', 'COMISIÓN (%)', 'COMISIÓN (S/.)', 
+        'PAGO DE PLATAFORMA', 'CHECK_PAGO', 'ENVÍO', 'COSTO', 'GANANCIA', 'RENTABILIDAD', 
+        'VENTA PAGADA', 'SE ADJUNTO', 'FECHA DE VALIDACIÓN', 'NRO. OPERACIÓN', 'N° TELÉFONO'
+    ])
+    return response
+
+@login_required
+@csrf_exempt
+def borrar_todos_los_reportes_creditienda(request):
+    if request.method == 'POST':
+        ReporteCreditienda.objects.all().delete()
+        return JsonResponse({'status': 'ok', 'message': '¡Reportes de Creditienda limpiados con éxito!'})
+    return JsonResponse({'status': 'error', 'message': 'Solo POST'})
+
+@login_required
+def guardar_reportes_masivos_creditienda(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            filas = data.get('referencias', [])
+            eliminadas = data.get('eliminadas', [])
+
+            if eliminadas:
+                ReporteCreditienda.objects.filter(id__in=eliminadas).delete()
+
+            def parse_date(date_str):
+                ds = str(date_str).strip()
+                if not ds: return None
+                try:
+                    if '/' in ds: return datetime.strptime(ds, '%d/%m/%Y').strftime('%Y-%m-%d')
+                    elif '-' in ds: return datetime.strptime(ds, '%Y-%m-%d').strftime('%Y-%m-%d')
+                except: return None
+                return ds
+
+            def to_float(val):
+                try: return float(str(val).replace('S/', '').replace('%', '').replace(',', '').strip() or 0)
+                except: return 0.00
+                
+            def to_int(val):
+                try: return int(float(str(val).strip() or 0))
+                except: return 0
+
+            objetos_a_guardar = []
+            
+            for fila in filas:
+                nro_orden = str(fila.get('NRO. ORDEN', '')).strip()
+                if not nro_orden: continue
+
+                obj = ReporteCreditienda(
+                    usuario=request.user,
+                    fecha_venta=parse_date(fila.get('FECHA DE VENTA')),
+                    fecha_despacho=parse_date(fila.get('FECHA DE DESPACHO')),
+                    mes_ano=str(fila.get('MES Y AÑO', '')).strip(),
+                    estado_pedido=str(fila.get('ESTADO DE PEDIDO', '')).strip(),
+                    nro_orden=nro_orden,
+                    cliente=str(fila.get('CLIENTE', '')).strip(),
+                    boleta=str(fila.get('BOLETA', '')).strip(),
+                    marca=str(fila.get('MARCA', '')).strip(),
+                    categoria=str(fila.get('CATEGORÍA', '')).strip(),
+                    sku_almacen=str(fila.get('SKU ALMACÉN', '')).strip(),
+                    codigo=str(fila.get('CÓDIGO', '')).strip(),
+                    producto=str(fila.get('PRODUCTO', '')).strip(),
+                    cantidad=to_int(fila.get('CANT.', 1)),
+                    precio_venta=to_float(fila.get('PRECIO DE VENTA')),
+                    total_venta=to_float(fila.get('TOTAL DE VENTA')),
+                    porc_comision=to_float(fila.get('COMISIÓN (%)')),
+                    comision_soles=to_float(fila.get('COMISIÓN (S/.)')),
+                    pago_plataforma=to_float(fila.get('PAGO DE PLATAFORMA')),
+                    envio=to_float(fila.get('ENVÍO')),
+                    costo=to_float(fila.get('COSTO')),
+                    ganancia=to_float(fila.get('GANANCIA')),
+                    rentabilidad=to_float(fila.get('RENTABILIDAD')),
+                    check_pago=True if str(fila.get('CHECK_PAGO', '')).upper() == 'TRUE' else False,
+                    venta_pagada=str(fila.get('VENTA PAGADA', '')).strip(),
+                    se_adjunto=str(fila.get('SE ADJUNTO', '')).strip(),
+                    fecha_validacion=parse_date(fila.get('FECHA DE VALIDACIÓN')),
+                    nro_operacion=str(fila.get('NRO. OPERACIÓN', '')).strip(),
+                    nro_telefono=str(fila.get('N° TELÉFONO', '')).strip(),
+                )
+                objetos_a_guardar.append(obj)
+
+            if objetos_a_guardar:
+                # Obtenemos los campos del modelo para actualizar en caso de conflicto
+                campos_update = [f.name for f in ReporteCreditienda._meta.fields if f.name not in ['id', 'fecha_registro', 'usuario']]
+                
+                # Como NRO_ORDEN no es Unique=True en el modelo, borramos los existentes y los re-creamos para "actualizar"
+                nros = [o.nro_orden for o in objetos_a_guardar]
+                ReporteCreditienda.objects.filter(nro_orden__in=nros).delete()
+                ReporteCreditienda.objects.bulk_create(objetos_a_guardar)
+
+            return JsonResponse({'status': 'ok', 'message': f'¡Éxito! Se guardaron/actualizaron {len(objetos_a_guardar)} ventas de Creditienda.'})
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc())
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
