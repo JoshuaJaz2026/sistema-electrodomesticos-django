@@ -1,0 +1,499 @@
+{% extends 'inventario/dashboard_global.html' %}
+{% load static %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<div class="card" style="border-top: 4px solid #026bc2; padding: 12px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); height: calc(100vh - 90px); display: flex; flex-direction: column;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; flex-shrink: 0;">
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-size: 1.1rem; white-space: nowrap;">
+                <i class="{{ request.session.icono_actual|default:'fas fa-store' }}" style="color: #026bc2;"></i> Reporte: {{ canal }}
+                <span id="indicador-cambios" style="background-color: #f59e0b; color: white; padding: 3px 8px; border-radius: 20px; font-size: 0.7rem; display: none; font-weight: bold; align-items: center; gap: 5px;">
+                    <i class="fas fa-exclamation-circle"></i> Sin guardar
+                </span>
+            </h2>
+
+            <form method="GET" action="" style="display: flex; align-items: center; height: 32px; margin-left: 5px;">
+                <input type="date" name="fecha_inicio" value="{{ request.GET.fecha_inicio }}" style="padding: 0 10px; height: 32px; border: 1px solid #cbd5e1; border-radius: 4px 0 0 4px; outline: none; font-size: 0.8rem;">
+                <input type="date" name="fecha_fin" value="{{ request.GET.fecha_fin }}" style="padding: 0 10px; height: 32px; border: 1px solid #cbd5e1; border-left: none; outline: none; font-size: 0.8rem;">
+                <div style="position: relative;">
+                    <i class="fas fa-search" style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.8rem;"></i>
+                    <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar Orden..." style="padding: 0 10px 0 26px; height: 32px; border: 1px solid #cbd5e1; border-left: none; outline: none; font-size: 0.8rem; width: 200px;">
+                </div>
+                <button type="submit" class="btn-top" style="background: #3b82f6; border-radius: 0 4px 4px 0; height: 32px; margin: 0;">Buscar</button>
+                {% if query_search or request.GET.fecha_inicio %}
+                <a href="?" class="btn-top" style="background: #ef4444; margin-left: 5px; height: 32px;"><i class="fas fa-times"></i></a>
+                {% endif %}
+            </form>
+        </div>
+
+        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            <a href="{% url 'descargar_plantilla_reporte_intercorp' %}" class="btn-top" style="background-color: #3b82f6;"><i class="fas fa-download"></i> Plantilla</a>
+            <button type="button" onclick="agregarFila()" class="btn-top" style="background-color: #8b5cf6;"><i class="fas fa-plus"></i> Fila</button>
+            <input type="file" id="fileImportExcel" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importarVentas(event)">
+            <button type="button" onclick="document.getElementById('fileImportExcel').click()" class="btn-top" style="background-color: #10b981;"><i class="fas fa-file-import"></i> Importar</button>
+            <button type="button" onclick="exportarExcel()" class="btn-top" style="background-color: #0ea5e9;"><i class="fas fa-file-excel"></i> Exportar</button>
+            <button type="button" id="btnGuardar" onclick="guardarVentas()" class="btn-top" style="background-color: #10b981;"><i class="fas fa-save"></i> Guardar</button>
+            <button type="button" id="btnBorrarSeleccionados" onclick="borrarFilasSeleccionadas()" class="btn-top" style="background-color: #f97316; display: none;"><i class="fas fa-trash"></i> Borrar Sel.</button>
+            <button type="button" onclick="borrarTodoBD()" class="btn-top" style="background-color: #ef4444;"><i class="fas fa-trash-alt"></i> Borrar Todo</button>
+        </div>
+    </div>
+
+    <datalist id="list-sitio">
+        <option value="OESHLE"><option value="PROMART"><option value="PLAZA VEA">
+    </datalist>
+    <datalist id="list-marca-int">
+        <option value="GAMA"><option value="BEHRINGER"><option value="BGH"><option value="BOSSKO"><option value="ELECTROLUX"><option value="FINEZZA"><option value="FUJITEC"><option value="IMACO"><option value="INDURAMA"><option value="LG"><option value="MORLEY"><option value="OSTER"><option value="PANASONIC"><option value="PHILIPS"><option value="RECORD"><option value="SAMSUNG"><option value="SKULLCANDY"><option value="SONY"><option value="TAURUS"><option value="TREVELY"><option value="VANHOFF"><option value="TCL"><option value="BLACK&DECKER"><option value="HISENSE"><option value="MOTOROLA"><option value="EVOLUTION"><option value="BLACKLINE"><option value="WESTINGHOUSE"><option value="SOLE"><option value="DSP"><option value="HYUNDAI"><option value="DAJU"><option value="COLDX">
+    </datalist>
+    <datalist id="list-cat-int">
+        <option value="AUDIFONOS"><option value="BATIDORA DE INMERSION"><option value="BATIDORA DE MANO"><option value="BATIDORA DE TAZÓN"><option value="BATIDORA PLANETARIA"><option value="CACEROLA"><option value="CAFETERA"><option value="CALENTADOR"><option value="CEPILLO"><option value="COCINA DE INDUCCION"><option value="COCINA DE PIE"><option value="COCINA ELECTRICA"><option value="COLADOR"><option value="COMBO BLACK"><option value="COMBO BLACK SILVER"><option value="COMBO CHERRY"><option value="COMBO CUMBIA"><option value="COMBO OSTER"><option value="COMBOBLACKOSTER2"><option value="COMBOEXTRACTOR"><option value="COMBOOSTER"><option value="COMBORED"><option value="DEPILADOR"><option value="DISPENSADOR ELECTRICO"><option value="ESPAGUETERA"><option value="ESTUFA"><option value="EXTRACTOR DE JUGOS"><option value="FREIDORA DE AIRE"><option value="FRIGOBAR"><option value="HORNO CON FREIDORA"><option value="HORNO ELECTRICO"><option value="JUEGO DE OLLAS"><option value="LAVADORA"><option value="LAVASECA"><option value="MICROONDAS"><option value="MINICOMPONENTE"><option value="MOLEDOR DE CARNE"><option value="MULTI OLLA"><option value="OLLA A PRESION"><option value="PANIFICADORA"><option value="PARRILLA CARBON"><option value="PLANCHA A VAPOR"><option value="PLANCHA GRILL"><option value="PLANCHA Y PARRILLA"><option value="PROCESADOR DE ALIMENTOS"><option value="REFRIGERADORA"><option value="SECADORA DE CABELLO"><option value="SET DE BOWLS"><option value="SET DE CUBIERTOS"><option value="TABLET"><option value="TAZAS"><option value="TERMO HERVIDOR"><option value="TERMO VENTILADOR"><option value="TOSTADORA"><option value="TRICOMBO AVOCADO"><option value="TRIPACK SARTÉN"><option value="TV"><option value="VAPORIZADOR DE TELAS"><option value="VASO DE VIDRIO"><option value="VENTILADOR"><option value="WAFLERA"><option value="COMBOBLACKOSTER2"><option value="COMBOCHERRYJARED"><option value="CORTADORA DE CABELLO"><option value="VENTILADOR DE TECHO"><option value="COMBODARKS"><option value="RIZADOR"><option value="VAPORERA"><option value="COCINA DE MESA"><option value="PASTA MAKER"><option value="VENTILADOR DE PARED"><option value="VAPORIZADOR DE ALIMENTOS"><option value="COCINA"><option value="MENAJE"><option value="TELEVISOR"><option value="CUIDADO PERSONAL"><option value="VAPORIZADOR"><option value="TELÉFONO"><option value="AUDIO">
+    </datalist>
+    <datalist id="list-estado-pago-int">
+        <option value="PENDIENTE"><option value="ABONADO">
+    </datalist>
+
+    <div style="position: relative; overflow-x: auto; overflow-y: auto; flex-grow: 1; border: 2px solid #94a3b8; border-radius: 4px;">
+        <table id="tablaReporte" style="width: max-content; border-collapse: collapse; background: white; font-size: 0.8rem; white-space: nowrap; table-layout: fixed;">
+            <thead style="position: sticky; top: 0; z-index: 10;">
+                <tr style="background-color: #026bc2; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.7rem;">
+                    <th class="th-premium" style="width: 40px;"><input type="checkbox" id="checkAll" onchange="toggleAllChecks()"></th>
+                    <th class="th-premium" style="width: 100px;">SITIO</th>
+                    <th class="th-premium" style="width: 110px;">FECHA</th>
+                    <th class="th-premium" style="width: 90px;">MES Y AÑO</th>
+                    <th class="th-premium" style="width: 150px;">ID ORDEN</th>
+                    <th class="th-premium" style="width: 160px;">COMPROBANTE DE VENTA</th>
+                    <th class="th-premium" style="width: 130px;">SKU ALMACÉN</th>
+                    <th class="th-premium" style="width: 120px;">MARCA</th>
+                    <th class="th-premium" style="width: 150px;">CATEGORIA</th>
+                    <th class="th-premium" style="width: 120px;">CÓDIGO</th>
+                    <th class="th-premium" style="width: 250px;">PRODUCTO</th>
+                    <th class="th-premium" style="width: 60px;">UND.</th>
+                    <th class="th-premium" style="width: 100px;">P. DE VENTA</th>
+                    <th class="th-premium" style="width: 120px;">COSTO DE ENVÍO</th>
+                    <th class="th-premium" style="width: 150px;">MONTO TOTAL FACTURABLE</th>
+                    <th class="th-premium" style="width: 80px;">IMPUESTO</th>
+                    <th class="th-premium" style="width: 120px;">COBRO LOGÍSTICO</th>
+                    <th class="th-premium" style="width: 110px;">COSTO DE PROD.</th>
+                    <th class="th-premium" style="width: 100px;">GANANCIA</th>
+                    <th class="th-premium" style="width: 110px;">MONTO A PAGAR</th>
+                    <th class="th-premium" style="width: 110px;">FECHA DE PAGO</th>
+                    <th class="th-premium" style="width: 130px;">ID LIQUIDACION</th>
+                    <th class="th-premium" style="width: 120px;">ESTADO DE PAGO</th>
+                    <th class="th-premium" style="width: 130px;">ID DE PAGO</th>
+                    <th class="th-premium" style="width: 80px;">VALIDACIÓN</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if page_obj %}
+                    {% for v in page_obj %}
+                    <tr class="fila-ventas" data-db-id="{{ v.id }}" data-original-key="{{ v.id_orden|default:v.id }}">
+                        <td class="td-premium central"><input type="checkbox" class="check-fila" onchange="checkFilaChange()"></td>
+                        <td class="td-premium"><input list="list-sitio" class="celda-input central bold val-sitio" value="{{ v.sitio|default:'' }}"></td>
+                        <td class="td-premium"><input type="date" class="celda-input central val-fecha" oninput="calcularFila(this)" value="{{ v.fecha|date:'Y-m-d' }}"></td>
+                        <td class="td-premium bg-read"><input type="text" class="celda-input central val-mes" readonly tabindex="-1" value="{{ v.mes_ano|default:'' }}"></td>
+                        <td class="td-premium"><input type="text" class="celda-input central bold text-blue val-orden" value="{{ v.id_orden|default:'' }}"></td>
+                        <td class="td-premium"><input type="text" class="celda-input central val-comprobante" value="{{ v.comprobante_venta|default:'' }}"></td>
+                        <td class="td-premium"><input type="text" class="celda-input central text-mono val-sku" value="{{ v.sku_almacen|default:'' }}"></td>
+                        <td class="td-premium"><input list="list-marca-int" class="celda-input central val-marca" value="{{ v.marca|default:'' }}"></td>
+                        <td class="td-premium"><input list="list-cat-int" class="celda-input central val-categoria" oninput="buscarImpuestoCategoria(this)" value="{{ v.categoria|default:'' }}"></td>
+                        <td class="td-premium bg-yellow-light"><input type="text" class="celda-input central text-mono val-codigo" oninput="buscarProducto(this)" value="{{ v.codigo|default:'' }}"></td>
+                        <td class="td-premium bg-read"><input type="text" class="celda-input val-producto" value="{{ v.producto|default:'' }}"></td>
+                        
+                        <td class="td-premium"><input type="number" class="celda-input central bold val-und" oninput="calcularFila(this)" value="{{ v.und|default:1 }}"></td>
+                        <td class="td-premium">
+                            <div style="display: flex; align-items: center; padding: 0 5px;"><span style="color: #64748b;">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha text-green val-pventa" oninput="calcularFila(this)" value="{{ v.p_venta|stringformat:'.2f'|default:'0.00' }}"></div>
+                        </td>
+                        <td class="td-premium">
+                            <div style="display: flex; align-items: center; padding: 0 5px;"><span style="color: #64748b;">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha val-envio" oninput="calcularFila(this)" value="{{ v.costo_envio|stringformat:'.2f'|default:'0.00' }}"></div>
+                        </td>
+                        
+                        <td class="td-premium bg-read">
+                            <div style="display: flex; align-items: center; padding: 0 5px;"><span style="color: #64748b;">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha bold text-blue val-total-fact" oninput="calcularFila(this)" value="{{ v.monto_total_facturable|stringformat:'.2f'|default:'0.00' }}"></div>
+                        </td>
+                        
+                        <td class="td-premium">
+                            <div style="display: flex; align-items: center; padding: 0 5px;">
+                            <input type="number" step="0.01" class="celda-input central text-red val-impuesto" oninput="calcularFila(this)" value="{{ v.impuesto|stringformat:'.2f'|default:'0.00' }}">
+                            <span style="color: #64748b;">%</span></div>
+                        </td>
+                        <td class="td-premium">
+                            <div style="display: flex; align-items: center; padding: 0 5px;"><span style="color: #64748b;">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha text-red val-logistico" oninput="calcularFila(this)" value="{{ v.cobro_logistico|stringformat:'.2f'|default:'0.00' }}"></div>
+                        </td>
+                        <td class="td-premium bg-read">
+                            <div style="display: flex; align-items: center; padding: 0 5px;"><span style="color: #64748b;">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha text-red val-costo-prod" oninput="calcularFila(this)" value="{{ v.costo_prod|stringformat:'.2f'|default:'0.00' }}"></div>
+                        </td>
+                        
+                        <td class="td-premium bg-read">
+                            <div style="display: flex; align-items: center; padding: 0 5px;"><span style="color: #64748b;">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha bold val-ganancia" readonly tabindex="-1" value="{{ v.ganancia|stringformat:'.2f'|default:'0.00' }}"></div>
+                        </td>
+                        <td class="td-premium bg-read">
+                            <div style="display: flex; align-items: center; padding: 0 5px;"><span style="color: #64748b;">S/</span>
+                            <input type="number" step="0.01" class="celda-input derecha bold text-blue val-monto-pagar" oninput="calcularFila(this)" value="{{ v.monto_a_pagar|stringformat:'.2f'|default:'0.00' }}"></div>
+                        </td>
+                        
+                        <td class="td-premium"><input type="date" class="celda-input central val-fecha-pago" value="{{ v.fecha_pago|date:'Y-m-d' }}"></td>
+                        <td class="td-premium"><input type="text" class="celda-input central val-liquidacion" value="{{ v.id_liquidacion|default:'' }}"></td>
+                        <td class="td-premium"><input list="list-estado-pago-int" class="celda-input central val-estado-pago" value="{{ v.estado_pago|default:'' }}"></td>
+                        <td class="td-premium"><input type="text" class="celda-input central val-idpago" value="{{ v.id_pago|default:'' }}"></td>
+                        <td class="td-premium central"><input type="checkbox" class="val-validacion" {% if v.validacion == 'SI' %}checked{% endif %}></td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+                
+                <tr class="fila-ventas" id="fila-molde" style="display: none;" data-original-key="molde">
+                    <td class="td-premium central"><input type="checkbox" class="check-fila" onchange="checkFilaChange()"></td>
+                    <td class="td-premium"><input list="list-sitio" class="celda-input central bold val-sitio"></td>
+                    <td class="td-premium"><input type="date" class="celda-input central val-fecha" oninput="calcularFila(this)"></td>
+                    <td class="td-premium bg-read"><input type="text" class="celda-input central val-mes" readonly tabindex="-1"></td>
+                    <td class="td-premium"><input type="text" class="celda-input central bold text-blue val-orden"></td>
+                    <td class="td-premium"><input type="text" class="celda-input central val-comprobante"></td>
+                    <td class="td-premium"><input type="text" class="celda-input central text-mono val-sku"></td>
+                    <td class="td-premium"><input list="list-marca-int" class="celda-input central val-marca"></td>
+                    <td class="td-premium"><input list="list-cat-int" class="celda-input central val-categoria" oninput="buscarImpuestoCategoria(this)"></td>
+                    <td class="td-premium bg-yellow-light"><input type="text" class="celda-input central text-mono val-codigo" oninput="buscarProducto(this)"></td>
+                    <td class="td-premium bg-read"><input type="text" class="celda-input val-producto"></td>
+                    <td class="td-premium"><input type="number" class="celda-input central bold val-und" value="1" oninput="calcularFila(this)"></td>
+                    <td class="td-premium"><div style="display: flex; align-items: center; padding: 0 5px;"><span style="color: #64748b;">S/</span><input type="number" step="0.01" class="celda-input derecha text-green val-pventa" value="0.00" oninput="calcularFila(this)"></div></td>
+                    <td class="td-premium"><div style="display: flex; align-items: center; padding: 0 5px;"><span style="color: #64748b;">S/</span><input type="number" step="0.01" class="celda-input derecha val-envio" value="0.00" oninput="calcularFila(this)"></div></td>
+                    <td class="td-premium bg-read"><div style="display: flex; align-items: center; padding: 0 5px;"><span style="color: #64748b;">S/</span><input type="number" step="0.01" class="celda-input derecha bold text-blue val-total-fact" value="0.00" oninput="calcularFila(this)"></div></td>
+                    <td class="td-premium"><div style="display: flex; align-items: center; padding: 0 5px;"><input type="number" step="0.01" class="celda-input central text-red val-impuesto" value="0.00" oninput="calcularFila(this)"><span style="color: #64748b;">%</span></div></td>
+                    <td class="td-premium"><div style="display: flex; align-items: center; padding: 0 5px;"><span style="color: #64748b;">S/</span><input type="number" step="0.01" class="celda-input derecha text-red val-logistico" value="0.00" oninput="calcularFila(this)"></div></td>
+                    <td class="td-premium bg-read"><div style="display: flex; align-items: center; padding: 0 5px;"><span style="color: #64748b;">S/</span><input type="number" step="0.01" class="celda-input derecha text-red val-costo-prod" value="0.00" oninput="calcularFila(this)"></div></td>
+                    <td class="td-premium bg-read"><div style="display: flex; align-items: center; padding: 0 5px;"><span style="color: #64748b;">S/</span><input type="number" step="0.01" class="celda-input derecha bold val-ganancia" value="0.00" readonly tabindex="-1"></div></td>
+                    <td class="td-premium bg-read"><div style="display: flex; align-items: center; padding: 0 5px;"><span style="color: #64748b;">S/</span><input type="number" step="0.01" class="celda-input derecha bold text-blue val-monto-pagar" value="0.00" oninput="calcularFila(this)"></div></td>
+                    <td class="td-premium"><input type="date" class="celda-input central val-fecha-pago"></td>
+                    <td class="td-premium"><input type="text" class="celda-input central val-liquidacion"></td>
+                    <td class="td-premium"><input list="list-estado-pago-int" class="celda-input central val-estado-pago"></td>
+                    <td class="td-premium"><input type="text" class="celda-input central val-idpago"></td>
+                    <td class="td-premium central"><input type="checkbox" class="val-validacion"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    {% if page_obj %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 6px 15px; background: #f8fafc; border-radius: 4px; border: 1px solid #e2e8f0;">
+        <span style="color: #475569; font-size: 0.85rem;">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        <div style="display: flex; gap: 8px;">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="btn-pag">« Primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn-pag">Anterior</a>
+            {% endif %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn-pag">Siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn-pag">Última »</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .btn-top { color: white; border: none; padding: 0 10px; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.8rem; text-decoration: none; height: 32px;}
+    .th-premium { padding: 8px 5px; border: 1px solid #94a3b8; text-align: center; }
+    .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 34px; vertical-align: middle; }
+    .fila-ventas:hover td { filter: brightness(0.95); }
+    .fila-editada > td { border-bottom: 2px solid #f59e0b !important; }
+    .bg-read { background-color: #f1f5f9; }
+    .bg-yellow-light { background-color: #fef9c3 !important; }
+    .celda-input { width: 100%; height: 100%; border: none; padding: 4px 6px; font-family: inherit; font-size: 13px; color: #334155; background: transparent; outline: none; }
+    .celda-input:focus:not([readonly]) { background-color: #fff; box-shadow: inset 0 0 0 2px #026bc2; }
+    .central { text-align: center; } .derecha { text-align: right; } .bold { font-weight: bold; }
+    .text-blue { color: #2563eb; } .text-green { color: #166534; } .text-red { color: #dc2626; } .text-mono { font-family: monospace; font-size: 14px; }
+    .btn-pag { padding: 4px 10px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; color: #334155; text-decoration: none; font-size: 0.8rem;}
+</style>
+
+<script>
+    let memoriaIntercorp = JSON.parse(localStorage.getItem('memoriaReportesIntercorp')) || {};
+    let eliminadasIntercorp = JSON.parse(localStorage.getItem('eliminadasReportesIntercorp')) || [];
+    const dictProductos = {{ diccionario_productos_json|safe|default:"{}" }};
+    const dictComisiones = {{ diccionario_comisiones_json|safe|default:"{}" }};
+
+    document.querySelector('#tablaReporte').addEventListener('input', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
+            const fila = e.target.closest('tr.fila-ventas');
+            if (fila && fila.id !== 'fila-molde') registrarCambio(fila);
+        }
+    });
+
+    function calcularFila(elem) {
+        const fila = elem.closest('tr');
+        
+        if (elem.classList.contains('val-fecha')) {
+            const fechaVal = elem.value;
+            if (fechaVal) fila.querySelector('.val-mes').value = fechaVal.substring(0, 7);
+        }
+
+        const und = parseFloat(fila.querySelector('.val-und').value) || 0;
+        const pVenta = parseFloat(fila.querySelector('.val-pventa').value) || 0;
+        const costoEnvio = parseFloat(fila.querySelector('.val-envio').value) || 0;
+        const impuesto = parseFloat(fila.querySelector('.val-impuesto').value) || 0;
+        const cobroLogistico = parseFloat(fila.querySelector('.val-logistico').value) || 0;
+        const costoProd = parseFloat(fila.querySelector('.val-costo-prod').value) || 0;
+
+        const montoTotalFacturable = pVenta + costoEnvio;
+        const montoAPagar = montoTotalFacturable - (pVenta * (impuesto / 100)) - cobroLogistico;
+        const ganancia = montoAPagar - (costoProd * und);
+
+        if (!elem.classList.contains('val-total-fact')) fila.querySelector('.val-total-fact').value = montoTotalFacturable.toFixed(2);
+        if (!elem.classList.contains('val-monto-pagar')) fila.querySelector('.val-monto-pagar').value = montoAPagar.toFixed(2);
+        fila.querySelector('.val-ganancia').value = ganancia.toFixed(2);
+        fila.querySelector('.val-ganancia').style.color = ganancia < 0 ? '#dc2626' : '#166534';
+    }
+
+    function buscarProducto(inputCodigo) {
+        const fila = inputCodigo.closest('tr');
+        const codigoLimpio = inputCodigo.value.trim().toUpperCase();
+        if (dictProductos[codigoLimpio]) {
+            fila.querySelector('.val-producto').value = dictProductos[codigoLimpio].producto;
+            fila.querySelector('.val-costo-prod').value = dictProductos[codigoLimpio].costo.toFixed(2);
+            calcularFila(fila.querySelector('.val-costo-prod'));
+        }
+    }
+
+    function buscarImpuestoCategoria(inputCat) {
+        const fila = inputCat.closest('tr');
+        const catLimpia = inputCat.value.trim().toUpperCase();
+        if (dictComisiones[catLimpia]) {
+            fila.querySelector('.val-impuesto').value = dictComisiones[catLimpia].toFixed(2);
+            calcularFila(fila.querySelector('.val-impuesto'));
+        }
+    }
+
+    function registrarCambio(fila) {
+        let key = fila.dataset.originalKey;
+        if (!key || key === 'molde') {
+            key = 'temp-' + Math.random().toString(36).substr(2, 9);
+            fila.dataset.originalKey = key;
+        }
+
+        const orden = fila.querySelector('.val-orden')?.value.trim() || '';
+        if (orden === '') return;
+
+        memoriaIntercorp[key] = {
+            'SITIO': fila.querySelector('.val-sitio').value,
+            'FECHA': fila.querySelector('.val-fecha').value,
+            'MES Y AÑO': fila.querySelector('.val-mes').value,
+            'ID ORDEN': orden,
+            'COMPROBANTE DE VENTA': fila.querySelector('.val-comprobante').value,
+            'SKU ALMACÉN': fila.querySelector('.val-sku').value,
+            'MARCA': fila.querySelector('.val-marca').value,
+            'CATEGORIA': fila.querySelector('.val-categoria').value,
+            'CÓDIGO': fila.querySelector('.val-codigo').value,
+            'PRODUCTO': fila.querySelector('.val-producto').value,
+            'UND.': fila.querySelector('.val-und').value,
+            'P. DE VENTA': fila.querySelector('.val-pventa').value,
+            'COSTO DE ENVÍO': fila.querySelector('.val-envio').value,
+            'MONTO TOTAL FACTURABLE': fila.querySelector('.val-total-fact').value,
+            'IMPUESTO': fila.querySelector('.val-impuesto').value,
+            'COBRO LOGÍSTICO': fila.querySelector('.val-logistico').value,
+            'COSTO DE PROD.': fila.querySelector('.val-costo-prod').value,
+            'GANANCIA': fila.querySelector('.val-ganancia').value,
+            'MONTO A PAGAR': fila.querySelector('.val-monto-pagar').value,
+            'FECHA DE PAGO': fila.querySelector('.val-fecha-pago').value,
+            'ID LIQUIDACION': fila.querySelector('.val-liquidacion').value,
+            'ESTADO DE PAGO': fila.querySelector('.val-estado-pago').value,
+            'ID DE PAGO': fila.querySelector('.val-idpago').value,
+            'VALIDACIÓN': fila.querySelector('.val-validacion').checked
+        };
+
+        localStorage.setItem('memoriaReportesIntercorp', JSON.stringify(memoriaIntercorp));
+        fila.classList.add('fila-editada');
+        document.getElementById('indicador-cambios').style.display = 'inline-flex';
+    }
+
+    function agregarFila() {
+        const tbody = document.querySelector('#tablaReporte tbody');
+        const molde = document.getElementById('fila-molde');
+        const nuevaFila = molde.cloneNode(true);
+        nuevaFila.id = ""; nuevaFila.style.display = "";
+        nuevaFila.dataset.originalKey = 'temp-' + Math.random().toString(36).substr(2, 9);
+        tbody.insertBefore(nuevaFila, tbody.firstChild);
+    }
+
+    function toggleAllChecks() {
+        const estado = document.getElementById('checkAll').checked;
+        document.querySelectorAll('.check-fila').forEach(cb => cb.checked = estado);
+        checkFilaChange();
+    }
+
+    function checkFilaChange() {
+        const haySeleccionados = document.querySelectorAll('.check-fila:checked').length > 0;
+        document.getElementById('btnBorrarSeleccionados').style.display = haySeleccionados ? 'inline-flex' : 'none';
+    }
+
+    function borrarFilasSeleccionadas() {
+        const checkboxes = document.querySelectorAll('.check-fila:checked');
+        checkboxes.forEach(cb => {
+            const fila = cb.closest('tr');
+            const dbId = fila.getAttribute('data-db-id');
+            const key = fila.dataset.originalKey;
+            
+            if (dbId) eliminadasIntercorp.push(dbId);
+            if (memoriaIntercorp[key]) delete memoriaIntercorp[key];
+            
+            fila.remove();
+        });
+        localStorage.setItem('memoriaReportesIntercorp', JSON.stringify(memoriaIntercorp));
+        localStorage.setItem('eliminadasReportesIntercorp', JSON.stringify(eliminadasIntercorp));
+        document.getElementById('indicador-cambios').style.display = 'inline-flex';
+        checkFilaChange();
+    }
+
+    function guardarVentas() {
+        let datosAguardar = Object.values(memoriaIntercorp);
+        if (datosAguardar.length === 0 && eliminadasIntercorp.length === 0) return alert("Nada para guardar.");
+
+        const btn = document.getElementById('btnGuardar');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        btn.disabled = true;
+
+        fetch("{% url 'guardar_reportes_masivos_intercorp' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+            body: JSON.stringify({ referencias: datosAguardar, eliminadas: eliminadasIntercorp })
+        }).then(r => r.json()).then(data => {
+            if(data.status === 'ok') {
+                localStorage.removeItem('memoriaReportesIntercorp');
+                localStorage.removeItem('eliminadasReportesIntercorp');
+                alert("Guardado exitoso"); window.location.reload();
+            } else { alert("Error: " + data.message); }
+        }).finally(() => { btn.innerHTML = '<i class="fas fa-save"></i> Guardar'; btn.disabled = false; });
+    }
+
+    function borrarTodoBD() {
+        if (confirm("borrar todo?")) {
+            fetch("{% url 'borrar_todos_los_reportes_intercorp' %}", {
+                method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            }).then(r => r.json()).then(data => {
+                if(data.status === 'ok') {
+                    localStorage.removeItem('memoriaReportesIntercorp');
+                    alert("limpio"); window.location.reload();
+                }
+            });
+        }
+    }
+
+    function importarVentas(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
+            
+            const tbody = document.querySelector('#tablaReporte tbody');
+            const filaMolde = document.getElementById('fila-molde');
+            const fragmento = document.createDocumentFragment();
+
+            json.forEach(row => {
+                const f = filaMolde.cloneNode(true);
+                f.id = ""; f.style.display = "";
+                f.dataset.originalKey = 'temp-' + Math.random().toString(36).substr(2, 9);
+                
+                if (f.querySelector('.val-sitio')) f.querySelector('.val-sitio').value = row['SITIO'] || '';
+                if (f.querySelector('.val-fecha')) f.querySelector('.val-fecha').value = formatExcelDate(row['FECHA']);
+                if (f.querySelector('.val-mes')) f.querySelector('.val-mes').value = row['MES Y AÑO'] || '';
+                if (f.querySelector('.val-orden')) f.querySelector('.val-orden').value = row['ID ORDEN'] || '';
+                if (f.querySelector('.val-comprobante')) f.querySelector('.val-comprobante').value = row['COMPROBANTE DE VENTA'] || '';
+                if (f.querySelector('.val-sku')) f.querySelector('.val-sku').value = row['SKU ALMACÉN'] || '';
+                if (f.querySelector('.val-marca')) f.querySelector('.val-marca').value = row['MARCA'] || '';
+                if (f.querySelector('.val-categoria')) f.querySelector('.val-categoria').value = row['CATEGORIA'] || '';
+                if (f.querySelector('.val-codigo')) f.querySelector('.val-codigo').value = row['CÓDIGO'] || '';
+                if (f.querySelector('.val-producto')) f.querySelector('.val-producto').value = row['PRODUCTO'] || '';
+                if (f.querySelector('.val-und')) f.querySelector('.val-und').value = row['UND.'] || 1;
+                
+                if (f.querySelector('.val-pventa')) f.querySelector('.val-pventa').value = limpiarMonto(row['P. DE VENTA']);
+                if (f.querySelector('.val-envio')) f.querySelector('.val-envio').value = limpiarMonto(row['COSTO DE ENVÍO']);
+                if (f.querySelector('.val-total-fact')) f.querySelector('.val-total-fact').value = limpiarMonto(row['MONTO TOTAL FACTURABLE']);
+                if (f.querySelector('.val-impuesto')) f.querySelector('.val-impuesto').value = limpiarMonto(row['IMPUESTO']);
+                if (f.querySelector('.val-logistico')) f.querySelector('.val-logistico').value = limpiarMonto(row['COBRO LOGÍSTICO']);
+                if (f.querySelector('.val-costo-prod')) f.querySelector('.val-costo-prod').value = limpiarMonto(row['COSTO DE PROD.']);
+                if (f.querySelector('.val-monto-pagar')) f.querySelector('.val-monto-pagar').value = limpiarMonto(row['MONTO A PAGAR']);
+                
+                if (f.querySelector('.val-fecha-pago')) f.querySelector('.val-fecha-pago').value = formatExcelDate(row['FECHA DE PAGO']);
+                if (f.querySelector('.val-liquidacion')) f.querySelector('.val-liquidacion').value = row['ID LIQUIDACION'] || '';
+                if (f.querySelector('.val-estado-pago')) f.querySelector('.val-estado-pago').value = row['ESTADO DE PAGO'] || '';
+                if (f.querySelector('.val-idpago')) f.querySelector('.val-idpago').value = row['ID DE PAGO'] || '';
+                
+                if (f.querySelector('.val-validacion')) {
+                    let v = str(row['VALIDACIÓN']).toLowerCase();
+                    f.querySelector('.val-validacion').checked = (v === 'si' || v === 'true' || v === '1');
+                }
+
+                if (f.querySelector('.val-codigo')) buscarProducto(f.querySelector('.val-codigo'));
+                if (f.querySelector('.val-categoria')) buscarImpuestoCategoria(f.querySelector('.val-categoria'));
+                if (f.querySelector('.val-und')) calcularFila(f.querySelector('.val-und'));
+                
+                registrarCambio(f);
+                fragmento.appendChild(f);
+            });
+            tbody.insertBefore(fragmento, tbody.firstChild);
+            alert("importado");
+        };
+        reader.readAsArrayBuffer(file);
+        event.target.value = "";
+    }
+
+    function formatExcelDate(v) {
+        if(!v) return '';
+        if(typeof v === 'number') return new Date(Math.round((v - 25569)*86400*1000)).toISOString().split('T')[0];
+        if(v.includes('/')) return v.split('/').reverse().join('-');
+        return v;
+    }
+
+    function limpiarMonto(v) {
+        if (!v) return '0.00';
+        let txt = v.toString().replace(/S\/\.|S\/|\$|%|\s/g, '');
+        return parseFloat(txt.replace(',','.')).toFixed(2) || '0.00';
+    }
+
+    function exportarExcel() {
+        const filas = document.querySelectorAll('.fila-ventas:not(#fila-molde)');
+        let data = [];
+        filas.forEach(fila => {
+            data.push({
+                "SITIO": fila.querySelector('.val-sitio')?.value || '',
+                "FECHA": fila.querySelector('.val-fecha')?.value || '',
+                "MES Y AÑO": fila.querySelector('.val-mes')?.value || '',
+                "ID ORDEN": fila.querySelector('.val-orden')?.value || '',
+                "COMPROBANTE DE VENTA": fila.querySelector('.val-comprobante')?.value || '',
+                "SKU ALMACÉN": fila.querySelector('.val-sku')?.value || '',
+                "MARCA": fila.querySelector('.val-marca')?.value || '',
+                "CATEGORIA": fila.querySelector('.val-categoria')?.value || '',
+                "CÓDIGO": fila.querySelector('.val-codigo')?.value || '',
+                "PRODUCTO": fila.querySelector('.val-producto')?.value || '',
+                "UND.": fila.querySelector('.val-und')?.value || '',
+                "P. DE VENTA": fila.querySelector('.val-pventa')?.value || '',
+                "COSTO DE ENVÍO": fila.querySelector('.val-envio')?.value || '',
+                "MONTO TOTAL FACTURABLE": fila.querySelector('.val-total-fact')?.value || '',
+                "IMPUESTO": fila.querySelector('.val-impuesto')?.value || '',
+                "COBRO LOGÍSTICO": fila.querySelector('.val-logistico')?.value || '',
+                "COSTO DE PROD.": fila.querySelector('.val-costo-prod')?.value || '',
+                "GANANCIA": fila.querySelector('.val-ganancia')?.value || '',
+                "MONTO A PAGAR": fila.querySelector('.val-monto-pagar')?.value || '',
+                "FECHA DE PAGO": fila.querySelector('.val-fecha-pago')?.value || '',
+                "ID LIQUIDACION": fila.querySelector('.val-liquidacion')?.value || '',
+                "ESTADO DE PAGO": fila.querySelector('.val-estado-pago')?.value || '',
+                "ID DE PAGO": fila.querySelector('.val-idpago')?.value || '',
+                "VALIDACIÓN": fila.querySelector('.val-validacion')?.checked ? 'SI' : 'NO'
+            });
+        });
+        if(data.length === 0) return alert("vacio");
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Intercorp");
+        XLSX.writeFile(wb, "Reporte_Intercorp.xlsx");
+    }
+</script>
+{% endblock %}

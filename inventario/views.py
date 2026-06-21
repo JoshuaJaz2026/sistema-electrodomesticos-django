@@ -873,7 +873,153 @@ def reporte_falabella(request):
 @verificar_acceso_plataforma('Intercorp')
 def reporte_intercorp(request):
     canal = request.session.get('canal_activo')
-    return render(request, 'reportes_plataformas/reporte_intercorp.html', {'canal': canal})
+    
+    query_search = request.GET.get('q', '')
+    fecha_inicio = request.GET.get('fecha_inicio', '')
+    fecha_fin = request.GET.get('fecha_fin', '')
+
+    ventas_todas = ReporteIntercorp.objects.all().order_by('-fecha', '-id')
+
+    if query_search:
+        ventas_todas = ventas_todas.filter(
+            Q(id_orden__icontains=query_search) | 
+            Q(sku_almacen__icontains=query_search) |
+            Q(comprobante_venta__icontains=query_search)
+        )
+    
+    if fecha_inicio:
+        ventas_todas = ventas_todas.filter(fecha__gte=fecha_inicio)
+    if fecha_fin:
+        ventas_todas = ventas_todas.filter(fecha__lte=fecha_fin)
+
+    paginator = Paginator(ventas_todas, 40) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    directorio_db = DirectorioProducto.objects.all()
+    diccionario_productos = {
+        str(d.codigo).strip().upper(): {
+            'producto': d.producto,
+            'costo': float(d.costo)
+        } for d in directorio_db if d.codigo
+    }
+
+    diccionario_comisiones = {}
+    try:
+        from .models import ReferenciaComision
+        comisiones_db = ReferenciaComision.objects.all()
+        diccionario_comisiones = {str(c.categoria).strip().upper(): float(c.comision_porcentaje) for c in comisiones_db if c.categoria}
+    except:
+        pass
+
+    return render(request, 'reportes_plataformas/reporte_intercorp.html', {
+        'canal': canal, 
+        'page_obj': page_obj,
+        'query_search': query_search,
+        'diccionario_productos_json': json.dumps(diccionario_productos),
+        'diccionario_comisiones_json': json.dumps(diccionario_comisiones)
+    })
+
+@login_required
+def descargar_plantilla_reporte_intercorp(request):
+    response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+    response['Content-Disposition'] = 'attachment; filename="plantilla_intercorp.csv"'
+    writer = csv.writer(response, delimiter=';')
+    writer.writerow([
+        'SITIO', 'FECHA', 'MES Y AÑO', 'ID ORDEN', 'COMPROBANTE DE VENTA', 
+        'SKU ALMACÉN', 'MARCA', 'CATEGORIA', 'CÓDIGO', 'PRODUCTO', 
+        'UND.', 'P. DE VENTA', 'COSTO DE ENVÍO', 'MONTO TOTAL FACTURABLE', 
+        'IMPUESTO', 'COBRO LOGÍSTICO', 'COSTO DE PROD.', 'GANANCIA', 
+        'MONTO A PAGAR', 'FECHA DE PAGO', 'ID LIQUIDACION', 'ESTADO DE PAGO', 
+        'ID DE PAGO', 'VALIDACIÓN'
+    ])
+    return response
+
+@login_required
+@csrf_exempt
+def borrar_todos_los_reportes_intercorp(request):
+    if request.method == 'POST':
+        ReporteIntercorp.objects.all().delete()
+        return JsonResponse({'status': 'ok', 'message': 'limpiado con exito'})
+    return JsonResponse({'status': 'error', 'message': 'Solo POST'})
+
+@login_required
+def guardar_reportes_masivos_intercorp(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            filas = data.get('referencias', [])
+            eliminadas = data.get('eliminadas', [])
+
+            if eliminadas:
+                ReporteIntercorp.objects.filter(id__in=eliminadas).delete()
+
+            def parse_date(date_str):
+                ds = str(date_str).strip()
+                if not ds: return None
+                try:
+                    if '/' in ds: return datetime.strptime(ds, '%d/%m/%Y').strftime('%Y-%m-%d')
+                    elif '-' in ds: return datetime.strptime(ds, '%Y-%m-%d').strftime('%Y-%m-%d')
+                except: return None
+                return ds
+
+            def to_float(val):
+                try: return float(str(val).replace('S/', '').replace('%', '').replace(',', '').strip() or 0)
+                except: return 0.00
+                
+            def to_int(val):
+                try: return int(float(str(val).strip() or 0))
+                except: return 0
+
+            def parse_bool(val):
+                if isinstance(val, bool): return val
+                if str(val).lower() in ['true', '1', 'si', 'sí', 'on']: return True
+                return False
+
+            objetos_a_guardar = []
+            
+            for fila in filas:
+                id_orden = str(fila.get('ID ORDEN', '')).strip()
+                if not id_orden: continue
+
+                obj = ReporteIntercorp(
+                    usuario=request.user,
+                    sitio=str(fila.get('SITIO', '')).strip(),
+                    fecha=parse_date(fila.get('FECHA')),
+                    mes_ano=str(fila.get('MES Y AÑO', '')).strip(),
+                    id_orden=id_orden,
+                    comprobante_venta=str(fila.get('COMPROBANTE DE VENTA', '')).strip(),
+                    sku_almacen=str(fila.get('SKU ALMACÉN', '')).strip(),
+                    marca=str(fila.get('MARCA', '')).strip(),
+                    categoria=str(fila.get('CATEGORIA', '')).strip(),
+                    codigo=str(fila.get('CÓDIGO', '')).strip(),
+                    producto=str(fila.get('PRODUCTO', '')).strip(),
+                    und=to_int(fila.get('UND.', 1)),
+                    p_venta=to_float(fila.get('P. DE VENTA')),
+                    costo_envio=to_float(fila.get('COSTO DE ENVÍO')),
+                    monto_total_facturable=to_float(fila.get('MONTO TOTAL FACTURABLE')),
+                    impuesto=to_float(fila.get('IMPUESTO')),
+                    cobro_logistico=to_float(fila.get('COBRO LOGÍSTICO')),
+                    costo_prod=to_float(fila.get('COSTO DE PROD.')),
+                    ganancia=to_float(fila.get('GANANCIA')),
+                    monto_a_pagar=to_float(fila.get('MONTO A PAGAR')),
+                    fecha_pago=parse_date(fila.get('FECHA DE PAGO')),
+                    id_liquidacion=str(fila.get('ID LIQUIDACION', '')).strip(),
+                    estado_pago=str(fila.get('ESTADO DE PAGO', '')).strip(),
+                    id_pago=str(fila.get('ID DE PAGO', '')).strip(),
+                    validacion='SI' if parse_bool(fila.get('VALIDACIÓN')) else 'NO'
+                )
+                objetos_a_guardar.append(obj)
+
+            if objetos_a_guardar:
+                ids = [o.id_orden for o in objetos_a_guardar]
+                ReporteIntercorp.objects.filter(id_orden__in=ids).delete()
+                ReporteIntercorp.objects.bulk_create(objetos_a_guardar)
+
+            return JsonResponse({'status': 'ok', 'message': 'guardado'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'error de metodo'})
 
 @login_required
 @verificar_acceso_plataforma('Tik tok', 'Tiktok')

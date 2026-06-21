@@ -530,3 +530,43 @@ class DirectorioProducto(models.Model):
 
     def __str__(self):
         return f"{self.codigo} - {self.producto}"
+    
+
+class ReporteIntercorp(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reportes_intercorp', null=True, blank=True)
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+    
+    sitio = models.CharField(max_length=100, null=True, blank=True)
+    fecha = models.DateField(null=True, blank=True)
+    mes_ano = models.CharField(max_length=20, null=True, blank=True)
+    id_orden = models.CharField(max_length=100, null=True, blank=True)
+    comprobante_venta = models.CharField(max_length=100, null=True, blank=True)
+    sku_almacen = models.CharField(max_length=100, null=True, blank=True)
+    marca = models.CharField(max_length=100, null=True, blank=True)
+    categoria = models.CharField(max_length=100, null=True, blank=True)
+    codigo = models.CharField(max_length=100, null=True, blank=True)
+    producto = models.CharField(max_length=255, null=True, blank=True)
+    
+    und = models.IntegerField(default=1, null=True, blank=True)
+    p_venta = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    costo_envio = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    monto_total_facturable = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    impuesto = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    cobro_logistico = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    costo_prod = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    ganancia = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    monto_a_pagar = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    fecha_pago = models.DateField(null=True, blank=True)
+    id_liquidacion = models.CharField(max_length=100, null=True, blank=True)
+    estado_pago = models.CharField(max_length=100, null=True, blank=True)
+    id_pago = models.CharField(max_length=100, null=True, blank=True)
+    validacion = models.CharField(max_length=100, null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Reporte Intercorp'
+        verbose_name_plural = 'Reportes Intercorp'
+        ordering = ['-fecha', '-id']
+
+    def __str__(self):
+        return f"Orden {self.id_orden} - {self.producto}"

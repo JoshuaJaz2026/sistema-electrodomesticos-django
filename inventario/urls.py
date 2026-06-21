@@ -124,4 +124,7 @@ urlpatterns = [
     path('descargar-plantilla-directorio/', views.descargar_plantilla_directorio, name='descargar_plantilla_directorio'),
     path('guardar-directorio-masivo/', views.guardar_directorio_masivo, name='guardar_directorio_masivo'),
     path('borrar-todos-directorio/', views.borrar_todos_directorio, name='borrar_todos_directorio'),
+    path('descargar-plantilla-reporte-intercorp/', views.descargar_plantilla_reporte_intercorp, name='descargar_plantilla_reporte_intercorp'),
+    path('guardar-reportes-masivos-intercorp/', views.guardar_reportes_masivos_intercorp, name='guardar_reportes_masivos_intercorp'),
+    path('borrar-todos-los-reportes-intercorp/', views.borrar_todos_los_reportes_intercorp, name='borrar_todos_los_reportes_intercorp'),
 ]
