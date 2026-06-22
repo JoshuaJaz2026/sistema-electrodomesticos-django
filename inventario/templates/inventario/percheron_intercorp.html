@@ -165,7 +165,10 @@
             return;
         }
         debounceTimer = setTimeout(() => {
-            fetch(`/api/buscar-modelo-intercorp/?modelo=${valor}`)
+            // Usamos la etiqueta SEGURA de Django para la ruta
+            const urlSegura = `{% url 'buscar_modelo_intercorp' %}?modelo=${valor}`;
+            
+            fetch(urlSegura)
             .then(r => r.json())
             .then(data => {
                 if(data.status === 'ok') {
@@ -188,8 +191,10 @@
                         `;
                     });
                     document.getElementById('cuerpoReferencia').innerHTML = html;
+                } else {
+                    console.error("Error buscando:", data.message);
                 }
-            });
+            }).catch(e => console.error("Error de red:", e));
         }, 500);
     }
 
@@ -277,7 +282,8 @@
         if(datos.length === 0) return alert('Por favor, ingresa al menos un SKU para procesar.');
         if(!valido) return alert('Por favor, completa NRO VENTAS y el nombre (BY) en las filas ingresadas.');
 
-        fetch('/api/procesar-salidas-intercorp/', {
+        // Usamos la etiqueta SEGURA de Django aquí también
+        fetch("{% url 'procesar_salidas_intercorp' %}", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
             body: JSON.stringify({ salidas: datos })
