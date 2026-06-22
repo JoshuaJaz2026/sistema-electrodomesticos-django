@@ -2495,11 +2495,11 @@ def comisiones_intercorp(request):
     else:
         comisiones = ComisionIntercorp.objects.all().order_by('categoria')
 
-    return render(request, 'reportes_plataformas/comisiones_intercorp.html'), {
+    return render(request, 'reportes_plataformas/comisiones_intercorp.html', {
         'canal': canal, 
         'comisiones': comisiones,
         'query_search': query_search
-    }
+    })
 
 @login_required
 @csrf_exempt
