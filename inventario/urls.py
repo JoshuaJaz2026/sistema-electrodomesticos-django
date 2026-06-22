@@ -131,4 +131,7 @@ urlpatterns = [
     path('guardar-comisiones-intercorp/', views.guardar_comisiones_intercorp, name='guardar_comisiones_intercorp'),
     path('borrar-comisiones-intercorp/', views.borrar_comisiones_intercorp, name='borrar_comisiones_intercorp'),
     path('descargar-plantilla-comisiones-intercorp/', views.descargar_plantilla_comisiones_intercorp, name='descargar_plantilla_comisiones_intercorp'),
+    path('percheron-intercorp/', views.percheron_intercorp, name='percheron_intercorp'),
+    path('api/buscar-modelo-intercorp/', views.buscar_modelo_intercorp, name='buscar_modelo_intercorp'),
+    path('api/procesar-salidas-intercorp/', views.procesar_salidas_intercorp, name='procesar_salidas_intercorp'),
 ]

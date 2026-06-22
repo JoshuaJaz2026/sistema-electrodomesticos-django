@@ -501,7 +501,11 @@ def percheron_creditienda(request):
 @verificar_acceso_plataforma('Intercorp')
 def percheron_intercorp(request):
     canal = request.session.get('canal_activo')
-    return render(request, 'inventario/percheron_intercorp.html', {'canal': canal})
+    usuarios_bci = User.objects.all() 
+    return render(request, 'inventario/percheron_intercorp.html', {
+        'canal': canal,
+        'usuarios': usuarios_bci
+    })
 
 @login_required
 @verificar_acceso_plataforma('Tik tok', 'Tiktok')
@@ -2546,3 +2550,71 @@ def descargar_plantilla_comisiones_intercorp(request):
     writer = csv.writer(response, delimiter=';')
     writer.writerow(['CATEGORIA', '%'])
     return response
+
+
+@login_required
+def buscar_modelo_intercorp(request):
+    modelo_query = request.GET.get('modelo', '').strip()
+    try:
+        from .models import RegistroPercheron 
+        resultados = RegistroPercheron.objects.filter(modelo__icontains=modelo_query, estado='DISPONIBLE')
+        
+        data = []
+        producto_nombre = ""
+        if resultados.exists():
+            producto_nombre = resultados.first().producto
+            
+        for r in resultados:
+            data.append({
+                'sku': r.sku,
+                'marca': r.marca,
+                'fecha_ingreso': r.fecha_ingreso.strftime('%d/%m/%Y') if r.fecha_ingreso else '',
+                'serie': r.serie,
+                'costo': str(r.costo),
+                'proveedor': r.proveedor,
+                'ingresado_por': r.usuario.username if r.usuario else ''
+            })
+            
+        return JsonResponse({
+            'status': 'ok', 
+            'producto': producto_nombre,
+            'stock': resultados.count(),
+            'items': data
+        })
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    
+
+@login_required
+@csrf_exempt
+def procesar_salidas_intercorp(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            salidas = data.get('salidas', [])
+            from .models import RegistroPercheron 
+            
+            for s in salidas:
+                sku = s.get('sku')
+                SalidaIntercorp.objects.create(
+                    usuario=request.user,
+                    sku=sku,
+                    modelo=s.get('modelo'),
+                    titulo=s.get('titulo'),
+                    fecha_salida=s.get('fecha_salida'),
+                    serie=s.get('serie'),
+                    costo_unt=s.get('costo_unt'),
+                    desc_und=1,
+                    nro_ventas=s.get('nro_ventas'),
+                    by=s.get('by')
+                )
+                
+                item = RegistroPercheron.objects.filter(sku=sku, estado='DISPONIBLE').first()
+                if item:
+                    item.estado = 'VENDIDO INTERCORP'
+                    item.save()
+                    
+            return JsonResponse({'status': 'ok', 'message': 'descontado'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error'})

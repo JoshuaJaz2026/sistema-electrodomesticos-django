@@ -11,15 +11,15 @@
         <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px; margin-bottom: 20px; align-items: center;">
             <div>
                 <label style="display: block; font-size: 0.75rem; font-weight: bold; color: #64748b; margin-bottom: 6px;">MODELO</label>
-                <input type="text" id="bciModelo" placeholder="Ej. BVSTEM6801M..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; text-transform: uppercase; font-weight: bold; box-sizing: border-box;">
+                <input type="text" id="bciModelo" onkeyup="buscarModelo(this.value)" placeholder="Ej. BVSTEM6801M..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; text-transform: uppercase; font-weight: bold; box-sizing: border-box;">
             </div>
             <div>
                 <label style="display: block; font-size: 0.75rem; font-weight: bold; color: #64748b; margin-bottom: 6px;">PRODUCTO</label>
-                <input type="text" id="bciProducto" readonly value="Cafetera Oster® PrimaLatte™ Touch BVSTEM6801M NEGRO" style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 6px; font-weight: 600; color: #475569; box-sizing: border-box;">
+                <input type="text" id="bciProducto" readonly placeholder="Esperando búsqueda..." style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 6px; font-weight: 600; color: #475569; box-sizing: border-box;">
             </div>
             <div>
                 <label style="display: block; font-size: 0.75rem; font-weight: bold; color: #64748b; margin-bottom: 6px;">STOCK REAL</label>
-                <input type="text" id="bciStock" readonly value="3" style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 6px; text-align: center; font-weight: bold; color: #b45309; font-size: 1.1rem; box-sizing: border-box;">
+                <input type="text" id="bciStock" readonly placeholder="0" style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 6px; text-align: center; font-weight: bold; color: #b45309; font-size: 1.1rem; box-sizing: border-box;">
             </div>
         </div>
 
@@ -37,34 +37,7 @@
                     </tr>
                 </thead>
                 <tbody id="cuerpoReferencia">
-                    <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 10px; font-weight: bold; color: #2563eb;">BVSTEM6801M-053-1989</td>
-                        <td style="padding: 10px;">OSTER</td>
-                        <td style="padding: 10px; text-align: center; color: #64748b;">18/05/2026</td>
-                        <td style="padding: 10px; font-family: monospace; font-size: 1.05em; color: #0f172a;">44604544</td>
-                        <td style="padding: 10px; text-align: right; font-weight: bold;">S/ 370.00</td>
-                        <td style="padding: 10px; color: #475569;">OSTER</td>
-                        <td style="padding: 10px; font-weight: 600; color: #2563eb;"><i class="fas fa-user-circle" style="color: #cbd5e1;"></i> EDUARDO</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 10px; font-weight: bold; color: #2563eb;">BVSTEM6801M-053-1990</td>
-                        <td style="padding: 10px;">OSTER</td>
-                        <td style="padding: 10px; text-align: center; color: #64748b;">18/05/2026</td>
-                        <td style="padding: 10px; font-family: monospace; font-size: 1.05em; color: #0f172a;">44604545</td>
-                        <td style="padding: 10px; text-align: right; font-weight: bold;">S/ 370.00</td>
-                        <td style="padding: 10px; color: #475569;">OSTER</td>
-                        <td style="padding: 10px; font-weight: 600; color: #2563eb;"><i class="fas fa-user-circle" style="color: #cbd5e1;"></i> EDUARDO</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 10px; font-weight: bold; color: #2563eb;">BVSTEM6801M-053-1991</td>
-                        <td style="padding: 10px;">OSTER</td>
-                        <td style="padding: 10px; text-align: center; color: #64748b;">18/05/2026</td>
-                        <td style="padding: 10px; font-family: monospace; font-size: 1.05em; color: #0f172a;">44604546</td>
-                        <td style="padding: 10px; text-align: right; font-weight: bold;">S/ 370.00</td>
-                        <td style="padding: 10px; color: #475569;">OSTER</td>
-                        <td style="padding: 10px; font-weight: 600; color: #2563eb;"><i class="fas fa-user-circle" style="color: #cbd5e1;"></i> EDUARDO</td>
-                    </tr>
-                </tbody>
+                    </tbody>
             </table>
         </div>
     </div>
@@ -79,7 +52,7 @@
                 <button type="button" onclick="agregarFilaSalida()" style="background-color: var(--color-principal); color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     <i class="fas fa-plus"></i> Agregar Fila
                 </button>
-                <button type="button" style="background-color: #1e293b; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <button type="button" onclick="procesarDescuentos()" style="background-color: #1e293b; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
                     <i class="fas fa-save"></i> Procesar Descuentos
                 </button>
             </div>
@@ -106,39 +79,40 @@
                     </tr>
                 </thead>
                 <tbody id="cuerpoSalidas">
-                    <tr class="fila-excel" style="border-bottom: 1px solid #e2e8f0;">
+                    <tr class="fila-salida" style="border-bottom: 1px solid #e2e8f0;">
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                            <input type="text" value="BLSTPYG1311-NBG-053-176" class="input-celda text-bold text-dark centralizar">
+                            <input type="text" placeholder="SKU..." onchange="autocompletarPorSku(this)" class="inp-sku input-celda text-bold text-dark centralizar">
                         </td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                            <input type="text" value="BLSTPYG1311-NBG-053" readonly class="input-celda input-bloqueado centralizar font-bold">
+                            <input type="text" placeholder="Auto..." readonly class="inp-modelo input-celda input-bloqueado centralizar font-bold">
                         </td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                            <input type="text" value="LICUADORA OSTER BLSTPYG1311NBG REVERSIBLE VASO BLEND N GO" readonly class="input-celda input-bloqueado">
+                            <input type="text" placeholder="Auto..." readonly class="inp-titulo input-celda input-bloqueado">
                         </td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                            <input type="date" value="2026-03-09" class="input-celda centralizar">
+                            <input type="date" class="inp-fecha input-celda centralizar">
                         </td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                            <input type="text" value="44605952" readonly class="input-celda input-bloqueado centralizar text-blue font-bold">
+                            <input type="text" placeholder="Auto..." readonly class="inp-serie input-celda input-bloqueado centralizar text-blue font-bold">
                         </td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0; position: relative; background-color: #fff5f5;">
                             <span style="position: absolute; left: 8px; top: 10px; color: #94a3b8; font-size: 0.8em;">S/</span>
-                            <input type="number" value="370.00" readonly class="input-celda input-bloqueado alinear-derecha font-bold" style="padding-left: 22px; color: #991b1b;">
+                            <input type="number" placeholder="0.00" readonly class="inp-costo input-celda input-bloqueado alinear-derecha font-bold" style="padding-left: 22px; color: #991b1b;">
                         </td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0; background-color: #fff5f5;">
                             <input type="number" value="1" readonly class="input-celda input-bloqueado centralizar font-bold" style="color: #ef4444;">
                         </td>
                         <td style="padding: 0; border-right: 1px solid #e2e8f0;">
-                            <input type="text" value="3227569745" class="input-celda centralizar font-bold text-dark">
+                            <input type="text" placeholder="Nro. Venta..." class="inp-ventas input-celda centralizar font-bold text-dark">
                         </td>
                         <td style="padding: 0;">
-                            <select class="input-celda select-personalizado centralizar font-bold" style="color: #047857;">
+                            <select class="inp-by input-celda select-personalizado centralizar font-bold" style="color: #047857;">
+                                <option value="" disabled selected>Seleccione...</option>
                                 <option value="MILAGROS">MILAGROS</option>
                                 <option value="PABLO">PABLO</option>
                                 <option value="DENISE">DENISE</option>
                                 <option value="JOSHUA">JOSHUA</option>
-                                <option value="ALDO" selected>ALDO</option>
+                                <option value="ALDO">ALDO</option>
                                 <option value="ADAMARI">ADAMARI</option>
                                 <option value="CARLOS">CARLOS</option>
                                 <option value="DAVID">DAVID</option>
@@ -178,6 +152,63 @@
 </style>
 
 <script>
+    let debounceTimer;
+    let catalogoActual = [];
+
+    // Función 1: Buscar Modelo en la BD en tiempo real
+    function buscarModelo(valor) {
+        clearTimeout(debounceTimer);
+        if(valor.length < 3) {
+            document.getElementById('cuerpoReferencia').innerHTML = '';
+            document.getElementById('bciProducto').value = '';
+            document.getElementById('bciStock').value = '';
+            return;
+        }
+        debounceTimer = setTimeout(() => {
+            fetch(`/api/buscar-modelo-intercorp/?modelo=${valor}`)
+            .then(r => r.json())
+            .then(data => {
+                if(data.status === 'ok') {
+                    document.getElementById('bciProducto').value = data.producto;
+                    document.getElementById('bciStock').value = data.stock;
+                    catalogoActual = data.items;
+                    
+                    let html = '';
+                    data.items.forEach(i => {
+                        html += `
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 10px; font-weight: bold; color: #2563eb;">${i.sku}</td>
+                                <td style="padding: 10px;">${i.marca}</td>
+                                <td style="padding: 10px; text-align: center; color: #64748b;">${i.fecha_ingreso}</td>
+                                <td style="padding: 10px; font-family: monospace; font-size: 1.05em; color: #0f172a;">${i.serie}</td>
+                                <td style="padding: 10px; text-align: right; font-weight: bold;">S/ ${parseFloat(i.costo).toFixed(2)}</td>
+                                <td style="padding: 10px; color: #475569;">${i.proveedor}</td>
+                                <td style="padding: 10px; font-weight: 600; color: #2563eb;"><i class="fas fa-user-circle" style="color: #cbd5e1;"></i> ${i.ingresado_por}</td>
+                            </tr>
+                        `;
+                    });
+                    document.getElementById('cuerpoReferencia').innerHTML = html;
+                }
+            });
+        }, 500);
+    }
+
+    // Función 2: Autocompletar cuando escaneas un SKU en la salida
+    function autocompletarPorSku(inputSku) {
+        const sku = inputSku.value.trim();
+        const fila = inputSku.closest('tr');
+        const item = catalogoActual.find(i => i.sku === sku);
+        
+        if(item) {
+            fila.querySelector('.inp-modelo').value = document.getElementById('bciModelo').value;
+            fila.querySelector('.inp-titulo').value = document.getElementById('bciProducto').value;
+            fila.querySelector('.inp-serie').value = item.serie;
+            fila.querySelector('.inp-costo').value = parseFloat(item.costo).toFixed(2);
+            fila.querySelector('.inp-fecha').value = new Date().toISOString().split('T')[0];
+        }
+    }
+
+    // Función 3: Duplicar fila respetando el diseño
     function agregarFilaSalida() {
         const tbody = document.getElementById('cuerpoSalidas');
         const opcionesCombo = `
@@ -195,25 +226,71 @@
         `;
 
         const nuevaFila = document.createElement('tr');
+        nuevaFila.className = 'fila-salida';
         nuevaFila.style.borderBottom = '1px solid #e2e8f0';
         
         nuevaFila.innerHTML = `
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="SKU..." class="input-celda text-bold text-dark centralizar"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Auto..." readonly class="input-celda input-bloqueado centralizar font-bold"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Auto..." readonly class="input-celda input-bloqueado"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" class="input-celda centralizar"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Auto..." readonly class="input-celda input-bloqueado centralizar text-blue font-bold"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0; position: relative; background-color: #fff5f5;"><span style="position: absolute; left: 8px; top: 10px; color: #94a3b8; font-size: 0.8em;">S/</span><input type="number" placeholder="0.00" readonly class="input-celda input-bloqueado alinear-derecha font-bold" style="padding-left: 22px; color: #991b1b;"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="SKU..." onchange="autocompletarPorSku(this)" class="inp-sku input-celda text-bold text-dark centralizar"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Auto..." readonly class="inp-modelo input-celda input-bloqueado centralizar font-bold"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Auto..." readonly class="inp-titulo input-celda input-bloqueado"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="date" class="inp-fecha input-celda centralizar"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Auto..." readonly class="inp-serie input-celda input-bloqueado centralizar text-blue font-bold"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0; position: relative; background-color: #fff5f5;"><span style="position: absolute; left: 8px; top: 10px; color: #94a3b8; font-size: 0.8em;">S/</span><input type="number" placeholder="0.00" readonly class="inp-costo input-celda input-bloqueado alinear-derecha font-bold" style="padding-left: 22px; color: #991b1b;"></td>
             <td style="padding: 0; border-right: 1px solid #e2e8f0; background-color: #fff5f5;"><input type="number" value="1" readonly class="input-celda input-bloqueado centralizar font-bold" style="color: #ef4444;"></td>
-            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Nro. Venta..." class="input-celda centralizar font-bold text-dark"></td>
+            <td style="padding: 0; border-right: 1px solid #e2e8f0;"><input type="text" placeholder="Nro. Venta..." class="inp-ventas input-celda centralizar font-bold text-dark"></td>
             <td style="padding: 0;">
-                <select class="input-celda select-personalizado centralizar font-bold" style="color: #047857;">
+                <select class="inp-by input-celda select-personalizado centralizar font-bold" style="color: #047857;">
                     <option value="" disabled selected>Seleccione...</option>
                     ${opcionesCombo}
                 </select>
             </td>
         `;
         tbody.appendChild(nuevaFila);
+    }
+
+    // Función 4: Enviar datos a Python para descontar de la BD
+    function procesarDescuentos() {
+        const filas = document.querySelectorAll('.fila-salida');
+        let datos = [];
+        let valido = true;
+
+        filas.forEach(f => {
+            const sku = f.querySelector('.inp-sku').value;
+            if(sku) {
+                const by = f.querySelector('.inp-by').value;
+                const ventas = f.querySelector('.inp-ventas').value;
+                if(!by || !ventas) valido = false;
+                
+                datos.push({
+                    sku: sku,
+                    modelo: f.querySelector('.inp-modelo').value,
+                    titulo: f.querySelector('.inp-titulo').value,
+                    fecha_salida: f.querySelector('.inp-fecha').value,
+                    serie: f.querySelector('.inp-serie').value,
+                    costo_unt: f.querySelector('.inp-costo').value,
+                    nro_ventas: ventas,
+                    by: by
+                });
+            }
+        });
+
+        if(datos.length === 0) return alert('Por favor, ingresa al menos un SKU para procesar.');
+        if(!valido) return alert('Por favor, completa NRO VENTAS y el nombre (BY) en las filas ingresadas.');
+
+        fetch('/api/procesar-salidas-intercorp/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+            body: JSON.stringify({ salidas: datos })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if(data.status === 'ok') {
+                alert('¡Éxito! Los productos han sido descontados del inventario.');
+                location.reload();
+            } else {
+                alert('Error al procesar: ' + data.message);
+            }
+        });
     }
 </script>
 {% endblock %}

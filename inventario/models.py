@@ -578,3 +578,20 @@ class ComisionIntercorp(models.Model):
 
     class Meta:
         verbose_name = 'Comisión Intercorp'
+
+
+class SalidaIntercorp(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    sku = models.CharField(max_length=100, null=True, blank=True)
+    modelo = models.CharField(max_length=100, null=True, blank=True)
+    titulo = models.CharField(max_length=255, null=True, blank=True)
+    fecha_salida = models.DateField(null=True, blank=True)
+    serie = models.CharField(max_length=100, null=True, blank=True)
+    costo_unt = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    desc_und = models.IntegerField(default=1)
+    nro_ventas = models.CharField(max_length=100, null=True, blank=True)
+    by = models.CharField(max_length=100, null=True, blank=True)
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Salida Intercorp'
