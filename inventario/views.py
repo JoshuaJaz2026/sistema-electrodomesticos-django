@@ -301,7 +301,7 @@ def percheron_registros(request):
     out_cdt_qs = SalidaCreditienda.objects.values('sku').annotate(total=Sum('descuento'))
     dict_out_cdt = {s['sku']: s['total'] for s in out_cdt_qs if s['sku']}
 
-    out_int_qs = SalidaIntercorp.objects.values('sku').annotate(total=Sum('descuento'))
+    out_int_qs = SalidaIntercorp.objects.values('sku').annotate(total=Sum('desc_und'))
     dict_out_int = {s['sku']: s['total'] for s in out_int_qs if s['sku']}
 
     out_tk_qs = SalidaTiktok.objects.values('sku').annotate(total=Sum('descuento'))
