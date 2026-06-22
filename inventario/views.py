@@ -17,6 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Sum, Count
 from django.utils import timezone
 from datetime import timedelta
+from django.contrib.auth.models import User
 
 # Importación corregida de SimulacionMercadoLibreJunior
 from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre, ReporteMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SalidaFalabella, SalidaCreditienda, SalidaIntercorp, SalidaTiktok, SalidaVentaLibre, ReporteCreditienda, ReporteFalabella, DirectorioProducto, ReporteIntercorp, ComisionIntercorp
