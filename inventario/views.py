@@ -2557,23 +2557,43 @@ def descargar_plantilla_comisiones_intercorp(request):
 def buscar_modelo_intercorp(request):
     modelo_query = request.GET.get('modelo', '').strip()
     try:
-        from .models import RegistroPercheron 
-        resultados = RegistroPercheron.objects.filter(modelo__icontains=modelo_query, estado='DISPONIBLE')
+        from .models import IngresoPercheron, Producto, SalidaIntercorp 
+        
+        # 1. Filtramos los SKUs que YA salieron en Intercorp para no volver a mostrarlos
+        skus_usados = SalidaIntercorp.objects.values_list('sku', flat=True)
+        
+        # 2. Buscamos los ingresos disponibles
+        resultados = IngresoPercheron.objects.filter(
+            modelo__icontains=modelo_query
+        ).exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
+        
+        # 3. Traemos el directorio de productos para sacar la marca correcta
+        productos_db = Producto.objects.all()
+        dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
         
         data = []
         producto_nombre = ""
         if resultados.exists():
-            producto_nombre = resultados.first().producto
+            producto_nombre = resultados.first().titulo or ""
             
         for r in resultados:
+            mod_limpio = str(r.modelo).strip().upper() if r.modelo else ''
+            prod = dict_prods.get(mod_limpio)
+            marca_val = prod.marca if prod else 'S/N MARCA'
+            
+            fecha_str = '-'
+            if r.fecha_ingreso:
+                try: fecha_str = r.fecha_ingreso.strftime('%d/%m/%Y')
+                except: fecha_str = str(r.fecha_ingreso)
+                
             data.append({
                 'sku': r.sku,
-                'marca': r.marca,
-                'fecha_ingreso': r.fecha_ingreso.strftime('%d/%m/%Y') if r.fecha_ingreso else '',
-                'serie': r.serie,
-                'costo': str(r.costo),
-                'proveedor': r.proveedor,
-                'ingresado_por': r.usuario.username if r.usuario else ''
+                'marca': marca_val,
+                'fecha_ingreso': fecha_str,
+                'serie': r.serie_nro or '-',
+                'costo': str(r.costo_unitario) if r.costo_unitario else '0.00',
+                'proveedor': r.proveedor_motivo or '-',
+                'ingresado_por': r.creado_por or ''
             })
             
         return JsonResponse({
@@ -2589,33 +2609,96 @@ def buscar_modelo_intercorp(request):
 @login_required
 @csrf_exempt
 def procesar_salidas_intercorp(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            salidas = data.get('salidas', [])
-            from .models import RegistroPercheron 
-            
-            for s in salidas:
-                sku = s.get('sku')
-                SalidaIntercorp.objects.create(
-                    usuario=request.user,
-                    sku=sku,
-                    modelo=s.get('modelo'),
-                    titulo=s.get('titulo'),
-                    fecha_salida=s.get('fecha_salida'),
-                    serie=s.get('serie'),
-                    costo_unt=s.get('costo_unt'),
-                    desc_und=1,
-                    nro_ventas=s.get('nro_ventas'),
-                    by=s.get('by')
-                )
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
+
+    try:
+        data = json.loads(request.body)
+        salidas = data.get('salidas', [])
+        eliminadas = data.get('eliminadas', []) 
+
+        if not salidas and not eliminadas:
+            return JsonResponse({'status': 'error', 'message': 'No hay nuevas salidas ni registros eliminados para procesar.'})
+
+        from .models import SalidaIntercorp, Producto
+        from datetime import datetime
+
+        # Usamos transaction.atomic() para que, si hay un error, no se guarde nada a medias
+        with transaction.atomic():
+            conteo_descuentos = {}
+            conteo_restauraciones = {}
+
+            # 1. Si se eliminan registros, sumamos el stock de vuelta
+            if eliminadas:
+                registros_viejos = SalidaIntercorp.objects.filter(id__in=eliminadas)
+                for registro in registros_viejos:
+                    if registro.modelo:
+                        key = str(registro.modelo).upper().replace(" ", "").replace("-", "")
+                        # Usamos desc_und que es tu columna de descuento en Intercorp
+                        conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.desc_und
                 
-                item = RegistroPercheron.objects.filter(sku=sku, estado='DISPONIBLE').first()
-                if item:
-                    item.estado = 'VENDIDO INTERCORP'
-                    item.save()
-                    
-            return JsonResponse({'status': 'ok', 'message': 'descontado'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
-    return JsonResponse({'status': 'error'})
+                    registro.delete()
+
+            # 2. Guardamos las salidas nuevas y preparamos el descuento
+            if salidas:
+                for sal in salidas:
+                    sku = sal.get('sku', '').strip()
+                    modelo = sal.get('modelo', '').strip()
+                    titulo = sal.get('titulo', '').strip()
+                    fecha_salida = sal.get('fecha_salida') or datetime.now().date()
+                    serie = sal.get('serie', '')
+                    costo = float(sal.get('costo_unt') or 0)
+                    descuento = 1 # En tu HTML de Intercorp siempre descuenta 1 por fila
+                    nro_venta = sal.get('nro_ventas', '')
+                    by_usuario = sal.get('by', request.user.username)
+
+                    SalidaIntercorp.objects.create(
+                        usuario=request.user,
+                        sku=sku,
+                        modelo=modelo,
+                        titulo=titulo,
+                        fecha_salida=fecha_salida,
+                        serie=serie,
+                        costo_unt=costo,
+                        desc_und=descuento,
+                        nro_ventas=nro_venta,
+                        by=by_usuario
+                    )
+
+                    key = modelo.upper().replace(" ", "").replace("-", "")
+                    if key:
+                        conteo_descuentos[key] = conteo_descuentos.get(key, 0) + descuento
+
+            modelos_afectados = 0
+            modelos_restaurados = 0
+            
+            # 3. Aplicamos la matemática al Directorio Principal (Producto)
+            if conteo_descuentos or conteo_restauraciones:
+                for prod in Producto.objects.all():
+                    if prod.modelo:
+                        key = prod.modelo.upper().replace(" ", "").replace("-", "")
+                        cambio = False
+                        
+                        # Restauramos stock de eliminados
+                        if key in conteo_restauraciones:
+                            prod.stock_actual += conteo_restauraciones[key]
+                            modelos_restaurados += 1
+                            cambio = True
+                            
+                        # Descontamos stock de salidas nuevas
+                        if key in conteo_descuentos:
+                            prod.stock_actual = max(prod.stock_actual - conteo_descuentos[key], 0)
+                            modelos_afectados += 1
+                            cambio = True
+                            
+                        # Guardamos el producto solo si hubo cambios
+                        if cambio:
+                            prod.save(update_fields=['stock_actual'])
+
+        mensaje_final = f'Proceso completado. Descontados: {modelos_afectados}. Devueltos: {modelos_restaurados}.'
+        return JsonResponse({'status': 'ok', 'message': mensaje_final})
+
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return JsonResponse({'status': 'error', 'message': str(e)})
