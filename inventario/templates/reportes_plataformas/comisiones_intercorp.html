@@ -1,0 +1,235 @@
+{% extends 'inventario/dashboard_global.html' %}
+{% load static %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<div class="card" style="border-top: 4px solid #026bc2; padding: 12px 15px; background: white; width: 100%; max-width: 800px; box-sizing: border-box; border-radius: 8px; margin: 0 auto; height: calc(100vh - 90px); display: flex; flex-direction: column;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <h2 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-size: 1.1rem; white-space: nowrap;">
+                <i class="fas fa-percent" style="color: #026bc2;"></i> Comisiones
+                <span id="indicador-cambios" style="background-color: #f59e0b; color: white; padding: 3px 8px; border-radius: 20px; font-size: 0.7rem; display: none; font-weight: bold; align-items: center; gap: 5px;">
+                    <i class="fas fa-exclamation-circle"></i> Sin guardar
+                </span>
+            </h2>
+
+            <!-- Barra de Búsqueda -->
+            <form method="GET" action="" style="display: flex; align-items: center; height: 32px; margin-left: 5px;">
+                <div style="position: relative;">
+                    <i class="fas fa-search" style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.8rem;"></i>
+                    <input type="text" name="q" value="{{ query_search }}" placeholder="Buscar Categoría..." style="padding: 0 10px 0 26px; height: 32px; border: 1px solid #cbd5e1; border-radius: 4px 0 0 4px; outline: none; font-size: 0.8rem; width: 200px;">
+                </div>
+                <button type="submit" class="btn-top" style="background: #3b82f6; border-radius: 0 4px 4px 0; height: 32px; margin: 0;">Buscar</button>
+                {% if query_search %}
+                <a href="?" class="btn-top" style="background: #ef4444; margin-left: 5px; height: 32px;"><i class="fas fa-times"></i></a>
+                {% endif %}
+            </form>
+        </div>
+
+        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            <a href="{% url 'descargar_plantilla_comisiones_intercorp' %}" class="btn-top" style="background-color: #3b82f6; text-decoration: none;"><i class="fas fa-download"></i> Plantilla</a>
+            <button type="button" onclick="agregarFila()" class="btn-top" style="background-color: #8b5cf6;"><i class="fas fa-plus"></i> Fila</button>
+            <input type="file" id="fileImportExcel" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importarComisiones(event)">
+            <button type="button" onclick="document.getElementById('fileImportExcel').click()" class="btn-top" style="background-color: #10b981;"><i class="fas fa-file-import"></i> Importar</button>
+            <button type="button" onclick="exportarExcel()" class="btn-top" style="background-color: #0ea5e9;"><i class="fas fa-file-excel"></i> Exportar</button>
+            <button type="button" id="btnGuardar" onclick="guardarComisiones()" class="btn-top" style="background-color: #ef4444;"><i class="fas fa-save"></i> Guardar</button>
+            <button type="button" id="btnBorrarSeleccionados" onclick="borrarFilasSeleccionadas()" class="btn-top" style="background-color: #f97316; display: none;"><i class="fas fa-trash"></i> Borrar Sel.</button>
+            <button type="button" onclick="borrarTodoBD()" class="btn-top" style="background-color: #ef4444;"><i class="fas fa-trash-alt"></i> Borrar Todo</button>
+        </div>
+    </div>
+
+    <div style="position: relative; overflow-y: auto; flex-grow: 1; border: 2px solid #94a3b8; border-radius: 4px;">
+        <table id="tablaComisiones" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.85rem;">
+            <thead style="position: sticky; top: 0; z-index: 10;">
+                <tr style="background-color: #026bc2; color: white; font-weight: 800;">
+                    <th style="padding: 8px; border: 1px solid #cbd5e1; width: 40px; text-align: center;"><input type="checkbox" id="checkAll" onchange="toggleAllChecks()"></th>
+                    <th style="padding: 8px; border: 1px solid #cbd5e1; width: 70%;">CATEGORIA</th>
+                    <th style="padding: 8px; border: 1px solid #cbd5e1; width: 30%;">%</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in comisiones %}
+                <tr class="fila-data" data-db-id="{{ c.id }}" data-original-key="{{ c.categoria|default:c.id }}">
+                    <td style="padding:0; border:1px solid #cbd5e1; text-align: center;"><input type="checkbox" class="check-fila" onchange="checkFilaChange()"></td>
+                    <td style="padding:0; border:1px solid #cbd5e1;"><input type="text" class="celda-input val-cat" value="{{ c.categoria }}"></td>
+                    <td style="padding:0; border:1px solid #cbd5e1;"><input type="number" step="0.01" class="celda-input central text-red bold val-perc" value="{{ c.porcentaje|stringformat:'.2f' }}"></td>
+                </tr>
+                {% endfor %}
+                <tr class="fila-data" id="fila-molde" style="display: none;" data-original-key="molde">
+                    <td style="padding:0; border:1px solid #cbd5e1; text-align: center;"><input type="checkbox" class="check-fila" onchange="checkFilaChange()"></td>
+                    <td style="padding:0; border:1px solid #cbd5e1;"><input type="text" class="celda-input val-cat"></td>
+                    <td style="padding:0; border:1px solid #cbd5e1;"><input type="number" step="0.01" class="celda-input central text-red bold val-perc" value="0.00"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .btn-top { color: white; border: none; padding: 0 10px; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.8rem; height: 32px;}
+    .celda-input { width: 100%; height: 34px; border: none; padding: 4px 8px; font-family: inherit; font-size: 13px; box-sizing: border-box; outline: none;}
+    .celda-input:focus { background-color: #f8fafc; box-shadow: inset 0 0 0 2px #026bc2; }
+    .central { text-align: center; } .bold { font-weight: bold; } .text-red { color: #dc2626; }
+    .fila-editada td { border-bottom: 2px solid #f59e0b !important; background-color: #fffbeb !important; }
+    .fila-data:nth-child(even) { background-color: #f8fafc; }
+    .fila-data:hover td { filter: brightness(0.95); }
+</style>
+
+<script>
+    let memoriaComisiones = JSON.parse(localStorage.getItem('memoriaComisiones')) || {};
+    let eliminadasComisiones = JSON.parse(localStorage.getItem('eliminadasComisiones')) || [];
+
+    document.querySelector('#tablaComisiones').addEventListener('input', function(e) {
+        if (e.target.tagName === 'INPUT') {
+            const fila = e.target.closest('tr.fila-data');
+            if (fila && fila.id !== 'fila-molde') registrarCambio(fila);
+        }
+    });
+
+    function registrarCambio(fila) {
+        let key = fila.dataset.originalKey;
+        if (!key || key === 'molde') {
+            key = 'temp-' + Math.random().toString(36).substr(2, 9);
+            fila.dataset.originalKey = key;
+        }
+        const cat = fila.querySelector('.val-cat').value.trim();
+        if (cat === '') return;
+
+        memoriaComisiones[key] = {
+            'CATEGORIA': cat,
+            '%': fila.querySelector('.val-perc').value
+        };
+
+        localStorage.setItem('memoriaComisiones', JSON.stringify(memoriaComisiones));
+        fila.classList.add('fila-editada');
+        document.getElementById('indicador-cambios').style.display = 'inline-flex';
+    }
+
+    function agregarFila() {
+        const tbody = document.querySelector('#tablaComisiones tbody');
+        const molde = document.getElementById('fila-molde');
+        const nuevaFila = molde.cloneNode(true);
+        nuevaFila.id = ""; nuevaFila.style.display = "";
+        nuevaFila.dataset.originalKey = 'temp-' + Math.random().toString(36).substr(2, 9);
+        tbody.insertBefore(nuevaFila, tbody.firstChild);
+    }
+
+    function toggleAllChecks() {
+        const estado = document.getElementById('checkAll').checked;
+        document.querySelectorAll('.check-fila').forEach(cb => cb.checked = estado);
+        checkFilaChange();
+    }
+
+    function checkFilaChange() {
+        const haySeleccionados = document.querySelectorAll('.check-fila:checked').length > 0;
+        document.getElementById('btnBorrarSeleccionados').style.display = haySeleccionados ? 'inline-flex' : 'none';
+    }
+
+    function borrarFilasSeleccionadas() {
+        const checkboxes = document.querySelectorAll('.check-fila:checked');
+        checkboxes.forEach(cb => {
+            const fila = cb.closest('tr');
+            const dbId = fila.getAttribute('data-db-id');
+            const key = fila.dataset.originalKey;
+            
+            if (dbId) eliminadasComisiones.push(dbId);
+            if (memoriaComisiones[key]) delete memoriaComisiones[key];
+            
+            fila.remove();
+        });
+        localStorage.setItem('memoriaComisiones', JSON.stringify(memoriaComisiones));
+        localStorage.setItem('eliminadasComisiones', JSON.stringify(eliminadasComisiones));
+        document.getElementById('indicador-cambios').style.display = 'inline-flex';
+        checkFilaChange();
+    }
+
+    function guardarComisiones() {
+        let datosAguardar = Object.values(memoriaComisiones);
+        if (datosAguardar.length === 0 && eliminadasComisiones.length === 0) return alert("Nada para guardar.");
+
+        const btn = document.getElementById('btnGuardar');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        btn.disabled = true;
+
+        fetch("{% url 'guardar_comisiones_intercorp' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+            body: JSON.stringify({ referencias: datosAguardar, eliminadas: eliminadasComisiones })
+        }).then(r => r.json()).then(data => {
+            if(data.status === 'ok') {
+                localStorage.removeItem('memoriaComisiones');
+                localStorage.removeItem('eliminadasComisiones');
+                alert("¡Guardado exitoso!"); window.location.reload();
+            } else {
+                alert("Error: " + data.message);
+            }
+        }).finally(() => { btn.innerHTML = '<i class="fas fa-save"></i> Guardar'; btn.disabled = false; });
+    }
+
+    function borrarTodoBD() {
+        if (confirm("⚠️ ¿Estás seguro de borrar TODAS las comisiones?")) {
+            fetch("{% url 'borrar_comisiones_intercorp' %}", {
+                method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            }).then(r => r.json()).then(data => {
+                if(data.status === 'ok') {
+                    localStorage.removeItem('memoriaComisiones');
+                    alert("¡Todo limpio!"); window.location.reload();
+                }
+            });
+        }
+    }
+
+    function importarComisiones(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
+            
+            const tbody = document.querySelector('#tablaComisiones tbody');
+            const filaMolde = document.getElementById('fila-molde');
+            const fragmento = document.createDocumentFragment();
+
+            json.forEach(row => {
+                const f = filaMolde.cloneNode(true);
+                f.id = ""; f.style.display = "";
+                f.dataset.originalKey = 'temp-' + Math.random().toString(36).substr(2, 9);
+                
+                if (f.querySelector('.val-cat')) f.querySelector('.val-cat').value = row['CATEGORIA'] || '';
+                
+                let percRaw = row['%'] || '0.00';
+                let txt = percRaw.toString().replace(/%|\s/g, '');
+                if (f.querySelector('.val-perc')) f.querySelector('.val-perc').value = parseFloat(txt.replace(',','.')).toFixed(2);
+                
+                registrarCambio(f);
+                fragmento.appendChild(f);
+            });
+            tbody.insertBefore(fragmento, tbody.firstChild);
+            alert("¡Excel importado! Dale a Guardar para registrar todo.");
+        };
+        reader.readAsArrayBuffer(file);
+        event.target.value = "";
+    }
+
+    function exportarExcel() {
+        const filas = document.querySelectorAll('.fila-data:not(#fila-molde)');
+        let data = [];
+        filas.forEach(fila => {
+            data.push({
+                "CATEGORIA": fila.querySelector('.val-cat')?.value || '',
+                "%": parseFloat(fila.querySelector('.val-perc')?.value || 0)
+            });
+        });
+        if(data.length === 0) return alert("No hay datos para exportar.");
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Comisiones");
+        XLSX.writeFile(wb, "Comisiones_Intercorp.xlsx");
+    }
+</script>
+{% endblock %}

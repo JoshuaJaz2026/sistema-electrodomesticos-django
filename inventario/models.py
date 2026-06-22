@@ -570,3 +570,11 @@ class ReporteIntercorp(models.Model):
 
     def __str__(self):
         return f"Orden {self.id_orden} - {self.producto}"
+    
+class ComisionIntercorp(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    categoria = models.CharField(max_length=255, null=True, blank=True)
+    porcentaje = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+
+    class Meta:
+        verbose_name = 'Comisión Intercorp'

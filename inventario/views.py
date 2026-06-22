@@ -906,9 +906,9 @@ def reporte_intercorp(request):
 
     diccionario_comisiones = {}
     try:
-        from .models import ReferenciaComision
-        comisiones_db = ReferenciaComision.objects.all()
-        diccionario_comisiones = {str(c.categoria).strip().upper(): float(c.comision_porcentaje) for c in comisiones_db if c.categoria}
+        from .models import ComisionIntercorp
+        comisiones_db = ComisionIntercorp.objects.all()
+        diccionario_comisiones = {str(c.categoria).strip().upper(): float(c.porcentaje) for c in comisiones_db if c.categoria}
     except:
         pass
 
@@ -2479,3 +2479,70 @@ def borrar_todos_directorio(request):
         DirectorioProducto.objects.all().delete()
         return JsonResponse({'status': 'ok', 'message': '¡Directorio borrado con éxito!'})
     return JsonResponse({'status': 'error', 'message': 'Solo POST'})
+
+
+
+@login_required
+@verificar_acceso_plataforma('Intercorp')
+def comisiones_intercorp(request):
+    canal = request.session.get('canal_activo')
+    query_search = request.GET.get('q', '')
+    
+    if query_search:
+        comisiones = ComisionIntercorp.objects.filter(
+            categoria__icontains=query_search
+        ).order_by('categoria')
+    else:
+        comisiones = ComisionIntercorp.objects.all().order_by('categoria')
+
+    return render(request, 'reportes_plataformas/comisiones_intercorp.html'), {
+        'canal': canal, 
+        'comisiones': comisiones,
+        'query_search': query_search
+    }
+
+@login_required
+@csrf_exempt
+def guardar_comisiones_intercorp(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            filas = data.get('referencias', [])
+            eliminadas = data.get('eliminadas', [])
+
+            if eliminadas:
+                ComisionIntercorp.objects.filter(id__in=eliminadas).delete()
+
+            objetos = []
+            for f in filas:
+                cat = str(f.get('CATEGORIA', '')).strip()
+                if not cat: continue
+                val_perc = str(f.get('%', '0')).replace('%', '').strip()
+                try: perc = float(val_perc)
+                except: perc = 0.00
+                
+                objetos.append(ComisionIntercorp(usuario=request.user, categoria=cat, porcentaje=perc))
+
+            if objetos:
+                cats = [o.categoria for o in objetos]
+                ComisionIntercorp.objects.filter(categoria__in=cats).delete()
+                ComisionIntercorp.objects.bulk_create(objetos)
+            return JsonResponse({'status': 'ok', 'message': 'guardado'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'solo post'})
+
+@login_required
+@csrf_exempt
+def borrar_comisiones_intercorp(request):
+    if request.method == 'POST':
+        ComisionIntercorp.objects.all().delete()
+        return JsonResponse({'status': 'ok', 'message': 'limpio'})
+
+@login_required
+def descargar_plantilla_comisiones_intercorp(request):
+    response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+    response['Content-Disposition'] = 'attachment; filename="plantilla_comisiones.csv"'
+    writer = csv.writer(response, delimiter=';')
+    writer.writerow(['CATEGORIA', '%'])
+    return response
