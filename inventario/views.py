@@ -2836,6 +2836,7 @@ def procesar_salidas_ventalibre(request):
         return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
 
     try:
+        import json
         data = json.loads(request.body)
         salidas = data.get('salidas', [])
         eliminadas = data.get('eliminadas', []) 
@@ -2856,7 +2857,8 @@ def procesar_salidas_ventalibre(request):
                 for registro in registros_viejos:
                     if registro.modelo:
                         key = str(registro.modelo).upper().replace(" ", "").replace("-", "")
-                        conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.desc_und
+                        # AQUI USAMOS EL NOMBRE REAL DE TU COLUMNA: descuento
+                        conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.descuento
                     registro.delete()
 
             if salidas:
@@ -2866,20 +2868,30 @@ def procesar_salidas_ventalibre(request):
                     titulo = sal.get('titulo', '').strip()
                     fecha_salida = sal.get('fecha_salida') or datetime.now().date()
                     serie = sal.get('serie', '')
-                    costo = float(sal.get('costo_unt') or 0)
-                    descuento = 1
-                    nro_venta = sal.get('nro_ventas', '')
-                    by_usuario = sal.get('by', request.user.username)
+                    
+                    # Extraemos la data del HTML
+                    costo_html = float(sal.get('costo_unt') or 0)
+                    descuento_html = 1
+                    nro_venta_html = sal.get('nro_ventas', '')
+                    by_html = sal.get('by', request.user.username)
 
+                    # AQUI ESTA LA CORRECCION AL GUARDAR
                     SalidaVentaLibre.objects.create(
-                        usuario=request.user, sku=sku, modelo=modelo, titulo=titulo,
-                        fecha_salida=fecha_salida, serie=serie, costo_unt=costo,
-                        desc_und=descuento, nro_ventas=nro_venta, by=by_usuario
+                        sku=sku,
+                        modelo=modelo,
+                        titulo=titulo,
+                        fecha_salida=fecha_salida,
+                        serie=serie,
+                        costo=costo_html,            # Antes decía costo_unt
+                        descuento=descuento_html,    # Antes decía desc_und
+                        nro_venta=nro_venta_html,    # Antes decía nro_ventas
+                        creado_por=by_html           # Antes decía by
+                        # No agregamos 'usuario' porque no existe en tu tabla
                     )
 
                     key = modelo.upper().replace(" ", "").replace("-", "")
                     if key:
-                        conteo_descuentos[key] = conteo_descuentos.get(key, 0) + descuento
+                        conteo_descuentos[key] = conteo_descuentos.get(key, 0) + descuento_html
 
             modelos_afectados = 0
             modelos_restaurados = 0

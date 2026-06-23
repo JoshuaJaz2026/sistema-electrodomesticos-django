@@ -3,8 +3,7 @@
 {% block content %}
 <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem; width: 100%; height: 100%;">
     
-    <!-- PANEL SUPERIOR: BUSCADOR -->
-    <div class="card" style="border-top: 4px solid #64748b; padding: 10px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); flex: 1; display: flex; flex-direction: column; min-height: 0;">
+    <div class="card" style="border-top: 4px solid #10b981; padding: 10px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); flex: 1; display: flex; flex-direction: column; min-height: 0;">
         
         <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 15px; margin-bottom: 10px; flex-shrink: 0;">
             <h3 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-size: 1.1rem; white-space: nowrap;">
@@ -52,7 +51,6 @@
         </div>
     </div>
 
-    <!-- PANEL INFERIOR: SALIDAS -->
     <div class="card" style="border-top: 4px solid var(--color-principal, #10b981); padding: 10px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: flex; flex-direction: column; flex: 1; min-height: 0;">
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; flex-shrink: 0;">
@@ -92,7 +90,6 @@
                     </tr>
                 </thead>
                 <tbody id="cuerpoSalidas">
-                    <!-- Fila Molde (Oculta) -->
                     <tr id="fila-molde-salida" style="display: none;" class="fila-salida">
                         <td class="td-premium"><input type="text" placeholder="Pega SKU..." class="celda-input central text-blue text-mono val-sku" oninput="autocompletarBUSCARV(this)"></td>
                         <td class="td-premium"><input type="text" readonly class="celda-input central bold val-modelo input-readonly" tabindex="-1"></td>
@@ -122,6 +119,7 @@
                                 <option value="DAVID">DAVID</option>
                                 <option value="EDUARDO">EDUARDO</option>
                                 <option value="KEVIN">KEVIN</option>
+                                <option value="MISTER">MISTER</option>
                             </select>
                         </td>
                         <td class="td-premium" style="text-align: center; vertical-align: middle;">
@@ -131,7 +129,6 @@
                         </td>
                     </tr>
 
-                    <!-- Filas Cargadas desde BD -->
                     {% if page_obj %}
                         {% for item in page_obj %}
                         <tr class="fila-salida" data-id="{{ item.id }}">
@@ -144,32 +141,37 @@
                             <td class="td-premium"><input type="date" class="celda-input central val-fecha" value="{{ item.fecha_salida|date:'Y-m-d' }}"></td>
                             <td class="td-premium"><input type="text" readonly class="celda-input central text-blue text-mono val-serie input-readonly" value="{{ item.serie|default:'-' }}" tabindex="-1"></td>
                             
+                            <!-- USAMOS item.costo -->
                             <td class="td-premium" style="background-color: #f8fafc;">
                                 <div style="display: flex; align-items: center; padding: 0 5px; justify-content: center;">
                                     <span style="color: #94a3b8; font-weight: bold; margin-right: 2px;">S/</span>
-                                    <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" value="{{ item.costo_unt|floatformat:2|default:'0.00' }}" style="padding-left: 2px; width: 60px;" tabindex="-1">
+                                    <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" value="{{ item.costo|floatformat:2|default:'0.00' }}" style="padding-left: 2px; width: 60px;" tabindex="-1">
                                 </div>
                             </td>
                             
+                            <!-- USAMOS item.descuento -->
                             <td class="td-premium" style="background-color: #fef2f2;">
-                                <input type="number" readonly class="celda-input central val-desc input-badge-rojo input-readonly" value="{{ item.desc_und|default:'1' }}" tabindex="-1">
+                                <input type="number" readonly class="celda-input central val-desc input-badge-rojo input-readonly" value="{{ item.descuento|default:'1' }}" tabindex="-1">
                             </td>
                             
-                            <td class="td-premium"><input type="text" class="celda-input central bold text-dark val-ventas" value="{{ item.nro_ventas|default:'' }}"></td>
+                            <!-- USAMOS item.nro_venta -->
+                            <td class="td-premium"><input type="text" class="celda-input central bold text-dark val-ventas" value="{{ item.nro_venta|default:'' }}"></td>
+                            
+                            <!-- USAMOS item.creado_por -->
                             <td class="td-premium">
                                 <select class="celda-input central text-orange val-by select-premium">
-                                    <option value="" disabled {% if not item.by %}selected{% endif %}>-- BY --</option>
-                                    <option value="MILAGROS" {% if item.by == 'MILAGROS' %}selected{% endif %}>MILAGROS</option>
-                                    <option value="PABLO" {% if item.by == 'PABLO' %}selected{% endif %}>PABLO</option>
-                                    <option value="DENISE" {% if item.by == 'DENISE' %}selected{% endif %}>DENISE</option>
-                                    <option value="JOSHUA" {% if item.by == 'JOSHUA' %}selected{% endif %}>JOSHUA</option>
-                                    <option value="ALDO" {% if item.by == 'ALDO' %}selected{% endif %}>ALDO</option>
-                                    <option value="ADAMARI" {% if item.by == 'ADAMARI' %}selected{% endif %}>ADAMARI</option>
-                                    <option value="CARLOS" {% if item.by == 'CARLOS' %}selected{% endif %}>CARLOS</option>
-                                    <option value="DAVID" {% if item.by == 'DAVID' %}selected{% endif %}>DAVID</option>
-                                    <option value="EDUARDO" {% if item.by == 'EDUARDO' %}selected{% endif %}>EDUARDO</option>
-                                    <option value="KEVIN" {% if item.by == 'KEVIN' %}selected{% endif %}>KEVIN</option>
-                                    <option value="MISTER" {% if item.by == 'MISTER' %}selected{% endif %}>MISTER</option>
+                                    <option value="" disabled {% if not item.creado_por %}selected{% endif %}>-- BY --</option>
+                                    <option value="MILAGROS" {% if item.creado_por == 'MILAGROS' %}selected{% endif %}>MILAGROS</option>
+                                    <option value="PABLO" {% if item.creado_por == 'PABLO' %}selected{% endif %}>PABLO</option>
+                                    <option value="DENISE" {% if item.creado_por == 'DENISE' %}selected{% endif %}>DENISE</option>
+                                    <option value="JOSHUA" {% if item.creado_por == 'JOSHUA' %}selected{% endif %}>JOSHUA</option>
+                                    <option value="ALDO" {% if item.creado_por == 'ALDO' %}selected{% endif %}>ALDO</option>
+                                    <option value="ADAMARI" {% if item.creado_por == 'ADAMARI' %}selected{% endif %}>ADAMARI</option>
+                                    <option value="CARLOS" {% if item.creado_por == 'CARLOS' %}selected{% endif %}>CARLOS</option>
+                                    <option value="DAVID" {% if item.creado_por == 'DAVID' %}selected{% endif %}>DAVID</option>
+                                    <option value="EDUARDO" {% if item.creado_por == 'EDUARDO' %}selected{% endif %}>EDUARDO</option>
+                                    <option value="KEVIN" {% if item.creado_por == 'KEVIN' %}selected{% endif %}>KEVIN</option>
+                                    <option value="MISTER" {% if item.creado_por == 'MISTER' %}selected{% endif %}>MISTER</option>
                                 </select>
                             </td>
                             
@@ -211,7 +213,7 @@
     /* Alerta Incompleta */
     .fila-incompleta { background-color: #fef2f2 !important; border-left: 4px solid #ef4444; }
 
-    /* Inputs Fantasma */
+    /* Inputs Fantasma (Llenan toda la celda al 100%) */
     .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 6px 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
     .celda-input:focus:not([readonly]) { background-color: #fef9c3; box-shadow: inset 0 0 0 2px var(--color-principal, #10b981); color: #000; }
     
@@ -228,10 +230,10 @@
     .text-blue { color: #2563eb; }
     .text-orange { color: #ea580c; }
 
-    /* BADGE ROJO */
+    /* EL BADGE ROJO ACTUALIZADO */
     .input-badge-rojo { background-color: #fee2e2; color: #b91c1c; border: none; width: 100%; height: 100%; font-weight: 900; font-size: 1rem; text-align: center; display: block; box-sizing: border-box; padding: 8px; }
 
-    /* Selectores Custom */
+    /* Selectores Custom (Combobox) */
     .select-premium { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px top 50%; background-size: 8px auto; padding-right: 20px; }
 
     .btn-eliminar { background: none; border: none; color: #ef4444; cursor: pointer; padding: 6px; border-radius: 4px; transition: background 0.2s; display: block; margin: 0 auto;}
@@ -241,6 +243,7 @@
 </style>
 
 <script>
+    const diccionarioSKUs = {{ skus_json|safe|default:"{}" }};
     let debounceTimer;
     let catalogoActual = [];
     let salidasAEliminar = [];
@@ -255,7 +258,7 @@
         return usados;
     }
 
-    // Función 1: Buscar Modelo
+    // Función 1: Buscar Modelo en la BD en tiempo real
     function buscarModelo(valor) {
         clearTimeout(debounceTimer);
         
@@ -280,6 +283,7 @@
                     
                     let html = '';
                     data.items.forEach(i => {
+                        // Ocultamos si ya está seleccionado en la tabla de abajo
                         if (skusUsados.has(i.sku.toUpperCase())) return;
 
                         html += `
@@ -315,7 +319,9 @@
             
             ultimoInput.value = texto;
             autocompletarBUSCARV(ultimoInput); 
+            
             ultimoInput.focus();
+            // Refrescar buscador para que desaparezca el recién agregado
             buscarModelo(document.getElementById('bciModelo').value);
         });
     }
@@ -344,10 +350,11 @@
         }
 
         fila.remove();
+        // Refrescar buscador por si devolvimos un SKU
         buscarModelo(document.getElementById('bciModelo').value);
     }
 
-    // Función 2: Autocompletar
+    // Función 2: Autocompletar cuando escaneas un SKU en la salida
     function autocompletarBUSCARV(inputSKU) {
         const fila = inputSKU.closest('tr');
         const sku = inputSKU.value.trim().toUpperCase();
@@ -375,7 +382,7 @@
         buscarModelo(document.getElementById('bciModelo').value);
     }
 
-    // Función 4: Enviar datos a Python
+    // Función 4: Enviar datos a Python para descontar de la BD
     function procesarDescuentosVentaLibre() {
         const filas = document.querySelectorAll('#cuerpoSalidas tr:not(#fila-molde-salida)');
         let datos = [];
