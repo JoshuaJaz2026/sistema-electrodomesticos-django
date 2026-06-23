@@ -501,11 +501,44 @@ def percheron_creditienda(request):
 @login_required
 @verificar_acceso_plataforma('Intercorp')
 def percheron_intercorp(request):
-    canal = request.session.get('canal_activo')
-    usuarios_bci = User.objects.all() 
+    canal = request.session.get('canal_activo', 'Intercorp')
+    
+    from .models import SalidaIntercorp, IngresoPercheron, Producto
+    
+    # 1. Traemos el historial de salidas ordenado del más nuevo al más viejo
+    page_obj = SalidaIntercorp.objects.all().order_by('-id')
+    
+    # 2. Generamos el diccionario de SKUs (igual que en Mercado Libre) para el buscador
+    skus_usados = SalidaIntercorp.objects.values_list('sku', flat=True)
+    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
+    
+    productos_db = Producto.objects.all()
+    dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
+    
+    dict_skus = {}
+    for ing in ingresos_db:
+        mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
+        prod = dict_prods.get(mod_limpio)
+        marca_val = prod.marca if prod else 'S/N MARCA'
+        stock_val = prod.stock_actual if prod else 0
+        
+        fecha_str = '-'
+        if ing.fecha_ingreso:
+            try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
+            except: fecha_str = str(ing.fecha_ingreso)
+
+        dict_skus[ing.sku] = {
+            'modelo': ing.modelo or '', 'titulo': ing.titulo or '', 'serie': ing.serie_nro or '-',
+            'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
+            'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
+            'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
+        }
+
+    # 3. Enviamos TODA la información al HTML
     return render(request, 'inventario/percheron_intercorp.html', {
         'canal': canal,
-        'usuarios': usuarios_bci
+        'page_obj': page_obj,
+        'skus_json': json.dumps(dict_skus)
     })
 
 @login_required
