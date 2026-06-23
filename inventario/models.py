@@ -595,3 +595,5 @@ class SalidaIntercorp(models.Model):
 
     class Meta:
         verbose_name = 'Salida Intercorp'
+
+

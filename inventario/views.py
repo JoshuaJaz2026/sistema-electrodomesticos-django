@@ -2735,3 +2735,174 @@ def procesar_salidas_intercorp(request):
         import traceback
         print(traceback.format_exc())
         return JsonResponse({'status': 'error', 'message': str(e)})
+    
+
+# ==========================================
+# PLATAFORMA VENTA LIBRE
+# ==========================================
+@login_required
+@verificar_acceso_plataforma('Venta Libre')
+def percheron_ventalibre(request):
+    canal = request.session.get('canal_activo', 'Venta Libre')
+    
+    from .models import SalidaVentaLibre, IngresoPercheron, Producto
+    import json
+    
+    # 1. Traemos el historial de salidas de Venta Libre
+    page_obj = SalidaVentaLibre.objects.all().order_by('-id')
+    
+    # 2. Generamos el diccionario de SKUs excluyendo los que ya salieron en Venta Libre
+    skus_usados = SalidaVentaLibre.objects.values_list('sku', flat=True)
+    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
+    
+    productos_db = Producto.objects.all()
+    dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
+    
+    dict_skus = {}
+    for ing in ingresos_db:
+        mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
+        prod = dict_prods.get(mod_limpio)
+        marca_val = prod.marca if prod else 'S/N MARCA'
+        stock_val = prod.stock_actual if prod else 0
+        
+        fecha_str = '-'
+        if ing.fecha_ingreso:
+            try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
+            except: fecha_str = str(ing.fecha_ingreso)
+
+        dict_skus[ing.sku] = {
+            'modelo': ing.modelo or '', 'titulo': ing.titulo or '', 'serie': ing.serie_nro or '-',
+            'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
+            'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
+            'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
+        }
+
+    return render(request, 'inventario/percheron_ventalibre.html', {
+        'canal': canal,
+        'page_obj': page_obj,
+        'skus_json': json.dumps(dict_skus)
+    })
+
+@login_required
+def buscar_modelo_ventalibre(request):
+    modelo_query = request.GET.get('modelo', '').strip()
+    try:
+        from .models import IngresoPercheron, Producto, SalidaVentaLibre 
+        
+        skus_usados = SalidaVentaLibre.objects.values_list('sku', flat=True)
+        resultados = IngresoPercheron.objects.filter(
+            modelo__icontains=modelo_query
+        ).exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
+        
+        productos_db = Producto.objects.all()
+        dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
+        
+        data = []
+        producto_nombre = ""
+        if resultados.exists():
+            producto_nombre = resultados.first().titulo or ""
+            
+        for r in resultados:
+            mod_limpio = str(r.modelo).strip().upper() if r.modelo else ''
+            prod = dict_prods.get(mod_limpio)
+            marca_val = prod.marca if prod else 'S/N MARCA'
+            
+            fecha_str = '-'
+            if r.fecha_ingreso:
+                try: fecha_str = r.fecha_ingreso.strftime('%d/%m/%Y')
+                except: fecha_str = str(r.fecha_ingreso)
+                
+            data.append({
+                'sku': r.sku,
+                'marca': marca_val,
+                'fecha_ingreso': fecha_str,
+                'serie': r.serie_nro or '-',
+                'costo': str(r.costo_unitario) if r.costo_unitario else '0.00',
+                'proveedor': r.proveedor_motivo or '-',
+                'ingresado_por': r.creado_por or ''
+            })
+            
+        return JsonResponse({
+            'status': 'ok', 'producto': producto_nombre,
+            'stock': resultados.count(), 'items': data
+        })
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+@login_required
+@csrf_exempt
+def procesar_salidas_ventalibre(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
+
+    try:
+        data = json.loads(request.body)
+        salidas = data.get('salidas', [])
+        eliminadas = data.get('eliminadas', []) 
+
+        if not salidas and not eliminadas:
+            return JsonResponse({'status': 'error', 'message': 'Sin datos para procesar.'})
+
+        from .models import SalidaVentaLibre, Producto
+        from datetime import datetime
+        from django.db import transaction
+
+        with transaction.atomic():
+            conteo_descuentos = {}
+            conteo_restauraciones = {}
+
+            if eliminadas:
+                registros_viejos = SalidaVentaLibre.objects.filter(id__in=eliminadas)
+                for registro in registros_viejos:
+                    if registro.modelo:
+                        key = str(registro.modelo).upper().replace(" ", "").replace("-", "")
+                        conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.desc_und
+                    registro.delete()
+
+            if salidas:
+                for sal in salidas:
+                    sku = sal.get('sku', '').strip()
+                    modelo = sal.get('modelo', '').strip()
+                    titulo = sal.get('titulo', '').strip()
+                    fecha_salida = sal.get('fecha_salida') or datetime.now().date()
+                    serie = sal.get('serie', '')
+                    costo = float(sal.get('costo_unt') or 0)
+                    descuento = 1
+                    nro_venta = sal.get('nro_ventas', '')
+                    by_usuario = sal.get('by', request.user.username)
+
+                    SalidaVentaLibre.objects.create(
+                        usuario=request.user, sku=sku, modelo=modelo, titulo=titulo,
+                        fecha_salida=fecha_salida, serie=serie, costo_unt=costo,
+                        desc_und=descuento, nro_ventas=nro_venta, by=by_usuario
+                    )
+
+                    key = modelo.upper().replace(" ", "").replace("-", "")
+                    if key:
+                        conteo_descuentos[key] = conteo_descuentos.get(key, 0) + descuento
+
+            modelos_afectados = 0
+            modelos_restaurados = 0
+            
+            if conteo_descuentos or conteo_restauraciones:
+                for prod in Producto.objects.all():
+                    if prod.modelo:
+                        key = prod.modelo.upper().replace(" ", "").replace("-", "")
+                        cambio = False
+                        if key in conteo_restauraciones:
+                            prod.stock_actual += conteo_restauraciones[key]
+                            modelos_restaurados += 1
+                            cambio = True
+                        if key in conteo_descuentos:
+                            prod.stock_actual = max(prod.stock_actual - conteo_descuentos[key], 0)
+                            modelos_afectados += 1
+                            cambio = True
+                        if cambio:
+                            prod.save(update_fields=['stock_actual'])
+
+        return JsonResponse({'status': 'ok', 'message': f'Descontados: {modelos_afectados}. Devueltos: {modelos_restaurados}.'})
+
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return JsonResponse({'status': 'error', 'message': str(e)})
