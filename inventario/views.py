@@ -1086,7 +1086,7 @@ def reporte_ventalibre(request):
         'page_obj': reportes,
         'dict_prods_json': json.dumps(dict_prods)
     })
-
+#hola
 @login_required
 @verificar_acceso_plataforma('Web')
 def reporte_web(request):
