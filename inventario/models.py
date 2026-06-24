@@ -597,3 +597,52 @@ class SalidaIntercorp(models.Model):
         verbose_name = 'Salida Intercorp'
 
 
+class ReporteVentaLibre(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reportes_ventalibre', null=True, blank=True)
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+
+    # 1. Datos Generales y del Cliente
+    fecha = models.DateField(null=True, blank=True)
+    mes_anio = models.CharField(max_length=50, null=True, blank=True)
+    asesor = models.CharField(max_length=100, null=True, blank=True)
+    tipo_cliente = models.CharField(max_length=100, null=True, blank=True)
+    dni_ruc = models.CharField(max_length=50, null=True, blank=True)
+    comprobante = models.CharField(max_length=100, null=True, blank=True)
+    nombre_razon_social = models.CharField(max_length=255, null=True, blank=True)
+
+    # 2. Producto y Almacén
+    marca = models.CharField(max_length=100, null=True, blank=True)
+    categoria = models.CharField(max_length=150, null=True, blank=True)
+    almacen_sjl = models.BooleanField(default=False) # Para el check box
+    sku_almacen = models.CharField(max_length=100, null=True, blank=True)
+    modelo = models.CharField(max_length=100, null=True, blank=True)
+    producto = models.CharField(max_length=255, null=True, blank=True)
+
+    # 3. Ventas y Envíos
+    precio_u = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    cant = models.IntegerField(default=1)
+    costo_envio = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    p_total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    # 4. Pagos y Saldos
+    a_cuenta = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    restante = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    # 5. Costos Internos y Rentabilidad
+    costo_x_prod = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    und = models.IntegerField(default=1)
+    costo_x_prod_total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    flete = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    saldo_x_envio = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    ganancia = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    # Se guarda como CharField para admitir el símbolo de "%" si viene del Excel
+    rentabilidad = models.CharField(max_length=50, null=True, blank=True) 
+
+    class Meta:
+        verbose_name = 'Reporte Venta Libre'
+        verbose_name_plural = 'Reportes Venta Libre'
+        ordering = ['-fecha', '-id']
+
+    def __str__(self):
+        return f"{self.comprobante} - {self.nombre_razon_social}"

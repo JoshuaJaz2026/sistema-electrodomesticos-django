@@ -142,4 +142,6 @@ urlpatterns = [
     # ==========================================
     path('api/buscar-modelo-ventalibre/', views.buscar_modelo_ventalibre, name='buscar_modelo_ventalibre'),
     path('api/procesar-salidas-ventalibre/', views.procesar_salidas_ventalibre, name='procesar_salidas_ventalibre'),
+    path('guardar-reportes-masivos-ventalibre/', views.guardar_reportes_masivos_ventalibre, name='guardar_reportes_masivos_ventalibre'),
+    path('borrar-todos-los-reportes-ventalibre/', views.borrar_todos_los_reportes_ventalibre, name='borrar_todos_los_reportes_ventalibre'),
 ]

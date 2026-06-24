@@ -1,0 +1,351 @@
+{% extends 'inventario/dashboard_global.html' %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem; width: 100%; height: 100%;">
+
+    <div class="card" style="border-top: 4px solid #10b981; padding: 10px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: flex; flex-direction: column; flex: 1; min-height: 0;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; flex-shrink: 0;">
+            <h3 style="margin: 0; color: #1e293b; text-transform: uppercase; display: flex; align-items: center; gap: 8px; font-size: 1.1rem;">
+                <i class="fas fa-chart-line" style="color: #10b981;"></i> Reporte de Ventas 2026: VENTA LIBRE
+            </h3>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button type="button" class="btn-top" style="background-color: #3b82f6;">
+                    <i class="fas fa-download"></i> Plantilla
+                </button>
+                <input type="file" id="csvImportarReportes" accept=".csv" style="display: none;">
+                <button type="button" onclick="document.getElementById('csvImportarReportes').click()" class="btn-top" style="background-color: #0ea5e9;">
+                    <i class="fas fa-upload"></i> Importar Masivo
+                </button>
+                <button type="button" onclick="agregarFila()" class="btn-top" style="background-color: #10b981; color: white;">
+                    <i class="fas fa-plus"></i> Nueva Fila
+                </button>
+                <button type="button" onclick="guardarReportes()" class="btn-top" style="background-color: #1e293b;">
+                    <i class="fas fa-save"></i> Guardar Todo
+                </button>
+                <button type="button" onclick="borrarTodo()" class="btn-top" style="background-color: #ef4444;">
+                    <i class="fas fa-trash"></i> Borrar Todo
+                </button>
+            </div>
+        </div>
+
+        <div style="overflow: auto; border: 2px solid #94a3b8; border-radius: 4px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); flex-grow: 1; min-height: 0;">
+            <table id="tablaReportes" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.8rem; white-space: nowrap;">
+                <thead style="position: sticky; top: 0; z-index: 10;">
+                    <tr style="background-color: #7e22ce; color: white; text-transform: uppercase; font-weight: bold; font-size: 0.7rem; letter-spacing: 0.5px;">
+                        <th class="th-premium" style="width: 40px; text-align: center;"><i class="fas fa-trash-alt"></i></th>
+                        <th class="th-premium" style="width: 130px; text-align: center;">FECHA</th>
+                        <th class="th-premium" style="width: 100px; text-align: center;">MES / AÑO</th>
+                        <th class="th-premium" style="width: 140px; text-align: center;">ASESOR</th>
+                        <th class="th-premium" style="width: 150px; text-align: center;">TIPO CLIENTE</th>
+                        <th class="th-premium" style="width: 120px; text-align: center;">D.N.I. / R.U.C.</th>
+                        <th class="th-premium" style="width: 120px; text-align: center;">COMPROBANTE</th>
+                        <th class="th-premium" style="width: 250px; text-align: center;">NOMBRE O RAZON SOCIAL</th>
+                        <th class="th-premium" style="width: 150px; text-align: center;">MARCA</th>
+                        <th class="th-premium" style="width: 150px; text-align: center;">CATEGORIA</th>
+                        
+                        <th class="th-premium" style="width: 90px; text-align: center;">ALM SJL <i class="fas fa-check-square"></i></th>
+                        <th class="th-premium" style="width: 150px; text-align: center;">SKU ALMACÉN</th>
+                        <th class="th-premium" style="width: 150px; text-align: center;">MODELO</th>
+                        <th class="th-premium" style="width: 300px; text-align: center;">PRODUCTO</th>
+                        <th class="th-premium" style="width: 110px; text-align: center;">PRECIO U.</th>
+                        <th class="th-premium" style="width: 80px; text-align: center;">CANT.</th>
+                        <th class="th-premium" style="width: 110px; text-align: center;">COSTO ENVÍO</th>
+                        <th class="th-premium" style="width: 110px; text-align: center;">P. TOTAL</th>
+                        
+                        <th class="th-premium" style="width: 110px; background-color: #facc15; color: #713f12; text-align: center;">A CUENTA</th>
+                        <th class="th-premium" style="width: 110px; background-color: #10b981; text-align: center;">RESTANTE</th>
+                        
+                        <th class="th-premium" style="width: 110px; background-color: #b91c1c; text-align: center;">COSTO x PROD</th>
+                        <th class="th-premium" style="width: 80px; background-color: #7e22ce; text-align: center;">UND.</th>
+                        <th class="th-premium" style="width: 110px; background-color: #7e22ce; text-align: center;">COSTOxPROD T.</th>
+                        <th class="th-premium" style="width: 110px; background-color: #7e22ce; text-align: center;">FLETE</th>
+                        <th class="th-premium" style="width: 110px; background-color: #ea580c; text-align: center;">SALDO ENVÍO</th>
+                        <th class="th-premium" style="width: 110px; text-align: center;">GANANCIA</th>
+                        <th class="th-premium" style="width: 100px; text-align: center;">RENTAB. %</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoReportes">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-top { border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: white; transition: 0.2s; font-size: 0.8rem; }
+    .btn-top:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    table { border-collapse: collapse; }
+    .th-premium { padding: 8px 6px; border: 1px solid #d8b4fe; }
+    .td-premium { padding: 0; border: 1px solid #e2e8f0; height: 32px; vertical-align: middle; }
+    
+    tbody tr:nth-child(even) { background-color: #f8fafc; }
+    tbody tr:hover { background-color: #e2e8f0; }
+
+    .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 4px 6px; font-family: inherit; font-size: 12px; color: #334155; background-color: transparent; outline: none; }
+    .celda-input:focus:not([readonly]) { background-color: #fef9c3; box-shadow: inset 0 0 0 2px #10b981; color: #000; }
+    
+    .celda-readonly { color: #64748b; font-weight: bold; background-color: #f1f5f9; cursor: not-allowed; }
+    
+    .central { text-align: center; }
+    .derecha { text-align: right; font-weight: bold; }
+    .bold { font-weight: bold; }
+    
+    .select-premium { cursor: pointer; appearance: none; background-color: transparent; }
+    .celda-check { width: 18px; height: 18px; cursor: pointer; margin: auto; display: block; accent-color: #7e22ce; }
+    .btn-eliminar { background: none; border: none; color: #ef4444; cursor: pointer; }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
+<script>
+    const productosDB = {{ dict_prods_json|safe|default:"{}" }};
+    const cuerpo = document.getElementById('cuerpoReportes');
+
+    const opcionesAsesor = `<option value="">-</option><option value="DAVID">DAVID</option><option value="STEPHANI">STEPHANI</option><option value="CARLOS">CARLOS</option><option value="BELEN">BELEN</option><option value="MILAGROS">MILAGROS</option><option value="ALDO">ALDO</option><option value="DENISE">DENISE</option><option value="JOSHUA">JOSHUA</option><option value="ALEX">ALEX</option><option value="ADAMARI">ADAMARI</option><option value="PABLO">PABLO</option>`;
+    
+    const opcionesTipoCliente = `<option value="">-</option><option value="CLIENTE FRECUENTE">CLIENTE FRECUENTE</option><option value="CLIENTE NUEVO">CLIENTE NUEVO</option><option value="FACEBOOK">FACEBOOK</option><option value="TIK TOK">TIK TOK</option><option value="PAGINA WEB">PAGINA WEB</option><option value="POST VENTA">POST VENTA</option><option value="LEAD CENTER">LEAD CENTER</option>`;
+    
+    const opcionesMarca = `<option value="">-</option><option value="PANASONIC">PANASONIC</option><option value="BEHRINGER">BEHRINGER</option><option value="BGH">BGH</option><option value="BOSSKO">BOSSKO</option><option value="ELECTROLUX">ELECTROLUX</option><option value="FINEZZA">FINEZZA</option><option value="FUJITEC">FUJITEC</option><option value="IMACO">IMACO</option><option value="INDURAMA">INDURAMA</option><option value="JBO">JBO</option><option value="JVC">JVC</option><option value="LG">LG</option><option value="OSTER">OSTER</option><option value="RECORD">RECORD</option><option value="SAMSUNG">SAMSUNG</option><option value="WAHL">WAHL</option><option value="MORLEY">MORLEY</option><option value="HALION">HALION</option><option value="TAURUS">TAURUS</option><option value="PREMIUM STAR">PREMIUM STAR</option><option value="EVOLUTION">EVOLUTION</option><option value="MIRAY">MIRAY</option><option value="TREVELY">TREVELY</option><option value="EPSON">EPSON</option><option value="MABE">MABE</option><option value="VISIONEER">VISIONEER</option><option value="WAYRA">WAYRA</option><option value="SOLE">SOLE</option><option value="PHILIPS">PHILIPS</option><option value="ACCESORIOS">ACCESORIOS</option><option value="MAXTRON">MAXTRON</option><option value="PREMIER">PREMIER</option><option value="DAJU">DAJU</option><option value="BLACKLINE">BLACKLINE</option><option value="LUISSANT">LUISSANT</option><option value="MICRONICS">MICRONICS</option><option value="TCL">TCL</option><option value="BLUE PACK">BLUE PACK</option><option value="CICLON">CICLON</option><option value="LIBERO">LIBERO</option><option value="IMPERIAL">IMPERIAL</option><option value="BLOPACK">BLOPACK</option><option value="SONY">SONY</option><option value="VENTUS">VENTUS</option><option value="MIDEA">MIDEA</option><option value="ILUMI">ILUMI</option>`;
+
+    const opcionesCategoria = `<option value="">-</option><option value="AUDIFONOS">AUDIFONOS</option><option value="AFEITADOR">AFEITADOR</option><option value="ALISADOR">ALISADOR</option><option value="ARROCERA">ARROCERA</option><option value="BATIDORA DE INMERSION">BATIDORA DE INMERSION</option><option value="BATIDORA DE MANO">BATIDORA DE MANO</option><option value="BATIDORA DE TAZÓN">BATIDORA DE TAZÓN</option><option value="BATIDORA PLANETARIA">BATIDORA PLANETARIA</option><option value="CACEROLA">CACEROLA</option><option value="CAFETERA">CAFETERA</option><option value="CALENTADOR">CALENTADOR</option><option value="CEPILLO">CEPILLO</option><option value="COCINA DE INDUCCION">COCINA DE INDUCCION</option><option value="COCINA DE PIE">COCINA DE PIE</option><option value="COCINA ELECTRICA">COCINA ELECTRICA</option><option value="COLADOR">COLADOR</option><option value="COMBO BLACK">COMBO BLACK</option><option value="COMBO BLACK SILVER">COMBO BLACK SILVER</option><option value="COMBO CHERRY">COMBO CHERRY</option><option value="COMBO CUMBIA">COMBO CUMBIA</option><option value="COMBO OSTER">COMBO OSTER</option><option value="COMBOBLACKOSTER2">COMBOBLACKOSTER2</option><option value="COMBOEXTRACTOR">COMBOEXTRACTOR</option><option value="COMBOOSTER">COMBOOSTER</option><option value="COMBORED">COMBORED</option><option value="DEPILADOR">DEPILADOR</option><option value="DISPENSADOR ELECTRICO">DISPENSADOR ELECTRICO</option><option value="ESPAGUETERA">ESPAGUETERA</option><option value="ESTUFA">ESTUFA</option><option value="EXTRACTOR DE JUGOS">EXTRACTOR DE JUGOS</option><option value="FREIDORA DE AIRE">FREIDORA DE AIRE</option><option value="FRIGOBAR">FRIGOBAR</option><option value="HORNO CON FREIDORA">HORNO CON FREIDORA</option><option value="HORNO ELECTRICO">HORNO ELECTRICO</option><option value="JUEGO DE OLLAS">JUEGO DE OLLAS</option><option value="LAVADORA">LAVADORA</option><option value="LAVASECA">LAVASECA</option><option value="MICROONDAS">MICROONDAS</option><option value="MINICOMPONENTE">MINICOMPONENTE</option><option value="MOLEDOR DE CARNE">MOLEDOR DE CARNE</option><option value="MULTI OLLA">MULTI OLLA</option><option value="OLLA A PRESION">OLLA A PRESION</option><option value="PANIFICADORA">PANIFICADORA</option><option value="PARRILLA CARBON">PARRILLA CARBON</option><option value="PLANCHA A VAPOR">PLANCHA A VAPOR</option><option value="PLANCHA GRILL">PLANCHA GRILL</option><option value="PLANCHA Y PARRILLA">PLANCHA Y PARRILLA</option><option value="PROCESADOR DE ALIMENTOS">PROCESADOR DE ALIMENTOS</option><option value="REFRIGERADORA">REFRIGERADORA</option><option value="SECADORA DE CABELLO">SECADORA DE CABELLO</option><option value="SET DE BOWLS">SET DE BOWLS</option><option value="SET DE CUBIERTOS">SET DE CUBIERTOS</option><option value="TABLET">TABLET</option><option value="TAZAS">TAZAS</option><option value="TERMO HERVIDOR">TERMO HERVIDOR</option><option value="TERMO VENTILADOR">TERMO VENTILADOR</option><option value="TOSTADORA">TOSTADORA</option><option value="TRICOMBO AVOCADO">TRICOMBO AVOCADO</option><option value="TRIPACK SARTÉN">TRIPACK SARTÉN</option><option value="VAPORIZADOR DE TELAS">VAPORIZADOR DE TELAS</option><option value="VASO DE VIDRIO">VASO DE VIDRIO</option><option value="VENTILADOR">VENTILADOR</option><option value="WAFLERA">WAFLERA</option><option value="VAPORERA">VAPORERA</option><option value="AIRE ACONDICIONADO">AIRE ACONDICIONADO</option><option value="DISPENSADOR DE AGUA">DISPENSADOR DE AGUA</option><option value="TERMA ELECTRICA">TERMA ELECTRICA</option><option value="MAQUINA DE HIELO">MAQUINA DE HIELO</option><option value="RACK DE TV">RACK DE TV</option>`;
+
+    function crearFilaHTML(data = {}) {
+        return `
+            <tr class="fila-reporte">
+                <td class="td-premium central"><button type="button" class="btn-eliminar" onclick="this.closest('tr').remove()"><i class="fas fa-trash-alt"></i></button></td>
+                <td class="td-premium"><input type="date" class="celda-input central c-fecha" value="${data.fecha || ''}" onchange="autocalcular(this)"></td>
+                <td class="td-premium"><input type="text" class="celda-input central bold celda-readonly c-mes" readonly value="${data.mes_anio || ''}" tabindex="-1"></td>
+                <td class="td-premium"><select class="celda-input central bold select-premium c-asesor">${opcionesAsesor.replace(`value="${data.asesor}"`, `value="${data.asesor}" selected`)}</select></td>
+                <td class="td-premium"><select class="celda-input central bold select-premium c-tipo">${opcionesTipoCliente.replace(`value="${data.tipo_cliente}"`, `value="${data.tipo_cliente}" selected`)}</select></td>
+                <td class="td-premium"><input type="text" class="celda-input central bold c-dni" value="${data.dni_ruc || ''}"></td>
+                <td class="td-premium"><input type="text" class="celda-input central bold text-blue c-comp" value="${data.comprobante || ''}"></td>
+                <td class="td-premium"><input type="text" class="celda-input c-razon" value="${data.nombre_razon_social || ''}"></td>
+                <td class="td-premium"><select class="celda-input central bold select-premium c-marca">${opcionesMarca.replace(`value="${data.marca}"`, `value="${data.marca}" selected`)}</select></td>
+                <td class="td-premium"><select class="celda-input central select-premium c-cat">${opcionesCategoria.replace(`value="${data.categoria}"`, `value="${data.categoria}" selected`)}</select></td>
+                
+                <td class="td-premium" style="background-color:#faf5ff;"><input type="checkbox" class="celda-check c-sjl" ${data.almacen_sjl ? 'checked' : ''}></td>
+                <td class="td-premium"><input type="text" class="celda-input central bold c-sku" value="${data.sku_almacen || ''}"></td>
+                <td class="td-premium"><input type="text" class="celda-input central bold c-modelo" value="${data.modelo || ''}" oninput="autocompletarProducto(this)"></td>
+                <td class="td-premium"><input type="text" class="celda-input celda-readonly c-prod" readonly value="${data.producto || ''}" tabindex="-1"></td>
+                
+                <td class="td-premium"><div style="display:flex;"><span style="padding:4px;color:#94a3b8;">S/</span><input type="number" class="celda-input derecha bold c-preciou" value="${data.precio_u || 0}" oninput="autocalcular(this)"></div></td>
+                <td class="td-premium"><input type="number" class="celda-input central bold c-cant" value="${data.cant || 1}" oninput="autocalcular(this)"></td>
+                <td class="td-premium"><div style="display:flex;"><span style="padding:4px;color:#94a3b8;">S/</span><input type="number" class="celda-input derecha bold c-cenvio" value="${data.costo_envio || 0}" oninput="autocalcular(this)"></div></td>
+                <td class="td-premium"><div style="display:flex;"><span style="padding:4px;color:#94a3b8;">S/</span><input type="text" readonly class="celda-input derecha bold celda-readonly c-ptotal" value="${data.p_total || 0}" tabindex="-1"></div></td>
+                
+                <td class="td-premium" style="background-color:#fefce8;"><div style="display:flex;"><span style="padding:4px;color:#a16207;">S/</span><input type="number" class="celda-input derecha bold c-acuenta" value="${data.a_cuenta || 0}" oninput="autocalcular(this)" style="color:#a16207;"></div></td>
+                <td class="td-premium" style="background-color:#ecfdf5;"><div style="display:flex;"><span style="padding:4px;color:#047857;">S/</span><input type="text" readonly class="celda-input derecha bold celda-readonly c-rest" value="${data.restante || 0}" tabindex="-1" style="color:#047857;"></div></td>
+                
+                <td class="td-premium" style="background-color:#fef2f2;"><div style="display:flex;"><span style="padding:4px;color:#b91c1c;">S/</span><input type="number" class="celda-input derecha bold c-costoxp" value="${data.costo_x_prod || 0}" oninput="autocalcular(this)" style="color:#b91c1c;"></div></td>
+                <td class="td-premium" style="background-color:#faf5ff;"><input type="number" class="celda-input central bold c-und" value="${data.und || 1}" oninput="autocalcular(this)" style="color:#7e22ce;"></td>
+                <td class="td-premium" style="background-color:#faf5ff;"><div style="display:flex;"><span style="padding:4px;color:#7e22ce;">S/</span><input type="text" readonly class="celda-input derecha bold celda-readonly c-cxtotal" value="${data.costo_x_prod_total || 0}" tabindex="-1" style="color:#7e22ce;"></div></td>
+                <td class="td-premium" style="background-color:#faf5ff;"><div style="display:flex;"><span style="padding:4px;color:#7e22ce;">S/</span><input type="number" class="celda-input derecha bold c-flete" value="${data.flete || 0}" oninput="autocalcular(this)" style="color:#7e22ce;"></div></td>
+                <td class="td-premium" style="background-color:#fff7ed;"><div style="display:flex;"><span style="padding:4px;color:#c2410c;">S/</span><input type="text" readonly class="celda-input derecha bold celda-readonly c-sxenvio" value="${data.saldo_x_envio || 0}" tabindex="-1" style="color:#c2410c;"></div></td>
+                <td class="td-premium"><div style="display:flex;"><span style="padding:4px;color:#1e293b;">S/</span><input type="text" readonly class="celda-input derecha bold celda-readonly c-ganancia" value="${data.ganancia || 0}" tabindex="-1"></div></td>
+                <td class="td-premium"><input type="text" readonly class="celda-input central bold celda-readonly c-renta" value="${data.rentabilidad || '0%'}" tabindex="-1"></td>
+            </tr>
+        `;
+    }
+
+    // Cargar datos existentes desde el backend
+    const reportesBackend = [
+        {% for rep in page_obj %}
+        {
+            fecha: "{{ rep.fecha|date:'Y-m-d' }}", mes_anio: "{{ rep.mes_anio }}", asesor: "{{ rep.asesor }}", tipo_cliente: "{{ rep.tipo_cliente }}",
+            dni_ruc: "{{ rep.dni_ruc }}", comprobante: "{{ rep.comprobante }}", nombre_razon_social: "{{ rep.nombre_razon_social }}",
+            marca: "{{ rep.marca }}", categoria: "{{ rep.categoria }}", almacen_sjl: {{ rep.almacen_sjl|lower }}, sku_almacen: "{{ rep.sku_almacen }}",
+            modelo: "{{ rep.modelo }}", producto: "{{ rep.producto }}", precio_u: {{ rep.precio_u }}, cant: {{ rep.cant }},
+            costo_envio: {{ rep.costo_envio }}, p_total: {{ rep.p_total }}, a_cuenta: {{ rep.a_cuenta }}, restante: {{ rep.restante }},
+            costo_x_prod: {{ rep.costo_x_prod }}, und: {{ rep.und }}, costo_x_prod_total: {{ rep.costo_x_prod_total }},
+            flete: {{ rep.flete }}, saldo_x_envio: {{ rep.saldo_x_envio }}, ganancia: {{ rep.ganancia }}, rentabilidad: "{{ rep.rentabilidad }}"
+        },
+        {% endfor %}
+    ];
+
+    reportesBackend.forEach(rep => cuerpo.insertAdjacentHTML('beforeend', crearFilaHTML(rep)));
+
+    function agregarFila() {
+        cuerpo.insertAdjacentHTML('afterbegin', crearFilaHTML());
+    }
+
+    // LA MATEMÁTICA EN TIEMPO REAL
+    function autocalcular(element) {
+        const fila = element.closest('tr');
+        
+        // Formateo Mes/Año automático
+        const fechaInp = fila.querySelector('.c-fecha').value;
+        if (fechaInp) {
+            const fechaObj = new Date(fechaInp);
+            const yyyy = fechaObj.getFullYear();
+            let mm = fechaObj.getMonth() + 1;
+            if (mm < 10) mm = '0' + mm;
+            fila.querySelector('.c-mes').value = `${yyyy}-${mm}`;
+        }
+
+        // Obtener valores numéricos, si están vacíos los pone en 0
+        const precioU = parseFloat(fila.querySelector('.c-preciou').value) || 0;
+        const cant = parseInt(fila.querySelector('.c-cant').value) || 0;
+        const cEnvio = parseFloat(fila.querySelector('.c-cenvio').value) || 0;
+        const aCuenta = parseFloat(fila.querySelector('.c-acuenta').value) || 0;
+        
+        const cxProd = parseFloat(fila.querySelector('.c-costoxp').value) || 0;
+        const und = parseInt(fila.querySelector('.c-und').value) || 0;
+        const flete = parseFloat(fila.querySelector('.c-flete').value) || 0;
+
+        // Cálculos
+        const pTotal = precioU * cant;
+        const restante = pTotal - aCuenta;
+        const cxProdTotal = cxProd * und;
+        const sxEnvio = cEnvio - flete;
+        
+        let descuentoPorFleteNegativo = 0;
+        if (sxEnvio < 0) {
+            descuentoPorFleteNegativo = Math.abs(sxEnvio);
+        }
+        
+        const ganancia = (pTotal - cxProdTotal) - descuentoPorFleteNegativo;
+        let rentabilidad = 0;
+        if (cxProdTotal > 0) {
+            rentabilidad = (ganancia / cxProdTotal) * 100;
+        }
+
+        // Aplicar resultados
+        fila.querySelector('.c-ptotal').value = pTotal.toFixed(2);
+        fila.querySelector('.c-rest').value = restante.toFixed(2);
+        fila.querySelector('.c-cxtotal').value = cxProdTotal.toFixed(2);
+        fila.querySelector('.c-sxenvio').value = sxEnvio.toFixed(2);
+        fila.querySelector('.c-ganancia').value = ganancia.toFixed(2);
+        fila.querySelector('.c-renta').value = rentabilidad.toFixed(2) + '%';
+    }
+
+    function autocompletarProducto(inputMod) {
+        const modelo = inputMod.value.trim().toUpperCase();
+        const fila = inputMod.closest('tr');
+        if (productosDB[modelo]) {
+            fila.querySelector('.c-prod').value = productosDB[modelo];
+        } else {
+            fila.querySelector('.c-prod').value = 'No encontrado';
+        }
+    }
+
+    // PAPAPARSE PARA EL EXCEL MASIVO
+    document.getElementById('csvImportarReportes').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                results.data.forEach(d => {
+                    let fecha = d['FECHA'] || d['fecha'] || '';
+                    if(fecha.includes('/')) {
+                        const parts = fecha.split('/');
+                        if (parts.length === 3) {
+                            if (parts[2].length === 4) fecha = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                        }
+                    }
+
+                    cuerpo.insertAdjacentHTML('beforeend', crearFilaHTML({
+                        fecha: fecha,
+                        mes_anio: d['MES / AÑO'] || d['mes'] || '',
+                        asesor: d['ASESOR'] || d['asesor'] || '',
+                        tipo_cliente: d['TIPO DE CLIENTE'] || d['tipo_cliente'] || '',
+                        dni_ruc: d['D.N.I. / R.U.C.'] || d['dni_ruc'] || '',
+                        comprobante: d['COMPROBANTE'] || d['comprobante'] || '',
+                        nombre_razon_social: d['NOMBRE O RAZON SOCIAL'] || d['cliente'] || '',
+                        marca: d['MARCA'] || d['marca'] || '',
+                        categoria: d['CATEGORIA'] || d['categoria'] || '',
+                        almacen_sjl: (d['ALMACÉN SJL'] || d['almacen_sjl'] || '').trim().toLowerCase() === 'true',
+                        sku_almacen: d['SKU ALMACÉN'] || d['sku'] || '',
+                        modelo: d['MODELO'] || d['modelo'] || '',
+                        producto: d['PRODUCTO'] || d['producto'] || '',
+                        precio_u: parseFloat(d['PRECIO U.'] || d['precio_u'] || 0),
+                        cant: parseInt(d['CANT.'] || d['cant'] || 1),
+                        costo_envio: parseFloat(d['COSTO DE ENVIO'] || d['costo_envio'] || 0),
+                        p_total: parseFloat(d['P. TOTAL'] || d['p_total'] || 0),
+                        a_cuenta: parseFloat(d['A CUENTA'] || d['a_cuenta'] || 0),
+                        restante: parseFloat(d['RESTANTE'] || d['restante'] || 0),
+                        costo_x_prod: parseFloat(d['COSTO x PROD'] || d['costo_x_prod'] || 0),
+                        und: parseInt(d['UND.'] || d['und'] || 1),
+                        costo_x_prod_total: parseFloat(d['COSTO x PROD TOTAL'] || d['costo_x_prod_total'] || 0),
+                        flete: parseFloat(d['FLETE'] || d['flete'] || 0),
+                        saldo_x_envio: parseFloat(d['SALDO x ENVÍO'] || d['saldo_x_envio'] || 0),
+                        ganancia: parseFloat(d['GANANCIA'] || d['ganancia'] || 0),
+                        rentabilidad: d['RENTABILIDAD'] || d['rentabilidad'] || '0%'
+                    }));
+                });
+                document.getElementById('csvImportarReportes').value = "";
+                alert('¡Datos de Venta Libre importados a la tabla! Haz clic en "Guardar Todo" para registrarlos en la base de datos.');
+            }
+        });
+    });
+
+    function guardarReportes() {
+        const filas = document.querySelectorAll('.fila-reporte');
+        const datos = [];
+
+        filas.forEach(f => {
+            datos.push({
+                fecha: f.querySelector('.c-fecha').value,
+                mes_anio: f.querySelector('.c-mes').value,
+                asesor: f.querySelector('.c-asesor').value,
+                tipo_cliente: f.querySelector('.c-tipo').value,
+                dni_ruc: f.querySelector('.c-dni').value,
+                comprobante: f.querySelector('.c-comp').value,
+                nombre_razon_social: f.querySelector('.c-razon').value,
+                marca: f.querySelector('.c-marca').value,
+                categoria: f.querySelector('.c-cat').value,
+                almacen_sjl: f.querySelector('.c-sjl').checked,
+                sku_almacen: f.querySelector('.c-sku').value,
+                modelo: f.querySelector('.c-modelo').value,
+                producto: f.querySelector('.c-prod').value,
+                precio_u: f.querySelector('.c-preciou').value,
+                cant: f.querySelector('.c-cant').value,
+                costo_envio: f.querySelector('.c-cenvio').value,
+                p_total: f.querySelector('.c-ptotal').value,
+                a_cuenta: f.querySelector('.c-acuenta').value,
+                restante: f.querySelector('.c-rest').value,
+                costo_x_prod: f.querySelector('.c-costoxp').value,
+                und: f.querySelector('.c-und').value,
+                costo_x_prod_total: f.querySelector('.c-cxtotal').value,
+                flete: f.querySelector('.c-flete').value,
+                saldo_x_envio: f.querySelector('.c-sxenvio').value,
+                ganancia: f.querySelector('.c-ganancia').value,
+                rentabilidad: f.querySelector('.c-renta').value
+            });
+        });
+
+        if(datos.length === 0) return alert("No hay filas para guardar.");
+
+        fetch("{% url 'guardar_reportes_masivos_ventalibre' %}", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+            body: JSON.stringify({ filas: datos })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if(data.status === 'ok'){
+                alert(data.message);
+                location.reload();
+            } else alert('Error: ' + data.message);
+        });
+    }
+
+    function borrarTodo() {
+        if(confirm('🚨 ¡ATENCIÓN! Esto borrará TODOS los registros de la base de datos de VENTA LIBRE. ¿Estás seguro?')){
+            fetch("{% url 'borrar_todos_los_reportes_ventalibre' %}", {
+                method: 'POST',
+                headers: {'X-CSRFToken': '{{ csrf_token }}'}
+            })
+            .then(r => r.json())
+            .then(data => {
+                alert(data.message);
+                location.reload();
+            });
+        }
+    }
+</script>
+{% endblock %}

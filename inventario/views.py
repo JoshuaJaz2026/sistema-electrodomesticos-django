@@ -1068,8 +1068,23 @@ def reporte_tiktok(request):
 @login_required
 @verificar_acceso_plataforma('Venta Libre')
 def reporte_ventalibre(request):
-    canal = request.session.get('canal_activo')
-    return render(request, 'reportes_plataformas/reporte_ventalibre.html', {'canal': canal})
+    canal = request.session.get('canal_activo', 'Venta Libre')
+    
+    from .models import ReporteVentaLibre, Producto
+    import json
+    
+    # 1. Traemos el historial de reportes ordenado
+    reportes = ReporteVentaLibre.objects.all().order_by('-fecha', '-id')
+    
+    # 2. Diccionario para simular el BUSCARV del Producto en el frontend
+    productos_db = Producto.objects.all()
+    dict_prods = {str(p.modelo).strip().upper(): p.titulo for p in productos_db if p.modelo}
+    
+    return render(request, 'inventario/reporte_ventalibre.html', {
+        'canal': canal,
+        'page_obj': reportes,
+        'dict_prods_json': json.dumps(dict_prods)
+    })
 
 @login_required
 @verificar_acceso_plataforma('Web')
@@ -2918,3 +2933,68 @@ def procesar_salidas_ventalibre(request):
         import traceback
         print(traceback.format_exc())
         return JsonResponse({'status': 'error', 'message': str(e)})
+    
+
+@login_required
+@csrf_exempt
+def guardar_reportes_masivos_ventalibre(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
+
+    try:
+        import json
+        from .models import ReporteVentaLibre
+        from django.db import transaction
+        
+        data = json.loads(request.body)
+        filas = data.get('filas', [])
+
+        if not filas:
+            return JsonResponse({'status': 'error', 'message': 'No hay datos para guardar.'})
+
+        with transaction.atomic():
+            for f in filas:
+                ReporteVentaLibre.objects.create(
+                    usuario=request.user,
+                    fecha=f.get('fecha'),
+                    mes_anio=f.get('mes_anio'),
+                    asesor=f.get('asesor'),
+                    tipo_cliente=f.get('tipo_cliente'),
+                    dni_ruc=f.get('dni_ruc'),
+                    comprobante=f.get('comprobante'),
+                    nombre_razon_social=f.get('nombre_razon_social'),
+                    marca=f.get('marca'),
+                    categoria=f.get('categoria'),
+                    almacen_sjl=f.get('almacen_sjl', False),
+                    sku_almacen=f.get('sku_almacen'),
+                    modelo=f.get('modelo'),
+                    producto=f.get('producto'),
+                    precio_u=float(f.get('precio_u') or 0),
+                    cant=int(f.get('cant') or 1),
+                    costo_envio=float(f.get('costo_envio') or 0),
+                    p_total=float(f.get('p_total') or 0),
+                    a_cuenta=float(f.get('a_cuenta') or 0),
+                    restante=float(f.get('restante') or 0),
+                    costo_x_prod=float(f.get('costo_x_prod') or 0),
+                    und=int(f.get('und') or 1),
+                    costo_x_prod_total=float(f.get('costo_x_prod_total') or 0),
+                    flete=float(f.get('flete') or 0),
+                    saldo_x_envio=float(f.get('saldo_x_envio') or 0),
+                    ganancia=float(f.get('ganancia') or 0),
+                    rentabilidad=str(f.get('rentabilidad', '0%'))
+                )
+
+        return JsonResponse({'status': 'ok', 'message': f'{len(filas)} filas guardadas con éxito.'})
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    
+@login_required
+@csrf_exempt
+def borrar_todos_los_reportes_ventalibre(request):
+    if request.method == 'POST':
+        from .models import ReporteVentaLibre
+        ReporteVentaLibre.objects.all().delete()
+        return JsonResponse({'status': 'ok', 'message': 'Se ha vaciado el reporte de Venta Libre.'})
+    return JsonResponse({'status': 'error'})
