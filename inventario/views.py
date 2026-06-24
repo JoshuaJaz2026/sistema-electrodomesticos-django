@@ -1081,7 +1081,7 @@ def reporte_ventalibre(request):
     dict_prods = {str(p.modelo).strip().upper(): p.titulo for p in productos_db if p.modelo}
     
     # AQUÍ ESTÁ LA LÍNEA CORREGIDA
-    return render(request, 'inventario/templates/reportes_plataformas/reporte_ventalibre.html', {
+    return render(request, 'reportes_plataformas/reporte_ventalibre.html', {
         'canal': canal,
         'page_obj': reportes,
         'dict_prods_json': json.dumps(dict_prods)
