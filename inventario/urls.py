@@ -113,11 +113,18 @@ urlpatterns = [
     path('descargar-plantilla-reporte-creditienda/', views.descargar_plantilla_reporte_creditienda, name='descargar_plantilla_reporte_creditienda'),
     path('guardar-reportes-masivos-creditienda/', views.guardar_reportes_masivos_creditienda, name='guardar_reportes_masivos_creditienda'),
     path('borrar-todos-los-reportes-creditienda/', views.borrar_todos_los_reportes_creditienda, name='borrar_todos_los_reportes_creditienda'),
+    path('api/buscar-modelo-creditienda/', views.buscar_modelo_creditienda, name='buscar_modelo_creditienda'),
+    path('api/procesar-salidas-creditienda/', views.procesar_salidas_creditienda, name='procesar_salidas_creditienda'),
 
     # Rutas para Reportes de Falabella
     path('descargar-plantilla-reporte-falabella/', views.descargar_plantilla_reporte_falabella, name='descargar_plantilla_reporte_falabella'),
     path('guardar-reportes-masivos-falabella/', views.guardar_reportes_masivos_falabella, name='guardar_reportes_masivos_falabella'),
     path('borrar-todos-los-reportes-falabella/', views.borrar_todos_los_reportes_falabella, name='borrar_todos_los_reportes_falabella'),
+    # ==========================================
+    # RUTAS FALABELLA
+    # ==========================================
+    path('api/buscar-modelo-falabella/', views.buscar_modelo_falabella, name='buscar_modelo_falabella'),
+    path('api/procesar-salidas-falabella/', views.procesar_salidas_falabella, name='procesar_salidas_falabella'),
 
     # Rutas para el Directorio de Productos Global
     path('directorio-productos/', views.directorio_productos, name='directorio_productos'),
