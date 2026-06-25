@@ -646,3 +646,57 @@ class ReporteVentaLibre(models.Model):
 
     def __str__(self):
         return f"{self.comprobante} - {self.nombre_razon_social}"
+    
+
+
+class ReporteTiktok(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reportes_tiktok', null=True, blank=True)
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+
+    # 1. Datos Generales y del Cliente
+    venta_verificada = models.BooleanField(default=False)
+    asesor = models.CharField(max_length=100, null=True, blank=True)
+    fecha = models.DateField(null=True, blank=True)
+    mes = models.CharField(max_length=50, null=True, blank=True)
+    comprobante = models.CharField(max_length=100, null=True, blank=True)
+    dni_ruc = models.CharField(max_length=50, null=True, blank=True)
+    nombre_razon_social = models.CharField(max_length=255, null=True, blank=True)
+    telefono = models.CharField(max_length=50, null=True, blank=True)
+    ciudad = models.CharField(max_length=100, null=True, blank=True)
+
+    # 2. Producto y Almacén
+    marca = models.CharField(max_length=100, null=True, blank=True)
+    categoria = models.CharField(max_length=150, null=True, blank=True)
+    sku_almacen = models.CharField(max_length=100, null=True, blank=True)
+    modelo = models.CharField(max_length=100, null=True, blank=True)
+
+    # 3. Ventas y Pagos
+    metodo_pago = models.CharField(max_length=100, null=True, blank=True)
+    precio_live = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    cant = models.IntegerField(default=1)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    a_cuenta = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    restante = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    # 4. Detalles del Producto (Fórmulas replicadas en frontend)
+    producto = models.CharField(max_length=255, null=True, blank=True)
+    precio = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    cantidad = models.IntegerField(default=1)
+    p_total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    # 5. Costos Internos y Rentabilidad
+    c_envio = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    flete = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    costo_producto = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    ganancia = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    ganancia_con_envio = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    rentabilidad = models.CharField(max_length=50, null=True, blank=True)
+    delivery_a_cargo = models.CharField(max_length=150, null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Reporte Tiktok'
+        verbose_name_plural = 'Reportes Tiktok'
+        ordering = ['-fecha', '-id']
+
+    def __str__(self):
+        return f"{self.comprobante} - {self.nombre_razon_social}"

@@ -150,4 +150,7 @@ urlpatterns = [
     # ==========================================
     path('api/buscar-modelo-tiktok/', views.buscar_modelo_tiktok, name='buscar_modelo_tiktok'),
     path('api/procesar-salidas-tiktok/', views.procesar_salidas_tiktok, name='procesar_salidas_tiktok'),
+    # REPORTES TIKTOK
+    path('guardar-reportes-masivos-tiktok/', views.guardar_reportes_masivos_tiktok, name='guardar_reportes_masivos_tiktok'),
+    path('borrar-todos-los-reportes-tiktok/', views.borrar_todos_los_reportes_tiktok, name='borrar_todos_los_reportes_tiktok'),
 ]

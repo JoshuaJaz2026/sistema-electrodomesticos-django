@@ -1220,11 +1220,28 @@ def guardar_reportes_masivos_intercorp(request):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     return JsonResponse({'status': 'error', 'message': 'error de metodo'})
 
+# ==========================================
+# REPORTES: TIKTOK
+# ==========================================
 @login_required
-@verificar_acceso_plataforma('Tik tok', 'Tiktok')
+@verificar_acceso_plataforma('Tiktok')
 def reporte_tiktok(request):
-    canal = request.session.get('canal_activo')
-    return render(request, 'reportes_plataformas/reporte_tiktok.html', {'canal': canal})
+    canal = request.session.get('canal_activo', 'Tiktok')
+    
+    from .models import ReporteTiktok, Producto
+    import json
+    
+    reportes = ReporteTiktok.objects.all().order_by('-fecha', '-id')
+    
+    productos_db = Producto.objects.all()
+    dict_prods = {str(p.modelo).strip().upper(): p.titulo for p in productos_db if p.modelo}
+    
+    # MUY IMPORTANTE LA RUTA CORRECTA AQUÍ
+    return render(request, 'inventario/reportes_plataformas/reporte_tiktok.html', {
+        'canal': canal,
+        'page_obj': reportes,
+        'dict_prods_json': json.dumps(dict_prods)
+    })
 
 @login_required
 @verificar_acceso_plataforma('Venta Libre')
@@ -3159,4 +3176,74 @@ def borrar_todos_los_reportes_ventalibre(request):
         from .models import ReporteVentaLibre
         ReporteVentaLibre.objects.all().delete()
         return JsonResponse({'status': 'ok', 'message': 'Se ha vaciado el reporte de Venta Libre.'})
+    return JsonResponse({'status': 'error'})
+
+
+@login_required
+@csrf_exempt
+def guardar_reportes_masivos_tiktok(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
+
+    try:
+        import json
+        from .models import ReporteTiktok
+        from django.db import transaction
+        
+        data = json.loads(request.body)
+        filas = data.get('filas', [])
+
+        if not filas:
+            return JsonResponse({'status': 'error', 'message': 'No hay datos para guardar.'})
+
+        with transaction.atomic():
+            for f in filas:
+                ReporteTiktok.objects.create(
+                    usuario=request.user,
+                    venta_verificada=f.get('venta_verificada', False),
+                    asesor=f.get('asesor'),
+                    fecha=f.get('fecha'),
+                    mes=f.get('mes'),
+                    comprobante=f.get('comprobante'),
+                    dni_ruc=f.get('dni_ruc'),
+                    nombre_razon_social=f.get('nombre_razon_social'),
+                    telefono=f.get('telefono'),
+                    ciudad=f.get('ciudad'),
+                    marca=f.get('marca'),
+                    categoria=f.get('categoria'),
+                    sku_almacen=f.get('sku_almacen'),
+                    modelo=f.get('modelo'),
+                    metodo_pago=f.get('metodo_pago'),
+                    precio_live=float(f.get('precio_live') or 0),
+                    cant=int(f.get('cant') or 1),
+                    total=float(f.get('total') or 0),
+                    a_cuenta=float(f.get('a_cuenta') or 0),
+                    restante=float(f.get('restante') or 0),
+                    producto=f.get('producto'),
+                    precio=float(f.get('precio') or 0),
+                    cantidad=int(f.get('cantidad') or 1),
+                    p_total=float(f.get('p_total') or 0),
+                    c_envio=float(f.get('c_envio') or 0),
+                    flete=float(f.get('flete') or 0),
+                    costo_producto=float(f.get('costo_producto') or 0),
+                    ganancia=float(f.get('ganancia') or 0),
+                    ganancia_con_envio=float(f.get('ganancia_con_envio') or 0),
+                    rentabilidad=str(f.get('rentabilidad', '0%')),
+                    delivery_a_cargo=f.get('delivery_a_cargo')
+                )
+
+        return JsonResponse({'status': 'ok', 'message': f'{len(filas)} filas guardadas con éxito en TikTok.'})
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    
+
+@login_required
+@csrf_exempt
+def borrar_todos_los_reportes_tiktok(request):
+    if request.method == 'POST':
+        from .models import ReporteTiktok
+        ReporteTiktok.objects.all().delete()
+        return JsonResponse({'status': 'ok', 'message': 'Se ha vaciado el reporte de TikTok.'})
     return JsonResponse({'status': 'error'})
