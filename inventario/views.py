@@ -1237,7 +1237,7 @@ def reporte_tiktok(request):
     dict_prods = {str(p.modelo).strip().upper(): p.titulo for p in productos_db if p.modelo}
     
     # MUY IMPORTANTE LA RUTA CORRECTA AQUÍ
-    return render(request, 'inventario/reportes_plataformas/reporte_tiktok.html', {
+    return render(request, 'reportes_plataformas/reporte_tiktok.html', {
         'canal': canal,
         'page_obj': reportes,
         'dict_prods_json': json.dumps(dict_prods)
