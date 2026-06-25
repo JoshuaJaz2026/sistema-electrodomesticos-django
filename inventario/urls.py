@@ -144,4 +144,10 @@ urlpatterns = [
     path('api/procesar-salidas-ventalibre/', views.procesar_salidas_ventalibre, name='procesar_salidas_ventalibre'),
     path('guardar-reportes-masivos-ventalibre/', views.guardar_reportes_masivos_ventalibre, name='guardar_reportes_masivos_ventalibre'),
     path('borrar-todos-los-reportes-ventalibre/', views.borrar_todos_los_reportes_ventalibre, name='borrar_todos_los_reportes_ventalibre'),
+
+    # ==========================================
+    # RUTAS NUEVAS: TIKTOK
+    # ==========================================
+    path('api/buscar-modelo-tiktok/', views.buscar_modelo_tiktok, name='buscar_modelo_tiktok'),
+    path('api/procesar-salidas-tiktok/', views.procesar_salidas_tiktok, name='procesar_salidas_tiktok'),
 ]

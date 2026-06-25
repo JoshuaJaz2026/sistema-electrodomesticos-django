@@ -541,11 +541,172 @@ def percheron_intercorp(request):
         'skus_json': json.dumps(dict_skus)
     })
 
+# ==========================================
+# PLATAFORMA TIKTOK
+# ==========================================
 @login_required
-@verificar_acceso_plataforma('Tik tok', 'Tiktok')
+@verificar_acceso_plataforma('Tiktok')
 def percheron_tiktok(request):
-    canal = request.session.get('canal_activo')
-    return render(request, 'inventario/percheron_tiktok.html', {'canal': canal})
+    canal = request.session.get('canal_activo', 'Tiktok')
+    
+    from .models import SalidaTiktok, IngresoPercheron, Producto
+    import json
+    
+    page_obj = SalidaTiktok.objects.all().order_by('-id')
+    
+    skus_usados = SalidaTiktok.objects.values_list('sku', flat=True)
+    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
+    
+    productos_db = Producto.objects.all()
+    dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
+    
+    dict_skus = {}
+    for ing in ingresos_db:
+        mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
+        prod = dict_prods.get(mod_limpio)
+        marca_val = prod.marca if prod else 'S/N MARCA'
+        stock_val = prod.stock_actual if prod else 0
+        
+        fecha_str = '-'
+        if ing.fecha_ingreso:
+            try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
+            except: fecha_str = str(ing.fecha_ingreso)
+
+        dict_skus[ing.sku] = {
+            'modelo': ing.modelo or '', 'titulo': ing.titulo or '', 'serie': ing.serie_nro or '-',
+            'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
+            'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
+            'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
+        }
+
+    return render(request, 'inventario/percheron_tiktok.html', {
+        'canal': canal,
+        'page_obj': page_obj,
+        'skus_json': json.dumps(dict_skus)
+    })
+
+@login_required
+def buscar_modelo_tiktok(request):
+    modelo_query = request.GET.get('modelo', '').strip()
+    try:
+        from .models import IngresoPercheron, Producto, SalidaTiktok 
+        
+        skus_usados = SalidaTiktok.objects.values_list('sku', flat=True)
+        resultados = IngresoPercheron.objects.filter(
+            modelo__icontains=modelo_query
+        ).exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
+        
+        productos_db = Producto.objects.all()
+        dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
+        
+        data = []
+        producto_nombre = ""
+        if resultados.exists():
+            producto_nombre = resultados.first().titulo or ""
+            
+        for r in resultados:
+            mod_limpio = str(r.modelo).strip().upper() if r.modelo else ''
+            prod = dict_prods.get(mod_limpio)
+            marca_val = prod.marca if prod else 'S/N MARCA'
+            
+            fecha_str = '-'
+            if r.fecha_ingreso:
+                try: fecha_str = r.fecha_ingreso.strftime('%d/%m/%Y')
+                except: fecha_str = str(r.fecha_ingreso)
+                
+            data.append({
+                'sku': r.sku, 'marca': marca_val, 'fecha_ingreso': fecha_str,
+                'serie': r.serie_nro or '-', 'costo': str(r.costo_unitario) if r.costo_unitario else '0.00',
+                'proveedor': r.proveedor_motivo or '-', 'ingresado_por': r.creado_por or ''
+            })
+            
+        return JsonResponse({
+            'status': 'ok', 'producto': producto_nombre,
+            'stock': resultados.count(), 'items': data
+        })
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+@login_required
+@csrf_exempt
+def procesar_salidas_tiktok(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
+
+    try:
+        import json
+        data = json.loads(request.body)
+        salidas = data.get('salidas', [])
+        eliminadas = data.get('eliminadas', []) 
+
+        if not salidas and not eliminadas:
+            return JsonResponse({'status': 'error', 'message': 'Sin datos para procesar.'})
+
+        from .models import SalidaTiktok, Producto
+        from datetime import datetime
+        from django.db import transaction
+
+        with transaction.atomic():
+            conteo_descuentos = {}
+            conteo_restauraciones = {}
+
+            if eliminadas:
+                registros_viejos = SalidaTiktok.objects.filter(id__in=eliminadas)
+                for registro in registros_viejos:
+                    if registro.modelo:
+                        key = str(registro.modelo).upper().replace(" ", "").replace("-", "")
+                        conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.descuento
+                    registro.delete()
+
+            if salidas:
+                for sal in salidas:
+                    sku = sal.get('sku', '').strip()
+                    modelo = sal.get('modelo', '').strip()
+                    titulo = sal.get('titulo', '').strip()
+                    fecha_salida = sal.get('fecha_salida') or datetime.now().date()
+                    serie = sal.get('serie', '')
+                    
+                    costo_html = float(sal.get('costo') or 0)
+                    descuento_html = 1
+                    nro_venta_html = sal.get('nro_ventas', '')
+                    by_html = sal.get('by', request.user.username)
+
+                    SalidaTiktok.objects.create(
+                        sku=sku, modelo=modelo, titulo=titulo,
+                        fecha_salida=fecha_salida, serie=serie, costo=costo_html,
+                        descuento=descuento_html, nro_venta=nro_venta_html,
+                        creado_por=by_html
+                    )
+
+                    key = modelo.upper().replace(" ", "").replace("-", "")
+                    if key:
+                        conteo_descuentos[key] = conteo_descuentos.get(key, 0) + descuento_html
+
+            modelos_afectados = 0
+            modelos_restaurados = 0
+            
+            if conteo_descuentos or conteo_restauraciones:
+                for prod in Producto.objects.all():
+                    if prod.modelo:
+                        key = prod.modelo.upper().replace(" ", "").replace("-", "")
+                        cambio = False
+                        if key in conteo_restauraciones:
+                            prod.stock_actual += conteo_restauraciones[key]
+                            modelos_restaurados += 1
+                            cambio = True
+                        if key in conteo_descuentos:
+                            prod.stock_actual = max(prod.stock_actual - conteo_descuentos[key], 0)
+                            modelos_afectados += 1
+                            cambio = True
+                        if cambio:
+                            prod.save(update_fields=['stock_actual'])
+
+        return JsonResponse({'status': 'ok', 'message': f'Descontados: {modelos_afectados}. Devueltos: {modelos_restaurados}.'})
+
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return JsonResponse({'status': 'error', 'message': str(e)})
 
 @login_required
 @verificar_acceso_plataforma('Venta Libre')
