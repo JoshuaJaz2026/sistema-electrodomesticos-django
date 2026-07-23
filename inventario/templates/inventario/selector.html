@@ -2,89 +2,116 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Acceso - Electrodomésticos</title>
-    
-    <!-- Importar tipografía moderna de Google -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-    <!-- Importar íconos profesionales de FontAwesome -->
+    <title>Portal de Acceso</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-        body { 
-            /* Fondo con un degradado sutil y moderno */
-            background: linear-gradient(135deg, #f0f4f8 0%, #d7e1ec 100%);
-            min-height: 100vh;
-            padding: 50px 20px;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-        }
-        .header { text-align: center; margin-bottom: 50px; }
-        .header h1 { color: #1a252f; font-size: 38px; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
-        .header p { color: #5c6a79; font-size: 16px; }
-        
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 25px;
-            width: 100%;
-            max-width: 1100px;
-        }
-        
-        .plataforma-card {
-            background-color: white;
-            padding: 40px 20px;
-            border-radius: 16px;
-            text-align: center;
-            text-decoration: none;
-            color: #2c3e50;
-            font-weight: 600;
-            font-size: 18px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            /* Animación suave para el efecto de flotar */
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            border-bottom: 4px solid transparent; /* Línea de color oculta */
-        }
-        
-        .icon-box {
-            font-size: 45px;
-            transition: transform 0.3s ease;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0, #f1f5f9, #e0f2fe, #f8fafc);
+            background-size: 400% 400%;
+            animation: moverFondo 15s ease infinite;
+            overflow: hidden;
         }
 
-        /* Efectos al pasar el mouse por encima */
-        .plataforma-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        @keyframes moverFondo {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        .plataforma-card:hover .icon-box {
-            transform: scale(1.15); /* El ícono crece un poco */
+
+        .titulo-portal {
+            font-weight: 800;
+            color: #1e293b;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .subtitulo {
+            color: #64748b;
+            font-size: 1rem;
+            margin-bottom: 50px;
+            font-weight: 400;
+        }
+
+        .grid-plataformas {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            max-width: 1000px;
+            padding: 0 20px;
+        }
+
+        .tarjeta {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            text-decoration: none;
+            color: #334155;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .tarjeta:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 35px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .icono-tarjeta {
+            font-size: 2.8rem;
+            transition: transform 0.3s ease;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+
+        .tarjeta:hover .icono-tarjeta {
+            transform: scale(1.1) translateY(-3px);
+        }
+
+        .nombre-tarjeta {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #0f172a;
+        }
+
+        @media (max-width: 900px) {
+            .grid-plataformas { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .grid-plataformas { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Sistema de Gestión Multicanal</h1>
-        <p>Seleccione la plataforma a la que desea ingresar</p>
-    </div>
+    <div class="titulo-portal">Sistema de Gestión Multicanal</div>
+    <div class="subtitulo">Seleccione la plataforma a la que desea ingresar</div>
 
-    <div class="grid-container">
-        <!-- Django leerá los colores y los íconos dinámicamente -->
-        {% for plataforma in plataformas %}
-            <a href="{% url 'login' %}?canal={{ plataforma.nombre|urlencode }}" class="plataforma-card" style="border-bottom-color: {{ plataforma.color }};">
-                <div class="icon-box" style="color: {{ plataforma.color }};">
-                    <i class="{{ plataforma.icono }}"></i> 
-                </div>
-                <span>{{ plataforma.nombre }}</span>
-            </a>
+    <div class="grid-plataformas">
+        {% for plat in plataformas %}
+        <a href="{% url 'login' %}?canal={{ plat.nombre }}" class="tarjeta">
+            <i class="{{ plat.icono }} icono-tarjeta" style="color: {{ plat.color }};"></i>
+            <div class="nombre-tarjeta">{{ plat.nombre }}</div>
+        </a>
         {% endfor %}
     </div>
 
