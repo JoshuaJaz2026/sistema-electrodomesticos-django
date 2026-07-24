@@ -2205,7 +2205,7 @@ def exportar_modelos_excel(request):
     writer = csv.writer(response, delimiter=';')
     writer.writerow([
         'MODELO', 'MARCA', 'CATEGORÍA', 'TÍTULO', 'STOCK', 
-        'INVENTARIADO POR LOS PERCHERONES', 'MERCADO LIBRE', 'FALABELLA', 'CREDITIENDA', 'PÁGINA WEB'
+        'INVENTARIO SSJ 2', 'MERCADO LIBRE', 'FALABELLA', 'CREDITIENDA', 'PÁGINA WEB', 'INTERCORP'
     ])
     
     for p in Producto.objects.all().order_by('id'):
@@ -2215,11 +2215,12 @@ def exportar_modelos_excel(request):
             p.categoria or '', 
             p.titulo or '', 
             p.stock_actual, 
-            'TRUE' if p.activo_intercorp else 'FALSE',
+            'TRUE' if p.activo_inventario_ssj2 else 'FALSE',
             'TRUE' if p.activo_ml else 'FALSE',
             'TRUE' if p.activo_falabella else 'FALSE',
             'TRUE' if p.activo_creditienda else 'FALSE',
-            'TRUE' if p.activo_web else 'FALSE'
+            'TRUE' if p.activo_web else 'FALSE',
+            'TRUE' if p.activo_intercorp else 'FALSE'
         ])
         
     return response
@@ -2252,11 +2253,13 @@ def guardar_modelos_masivos(request):
                     obj.categoria = item.get('CATEGORÍA', '')
                     obj.titulo = item.get('TÍTULO', '')
                     
-                    obj.activo_intercorp = True if item.get('INVENTARIADO POR LOS PERCHERONES') == 'TRUE' else False
+                    # ASIGNACIÓN CORRECTA DE CHECKBOXES
+                    obj.activo_inventario_ssj2 = True if item.get('INVENTARIO SSJ 2') == 'TRUE' else False
                     obj.activo_ml = True if item.get('MERCADO LIBRE') == 'TRUE' else False
                     obj.activo_falabella = True if item.get('FALABELLA') == 'TRUE' else False
                     obj.activo_creditienda = True if item.get('CREDITIENDA') == 'TRUE' else False
                     obj.activo_web = True if item.get('PÁGINA WEB') == 'TRUE' else False
+                    obj.activo_intercorp = True if item.get('INTERCORP') == 'TRUE' else False
                     
                     obj.save()
                     

@@ -66,10 +66,11 @@ class Producto(models.Model):
     costo_dolares = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Costo Unit. ($)")
     costo_soles = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Costo Cero (S/.)")
     
-    # NUEVO: ¡La columna física real para el Stock!
+    # Stock Físico
     stock_actual = models.IntegerField(default=0, verbose_name="Stock Actual")
     
     # Casillas (Checkboxes) para tu pantalla "Consulta Rápida"
+    activo_inventario_ssj2 = models.BooleanField(default=False, verbose_name="Inventario SSJ 2")
     activo_ml = models.BooleanField(default=False, verbose_name="Mercado Libre")
     activo_ml_jr = models.BooleanField(default=False, verbose_name="Mercado Libre Junior")
     activo_falabella = models.BooleanField(default=False, verbose_name="Falabella")

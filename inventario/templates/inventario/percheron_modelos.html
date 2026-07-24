@@ -73,11 +73,12 @@
                         <th class="th-premium" style="background-color: #0f172a; color: white; min-width: 320px;">Título <i class="fas fa-filter" style="color: #94a3b8; font-size: 0.8em; margin-left: 5px;"></i></th>
                         <th class="th-premium" style="background-color: #1e3a8a; color: white; width: 90px; text-align: center;">Stock <i class="fas fa-lock" style="font-size: 0.8em; margin-left: 5px;"></i></th>
                         
-                        <th class="th-premium" style="background-color: #000000; color: #eab308; font-size: 0.7rem; line-height: 1.2; text-align: center; width: 110px;">Inv. por<br>Percherones</th>
+                        <th class="th-premium" style="background-color: #000000; color: #06b6d4; font-size: 0.7rem; line-height: 1.2; text-align: center; width: 110px;">Inventario<br>SSJ 2</th>
                         <th class="th-premium" style="background-color: #fde047; color: black; text-align: center; width: 85px;">Mercado<br>Libre</th>
                         <th class="th-premium" style="background-color: #a3e635; color: black; text-align: center; width: 85px;">Falabella</th>
                         <th class="th-premium" style="background-color: #3b82f6; color: white; text-align: center; width: 95px;">Creditienda</th>
                         <th class="th-premium" style="background-color: #8b5cf6; color: white; text-align: center; width: 85px;">Página<br>Web</th>
+                        <th class="th-premium" style="background-color: #06b6d4; color: white; text-align: center; width: 85px;">Intercorp</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -96,6 +97,7 @@
                         <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-fbl" onchange="pintarCelda(this, 'bg-fbl')"></td>
                         <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-cdt" onchange="pintarCelda(this, 'bg-cdt')"></td>
                         <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-web" onchange="pintarCelda(this, 'bg-web')"></td>
+                        <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-int" onchange="pintarCelda(this, 'bg-int')"></td>
                     </tr>
 
                     {% for item in page_obj %}
@@ -115,11 +117,12 @@
                                 {% else %} color: #b91c1c; {% endif %}">
                         </td>
                         
-                        <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-inv" onchange="pintarCelda(this, 'bg-inv')" {% if item.activo_intercorp %}checked{% endif %}></td>
+                        <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-inv" onchange="pintarCelda(this, 'bg-inv')" {% if item.activo_inventario_ssj2 %}checked{% endif %}></td>
                         <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-ml" onchange="pintarCelda(this, 'bg-ml')" {% if item.activo_ml %}checked{% endif %}></td>
                         <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-fbl" onchange="pintarCelda(this, 'bg-fbl')" {% if item.activo_falabella %}checked{% endif %}></td>
                         <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-cdt" onchange="pintarCelda(this, 'bg-cdt')" {% if item.activo_creditienda %}checked{% endif %}></td>
                         <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-web" onchange="pintarCelda(this, 'bg-web')" {% if item.activo_web %}checked{% endif %}></td>
+                        <td class="td-check celda-paint"><input type="checkbox" class="check-moderno val-int" onchange="pintarCelda(this, 'bg-int')" {% if item.activo_intercorp %}checked{% endif %}></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -250,6 +253,7 @@
     .bg-fbl { background-color: #a3e635 !important; }
     .bg-cdt { background-color: #3b82f6 !important; }
     .bg-web { background-color: #8b5cf6 !important; }
+    .bg-int { background-color: #06b6d4 !important; } /* Nuevo color para Intercorp */
 
     /* Estilo del Paginador */
     .btn-pag { padding: 4px 10px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; font-size: 0.8rem;}
@@ -310,6 +314,7 @@
         document.querySelectorAll('.val-fbl').forEach(cb => pintarCelda(cb, 'bg-fbl'));
         document.querySelectorAll('.val-cdt').forEach(cb => pintarCelda(cb, 'bg-cdt'));
         document.querySelectorAll('.val-web').forEach(cb => pintarCelda(cb, 'bg-web'));
+        document.querySelectorAll('.val-int').forEach(cb => pintarCelda(cb, 'bg-int'));
     });
 
     function agregarNuevaFila() {
@@ -364,7 +369,7 @@
                     nueva.querySelector('.val-titulo').value = item['TITULO'] || '';
                     
                     const cbInv = nueva.querySelector('.val-inv');
-                    cbInv.checked = checkValor(item['INVENTARIADOPORLOSPERCHERONES'] || item['INVENTARIADO']);
+                    cbInv.checked = checkValor(item['INVENTARIOSSJ2'] || item['INVENTARIADOPORLOSPERCHERONES'] || item['INVENTARIADO']);
                     pintarCelda(cbInv, 'bg-inv');
 
                     const cbMl = nueva.querySelector('.val-ml');
@@ -382,6 +387,10 @@
                     const cbWeb = nueva.querySelector('.val-web');
                     cbWeb.checked = checkValor(item['PAGINAWEB']);
                     pintarCelda(cbWeb, 'bg-web');
+
+                    const cbInt = nueva.querySelector('.val-int');
+                    cbInt.checked = checkValor(item['INTERCORP']);
+                    pintarCelda(cbInt, 'bg-int');
 
                     fragmento.appendChild(nueva);
                     agregados++;
@@ -408,11 +417,12 @@
                 'MARCA': fila.querySelector('.val-marca').value.trim(),
                 'CATEGORÍA': fila.querySelector('.val-categoria').value.trim(),
                 'TÍTULO': fila.querySelector('.val-titulo').value.trim(),
-                'INVENTARIADO POR LOS PERCHERONES': fila.querySelector('.val-inv').checked ? 'TRUE' : 'FALSE',
+                'INVENTARIO SSJ 2': fila.querySelector('.val-inv').checked ? 'TRUE' : 'FALSE',
                 'MERCADO LIBRE': fila.querySelector('.val-ml').checked ? 'TRUE' : 'FALSE',
                 'FALABELLA': fila.querySelector('.val-fbl').checked ? 'TRUE' : 'FALSE',
                 'CREDITIENDA': fila.querySelector('.val-cdt').checked ? 'TRUE' : 'FALSE',
-                'PÁGINA WEB': fila.querySelector('.val-web').checked ? 'TRUE' : 'FALSE'
+                'PÁGINA WEB': fila.querySelector('.val-web').checked ? 'TRUE' : 'FALSE',
+                'INTERCORP': fila.querySelector('.val-int').checked ? 'TRUE' : 'FALSE'
             });
         });
 
