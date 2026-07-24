@@ -27,7 +27,19 @@
         }
         
         .sidebar-header { padding: 20px; text-align: center; background: rgba(0,0,0,0.1); border-bottom: 2px solid var(--color-principal); }
-        .sidebar-menu { flex: 1; padding: 10px 0; overflow-y: auto; }
+        
+        /* --- ESTILOS DE SCROLL DELGADO PARA EL MENÚ --- */
+        .sidebar-menu { 
+            flex: 1; padding: 10px 0; overflow-y: auto; 
+            scrollbar-width: thin; /* Para Firefox */
+        }
+        .sidebar-menu::-webkit-scrollbar {
+            width: 6px; /* Para navegadores basados en WebKit (Chrome, Edge) */
+        }
+        .sidebar-menu::-webkit-scrollbar-thumb {
+            background-color: #4a5568;
+            border-radius: 10px;
+        }
         
         .menu-category { padding: 15px 25px 5px; font-size: 0.75rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
         
@@ -36,6 +48,10 @@
             color: #bdc3c7; text-decoration: none; transition: 0.3s;
             cursor: pointer;
             border-left: 4px solid transparent;
+            /* --- EVITA EL SALTO DE LÍNEA --- */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .menu-item:hover { background: #34495e; color: white; border-left: 4px solid var(--color-principal); }
         .menu-item i:first-child { margin-right: 15px; width: 20px; text-align: center; }
@@ -60,6 +76,10 @@
             font-size: 0.9em;
             transition: 0.3s;
             border-left: 3px solid transparent;
+            /* --- EVITA EL SALTO DE LÍNEA --- */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .submenu-item:hover { color: white; background: #2c3e50; }
         .submenu-item i { margin-right: 10px; font-size: 0.8em; width: 15px; text-align: center; }
