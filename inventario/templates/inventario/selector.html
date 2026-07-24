@@ -16,35 +16,147 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #f8fafc, #e2e8f0, #f1f5f9, #e0f2fe, #f8fafc);
-            background-size: 400% 400%;
-            animation: moverFondo 15s ease infinite;
+            background-color: #0b0f19;
+            background-image: url('https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=2050&auto=format&fit=crop');
+            
+            /* ====== ANIMACIÓN LENTA DEL ESPACIO ====== */
+            background-size: 130% 130%; /* Más grande para poder moverse */
+            background-position: 0% 0%;
+            background-repeat: no-repeat;
+            animation: paneoEspacio 60s ease-in-out infinite alternate;
+            
             overflow: hidden;
+            position: relative;
+            color: #ffffff;
         }
 
-        @keyframes moverFondo {
-            0% { background-position: 0% 50%; }
+        @keyframes paneoEspacio {
+            0% { background-position: 0% 0%; }
             50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            100% { background-position: 0% 100%; }
         }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(11, 15, 25, 0.4), rgba(11, 15, 25, 0.9));
+            z-index: 0;
+        }
+
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: 0;
+            animation: moverLuces 20s ease-in-out infinite alternate;
+        }
+
+        body::before {
+            width: 450px;
+            height: 450px;
+            background: rgba(139, 92, 246, 0.15); 
+            top: 5%;
+            left: 10%;
+        }
+
+        body::after {
+            width: 550px;
+            height: 550px;
+            background: rgba(56, 189, 248, 0.1); 
+            bottom: 5%;
+            right: 10%;
+            animation-delay: -10s;
+        }
+
+        @keyframes moverLuces {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(60px, 60px) scale(1.1); }
+        }
+
+        .meteor-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            z-index: 1;
+            pointer-events: none; 
+        }
+
+        .meteor {
+            position: absolute;
+            width: 150px;
+            height: 2px;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+            opacity: 0;
+            animation: meteor-fall linear infinite;
+        }
+
+        .meteor::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #fff, 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(139, 92, 246, 0.6);
+        }
+
+        @keyframes meteor-fall {
+            0% {
+                transform: translate(0, 0) rotate(135deg);
+                opacity: 1;
+            }
+            15% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-1500px, 1500px) rotate(135deg);
+                opacity: 0;
+            }
+        }
+
+        .m1 { top: -100px; left: 80%; animation-duration: 3s; animation-delay: 0s; }
+        .m2 { top: -50px; left: 120%; animation-duration: 4.5s; animation-delay: 1.2s; }
+        .m3 { top: 200px; left: 110%; animation-duration: 2.5s; animation-delay: 0.5s; }
+        .m4 { top: -100px; left: 50%; animation-duration: 3.8s; animation-delay: 2s; }
+        .m5 { top: 400px; left: 120%; animation-duration: 4s; animation-delay: 1.8s; }
+        .m6 { top: -100px; left: 150%; animation-duration: 3.2s; animation-delay: 3s; }
+        .m7 { top: 100px; left: 90%; animation-duration: 5s; animation-delay: 2.5s; }
+        .m8 { top: 300px; left: 140%; animation-duration: 2.8s; animation-delay: 4.2s; }
+        .m9 { top: -100px; left: 30%; animation-duration: 4.2s; animation-delay: 1s; }
+        .m10 { top: 500px; left: 150%; animation-duration: 3.5s; animation-delay: 0.8s; }
 
         .titulo-portal {
+            position: relative;
+            z-index: 2;
             font-weight: 800;
-            color: #1e293b;
+            color: #f8fafc;
             font-size: 2.5rem;
             margin-bottom: 10px;
             letter-spacing: -1px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .subtitulo {
-            color: #64748b;
+            position: relative;
+            z-index: 2;
+            color: #94a3b8;
             font-size: 1rem;
             margin-bottom: 50px;
             font-weight: 400;
         }
 
         .grid-plataformas {
+            position: relative;
+            z-index: 2;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 25px;
@@ -53,17 +165,16 @@
         }
 
         .tarjeta {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 16px;
             padding: 30px 20px;
             text-align: center;
             text-decoration: none;
-            color: #334155;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -72,25 +183,25 @@
 
         .tarjeta:hover {
             transform: translateY(-8px);
-            box-shadow: 0 20px 35px rgba(0,0,0,0.1);
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            background: rgba(45, 55, 72, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
 
         .icono-tarjeta {
             font-size: 2.8rem;
             transition: transform 0.3s ease;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
         }
 
         .tarjeta:hover .icono-tarjeta {
-            transform: scale(1.1) translateY(-3px);
+            transform: scale(1.1);
         }
 
         .nombre-tarjeta {
             font-weight: 600;
             font-size: 0.95rem;
-            color: #0f172a;
+            color: #e2e8f0;
+            letter-spacing: 0.5px;
         }
 
         @media (max-width: 900px) {
@@ -103,13 +214,32 @@
 </head>
 <body>
 
+    <div class="overlay"></div>
+
+    <div class="meteor-container">
+        <div class="meteor m1"></div>
+        <div class="meteor m2"></div>
+        <div class="meteor m3"></div>
+        <div class="meteor m4"></div>
+        <div class="meteor m5"></div>
+        <div class="meteor m6"></div>
+        <div class="meteor m7"></div>
+        <div class="meteor m8"></div>
+        <div class="meteor m9"></div>
+        <div class="meteor m10"></div>
+    </div>
+
     <div class="titulo-portal">Sistema de Gestión Multicanal</div>
     <div class="subtitulo">Seleccione la plataforma a la que desea ingresar</div>
 
     <div class="grid-plataformas">
         {% for plat in plataformas %}
         <a href="{% url 'login' %}?canal={{ plat.nombre }}" class="tarjeta">
-            <i class="{{ plat.icono }} icono-tarjeta" style="color: {{ plat.color }};"></i>
+            <!-- Condición para forzar que el ícono de TikTok sea blanco y brille en blanco -->
+            <i class="{{ plat.icono }} icono-tarjeta" 
+               style="color: {% if plat.nombre == 'Tik tok' %}#ffffff{% else %}{{ plat.color }}{% endif %}; 
+                      text-shadow: 0 0 15px {% if plat.nombre == 'Tik tok' %}#ffffff{% else %}{{ plat.color }}{% endif %}50;">
+            </i>
             <div class="nombre-tarjeta">{{ plat.nombre }}</div>
         </a>
         {% endfor %}
