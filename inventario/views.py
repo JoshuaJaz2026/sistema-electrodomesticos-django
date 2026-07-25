@@ -2369,24 +2369,28 @@ def guardar_modelos_masivos(request):
                 return JsonResponse({'status': 'error', 'message': 'No se enviaron datos.'})
 
             with transaction.atomic():
+                from .models import IngresoPercheron # Importamos el modelo de ingresos
+                
                 for item in referencias:
                     modelo_val = str(item.get('MODELO') or '').strip()
                     if not modelo_val:
                         continue
+                        
+                    titulo_nuevo = item.get('TÍTULO', '')
                     
+                    # 1. Guarda en el Directorio de Modelos
                     obj, created = Producto.objects.get_or_create(
                         modelo=modelo_val, 
                         defaults={
                             'sku': f'SKU-{uuid.uuid4().hex[:8].upper()}', 
-                            'titulo': item.get('TÍTULO', '')
+                            'titulo': titulo_nuevo
                         }
                     )
                     
                     obj.marca = item.get('MARCA', '')
                     obj.categoria = item.get('CATEGORÍA', '')
-                    obj.titulo = item.get('TÍTULO', '')
+                    obj.titulo = titulo_nuevo
                     
-                    # ASIGNACIÓN CORRECTA DE CHECKBOXES
                     obj.activo_inventario_ssj2 = True if item.get('INVENTARIO SSJ 2') == 'TRUE' else False
                     obj.activo_ml = True if item.get('MERCADO LIBRE') == 'TRUE' else False
                     obj.activo_falabella = True if item.get('FALABELLA') == 'TRUE' else False
@@ -2396,7 +2400,12 @@ def guardar_modelos_masivos(request):
                     
                     obj.save()
                     
-            return JsonResponse({'status': 'ok', 'message': '¡Directorio de Modelos actualizado correctamente!'})
+                    # 2. ¡LA MAGIA RETROACTIVA! 
+                    # Busca todos los ingresos del pasado que tengan este modelo y les actualiza el título
+                    if titulo_nuevo:
+                        IngresoPercheron.objects.filter(modelo=modelo_val).update(titulo=titulo_nuevo)
+                    
+            return JsonResponse({'status': 'ok', 'message': '¡Directorio actualizado y títulos sincronizados con los ingresos del pasado!'})
             
         except Exception as e:
             import traceback
