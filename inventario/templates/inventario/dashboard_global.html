@@ -147,7 +147,6 @@
         </div>
         
         <nav class="sidebar-menu">
-            <!-- AHORA USAMOS EL INTERCEPTOR PARA NAVEGAR SIN PERDER LA SESIÓN -->
             <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='inicio' %}" data-path="{% url 'inicio' %}" class="menu-item"><i class="fas fa-home"></i> Inicio</a>
             
             <div class="menu-category">Inventario Principal</div>
@@ -158,10 +157,12 @@
                 <div class="menu-item" onclick="toggleMenu('percheron-menu', 'arrow-per')">
                     <i class="fas fa-boxes"></i> 
                     <span>PERCHERON</span>
-                    <i class="fas fa-chevron-down" id="arrow-per" style="margin-left: auto; font-size: 0.7em; transition: 0.3s;"></i>
+                    <!-- Condicional del Servidor para evitar que la flecha gire al cargar -->
+                    <i class="fas fa-chevron-down {% if '/percheron/' in request.path %}rotate{% endif %}" id="arrow-per" style="margin-left: auto; font-size: 0.7em; transition: 0.3s;"></i>
                 </div>
                 
-                <div class="submenu" id="percheron-menu">
+                <!-- Condicional del Servidor para abrir el menú sin animaciones si estamos dentro de Percherón -->
+                <div class="submenu {% if '/percheron/' in request.path %}open{% endif %}" id="percheron-menu">
                     <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='percheron_ingresos' %}" data-path="{% url 'percheron_ingresos' %}" class="submenu-item"><i class="fas fa-box-open"></i> Ingresos</a>
                     <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='percheron_registros' %}" data-path="{% url 'percheron_registros' %}" class="submenu-item"><i class="fas fa-clipboard-list"></i> Registros</a>
                     <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='percheron_modelos' %}" data-path="{% url 'percheron_modelos' %}" class="submenu-item"><i class="fas fa-tags"></i> Modelos</a>
@@ -285,7 +286,6 @@
 
             const currentPath = window.location.pathname; 
             
-            // JAVASCRIPT MODIFICADO: Ahora lee data-path para que el resaltado funcione perfecto
             const submenuItems = document.querySelectorAll('.submenu-item');
             submenuItems.forEach(item => {
                 let linkPath = item.getAttribute('data-path') || item.getAttribute('href');
