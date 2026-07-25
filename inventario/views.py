@@ -20,7 +20,7 @@ from datetime import timedelta
 from django.contrib.auth.models import User
 
 # Importación corregida de SimulacionMercadoLibreJunior
-from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre, ReporteMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SalidaFalabella, SalidaCreditienda, SalidaIntercorp, SalidaTiktok, SalidaVentaLibre, ReporteCreditienda, ReporteFalabella, DirectorioProducto, ReporteIntercorp, ComisionIntercorp
+from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre, ReporteMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SalidaFalabella, SalidaCreditienda, SalidaIntercorp, SalidaTiktok, SalidaVentaLibre, ReporteCreditienda, ReporteFalabella, DirectorioProducto, ReporteIntercorp, ComisionIntercorp, SalidaBCI
 
 # =========================================================
 # CONFIGURACIÓN MAESTRA DE ESTILOS Y COLORES
@@ -886,8 +886,137 @@ def percheron_bci(request):
     if not request.user.is_superuser:
         messages.error(request, "Acceso exclusivo para BCI Autorizados.")
         return redirect('inicio')
+        
     canal = request.session.get('canal_activo', 'Web')
-    return render(request, 'inventario/percheron_bci.html', {'canal': canal})
+    
+    from .models import SalidaBCI, IngresoPercheron, Producto
+    import json
+    
+    # 1. Traemos el historial de salidas BCI
+    page_obj = SalidaBCI.objects.all().order_by('-id')
+    
+    # 2. Generamos el diccionario de SKUs disponibles (que no hayan salido en BCI)
+    skus_usados = SalidaBCI.objects.values_list('sku', flat=True)
+    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
+    
+    productos_db = Producto.objects.all()
+    dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
+    
+    dict_skus = {}
+    for ing in ingresos_db:
+        mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
+        prod = dict_prods.get(mod_limpio)
+        marca_val = prod.marca if prod else 'S/N MARCA'
+        stock_val = prod.stock_actual if prod else 0
+        
+        fecha_str = '-'
+        if ing.fecha_ingreso:
+            try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
+            except: fecha_str = str(ing.fecha_ingreso)
+
+        dict_skus[ing.sku] = {
+            'modelo': ing.modelo or '', 'titulo': ing.titulo or '', 'serie': ing.serie_nro or '-',
+            'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
+            'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
+            'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
+        }
+
+    return render(request, 'inventario/percheron_bci.html', {
+        'canal': canal,
+        'page_obj': page_obj,
+        'skus_json': json.dumps(dict_skus)
+    })
+
+@login_required
+@csrf_exempt
+def procesar_salidas_bci(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
+
+    try:
+        import json
+        data = json.loads(request.body)
+        salidas = data.get('salidas', [])
+        eliminadas = data.get('eliminadas', []) 
+
+        if not salidas and not eliminadas:
+            return JsonResponse({'status': 'error', 'message': 'Sin datos para procesar.'})
+
+        from .models import SalidaBCI, Producto
+        from datetime import datetime
+        from django.db import transaction
+
+        with transaction.atomic():
+            
+            # Validación de Concurrencia
+            if salidas:
+                skus_entrantes = [sal.get('sku', '').strip() for sal in salidas if sal.get('sku', '').strip()]
+                skus_ya_vendidos = SalidaBCI.objects.filter(sku__in=skus_entrantes).values_list('sku', flat=True)
+                
+                if skus_ya_vendidos:
+                    skus_repetidos = ", ".join(skus_ya_vendidos)
+                    return JsonResponse({
+                        'status': 'error', 
+                        'message': f'¡ALTO! Los siguientes SKUs ya fueron descontados por otro usuario: {skus_repetidos}.'
+                    })
+
+            conteo_descuentos = {}
+            conteo_restauraciones = {}
+
+            if eliminadas:
+                registros_viejos = SalidaBCI.objects.filter(id__in=eliminadas)
+                for registro in registros_viejos:
+                    if registro.modelo:
+                        key = str(registro.modelo).upper().replace(" ", "").replace("-", "")
+                        conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.descuento
+                    registro.delete()
+
+            if salidas:
+                for sal in salidas:
+                    sku = sal.get('sku', '').strip()
+                    modelo = sal.get('modelo', '').strip()
+                    titulo = sal.get('titulo', '').strip()
+                    fecha_salida = sal.get('fecha_salida') or datetime.now().date()
+                    serie = sal.get('serie', '')
+                    costo_html = float(sal.get('costo') or 0)
+                    descuento_html = int(float(sal.get('desc_1und') or 1))
+                    nro_venta_html = sal.get('nro_ventas', '')
+                    tipo_venta_html = sal.get('tipo_venta', '')
+                    by_html = sal.get('by', request.user.username)
+
+                    SalidaBCI.objects.create(
+                        sku=sku, modelo=modelo, titulo=titulo, fecha_salida=fecha_salida,
+                        serie=serie, costo=costo_html, descuento=descuento_html,
+                        nro_venta=nro_venta_html, tipo_venta=tipo_venta_html, creado_por=by_html
+                    )
+
+                    key = modelo.upper().replace(" ", "").replace("-", "")
+                    if key:
+                        conteo_descuentos[key] = conteo_descuentos.get(key, 0) + descuento_html
+
+            modelos_afectados = 0
+            modelos_restaurados = 0
+            
+            if conteo_descuentos or conteo_restauraciones:
+                for prod in Producto.objects.all():
+                    if prod.modelo:
+                        key = prod.modelo.upper().replace(" ", "").replace("-", "")
+                        cambio = False
+                        if key in conteo_restauraciones:
+                            prod.stock_actual += conteo_restauraciones[key]
+                            modelos_restaurados += 1
+                            cambio = True
+                        if key in conteo_descuentos:
+                            prod.stock_actual = max(prod.stock_actual - conteo_descuentos[key], 0)
+                            modelos_afectados += 1
+                            cambio = True
+                        if cambio:
+                            prod.save(update_fields=['stock_actual'])
+
+        return JsonResponse({'status': 'ok', 'message': f'Descontados: {modelos_afectados}. Devueltos: {modelos_restaurados}.'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
 
 # =========================================================
 # 5. APIs Y BASES DE DATOS (GUARDADO Y BÚSQUEDA)

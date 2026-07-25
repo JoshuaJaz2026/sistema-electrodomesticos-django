@@ -100,8 +100,16 @@ urlpatterns = [
     # Rutas de Sincronización de Stock
     path('percheron/modelos/sincronizar-stock/', views.sincronizar_stock_modelos, name='sincronizar_stock_modelos'),
     path('percheron/modelos/borrar-todos/', views.borrar_todos_los_modelos, name='borrar_todos_los_modelos'),
+    
+    # === RUTAS DE PROCESAMIENTO DE SALIDAS (PERCHERONES) ===
     path('percheron/mercado-libre/procesar/', views.procesar_salidas_ml, name='procesar_salidas_ml'),
     path('percheron/mercado-libre-junior/procesar/', views.procesar_salidas_ml_junior, name='procesar_salidas_ml_junior'),
+    path('api/procesar-salidas-falabella/', views.procesar_salidas_falabella, name='procesar_salidas_falabella'),
+    path('api/procesar-salidas-creditienda/', views.procesar_salidas_creditienda, name='procesar_salidas_creditienda'),
+    path('api/procesar-salidas-intercorp/', views.procesar_salidas_intercorp, name='procesar_salidas_intercorp'),
+    path('api/procesar-salidas-ventalibre/', views.procesar_salidas_ventalibre, name='procesar_salidas_ventalibre'),
+    path('api/procesar-salidas-tiktok/', views.procesar_salidas_tiktok, name='procesar_salidas_tiktok'),
+    path('percheron/bci/procesar/', views.procesar_salidas_bci, name='procesar_salidas_bci'), # <--- LA NUEVA RUTA BCI
     
     # Rutas de borrado masivo
     path('borrar-todos-los-reportes-ml/', views.borrar_todos_los_reportes_ml, name='borrar_todos_los_reportes_ml'),
@@ -114,17 +122,12 @@ urlpatterns = [
     path('guardar-reportes-masivos-creditienda/', views.guardar_reportes_masivos_creditienda, name='guardar_reportes_masivos_creditienda'),
     path('borrar-todos-los-reportes-creditienda/', views.borrar_todos_los_reportes_creditienda, name='borrar_todos_los_reportes_creditienda'),
     path('api/buscar-modelo-creditienda/', views.buscar_modelo_creditienda, name='buscar_modelo_creditienda'),
-    path('api/procesar-salidas-creditienda/', views.procesar_salidas_creditienda, name='procesar_salidas_creditienda'),
 
     # Rutas para Reportes de Falabella
     path('descargar-plantilla-reporte-falabella/', views.descargar_plantilla_reporte_falabella, name='descargar_plantilla_reporte_falabella'),
     path('guardar-reportes-masivos-falabella/', views.guardar_reportes_masivos_falabella, name='guardar_reportes_masivos_falabella'),
     path('borrar-todos-los-reportes-falabella/', views.borrar_todos_los_reportes_falabella, name='borrar_todos_los_reportes_falabella'),
-    # ==========================================
-    # RUTAS FALABELLA
-    # ==========================================
     path('api/buscar-modelo-falabella/', views.buscar_modelo_falabella, name='buscar_modelo_falabella'),
-    path('api/procesar-salidas-falabella/', views.procesar_salidas_falabella, name='procesar_salidas_falabella'),
 
     # Rutas para el Directorio de Productos Global
     path('directorio-productos/', views.directorio_productos, name='directorio_productos'),
@@ -142,13 +145,11 @@ urlpatterns = [
     # Rutas Percherón Intercorp
     path('percheron-intercorp/', views.percheron_intercorp, name='percheron_intercorp'),
     path('api/buscar-modelo-intercorp/', views.buscar_modelo_intercorp, name='buscar_modelo_intercorp'),
-    path('api/procesar-salidas-intercorp/', views.procesar_salidas_intercorp, name='procesar_salidas_intercorp'),
     
     # ==========================================
     # RUTAS NUEVAS: VENTA LIBRE
     # ==========================================
     path('api/buscar-modelo-ventalibre/', views.buscar_modelo_ventalibre, name='buscar_modelo_ventalibre'),
-    path('api/procesar-salidas-ventalibre/', views.procesar_salidas_ventalibre, name='procesar_salidas_ventalibre'),
     path('guardar-reportes-masivos-ventalibre/', views.guardar_reportes_masivos_ventalibre, name='guardar_reportes_masivos_ventalibre'),
     path('borrar-todos-los-reportes-ventalibre/', views.borrar_todos_los_reportes_ventalibre, name='borrar_todos_los_reportes_ventalibre'),
 
@@ -156,7 +157,6 @@ urlpatterns = [
     # RUTAS NUEVAS: TIKTOK
     # ==========================================
     path('api/buscar-modelo-tiktok/', views.buscar_modelo_tiktok, name='buscar_modelo_tiktok'),
-    path('api/procesar-salidas-tiktok/', views.procesar_salidas_tiktok, name='procesar_salidas_tiktok'),
     # REPORTES TIKTOK
     path('guardar-reportes-masivos-tiktok/', views.guardar_reportes_masivos_tiktok, name='guardar_reportes_masivos_tiktok'),
     path('borrar-todos-los-reportes-tiktok/', views.borrar_todos_los_reportes_tiktok, name='borrar_todos_los_reportes_tiktok'),
