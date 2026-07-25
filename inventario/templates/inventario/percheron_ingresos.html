@@ -13,9 +13,9 @@
         </h2>
         
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-            <a href="{% url 'descargar_plantilla_ingresos' %}" class="btn-top" style="background-color: #3b82f6;">
+            <button type="button" onclick="window.location.href='{% url 'descargar_plantilla_ingresos' %}'" class="btn-top" style="background-color: #3b82f6;">
                 <i class="fas fa-download"></i> Plantilla
-            </a>
+            </button>
 
             <button type="button" onclick="agregarNuevoIngreso()" class="btn-top" style="background-color: #10b981;">
                 <i class="fas fa-plus"></i> Nueva Fila
