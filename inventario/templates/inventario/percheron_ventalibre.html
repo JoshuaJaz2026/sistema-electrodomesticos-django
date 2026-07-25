@@ -13,7 +13,8 @@
             <div style="display: flex; gap: 10px; flex-grow: 1; align-items: flex-end;">
                 <div style="flex: 1; max-width: 200px;">
                     <label class="label-mini">MODELO</label>
-                    <input type="text" id="bciModelo" oninput="buscarModelo(this.value)" placeholder="Ej. BVSTEM6801M..." class="input-mini" style="text-transform: uppercase;">
+                    <!-- ELIMINAMOS EL ONINPUT ANTIGUO -->
+                    <input type="text" id="bciModelo" placeholder="Ej. BVSTEM6801M..." class="input-mini" style="text-transform: uppercase;">
                 </div>
                 <div style="flex: 2;">
                     <label class="label-mini">PRODUCTO</label>
@@ -82,12 +83,8 @@
                         <th class="th-premium" style="width: 21%; text-align: center;">TÍTULO <i class="fas fa-lock" style="color: #94a3b8; font-size: 0.9em; margin-left: 3px;"></i></th>
                         <th class="th-premium" style="width: 9%; text-align: center;">FECHA SAL.</th>
                         <th class="th-premium" style="width: 9%; text-align: center;">SERIE / N° <i class="fas fa-lock" style="color: #94a3b8; font-size: 0.9em; margin-left: 3px;"></i></th>
-                        
-                        <!-- AQUI ESTABA EL ERROR: LE FALTABA EL BACKGROUND COLOR OSCURO -->
                         <th class="th-premium" style="width: 6%; background-color: #1e293b; text-align: center;">COSTO</th>
                         <th class="th-premium" style="width: 4%; background-color: #7f1d1d; text-align: center;">CANT.</th>
-                        <!-- ======================================================== -->
-
                         <th class="th-premium" style="width: 12%; text-align: center;">NRO. VENTA</th>
                         <th class="th-premium" style="width: 10%; text-align: center;">BY:</th>
                         <th class="th-premium" style="width: 4%; text-align: center;"><i class="fas fa-trash-alt" style="color: #f87171;"></i></th>
@@ -242,9 +239,26 @@
 </style>
 
 <script>
-    let debounceTimer;
-    let catalogoActual = [];
+    const diccionarioSKUs = {{ skus_json|safe|default:"{}" }};
+    const diccionarioTitulos = {{ titulos_json|safe|default:"{}" }}; 
     let salidasAEliminar = [];
+
+    window.addEventListener('load', function() {
+        const filas = document.querySelectorAll('#cuerpoSalidas tr.fila-salida');
+        filas.forEach(fila => {
+            if(fila.id === 'fila-molde-salida') return;
+            const inputModelo = fila.querySelector('.val-modelo');
+            const inputTitulo = fila.querySelector('.val-titulo');
+            if (inputModelo && inputTitulo) {
+                const modeloVal = inputModelo.value.trim().toUpperCase();
+                if (modeloVal && diccionarioTitulos[modeloVal]) {
+                    if (inputTitulo.value === '' || inputTitulo.value === 'Modelo nuevo / Sin título' || inputTitulo.value !== diccionarioTitulos[modeloVal]) {
+                        inputTitulo.value = diccionarioTitulos[modeloVal];
+                    }
+                }
+            }
+        });
+    });
 
     function getSKUsUsados() {
         const inputs = document.querySelectorAll('#cuerpoSalidas .val-sku');
@@ -256,58 +270,55 @@
         return usados;
     }
 
-    // Función 1: Buscar Modelo en la BD en tiempo real
-    function buscarModelo(valor) {
-        clearTimeout(debounceTimer);
+    // EL BUSCADOR INTELIGENTE (100% Fuera de Línea)
+    function ejecutarBusqueda() {
+        const query = document.getElementById('bciModelo').value.trim().toUpperCase();
+        const tbody = document.getElementById('cuerpoReferencia');
         
-        if(valor.trim().length < 1) {
-            document.getElementById('cuerpoReferencia').innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 15px; color: #94a3b8; font-size: 0.9rem; border: 1px solid #cbd5e1;"><i class="fas fa-barcode" style="font-size: 1.5em; color: #cbd5e1; margin-bottom: 5px; display: block;"></i>Escribe un modelo arriba para buscar los SKUs disponibles</td></tr>';
-            document.getElementById('bciProducto').value = '';
-            document.getElementById('bciStock').value = '0';
+        document.getElementById('bciProducto').value = '';
+        document.getElementById('bciStock').value = '0';
+        
+        if (query === '') {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #94a3b8; font-size: 0.95rem; border: 1px solid #cbd5e1;"><i class="fas fa-barcode" style="font-size: 2em; color: #cbd5e1; margin-bottom: 10px; display: block;"></i>Escribe un modelo arriba para buscar los SKUs disponibles</td></tr>';
             return;
         }
-        
-        debounceTimer = setTimeout(() => {
-            const urlSegura = `{% url 'buscar_modelo_ventalibre' %}?modelo=${valor}`;
-            const skusUsados = getSKUsUsados();
 
-            fetch(urlSegura)
-            .then(r => r.json())
-            .then(data => {
-                if(data.status === 'ok') {
-                    document.getElementById('bciProducto').value = data.producto;
-                    document.getElementById('bciStock').value = data.stock;
-                    catalogoActual = data.items;
-                    
-                    let html = '';
-                    data.items.forEach(i => {
-                        // Ocultamos si ya está seleccionado en la tabla de abajo
-                        if (skusUsados.has(i.sku.toUpperCase())) return;
+        const skusUsados = getSKUsUsados();
+        let html = '';
+        let infoProductoMostrada = false;
 
-                        html += `
-                            <tr class="fila-buscador" style="cursor: pointer;" onclick="copiarAlPortapapeles('${i.sku}')" title="Clic para agregar este SKU">
-                                <td class="td-premium text-blue text-mono central" style="padding: 6px;">${i.sku} <i class="far fa-copy" style="font-size: 0.8em; color: #94a3b8; margin-left: 5px;"></i></td>
-                                <td class="td-premium bold central" style="color: #475569; padding: 6px;">${i.marca}</td>
-                                <td class="td-premium central" style="color: #64748b; padding: 6px;">${i.fecha_ingreso}</td>
-                                <td class="td-premium text-blue text-mono central" style="padding: 6px;">${i.serie}</td>
-                                <td class="td-premium bold derecha" style="color: #0f172a; padding: 6px;">S/ ${parseFloat(i.costo).toFixed(2)}</td>
-                                <td class="td-premium central" style="color: #64748b; padding: 6px;">${i.proveedor}</td>
-                                <td class="td-premium text-orange central" style="padding: 6px;">${i.ingresado_por}</td>
-                            </tr>
-                        `;
-                    });
-                    
-                    if (html === '') {
-                        document.getElementById('cuerpoReferencia').innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #ef4444; font-weight: bold; font-size: 0.95rem; border: 1px solid #cbd5e1;"><i class="fas fa-exclamation-circle" style="margin-bottom: 5px; display: block; font-size: 1.5rem;"></i>No hay SKUs disponibles (o todos ya fueron agregados).</td></tr>';
-                    } else {
-                        document.getElementById('cuerpoReferencia').innerHTML = html;
-                    }
-                } else {
-                    console.error("Error buscando:", data.message);
+        for (const [sku, data] of Object.entries(diccionarioSKUs)) {
+            if (skusUsados.has(sku)) continue;
+
+            if (data.modelo.toUpperCase().includes(query)) {
+                if (!infoProductoMostrada) {
+                    document.getElementById('bciProducto').value = data.titulo;
+                    document.getElementById('bciStock').value = data.stock_real;
+                    infoProductoMostrada = true;
                 }
-            }).catch(e => console.error("Error de red:", e));
-        }, 300);
+
+                html += `
+                    <tr class="fila-buscador" style="cursor: pointer;" onclick="copiarAlPortapapeles('${sku}')" title="Clic para agregar este SKU">
+                        <td class="td-premium text-blue text-mono central" style="padding: 6px;">${sku} <i class="far fa-copy" style="font-size: 0.8em; color: #94a3b8; margin-left: 5px;"></i></td>
+                        <td class="td-premium bold central" style="color: #475569; padding: 6px;">${data.marca}</td>
+                        <td class="td-premium central" style="color: #64748b; padding: 6px;">${data.fecha_ingreso}</td>
+                        <td class="td-premium text-blue text-mono central" style="padding: 6px;">${data.serie}</td>
+                        <td class="td-premium bold derecha" style="color: #0f172a; padding: 6px;">S/ ${data.costo.toFixed(2)}</td>
+                        <td class="td-premium central" style="color: #64748b; padding: 6px;">${data.proveedor}</td>
+                        <td class="td-premium text-orange central" style="padding: 6px;">${data.registrado_por}</td>
+                    </tr>
+                `;
+            }
+        }
+
+        if (html === '') {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #ef4444; font-weight: bold; font-size: 0.95rem; border: 1px solid #cbd5e1;"><i class="fas fa-exclamation-circle" style="margin-bottom: 5px; display: block; font-size: 1.5rem;"></i>No hay SKUs disponibles (o todos ya fueron agregados).</td></tr>';
+        } else {
+            tbody.innerHTML = html;
+        }
     }
+
+    document.getElementById('bciModelo').addEventListener('input', ejecutarBusqueda);
 
     function copiarAlPortapapeles(texto) {
         navigator.clipboard.writeText(texto).then(() => {
@@ -319,8 +330,7 @@
             autocompletarBUSCARV(ultimoInput); 
             
             ultimoInput.focus();
-            // Refrescar buscador para que desaparezca el recién agregado
-            buscarModelo(document.getElementById('bciModelo').value);
+            ejecutarBusqueda();
         });
     }
 
@@ -348,27 +358,20 @@
         }
 
         fila.remove();
-        // Refrescar buscador por si devolvimos un SKU
-        buscarModelo(document.getElementById('bciModelo').value);
+        ejecutarBusqueda();
     }
 
-    // Función 2: Autocompletar cuando escaneas un SKU en la salida
     function autocompletarBUSCARV(inputSKU) {
         const fila = inputSKU.closest('tr');
         const sku = inputSKU.value.trim().toUpperCase();
         inputSKU.value = sku;
         
-        const item = catalogoActual.find(i => i.sku.toUpperCase() === sku);
-        
-        if(item) {
-            fila.querySelector('.val-modelo').value = document.getElementById('bciModelo').value.toUpperCase();
-            fila.querySelector('.val-titulo').value = document.getElementById('bciProducto').value;
-            fila.querySelector('.val-serie').value = item.serie;
-            fila.querySelector('.val-costo').value = parseFloat(item.costo).toFixed(2);
+        if (diccionarioSKUs[sku]) {
+            fila.querySelector('.val-modelo').value = diccionarioSKUs[sku].modelo;
+            fila.querySelector('.val-titulo').value = diccionarioSKUs[sku].titulo;
+            fila.querySelector('.val-serie').value = diccionarioSKUs[sku].serie;
+            fila.querySelector('.val-costo').value = diccionarioSKUs[sku].costo.toFixed(2);
             fila.querySelector('.val-desc').value = "1";
-            
-            let fechaInp = fila.querySelector('.val-fecha');
-            if(!fechaInp.value) fechaInp.value = new Date().toISOString().split('T')[0];
         } else {
             fila.querySelector('.val-modelo').value = sku === '' ? '' : 'NO REGISTRADO';
             fila.querySelector('.val-titulo').value = '';
@@ -377,10 +380,9 @@
             fila.querySelector('.val-desc').value = "1";
         }
 
-        buscarModelo(document.getElementById('bciModelo').value);
+        ejecutarBusqueda();
     }
 
-    // Función 4: Enviar datos a Python para descontar de la BD
     function procesarDescuentosVentaLibre() {
         const filas = document.querySelectorAll('#cuerpoSalidas tr:not(#fila-molde-salida)');
         let datos = [];
