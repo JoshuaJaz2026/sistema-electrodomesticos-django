@@ -12,10 +12,13 @@ urlpatterns = [
     path('loading/', views.pantalla_carga, name='pantalla_carga'),
     
     # ==========================================
-    # 2. DASHBOARD PRINCIPAL Y MAGAZZINO
+    # 2. DASHBOARD PRINCIPAL Y NAVEGACIÓN
     # ==========================================
     path('inicio/', views.inicio, name='inicio'),
     path('inventario/magazzino/', views.inventario_magazzino, name='inv_magazzino'),
+    
+    # --- RUTA INTERCEPTORA PARA EL MENÚ LATERAL DINÁMICO ---
+    path('navegar/<str:plataforma>/<str:ruta_destino>/', views.cambiar_plataforma_menu, name='navegar_menu'),
     
     # ==========================================
     # 3. SECCIÓN PERCHERÓN: GLOBALES

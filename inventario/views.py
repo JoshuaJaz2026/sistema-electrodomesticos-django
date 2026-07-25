@@ -247,6 +247,45 @@ def inicio(request):
     
     return render(request, 'inventario/inicio.html', context)
 
+
+@login_required
+def cambiar_plataforma_menu(request, plataforma, ruta_destino):
+    """
+    Función interceptora: Actualiza la sesión con la nueva plataforma
+    y luego redirige a la vista solicitada.
+    """
+    # 1. Definimos los colores e íconos oficiales
+    ESTILOS = {
+        "Mercado Libre": {"color": "#F1C40F", "icono": "fas fa-handshake"},
+        "Mercado Libre - Junior": {"color": "#F39C12", "icono": "fas fa-seedling"},
+        "Creditienda": {"color": "#E74C3C", "icono": "fas fa-credit-card"},
+        "Falabella": {"color": "#2ECC71", "icono": "fas fa-store"},
+        "Intercorp": {"color": "#2980B9", "icono": "fas fa-building"},
+        "Venta Libre": {"color": "#9B59B6", "icono": "fas fa-tags"},
+        "Tik tok": {"color": "#2C3E50", "icono": "fab fa-tiktok"},
+        "Web": {"color": "#3498DB", "icono": "fas fa-globe"}
+    }
+    
+    # 2. Reconstruimos el nombre si viene con guiones bajos desde la URL
+    plataforma_limpia = plataforma.replace('_', ' ')
+    if plataforma_limpia == "Mercado Libre Junior":
+        plataforma_limpia = "Mercado Libre - Junior"
+    
+    # 3. Validamos permisos
+    if not request.user.is_superuser:
+        if not hasattr(request.user, 'perfil') or not request.user.perfil.plataformas.filter(nombre=plataforma_limpia).exists():
+            messages.error(request, f"Acceso denegado: No tienes permiso para acceder al módulo de {plataforma_limpia}.")
+            return redirect('inicio')
+    
+    # 4. Actualizamos TODA la sesión
+    request.session['canal_activo'] = plataforma_limpia
+    tema = ESTILOS.get(plataforma_limpia, ESTILOS["Web"])
+    request.session['color_actual'] = tema['color']
+    request.session['icono_actual'] = tema['icono']
+    
+    # 5. Redirigimos a la vista real que el usuario quería ver
+    return redirect(ruta_destino)
+
 @login_required
 def inventario_magazzino(request):
     productos = Electrodomestico.objects.all()
