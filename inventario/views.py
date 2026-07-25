@@ -802,9 +802,9 @@ def percheron_intercorp(request):
 # PLATAFORMA TIKTOK
 # ==========================================
 @login_required
-@verificar_acceso_plataforma('TikTok')
+@verificar_acceso_plataforma('Tik tok')
 def percheron_tiktok(request):
-    canal = request.session.get('canal_activo', 'TikTok')
+    canal = request.session.get('canal_activo', 'Tik tok')
     from .models import SalidaTiktok, IngresoPercheron, Producto
     import json
     
@@ -1632,9 +1632,9 @@ def guardar_reportes_masivos_intercorp(request):
 # REPORTES: TIKTOK
 # ==========================================
 @login_required
-@verificar_acceso_plataforma('Tiktok')
+@verificar_acceso_plataforma('Tik tok')
 def reporte_tiktok(request):
-    canal = request.session.get('canal_activo', 'Tiktok')
+    canal = request.session.get('canal_activo', 'Tik tok')
     
     from .models import ReporteTiktok, Producto
     import json
@@ -1994,9 +1994,9 @@ def simulador_intercorp(request):
     return render(request, 'simuladores_plataformas/simulador_intercorp.html', {'canal': canal})
 
 @login_required
-@verificar_acceso_plataforma('Tik tok', 'Tiktok')
+@verificar_acceso_plataforma('Tik tok')
 def simulador_tiktok(request):
-    canal = request.session.get('canal_activo')
+    canal = request.session.get('canal_activo', 'Tik tok')
     return render(request, 'simuladores_plataformas/simulador_tiktok.html', {'canal': canal})
 
 @login_required
