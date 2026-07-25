@@ -142,7 +142,8 @@
 
     <div class="sidebar" id="miSidebar">
         <div class="sidebar-header">
-            <i class="{{ request.session.icono_actual|default:'fas fa-globe' }} fa-2x" style="color: var(--color-principal);"></i>
+            <!-- Condicional para asegurar que el icono sea blanco en TikTok -->
+            <i class="{{ request.session.icono_actual|default:'fas fa-globe' }} fa-2x" style="color: {% if canal == 'Tik tok' or canal == 'TikTok' %}white{% else %}var(--color-principal){% endif %};"></i>
             <h3 style="margin-top: 10px;">{{ canal }}</h3>
         </div>
         
@@ -157,11 +158,9 @@
                 <div class="menu-item" onclick="toggleMenu('percheron-menu', 'arrow-per')">
                     <i class="fas fa-boxes"></i> 
                     <span>PERCHERON</span>
-                    <!-- Condicional del Servidor para evitar que la flecha gire al cargar -->
                     <i class="fas fa-chevron-down {% if '/percheron/' in request.path %}rotate{% endif %}" id="arrow-per" style="margin-left: auto; font-size: 0.7em; transition: 0.3s;"></i>
                 </div>
                 
-                <!-- Condicional del Servidor para abrir el menú sin animaciones si estamos dentro de Percherón -->
                 <div class="submenu {% if '/percheron/' in request.path %}open{% endif %}" id="percheron-menu">
                     <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='percheron_ingresos' %}" data-path="{% url 'percheron_ingresos' %}" class="submenu-item"><i class="fas fa-box-open"></i> Ingresos</a>
                     <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='percheron_registros' %}" data-path="{% url 'percheron_registros' %}" class="submenu-item"><i class="fas fa-clipboard-list"></i> Registros</a>
@@ -185,7 +184,7 @@
                         <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='percheron_ventalibre' %}" data-path="{% url 'percheron_ventalibre' %}" class="submenu-item"><i class="fas fa-shopping-cart"></i> Percherón Venta Libre</a>
                     {% elif canal == 'Web' %}
                         <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='percheron_web' %}" data-path="{% url 'percheron_web' %}" class="submenu-item"><i class="fas fa-globe"></i> Percherón Web</a>
-                        {% endif %}
+                    {% endif %}
 
                     {% if user.is_superuser %}
                         <hr style="border: 0.5px solid #3e4f5f; margin: 10px 20px;">

@@ -17,8 +17,10 @@
         }
         .loading-container { text-align: center; width: 300px; }
         
+        /* Condicional en el CSS para pintar de blanco si es TikTok */
         .icon-box {
-            font-size: 4em; color: var(--color-plataforma);
+            font-size: 4em; 
+            color: {% if canal == 'Tik tok' or canal == 'TikTok' %}white{% else %}var(--color-plataforma){% endif %};
             margin-bottom: 20px; animation: pulse 1.5s infinite;
         }
 
@@ -50,7 +52,11 @@
             <i class="{{ request.session.icono_actual|default:'fas fa-globe' }}"></i>
         </div>
         <div class="status-text">INICIANDO SISTEMA</div>
-        <div style="font-weight: bold; color: var(--color-plataforma);">{{ canal }}</div>
+        
+        <!-- Condicional aquí también para evitar texto oscuro sobre fondo oscuro -->
+        <div style="font-weight: bold; color: {% if canal == 'Tik tok' or canal == 'TikTok' %}white{% else %}var(--color-plataforma){% endif %};">
+            {{ canal }}
+        </div>
         
         <div class="progress-bar-bg">
             <div id="bar" class="progress-bar-fill"></div>
