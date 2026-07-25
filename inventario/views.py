@@ -985,54 +985,7 @@ def procesar_salidas_tiktok(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
 
-@login_required
-@verificar_acceso_plataforma('Venta Libre')
-def percheron_ventalibre(request):
-    canal = request.session.get('canal_activo', 'Venta Libre')
-    from .models import SalidaVentaLibre, IngresoPercheron, Producto
-    import json
-    
-    skus_usados_global = obtener_todos_los_skus_usados()
-    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
-    
-    productos_db = Producto.objects.all()
-    dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
-    
-    dict_titulos_global = {}
-    for ing in IngresoPercheron.objects.all():
-        if ing.modelo and ing.titulo and ing.titulo != 'Modelo nuevo / Sin título':
-            dict_titulos_global[str(ing.modelo).strip().upper()] = ing.titulo
-    for prod in productos_db:
-        if prod.modelo and prod.titulo and prod.titulo != 'Modelo nuevo / Sin título':
-            dict_titulos_global[str(prod.modelo).strip().upper()] = prod.titulo
 
-    dict_skus = {}
-    for ing in ingresos_db:
-        mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
-        prod = dict_prods.get(mod_limpio)
-        marca_val = prod.marca if prod else 'S/N MARCA'
-        stock_val = prod.stock_actual if prod else 0
-        
-        fecha_str = '-'
-        if ing.fecha_ingreso:
-            try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
-            except: fecha_str = str(ing.fecha_ingreso)
-
-        titulo_val = dict_titulos_global.get(mod_limpio, ing.titulo or 'Modelo nuevo / Sin título')
-
-        dict_skus[ing.sku] = {
-            'modelo': ing.modelo or '', 'titulo': titulo_val, 'serie': ing.serie_nro or '-',
-            'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
-            'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
-            'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
-        }
-
-    page_obj = SalidaVentaLibre.objects.all().order_by('-id')
-
-    return render(request, 'inventario/percheron_ventalibre.html', {
-        'canal': canal, 'skus_json': json.dumps(dict_skus),
-        'titulos_json': json.dumps(dict_titulos_global), 'page_obj': page_obj
-    })
 
 @login_required
 def percheron_bci(request):
@@ -3455,13 +3408,21 @@ def percheron_ventalibre(request):
     # 1. Traemos el historial de salidas de Venta Libre
     page_obj = SalidaVentaLibre.objects.all().order_by('-id')
     
-    # 2. Generamos el diccionario de SKUs excluyendo los que ya salieron en Venta Libre
-    skus_usados = SalidaVentaLibre.objects.values_list('sku', flat=True)
-    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
+    # 2. ¡EL ARREGLO! Aquí usamos la función global para filtrar todo el sistema
+    skus_usados_global = obtener_todos_los_skus_usados()
+    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
     
     productos_db = Producto.objects.all()
     dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
     
+    dict_titulos_global = {}
+    for ing in IngresoPercheron.objects.all():
+        if ing.modelo and ing.titulo and ing.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(ing.modelo).strip().upper()] = ing.titulo
+    for prod in productos_db:
+        if prod.modelo and prod.titulo and prod.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(prod.modelo).strip().upper()] = prod.titulo
+
     dict_skus = {}
     for ing in ingresos_db:
         mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
@@ -3474,8 +3435,10 @@ def percheron_ventalibre(request):
             try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
             except: fecha_str = str(ing.fecha_ingreso)
 
+        titulo_val = dict_titulos_global.get(mod_limpio, ing.titulo or 'Modelo nuevo / Sin título')
+
         dict_skus[ing.sku] = {
-            'modelo': ing.modelo or '', 'titulo': ing.titulo or '', 'serie': ing.serie_nro or '-',
+            'modelo': ing.modelo or '', 'titulo': titulo_val, 'serie': ing.serie_nro or '-',
             'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
             'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
             'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
@@ -3484,7 +3447,8 @@ def percheron_ventalibre(request):
     return render(request, 'inventario/percheron_ventalibre.html', {
         'canal': canal,
         'page_obj': page_obj,
-        'skus_json': json.dumps(dict_skus)
+        'skus_json': json.dumps(dict_skus),
+        'titulos_json': json.dumps(dict_titulos_global)
     })
 
 @login_required
