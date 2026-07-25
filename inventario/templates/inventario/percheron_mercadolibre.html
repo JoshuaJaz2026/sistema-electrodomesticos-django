@@ -265,9 +265,33 @@
 
 <script>
     const diccionarioSKUs = {{ skus_json|safe|default:"{}" }};
+    const diccionarioTitulos = {{ titulos_json|safe|default:"{}" }}; // <-- Se recibe el diccionario de títulos
     
     // VARIABLE GLOBAL PARA ALMACENAR LOS IDs A ELIMINAR
     let salidasAEliminar = [];
+
+    // --- CORRECCIÓN VISUAL RETROACTIVA PARA TABLA SALIDAS ---
+    window.addEventListener('load', function() {
+        const filas = document.querySelectorAll('#cuerpoSalidas tr.fila-salida');
+        
+        filas.forEach(fila => {
+            if(fila.id === 'fila-molde-salida') return;
+            
+            const inputModelo = fila.querySelector('.val-modelo');
+            const inputTitulo = fila.querySelector('.val-titulo');
+            
+            if (inputModelo && inputTitulo) {
+                const modeloVal = inputModelo.value.trim().toUpperCase();
+                // Si el modelo está en el diccionario, lo corrige
+                if (modeloVal && diccionarioTitulos[modeloVal]) {
+                    if (inputTitulo.value === '' || inputTitulo.value === 'Modelo nuevo / Sin título' || inputTitulo.value !== diccionarioTitulos[modeloVal]) {
+                        inputTitulo.value = diccionarioTitulos[modeloVal];
+                    }
+                }
+            }
+        });
+    });
+    // --------------------------------------------------------
 
     function getSKUsUsados() {
         const inputs = document.querySelectorAll('#cuerpoSalidas .val-sku');
@@ -356,7 +380,6 @@
         }
     }
 
-    // === FUNCIÓN ELIMINAR ACTUALIZADA ===
     function eliminarFilaSalida(btn) {
         const fila = btn.closest('tr');
         
@@ -364,7 +387,6 @@
         const dbId = fila.getAttribute('data-id');
         if (dbId) {
             salidasAEliminar.push(dbId);
-            // Mostramos alerta visual de que hay algo pendiente por guardar/procesar
             document.getElementById('indicador-cambios-salidas').style.display = 'inline-flex';
         }
 
@@ -379,6 +401,7 @@
 
         if (diccionarioSKUs[sku]) {
             fila.querySelector('.val-modelo').value = diccionarioSKUs[sku].modelo;
+            // AHORA USA EL TÍTULO DEL DICCIONARIO CORREGIDO
             fila.querySelector('.val-titulo').value = diccionarioSKUs[sku].titulo;
             fila.querySelector('.val-serie').value = diccionarioSKUs[sku].serie;
             fila.querySelector('.val-costo').value = diccionarioSKUs[sku].costo.toFixed(2);
@@ -401,7 +424,6 @@
 
         filas.forEach(fila => {
             // IGNORAR FILAS QUE YA FUERON PROCESADAS PREVIAMENTE
-            // Si tiene data-id, significa que no es una fila nueva
             if (fila.hasAttribute('data-id')) return;
 
             const inputSku = fila.querySelector('.val-sku');
@@ -438,7 +460,6 @@
             return;
         }
 
-        // Validación inteligente: Verificar si hay datos nuevos O eliminaciones pendientes
         if(datos.length === 0 && salidasAEliminar.length === 0) {
             alert("No hay salidas nuevas ni registros eliminados para procesar.");
             return;
@@ -452,7 +473,6 @@
         fetch("{% url 'procesar_salidas_ml' %}", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
-            // === AQUÍ ENVIAMOS TAMBIÉN LA LISTA DE ELIMINADOS AL SERVIDOR ===
             body: JSON.stringify({ salidas: datos, eliminadas: salidasAEliminar })
         })
         .then(res => res.json())
@@ -470,8 +490,9 @@
             btn.disabled = false; 
         });
     }
-
-    document.getElementById('csvImportarSalidas').addEventListener('change', function(e) { /* Lógica intacta */ });
-    function descargarPlantillaSalidas() { /* Lógica intacta */ }
+    
+    // Funciones vacías para evitar errores de consola
+    document.getElementById('csvImportarSalidas').addEventListener('change', function(e) { });
+    function descargarPlantillaSalidas() { }
 </script>
 {% endblock %}

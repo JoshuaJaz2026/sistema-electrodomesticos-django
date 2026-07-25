@@ -288,7 +288,16 @@ def percheron_registros(request):
     productos_db = Producto.objects.all()
     dict_productos = {p.modelo: p for p in productos_db if p.modelo}
     
-    # === RECOPILACIÓN MASIVA DE TODAS LAS PLATAFORMAS ===
+    # --- 1. DICCIONARIO INTELIGENTE EN CASCADA ---
+    dict_titulos_global = {}
+    for ing in ingresos_db:
+        if ing.modelo and ing.titulo and ing.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(ing.modelo).strip().upper()] = ing.titulo
+    for prod in productos_db:
+        if prod.modelo and prod.titulo and prod.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(prod.modelo).strip().upper()] = prod.titulo
+    # ---------------------------------------------
+    
     out_ml_qs = SalidaMercadoLibre.objects.values('sku').annotate(total=Sum('descuento'))
     dict_out_ml = {s['sku']: s['total'] for s in out_ml_qs if s['sku']}
     
@@ -318,7 +327,10 @@ def percheron_registros(request):
         marca_val = prod.marca if prod else 'SIN MARCA'
         ubicacion_val = prod.ubicacion if prod else 'SIN UBICACIÓN'
         
-        # Asignar salidas extraídas por plataforma
+        # --- 2. JALAR TÍTULO CON PRIORIDAD DESDE INGRESOS ---
+        mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
+        titulo_val = dict_titulos_global.get(mod_limpio, ing.titulo or 'Modelo nuevo / Sin título')
+        
         out_ml = dict_out_ml.get(ing.sku, 0)
         out_ml2 = dict_out_ml_jr.get(ing.sku, 0)
         out_fbl = dict_out_fbl.get(ing.sku, 0)
@@ -327,7 +339,6 @@ def percheron_registros(request):
         out_tk = dict_out_tk.get(ing.sku, 0)
         out_vl = dict_out_vl.get(ing.sku, 0)
         
-        # Balance Final Automático
         total_out = out_ml + out_fbl + out_cdt + out_vl + out_tk + out_intcp + out_ml2
         stock_val = ing.cantidad - total_out
         
@@ -342,7 +353,7 @@ def percheron_registros(request):
             'ubicacion': ubicacion_val,
             'registrado_por': ing.creado_por,
             'modelo': ing.modelo,
-            'titulo': ing.titulo,
+            'titulo': titulo_val, # Título Corregido
             'in_cant': ing.cantidad,
             'out_ml': out_ml,
             'out_fbl': out_fbl,
@@ -421,6 +432,16 @@ def percheron_mercadolibre(request):
     productos_db = Producto.objects.all()
     dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
     
+    # --- 1. DICCIONARIO INTELIGENTE EN CASCADA ---
+    dict_titulos_global = {}
+    for ing in IngresoPercheron.objects.all():
+        if ing.modelo and ing.titulo and ing.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(ing.modelo).strip().upper()] = ing.titulo
+    for prod in productos_db:
+        if prod.modelo and prod.titulo and prod.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(prod.modelo).strip().upper()] = prod.titulo
+    # ---------------------------------------------
+            
     dict_skus = {}
     for ing in ingresos_db:
         mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
@@ -433,8 +454,11 @@ def percheron_mercadolibre(request):
             try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
             except: fecha_str = str(ing.fecha_ingreso)
 
+        # --- 2. JALAR TÍTULO PARA EL BUSCADOR (Salidas) ---
+        titulo_val = dict_titulos_global.get(mod_limpio, ing.titulo or 'Modelo nuevo / Sin título')
+
         dict_skus[ing.sku] = {
-            'modelo': ing.modelo or '', 'titulo': ing.titulo or '', 'serie': ing.serie_nro or '-',
+            'modelo': ing.modelo or '', 'titulo': titulo_val, 'serie': ing.serie_nro or '-',
             'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
             'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
             'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
@@ -445,6 +469,7 @@ def percheron_mercadolibre(request):
     return render(request, 'inventario/percheron_mercadolibre.html', {
         'canal': canal,
         'skus_json': json.dumps(dict_skus),
+        'titulos_json': json.dumps(dict_titulos_global), # <--- Se envía el diccionario a la tabla
         'page_obj': page_obj 
     })
 
