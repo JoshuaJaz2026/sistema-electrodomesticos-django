@@ -9,7 +9,19 @@
         :root {
             --color-principal: {{ request.session.color_actual|default:"#3498DB" }};
         }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; background: #f4f7f6; overflow: hidden; }
+        
+        /* 1. AGREGAMOS TRANSICIÓN DE OPACIDAD AL BODY */
+        body { 
+            margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; 
+            background: #f4f7f6; overflow: hidden; 
+            transition: opacity 0.4s ease-in-out; 
+            opacity: 1; 
+        }
+        
+        /* 2. CLASE QUE HACE DESAPARECER LA PANTALLA */
+        body.fade-out { 
+            opacity: 0; 
+        }
         
         /* === BARRA LATERAL (CON EFECTO SLIDE) === */
         .sidebar { 
@@ -142,7 +154,6 @@
 
     <div class="sidebar" id="miSidebar">
         <div class="sidebar-header">
-            <!-- Condicional para asegurar que el icono sea blanco en TikTok -->
             <i class="{{ request.session.icono_actual|default:'fas fa-globe' }} fa-2x" style="color: {% if canal == 'Tik tok' or canal == 'TikTok' %}white{% else %}var(--color-principal){% endif %};"></i>
             <h3 style="margin-top: 10px;">{{ canal }}</h3>
         </div>
@@ -250,7 +261,8 @@
                 <span style="font-weight: bold; font-size: 0.9rem;">{{ user.username|upper }}</span>
             </div>
             
-            <form method="post" action="{% url 'logout' %}" style="margin: 0;">
+            <!-- 3. FORMULARIO MODIFICADO CON ID Y ONSUBMIT -->
+            <form id="form-logout" method="post" action="{% url 'logout' %}" style="margin: 0;" onsubmit="animarSalida(event)">
                 {% csrf_token %}
                 <button type="submit" class="btn-logout-sidebar">
                     <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
@@ -278,6 +290,19 @@
             const sidebar = document.getElementById('miSidebar');
             sidebar.classList.toggle('collapsed');
             localStorage.setItem('menuColapsado', sidebar.classList.contains('collapsed'));
+        }
+
+        // 4. FUNCIÓN QUE GESTIONA LA ANIMACIÓN DE SALIDA
+        function animarSalida(event) {
+            // Detenemos el envío inmediato
+            event.preventDefault(); 
+            // Agregamos la clase que hace el fade-out (desaparecer)
+            document.body.classList.add('fade-out'); 
+            
+            // Esperamos 400ms (lo que dura la transición CSS) y enviamos la petición de cierre
+            setTimeout(() => {
+                document.getElementById('form-logout').submit(); 
+            }, 400);
         }
 
         document.addEventListener("DOMContentLoaded", function() {
