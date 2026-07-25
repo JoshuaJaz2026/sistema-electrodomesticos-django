@@ -59,7 +59,7 @@
             <input type="number" step="0.01" id="masivo-costo" placeholder="0.00" class="input-mini" style="text-align: right;">
         </div>
         
-        <!-- CAMPO UBICACIÓN MASIVO -->
+        <!-- NUEVO CAMPO UBICACIÓN MASIVO -->
         <div style="flex: 1; min-width: 100px;">
             <label class="label-mini"><i class="fas fa-map-marker-alt"></i> UBICACIÓN</label>
             <input type="text" id="masivo-ubicacion" placeholder="Ej. P1-A3" class="input-mini" style="text-transform: uppercase;">
@@ -101,7 +101,7 @@
                 <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;">
                     <th class="th-premium" style="width: 170px;">SKU <i class="fas fa-magic" style="color: #34d399; font-size: 0.9em; margin-left: 5px;" title="Autogenerado"></i></th>
                     <th class="th-premium" style="width: 160px;">MODELO</th>
-                    <th class="th-premium" style="width: 280px;">TÍTULO <i class="fas fa-edit" style="color: #3b82f6; font-size: 0.9em; margin-left: 5px;" title="Editable"></i></th>
+                    <th class="th-premium" style="width: 280px;">TÍTULO <i class="fas fa-lock" style="color: #64748b; font-size: 0.9em; margin-left: 5px;" title="Bloqueado"></i></th>
                     <th class="th-premium" style="width: 140px;">FECHA ING.</th>
                     <th class="th-premium" style="width: 160px;">CÓDIGO EAN</th>
                     <th class="th-premium" style="width: 160px;">SERIE / N°</th>
@@ -124,8 +124,8 @@
                         <input type="text" class="celda-input central bold val-modelo" oninput="autogenerarSKU(this); registrarCambioIngreso(this)" placeholder="Escribe...">
                     </td>
                     <td class="td-premium">
-                        <!-- TÍTULO EDITABLE -->
-                        <input type="text" class="celda-input val-titulo" oninput="registrarCambioIngreso(this)" placeholder="Escribe o autocompleta...">
+                        <!-- TÍTULO BLOQUEADO -->
+                        <input type="text" class="celda-input val-titulo input-readonly" readonly tabindex="-1" oninput="registrarCambioIngreso(this)" placeholder="Autocompletado...">
                     </td>
                     <td class="td-premium">
                         <input type="date" class="celda-input central val-fecha" oninput="registrarCambioIngreso(this)">
@@ -185,8 +185,8 @@
                             <input type="text" value="{{ item.modelo|default:'' }}" class="celda-input central bold val-modelo" oninput="autogenerarSKU(this); registrarCambioIngreso(this)">
                         </td>
                         <td class="td-premium">
-                            <!-- TÍTULO EDITABLE PARA ELEMENTOS EXISTENTES -->
-                            <input type="text" value="{{ item.titulo|default:'' }}" class="celda-input val-titulo" oninput="registrarCambioIngreso(this)" placeholder="Escribe un título...">
+                            <!-- TÍTULO BLOQUEADO PARA ELEMENTOS EXISTENTES -->
+                            <input type="text" value="{{ item.titulo|default:'' }}" class="celda-input val-titulo input-readonly" readonly tabindex="-1" oninput="registrarCambioIngreso(this)">
                         </td>
                         <td class="td-premium">
                             <input type="date" value="{{ item.fecha_ingreso|date:'Y-m-d' }}" class="celda-input central val-fecha" oninput="registrarCambioIngreso(this)">
@@ -322,6 +322,22 @@
 
         filas.forEach(fila => {
             if(fila.id === 'fila-molde') return;
+
+            // === MAGIA RETROACTIVA VISUAL ===
+            // Actualiza los títulos viejos que quedaron como "Modelo nuevo..." basándose en el Directorio
+            const inputModelo = fila.querySelector('.val-modelo');
+            const inputTitulo = fila.querySelector('.val-titulo');
+            
+            if (inputModelo && inputTitulo) {
+                const modeloVal = inputModelo.value.trim().toUpperCase();
+                if (modeloVal && diccionarioTitulos[modeloVal]) {
+                    if (inputTitulo.value === '' || inputTitulo.value === 'Modelo nuevo / Sin título' || inputTitulo.value !== diccionarioTitulos[modeloVal]) {
+                        inputTitulo.value = diccionarioTitulos[modeloVal];
+                    }
+                }
+            }
+            // ================================
+
             const key = fila.dataset.originalKey;
             if (key && memoriaIngresos[key]) {
                 fila.classList.add('fila-editada');
@@ -378,11 +394,10 @@
                 nuevaFila.querySelector('.val-costo').value = costoInput.toFixed(2);
             }
 
-            // AHORA NO PONEMOS TEXTOS FORZADOS SI NO EXISTE
             if (diccionarioTitulos[modeloInput]) {
                 nuevaFila.querySelector('.val-titulo').value = diccionarioTitulos[modeloInput];
             } else {
-                nuevaFila.querySelector('.val-titulo').value = ''; 
+                nuevaFila.querySelector('.val-titulo').value = 'Modelo nuevo / Sin título'; 
             }
 
             let numeroCorrelativo = totalFilasActuales + i + 18; 
@@ -449,13 +464,10 @@
         const modelo = inputModelo.value.trim().toUpperCase();
 
         if (modelo !== '') {
-            // SI ESTÁ EN EL DICCIONARIO, LO JALA. SI NO, LO DEJA PARA QUE EL USUARIO ESCRIBA
             if (diccionarioTitulos[modelo]) {
                 inputTitulo.value = diccionarioTitulos[modelo];
             } else {
-                if (inputTitulo.value === 'Modelo nuevo / Sin título' || inputTitulo.value.trim() === '') {
-                    inputTitulo.value = ''; 
-                }
+                inputTitulo.value = 'Modelo nuevo / Sin título'; 
             }
 
             if (inputSku.value === '') {
@@ -646,7 +658,7 @@
                 const indicador = document.getElementById('indicador-cambios');
                 if(indicador) indicador.style.display = 'inline-flex';
 
-                alert(`¡Se procesaron ${importadas} ingresos! Revisa la tabla y presiona 'Guardar Ingresos'.`);
+                alert(`¡Se procesaron ${importadas} ingresos! El sistema autogeneró los SKUs y Títulos faltantes. Revisa la tabla y presiona 'Guardar Ingresos'.`);
             }
         });
     });
