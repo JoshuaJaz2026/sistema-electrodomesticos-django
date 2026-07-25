@@ -183,7 +183,9 @@
                         <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='percheron_tiktok' %}" data-path="{% url 'percheron_tiktok' %}" class="submenu-item"><i class="fab fa-tiktok"></i> Percherón Tiktok</a>
                     {% elif canal == 'Venta Libre' %}
                         <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='percheron_ventalibre' %}" data-path="{% url 'percheron_ventalibre' %}" class="submenu-item"><i class="fas fa-shopping-cart"></i> Percherón Venta Libre</a>
-                    {% endif %}
+                    {% elif canal == 'Web' %}
+                        <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='percheron_web' %}" data-path="{% url 'percheron_web' %}" class="submenu-item"><i class="fas fa-globe"></i> Percherón Web</a>
+                        {% endif %}
 
                     {% if user.is_superuser %}
                         <hr style="border: 0.5px solid #3e4f5f; margin: 10px 20px;">

@@ -20,7 +20,7 @@ from datetime import timedelta
 from django.contrib.auth.models import User
 
 # Importación corregida de SimulacionMercadoLibreJunior
-from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre, ReporteMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SalidaFalabella, SalidaCreditienda, SalidaIntercorp, SalidaTiktok, SalidaVentaLibre, ReporteCreditienda, ReporteFalabella, DirectorioProducto, ReporteIntercorp, ComisionIntercorp, SalidaBCI
+from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre, ReporteMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SalidaFalabella, SalidaCreditienda, SalidaIntercorp, SalidaTiktok, SalidaVentaLibre, ReporteCreditienda, ReporteFalabella, DirectorioProducto, ReporteIntercorp, ComisionIntercorp, SalidaBCI, SalidaWeb
 
 # =========================================================
 # CONFIGURACIÓN MAESTRA DE ESTILOS Y COLORES
@@ -889,6 +889,150 @@ def buscar_modelo_tiktok(request):
             'status': 'ok', 'producto': producto_nombre,
             'stock': resultados.count(), 'items': data
         })
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+# ==========================================
+# PLATAFORMA WEB
+# ==========================================
+@login_required
+@verificar_acceso_plataforma('Web')
+def percheron_web(request):
+    canal = request.session.get('canal_activo', 'Web')
+    from .models import SalidaWeb, IngresoPercheron, Producto
+    import json
+    
+    page_obj = SalidaWeb.objects.all().order_by('-id')
+    
+    skus_usados_global = obtener_todos_los_skus_usados()
+    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
+    
+    productos_db = Producto.objects.all()
+    dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
+    
+    dict_titulos_global = {}
+    for ing in IngresoPercheron.objects.all():
+        if ing.modelo and ing.titulo and ing.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(ing.modelo).strip().upper()] = ing.titulo
+    for prod in productos_db:
+        if prod.modelo and prod.titulo and prod.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(prod.modelo).strip().upper()] = prod.titulo
+
+    dict_skus = {}
+    for ing in ingresos_db:
+        mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
+        prod = dict_prods.get(mod_limpio)
+        marca_val = prod.marca if prod else 'S/N MARCA'
+        stock_val = prod.stock_actual if prod else 0
+        
+        fecha_str = '-'
+        if ing.fecha_ingreso:
+            try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
+            except: fecha_str = str(ing.fecha_ingreso)
+
+        titulo_val = dict_titulos_global.get(mod_limpio, ing.titulo or 'Modelo nuevo / Sin título')
+
+        dict_skus[ing.sku] = {
+            'modelo': ing.modelo or '', 'titulo': titulo_val, 'serie': ing.serie_nro or '-',
+            'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
+            'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
+            'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
+        }
+
+    return render(request, 'inventario/percheron_web.html', {
+        'canal': canal,
+        'page_obj': page_obj,
+        'skus_json': json.dumps(dict_skus),
+        'titulos_json': json.dumps(dict_titulos_global)
+    })
+
+@login_required
+@csrf_exempt
+def procesar_salidas_web(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido'})
+
+    try:
+        import json
+        data = json.loads(request.body)
+        salidas = data.get('salidas', [])
+        eliminadas = data.get('eliminadas', []) 
+
+        if not salidas and not eliminadas:
+            return JsonResponse({'status': 'error', 'message': 'Sin datos para procesar.'})
+
+        from .models import SalidaWeb, Producto
+        from datetime import datetime
+        from django.db import transaction
+
+        with transaction.atomic():
+            
+            if salidas:
+                skus_entrantes = [sal.get('sku', '').strip() for sal in salidas if sal.get('sku', '').strip()]
+                skus_ya_vendidos = SalidaWeb.objects.filter(sku__in=skus_entrantes).values_list('sku', flat=True)
+                
+                if skus_ya_vendidos:
+                    skus_repetidos = ", ".join(skus_ya_vendidos)
+                    return JsonResponse({
+                        'status': 'error', 
+                        'message': f'¡ALTO! Los siguientes SKUs ya fueron descontados: {skus_repetidos}. Por favor, borra esas filas y actualiza.'
+                    })
+
+            conteo_descuentos = {}
+            conteo_restauraciones = {}
+
+            if eliminadas:
+                registros_viejos = SalidaWeb.objects.filter(id__in=eliminadas)
+                for registro in registros_viejos:
+                    if registro.modelo:
+                        key = str(registro.modelo).upper().replace(" ", "").replace("-", "")
+                        conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.descuento
+                    registro.delete()
+
+            if salidas:
+                for sal in salidas:
+                    sku = sal.get('sku', '').strip()
+                    modelo = sal.get('modelo', '').strip()
+                    titulo = sal.get('titulo', '').strip()
+                    fecha_salida = sal.get('fecha_salida') or datetime.now().date()
+                    serie = sal.get('serie', '')
+                    costo_html = float(sal.get('costo') or 0)
+                    descuento_html = 1
+                    nro_venta_html = sal.get('nro_ventas', '')
+                    by_html = sal.get('by', request.user.username)
+
+                    SalidaWeb.objects.create(
+                        sku=sku, modelo=modelo, titulo=titulo, fecha_salida=fecha_salida,
+                        serie=serie, costo=costo_html, descuento=descuento_html,
+                        nro_venta=nro_venta_html, creado_por=by_html
+                    )
+
+                    key = modelo.upper().replace(" ", "").replace("-", "")
+                    if key:
+                        conteo_descuentos[key] = conteo_descuentos.get(key, 0) + descuento_html
+
+            modelos_afectados = 0
+            modelos_restaurados = 0
+            
+            if conteo_descuentos or conteo_restauraciones:
+                for prod in Producto.objects.all():
+                    if prod.modelo:
+                        key = prod.modelo.upper().replace(" ", "").replace("-", "")
+                        cambio = False
+                        if key in conteo_restauraciones:
+                            prod.stock_actual += conteo_restauraciones[key]
+                            modelos_restaurados += 1
+                            cambio = True
+                        if key in conteo_descuentos:
+                            prod.stock_actual = max(prod.stock_actual - conteo_descuentos[key], 0)
+                            modelos_afectados += 1
+                            cambio = True
+                        if cambio:
+                            prod.save(update_fields=['stock_actual'])
+
+        return JsonResponse({'status': 'ok', 'message': f'Descontados: {modelos_afectados}. Devueltos: {modelos_restaurados}.'})
+
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
 
@@ -3930,6 +4074,13 @@ def obtener_todos_los_skus_usados():
     skus += list(SalidaIntercorp.objects.values_list('sku', flat=True))
     skus += list(SalidaTiktok.objects.values_list('sku', flat=True))
     skus += list(SalidaVentaLibre.objects.values_list('sku', flat=True))
+
+    try:
+        from .models import SalidaWeb
+        skus += list(SalidaWeb.objects.values_list('sku', flat=True))
+    except:
+        pass
+    
     try:
         from .models import SalidaBCI
         skus += list(SalidaBCI.objects.values_list('sku', flat=True))

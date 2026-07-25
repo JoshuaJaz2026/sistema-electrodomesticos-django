@@ -38,6 +38,7 @@ urlpatterns = [
     path('percheron/tiktok/', views.percheron_tiktok, name='percheron_tiktok'),
     path('percheron/venta-libre/', views.percheron_ventalibre, name='percheron_ventalibre'),
     path('percheron/bci/', views.percheron_bci, name='percheron_bci'),
+    path('percheron/web/', views.percheron_web, name='percheron_web'),
 
     # ==========================================
     # 5. REPORTES DE VENTAS POR PLATAFORMA
@@ -113,6 +114,7 @@ urlpatterns = [
     path('api/procesar-salidas-ventalibre/', views.procesar_salidas_ventalibre, name='procesar_salidas_ventalibre'),
     path('api/procesar-salidas-tiktok/', views.procesar_salidas_tiktok, name='procesar_salidas_tiktok'),
     path('percheron/bci/procesar/', views.procesar_salidas_bci, name='procesar_salidas_bci'), # <--- LA NUEVA RUTA BCI
+    path('api/procesar-salidas-web/', views.procesar_salidas_web, name='procesar_salidas_web'),
     
     # Rutas de borrado masivo
     path('borrar-todos-los-reportes-ml/', views.borrar_todos_los_reportes_ml, name='borrar_todos_los_reportes_ml'),
