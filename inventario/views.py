@@ -425,14 +425,15 @@ def exportar_registros_excel(request):
 @verificar_acceso_plataforma('Mercado Libre')
 def percheron_mercadolibre(request):
     canal = request.session.get('canal_activo', 'Mercado Libre')
+    from .models import SalidaMercadoLibre, IngresoPercheron, Producto
+    import json
     
-    skus_usados = SalidaMercadoLibre.objects.values_list('sku', flat=True)
-    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
+    skus_usados_global = obtener_todos_los_skus_usados()
+    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
     
     productos_db = Producto.objects.all()
     dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
     
-    # --- 1. DICCIONARIO INTELIGENTE EN CASCADA ---
     dict_titulos_global = {}
     for ing in IngresoPercheron.objects.all():
         if ing.modelo and ing.titulo and ing.titulo != 'Modelo nuevo / Sin título':
@@ -440,7 +441,6 @@ def percheron_mercadolibre(request):
     for prod in productos_db:
         if prod.modelo and prod.titulo and prod.titulo != 'Modelo nuevo / Sin título':
             dict_titulos_global[str(prod.modelo).strip().upper()] = prod.titulo
-    # ---------------------------------------------
             
     dict_skus = {}
     for ing in ingresos_db:
@@ -454,7 +454,6 @@ def percheron_mercadolibre(request):
             try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
             except: fecha_str = str(ing.fecha_ingreso)
 
-        # --- 2. JALAR TÍTULO PARA EL BUSCADOR (Salidas) ---
         titulo_val = dict_titulos_global.get(mod_limpio, ing.titulo or 'Modelo nuevo / Sin título')
 
         dict_skus[ing.sku] = {
@@ -467,23 +466,31 @@ def percheron_mercadolibre(request):
     page_obj = SalidaMercadoLibre.objects.all().order_by('-id')
 
     return render(request, 'inventario/percheron_mercadolibre.html', {
-        'canal': canal,
-        'skus_json': json.dumps(dict_skus),
-        'titulos_json': json.dumps(dict_titulos_global), # <--- Se envía el diccionario a la tabla
-        'page_obj': page_obj 
+        'canal': canal, 'skus_json': json.dumps(dict_skus),
+        'titulos_json': json.dumps(dict_titulos_global), 'page_obj': page_obj 
     })
 
 @login_required
-@verificar_acceso_plataforma('Mercado Libre - Junior')
+@verificar_acceso_plataforma('Mercado Libre Junior')
 def percheron_mercadolibre_junior(request):
-    canal = request.session.get('canal_activo', 'Mercado Libre - Junior')
+    canal = request.session.get('canal_activo', 'Mercado Libre Junior')
+    from .models import SalidaMercadoLibreJunior, IngresoPercheron, Producto
+    import json
     
-    skus_usados = SalidaMercadoLibreJunior.objects.values_list('sku', flat=True)
-    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
+    skus_usados_global = obtener_todos_los_skus_usados()
+    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
     
     productos_db = Producto.objects.all()
     dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
     
+    dict_titulos_global = {}
+    for ing in IngresoPercheron.objects.all():
+        if ing.modelo and ing.titulo and ing.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(ing.modelo).strip().upper()] = ing.titulo
+    for prod in productos_db:
+        if prod.modelo and prod.titulo and prod.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(prod.modelo).strip().upper()] = prod.titulo
+            
     dict_skus = {}
     for ing in ingresos_db:
         mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
@@ -496,8 +503,10 @@ def percheron_mercadolibre_junior(request):
             try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
             except: fecha_str = str(ing.fecha_ingreso)
 
+        titulo_val = dict_titulos_global.get(mod_limpio, ing.titulo or 'Modelo nuevo / Sin título')
+
         dict_skus[ing.sku] = {
-            'modelo': ing.modelo or '', 'titulo': ing.titulo or '', 'serie': ing.serie_nro or '-',
+            'modelo': ing.modelo or '', 'titulo': titulo_val, 'serie': ing.serie_nro or '-',
             'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
             'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
             'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
@@ -506,27 +515,31 @@ def percheron_mercadolibre_junior(request):
     page_obj = SalidaMercadoLibreJunior.objects.all().order_by('-id')
 
     return render(request, 'inventario/percheron_mercadolibre_junior.html', {
-        'canal': canal,
-        'skus_json': json.dumps(dict_skus),
-        'page_obj': page_obj 
+        'canal': canal, 'skus_json': json.dumps(dict_skus),
+        'titulos_json': json.dumps(dict_titulos_global), 'page_obj': page_obj 
     })
 
 @login_required
 @verificar_acceso_plataforma('Falabella')
 def percheron_falabella(request):
     canal = request.session.get('canal_activo', 'Falabella')
-    
     from .models import SalidaFalabella, IngresoPercheron, Producto
     import json
     
-    page_obj = SalidaFalabella.objects.all().order_by('-id')
-    
-    skus_usados = SalidaFalabella.objects.values_list('sku', flat=True)
-    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
+    skus_usados_global = obtener_todos_los_skus_usados()
+    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
     
     productos_db = Producto.objects.all()
     dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
     
+    dict_titulos_global = {}
+    for ing in IngresoPercheron.objects.all():
+        if ing.modelo and ing.titulo and ing.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(ing.modelo).strip().upper()] = ing.titulo
+    for prod in productos_db:
+        if prod.modelo and prod.titulo and prod.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(prod.modelo).strip().upper()] = prod.titulo
+
     dict_skus = {}
     for ing in ingresos_db:
         mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
@@ -539,17 +552,20 @@ def percheron_falabella(request):
             try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
             except: fecha_str = str(ing.fecha_ingreso)
 
+        titulo_val = dict_titulos_global.get(mod_limpio, ing.titulo or 'Modelo nuevo / Sin título')
+
         dict_skus[ing.sku] = {
-            'modelo': ing.modelo or '', 'titulo': ing.titulo or '', 'serie': ing.serie_nro or '-',
+            'modelo': ing.modelo or '', 'titulo': titulo_val, 'serie': ing.serie_nro or '-',
             'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
             'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
             'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
         }
 
+    page_obj = SalidaFalabella.objects.all().order_by('-id')
+
     return render(request, 'inventario/percheron_falabella.html', {
-        'canal': canal,
-        'page_obj': page_obj,
-        'skus_json': json.dumps(dict_skus)
+        'canal': canal, 'skus_json': json.dumps(dict_skus),
+        'titulos_json': json.dumps(dict_titulos_global), 'page_obj': page_obj
     })
 
 
@@ -605,12 +621,24 @@ def percheron_creditienda(request):
     
     page_obj = SalidaCreditienda.objects.all().order_by('-id')
     
-    skus_usados = SalidaCreditienda.objects.values_list('sku', flat=True)
-    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
+    # --- 1. AHORA BUSCAMOS LOS SKUs USADOS EN TODAS LAS PLATAFORMAS ---
+    skus_usados_global = obtener_todos_los_skus_usados()
+    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
+    # ------------------------------------------------------------------
     
     productos_db = Producto.objects.all()
     dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
     
+    # --- 2. DICCIONARIO INTELIGENTE EN CASCADA (Para corregir Títulos) ---
+    dict_titulos_global = {}
+    for ing in IngresoPercheron.objects.all():
+        if ing.modelo and ing.titulo and ing.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(ing.modelo).strip().upper()] = ing.titulo
+    for prod in productos_db:
+        if prod.modelo and prod.titulo and prod.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(prod.modelo).strip().upper()] = prod.titulo
+    # ---------------------------------------------------------------------
+
     dict_skus = {}
     for ing in ingresos_db:
         mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
@@ -623,8 +651,11 @@ def percheron_creditienda(request):
             try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
             except: fecha_str = str(ing.fecha_ingreso)
 
+        # Jalar el título corregido en vez del antiguo
+        titulo_val = dict_titulos_global.get(mod_limpio, ing.titulo or 'Modelo nuevo / Sin título')
+
         dict_skus[ing.sku] = {
-            'modelo': ing.modelo or '', 'titulo': ing.titulo or '', 'serie': ing.serie_nro or '-',
+            'modelo': ing.modelo or '', 'titulo': titulo_val, 'serie': ing.serie_nro or '-',
             'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
             'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
             'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
@@ -633,7 +664,8 @@ def percheron_creditienda(request):
     return render(request, 'inventario/percheron_creditienda.html', {
         'canal': canal,
         'page_obj': page_obj,
-        'skus_json': json.dumps(dict_skus)
+        'skus_json': json.dumps(dict_skus),
+        'titulos_json': json.dumps(dict_titulos_global)
     })
 
 @login_required
@@ -682,19 +714,23 @@ def buscar_modelo_creditienda(request):
 @verificar_acceso_plataforma('Intercorp')
 def percheron_intercorp(request):
     canal = request.session.get('canal_activo', 'Intercorp')
-    
     from .models import SalidaIntercorp, IngresoPercheron, Producto
+    import json
     
-    # 1. Traemos el historial de salidas ordenado del más nuevo al más viejo
-    page_obj = SalidaIntercorp.objects.all().order_by('-id')
-    
-    # 2. Generamos el diccionario de SKUs (igual que en Mercado Libre) para el buscador
-    skus_usados = SalidaIntercorp.objects.values_list('sku', flat=True)
-    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
+    skus_usados_global = obtener_todos_los_skus_usados()
+    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
     
     productos_db = Producto.objects.all()
     dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
     
+    dict_titulos_global = {}
+    for ing in IngresoPercheron.objects.all():
+        if ing.modelo and ing.titulo and ing.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(ing.modelo).strip().upper()] = ing.titulo
+    for prod in productos_db:
+        if prod.modelo and prod.titulo and prod.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(prod.modelo).strip().upper()] = prod.titulo
+
     dict_skus = {}
     for ing in ingresos_db:
         mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
@@ -707,39 +743,46 @@ def percheron_intercorp(request):
             try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
             except: fecha_str = str(ing.fecha_ingreso)
 
+        titulo_val = dict_titulos_global.get(mod_limpio, ing.titulo or 'Modelo nuevo / Sin título')
+
         dict_skus[ing.sku] = {
-            'modelo': ing.modelo or '', 'titulo': ing.titulo or '', 'serie': ing.serie_nro or '-',
+            'modelo': ing.modelo or '', 'titulo': titulo_val, 'serie': ing.serie_nro or '-',
             'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
             'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
             'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
         }
 
-    # 3. Enviamos TODA la información al HTML
+    page_obj = SalidaIntercorp.objects.all().order_by('-id')
+
     return render(request, 'inventario/percheron_intercorp.html', {
-        'canal': canal,
-        'page_obj': page_obj,
-        'skus_json': json.dumps(dict_skus)
+        'canal': canal, 'skus_json': json.dumps(dict_skus),
+        'titulos_json': json.dumps(dict_titulos_global), 'page_obj': page_obj
     })
 
 # ==========================================
 # PLATAFORMA TIKTOK
 # ==========================================
 @login_required
-@verificar_acceso_plataforma('Tiktok')
+@verificar_acceso_plataforma('TikTok')
 def percheron_tiktok(request):
-    canal = request.session.get('canal_activo', 'Tiktok')
-    
+    canal = request.session.get('canal_activo', 'TikTok')
     from .models import SalidaTiktok, IngresoPercheron, Producto
     import json
     
-    page_obj = SalidaTiktok.objects.all().order_by('-id')
-    
-    skus_usados = SalidaTiktok.objects.values_list('sku', flat=True)
-    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
+    skus_usados_global = obtener_todos_los_skus_usados()
+    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
     
     productos_db = Producto.objects.all()
     dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
     
+    dict_titulos_global = {}
+    for ing in IngresoPercheron.objects.all():
+        if ing.modelo and ing.titulo and ing.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(ing.modelo).strip().upper()] = ing.titulo
+    for prod in productos_db:
+        if prod.modelo and prod.titulo and prod.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(prod.modelo).strip().upper()] = prod.titulo
+
     dict_skus = {}
     for ing in ingresos_db:
         mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
@@ -752,17 +795,20 @@ def percheron_tiktok(request):
             try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
             except: fecha_str = str(ing.fecha_ingreso)
 
+        titulo_val = dict_titulos_global.get(mod_limpio, ing.titulo or 'Modelo nuevo / Sin título')
+
         dict_skus[ing.sku] = {
-            'modelo': ing.modelo or '', 'titulo': ing.titulo or '', 'serie': ing.serie_nro or '-',
+            'modelo': ing.modelo or '', 'titulo': titulo_val, 'serie': ing.serie_nro or '-',
             'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
             'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
             'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
         }
 
+    page_obj = SalidaTiktok.objects.all().order_by('-id')
+
     return render(request, 'inventario/percheron_tiktok.html', {
-        'canal': canal,
-        'page_obj': page_obj,
-        'skus_json': json.dumps(dict_skus)
+        'canal': canal, 'skus_json': json.dumps(dict_skus),
+        'titulos_json': json.dumps(dict_titulos_global), 'page_obj': page_obj
     })
 
 @login_required
@@ -903,30 +949,24 @@ def procesar_salidas_tiktok(request):
 @login_required
 @verificar_acceso_plataforma('Venta Libre')
 def percheron_ventalibre(request):
-    canal = request.session.get('canal_activo')
-    return render(request, 'inventario/percheron_ventalibre.html', {'canal': canal})
-
-@login_required
-def percheron_bci(request):
-    if not request.user.is_superuser:
-        messages.error(request, "Acceso exclusivo para BCI Autorizados.")
-        return redirect('inicio')
-        
-    canal = request.session.get('canal_activo', 'Web')
-    
-    from .models import SalidaBCI, IngresoPercheron, Producto
+    canal = request.session.get('canal_activo', 'Venta Libre')
+    from .models import SalidaVentaLibre, IngresoPercheron, Producto
     import json
     
-    # 1. Traemos el historial de salidas BCI
-    page_obj = SalidaBCI.objects.all().order_by('-id')
-    
-    # 2. Generamos el diccionario de SKUs disponibles (que no hayan salido en BCI)
-    skus_usados = SalidaBCI.objects.values_list('sku', flat=True)
-    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados)
+    skus_usados_global = obtener_todos_los_skus_usados()
+    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
     
     productos_db = Producto.objects.all()
     dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
     
+    dict_titulos_global = {}
+    for ing in IngresoPercheron.objects.all():
+        if ing.modelo and ing.titulo and ing.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(ing.modelo).strip().upper()] = ing.titulo
+    for prod in productos_db:
+        if prod.modelo and prod.titulo and prod.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(prod.modelo).strip().upper()] = prod.titulo
+
     dict_skus = {}
     for ing in ingresos_db:
         mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
@@ -939,17 +979,72 @@ def percheron_bci(request):
             try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
             except: fecha_str = str(ing.fecha_ingreso)
 
+        titulo_val = dict_titulos_global.get(mod_limpio, ing.titulo or 'Modelo nuevo / Sin título')
+
         dict_skus[ing.sku] = {
-            'modelo': ing.modelo or '', 'titulo': ing.titulo or '', 'serie': ing.serie_nro or '-',
+            'modelo': ing.modelo or '', 'titulo': titulo_val, 'serie': ing.serie_nro or '-',
             'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
             'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
             'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
         }
 
+    page_obj = SalidaVentaLibre.objects.all().order_by('-id')
+
+    return render(request, 'inventario/percheron_ventalibre.html', {
+        'canal': canal, 'skus_json': json.dumps(dict_skus),
+        'titulos_json': json.dumps(dict_titulos_global), 'page_obj': page_obj
+    })
+
+@login_required
+def percheron_bci(request):
+    if not request.user.is_superuser:
+        messages.error(request, "Acceso exclusivo para BCI Autorizados.")
+        return redirect('inicio')
+        
+    canal = request.session.get('canal_activo', 'Web')
+    from .models import SalidaBCI, IngresoPercheron, Producto
+    import json
+    
+    skus_usados_global = obtener_todos_los_skus_usados()
+    ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
+    
+    productos_db = Producto.objects.all()
+    dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
+    
+    dict_titulos_global = {}
+    for ing in IngresoPercheron.objects.all():
+        if ing.modelo and ing.titulo and ing.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(ing.modelo).strip().upper()] = ing.titulo
+    for prod in productos_db:
+        if prod.modelo and prod.titulo and prod.titulo != 'Modelo nuevo / Sin título':
+            dict_titulos_global[str(prod.modelo).strip().upper()] = prod.titulo
+
+    dict_skus = {}
+    for ing in ingresos_db:
+        mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
+        prod = dict_prods.get(mod_limpio)
+        marca_val = prod.marca if prod else 'S/N MARCA'
+        stock_val = prod.stock_actual if prod else 0
+        
+        fecha_str = '-'
+        if ing.fecha_ingreso:
+            try: fecha_str = ing.fecha_ingreso.strftime('%d/%m/%Y')
+            except: fecha_str = str(ing.fecha_ingreso)
+
+        titulo_val = dict_titulos_global.get(mod_limpio, ing.titulo or 'Modelo nuevo / Sin título')
+
+        dict_skus[ing.sku] = {
+            'modelo': ing.modelo or '', 'titulo': titulo_val, 'serie': ing.serie_nro or '-',
+            'costo': float(ing.costo_unitario) if ing.costo_unitario else 0.00,
+            'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
+            'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
+        }
+
+    page_obj = SalidaBCI.objects.all().order_by('-id')
+
     return render(request, 'inventario/percheron_bci.html', {
-        'canal': canal,
-        'page_obj': page_obj,
-        'skus_json': json.dumps(dict_skus)
+        'canal': canal, 'skus_json': json.dumps(dict_skus),
+        'titulos_json': json.dumps(dict_titulos_global), 'page_obj': page_obj
     })
 
 @login_required
@@ -3820,3 +3915,22 @@ def procesar_salidas_creditienda(request):
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
+    
+
+def obtener_todos_los_skus_usados():
+    """Recopila absolutamente todos los SKUs que ya han salido por cualquier plataforma"""
+    skus = []
+    skus += list(SalidaMercadoLibre.objects.values_list('sku', flat=True))
+    skus += list(SalidaMercadoLibreJunior.objects.values_list('sku', flat=True))
+    skus += list(SalidaFalabella.objects.values_list('sku', flat=True))
+    skus += list(SalidaCreditienda.objects.values_list('sku', flat=True))
+    skus += list(SalidaIntercorp.objects.values_list('sku', flat=True))
+    skus += list(SalidaTiktok.objects.values_list('sku', flat=True))
+    skus += list(SalidaVentaLibre.objects.values_list('sku', flat=True))
+    try:
+        from .models import SalidaBCI
+        skus += list(SalidaBCI.objects.values_list('sku', flat=True))
+    except:
+        pass
+    
+    return set(skus) # Devuelve una lista única de SKUs descontados globalmente

@@ -73,20 +73,20 @@
             </div>
         </div>
 
-        <div style="overflow: auto; border: 2px solid #94a3b8; border-radius: 4px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); flex-grow: 1; min-height: 0;">
-            <table id="tablaSalidasVentaLibre" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap;">
+        <div style="overflow-x: hidden; overflow-y: auto; border: 2px solid #94a3b8; border-radius: 4px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); flex-grow: 1; min-height: 0;">
+            <table id="tablaSalidasVentaLibre" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.8rem; white-space: nowrap; table-layout: fixed;">
                 <thead style="position: sticky; top: 0; z-index: 10;">
-                    <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;">
-                        <th class="th-premium" style="width: 170px; text-align: center;">SKU</th>
-                        <th class="th-premium" style="width: 150px; text-align: center;">MODELO <i class="fas fa-lock" style="color: #64748b; font-size: 0.9em; margin-left: 5px;"></i></th>
-                        <th class="th-premium" style="width: 280px; text-align: center;">TÍTULO <i class="fas fa-lock" style="color: #64748b; font-size: 0.9em; margin-left: 5px;"></i></th>
-                        <th class="th-premium" style="width: 130px; text-align: center;">FECHA SALIDA</th>
-                        <th class="th-premium" style="width: 140px; text-align: center;">SERIE / N° <i class="fas fa-lock" style="color: #64748b; font-size: 0.9em; margin-left: 5px;"></i></th>
-                        <th class="th-premium" style="width: 100px; background-color: #1e293b; text-align: center;">COSTO</th>
-                        <th class="th-premium" style="width: 80px; background-color: #7f1d1d; text-align: center;">CANT.</th>
-                        <th class="th-premium" style="width: 140px; text-align: center;">NRO. VENTA</th>
-                        <th class="th-premium" style="width: 130px; text-align: center;">BY:</th>
-                        <th class="th-premium" style="width: 40px; text-align: center;"><i class="fas fa-trash-alt" style="color: #f87171;"></i></th>
+                    <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.7rem; letter-spacing: 0.5px;">
+                        <th class="th-premium" style="width: 13%; text-align: center;">SKU</th>
+                        <th class="th-premium" style="width: 12%; text-align: center;">MODELO <i class="fas fa-lock" style="color: #94a3b8; font-size: 0.9em; margin-left: 3px;"></i></th>
+                        <th class="th-premium" style="width: 21%; text-align: center;">TÍTULO <i class="fas fa-lock" style="color: #94a3b8; font-size: 0.9em; margin-left: 3px;"></i></th>
+                        <th class="th-premium" style="width: 9%; text-align: center;">FECHA SAL.</th>
+                        <th class="th-premium" style="width: 9%; text-align: center;">SERIE / N° <i class="fas fa-lock" style="color: #94a3b8; font-size: 0.9em; margin-left: 3px;"></i></th>
+                        <th class="th-premium" style="width: 6%; background-color: #f1f5f9; text-align: center;">COSTO</th>
+                        <th class="th-premium" style="width: 4%; background-color: #fee2e2; color: #b91c1c; text-align: center;">CANT.</th>
+                        <th class="th-premium" style="width: 12%; text-align: center;">NRO. VENTA</th>
+                        <th class="th-premium" style="width: 10%; text-align: center;">BY:</th>
+                        <th class="th-premium" style="width: 4%; text-align: center;"><i class="fas fa-trash-alt" style="color: #f87171;"></i></th>
                     </tr>
                 </thead>
                 <tbody id="cuerpoSalidas">
@@ -99,7 +99,7 @@
                         <td class="td-premium" style="background-color: #f8fafc;">
                             <div style="display: flex; align-items: center; padding: 0 5px; justify-content: center;">
                                 <span style="color: #94a3b8; font-weight: bold; margin-right: 2px;">S/</span>
-                                <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" style="padding-left: 2px; width: 60px;" tabindex="-1">
+                                <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" style="padding-left: 0; padding-right: 2px;" tabindex="-1">
                             </div>
                         </td>
                         <td class="td-premium" style="background-color: #fef2f2;">
@@ -141,37 +141,32 @@
                             <td class="td-premium"><input type="date" class="celda-input central val-fecha" value="{{ item.fecha_salida|date:'Y-m-d' }}"></td>
                             <td class="td-premium"><input type="text" readonly class="celda-input central text-blue text-mono val-serie input-readonly" value="{{ item.serie|default:'-' }}" tabindex="-1"></td>
                             
-                            <!-- USAMOS item.costo -->
                             <td class="td-premium" style="background-color: #f8fafc;">
                                 <div style="display: flex; align-items: center; padding: 0 5px; justify-content: center;">
                                     <span style="color: #94a3b8; font-weight: bold; margin-right: 2px;">S/</span>
-                                    <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" value="{{ item.costo|floatformat:2|default:'0.00' }}" style="padding-left: 2px; width: 60px;" tabindex="-1">
+                                    <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" value="{{ item.costo_unt|floatformat:2|default:'0.00' }}" style="padding-left: 0; padding-right: 2px;" tabindex="-1">
                                 </div>
                             </td>
                             
-                            <!-- USAMOS item.descuento -->
                             <td class="td-premium" style="background-color: #fef2f2;">
-                                <input type="number" readonly class="celda-input central val-desc input-badge-rojo input-readonly" value="{{ item.descuento|default:'1' }}" tabindex="-1">
+                                <input type="number" readonly class="celda-input central val-desc input-badge-rojo input-readonly" value="{{ item.desc_und|default:'1' }}" tabindex="-1">
                             </td>
                             
-                            <!-- USAMOS item.nro_venta -->
-                            <td class="td-premium"><input type="text" class="celda-input central bold text-dark val-ventas" value="{{ item.nro_venta|default:'' }}"></td>
-                            
-                            <!-- USAMOS item.creado_por -->
+                            <td class="td-premium"><input type="text" class="celda-input central bold text-dark val-ventas" value="{{ item.nro_ventas|default:'' }}"></td>
                             <td class="td-premium">
                                 <select class="celda-input central text-orange val-by select-premium">
-                                    <option value="" disabled {% if not item.creado_por %}selected{% endif %}>-- BY --</option>
-                                    <option value="MILAGROS" {% if item.creado_por == 'MILAGROS' %}selected{% endif %}>MILAGROS</option>
-                                    <option value="PABLO" {% if item.creado_por == 'PABLO' %}selected{% endif %}>PABLO</option>
-                                    <option value="DENISE" {% if item.creado_por == 'DENISE' %}selected{% endif %}>DENISE</option>
-                                    <option value="JOSHUA" {% if item.creado_por == 'JOSHUA' %}selected{% endif %}>JOSHUA</option>
-                                    <option value="ALDO" {% if item.creado_por == 'ALDO' %}selected{% endif %}>ALDO</option>
-                                    <option value="ADAMARI" {% if item.creado_por == 'ADAMARI' %}selected{% endif %}>ADAMARI</option>
-                                    <option value="CARLOS" {% if item.creado_por == 'CARLOS' %}selected{% endif %}>CARLOS</option>
-                                    <option value="DAVID" {% if item.creado_por == 'DAVID' %}selected{% endif %}>DAVID</option>
-                                    <option value="EDUARDO" {% if item.creado_por == 'EDUARDO' %}selected{% endif %}>EDUARDO</option>
-                                    <option value="KEVIN" {% if item.creado_por == 'KEVIN' %}selected{% endif %}>KEVIN</option>
-                                    <option value="MISTER" {% if item.creado_por == 'MISTER' %}selected{% endif %}>MISTER</option>
+                                    <option value="" disabled {% if not item.by %}selected{% endif %}>-- BY --</option>
+                                    <option value="MILAGROS" {% if item.by == 'MILAGROS' %}selected{% endif %}>MILAGROS</option>
+                                    <option value="PABLO" {% if item.by == 'PABLO' %}selected{% endif %}>PABLO</option>
+                                    <option value="DENISE" {% if item.by == 'DENISE' %}selected{% endif %}>DENISE</option>
+                                    <option value="JOSHUA" {% if item.by == 'JOSHUA' %}selected{% endif %}>JOSHUA</option>
+                                    <option value="ALDO" {% if item.by == 'ALDO' %}selected{% endif %}>ALDO</option>
+                                    <option value="ADAMARI" {% if item.by == 'ADAMARI' %}selected{% endif %}>ADAMARI</option>
+                                    <option value="CARLOS" {% if item.by == 'CARLOS' %}selected{% endif %}>CARLOS</option>
+                                    <option value="DAVID" {% if item.by == 'DAVID' %}selected{% endif %}>DAVID</option>
+                                    <option value="EDUARDO" {% if item.by == 'EDUARDO' %}selected{% endif %}>EDUARDO</option>
+                                    <option value="KEVIN" {% if item.by == 'KEVIN' %}selected{% endif %}>KEVIN</option>
+                                    <option value="MISTER" {% if item.by == 'MISTER' %}selected{% endif %}>MISTER</option>
                                 </select>
                             </td>
                             
@@ -243,7 +238,6 @@
 </style>
 
 <script>
-    const diccionarioSKUs = {{ skus_json|safe|default:"{}" }};
     let debounceTimer;
     let catalogoActual = [];
     let salidasAEliminar = [];

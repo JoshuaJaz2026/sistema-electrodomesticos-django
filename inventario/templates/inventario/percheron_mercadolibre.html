@@ -80,21 +80,21 @@
             </div>
         </div>
 
-        <div style="overflow: auto; border: 2px solid #94a3b8; border-radius: 4px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); flex-grow: 1; min-height: 0;">
-            <table id="tablaSalidasML" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap;">
+        <div style="overflow-x: hidden; overflow-y: auto; border: 2px solid #94a3b8; border-radius: 4px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); flex-grow: 1; min-height: 0;">
+            <table id="tablaSalidasML" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.8rem; white-space: nowrap; table-layout: fixed;">
                 <thead style="position: sticky; top: 0; z-index: 10;">
-                    <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;">
-                        <th class="th-premium" style="width: 170px; text-align: center;">SKU</th>
-                        <th class="th-premium" style="width: 150px; text-align: center;">MODELO <i class="fas fa-lock" style="color: #64748b; font-size: 0.9em; margin-left: 5px;"></i></th>
-                        <th class="th-premium" style="width: 280px; text-align: center;">TÍTULO <i class="fas fa-lock" style="color: #64748b; font-size: 0.9em; margin-left: 5px;"></i></th>
-                        <th class="th-premium" style="width: 130px; text-align: center;">FECHA SALIDA</th>
-                        <th class="th-premium" style="width: 140px; text-align: center;">SERIE / N° <i class="fas fa-lock" style="color: #64748b; font-size: 0.9em; margin-left: 5px;"></i></th>
-                        <th class="th-premium" style="width: 100px; background-color: #1e293b; text-align: center;">COSTO</th>
-                        <th class="th-premium" style="width: 80px; background-color: #7f1d1d; text-align: center;">CANT.</th>
-                        <th class="th-premium" style="width: 140px; text-align: center;">NRO. VENTA</th>
-                        <th class="th-premium" style="width: 140px; text-align: center;">TIPO DE VENTA</th>
-                        <th class="th-premium" style="width: 130px; text-align: center;">BY:</th>
-                        <th class="th-premium" style="width: 40px; text-align: center;"><i class="fas fa-trash-alt" style="color: #f87171;"></i></th>
+                    <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.7rem; letter-spacing: 0.5px;">
+                        <th class="th-premium" style="width: 12%; text-align: center;">SKU</th>
+                        <th class="th-premium" style="width: 10%; text-align: center;">MODELO <i class="fas fa-lock" style="color: #64748b; font-size: 0.9em; margin-left: 3px;"></i></th>
+                        <th class="th-premium" style="width: 18%; text-align: center;">TÍTULO <i class="fas fa-lock" style="color: #64748b; font-size: 0.9em; margin-left: 3px;"></i></th>
+                        <th class="th-premium" style="width: 9%; text-align: center;">FECHA SAL.</th>
+                        <th class="th-premium" style="width: 8%; text-align: center;">SERIE / N° <i class="fas fa-lock" style="color: #64748b; font-size: 0.9em; margin-left: 3px;"></i></th>
+                        <th class="th-premium" style="width: 6%; background-color: #1e293b; text-align: center;">COSTO</th>
+                        <th class="th-premium" style="width: 4%; background-color: #7f1d1d; text-align: center;">CANT.</th>
+                        <th class="th-premium" style="width: 12%; text-align: center;">NRO. VENTA</th>
+                        <th class="th-premium" style="width: 10%; text-align: center;">TIPO DE VENTA</th>
+                        <th class="th-premium" style="width: 8%; text-align: center;">BY:</th>
+                        <th class="th-premium" style="width: 3%; text-align: center;"><i class="fas fa-trash-alt" style="color: #f87171;"></i></th>
                     </tr>
                 </thead>
                 <tbody id="cuerpoSalidas">
@@ -105,9 +105,9 @@
                         <td class="td-premium"><input type="date" class="celda-input central val-fecha"></td>
                         <td class="td-premium"><input type="text" readonly class="celda-input central text-blue text-mono val-serie input-readonly" tabindex="-1"></td>
                         <td class="td-premium" style="background-color: #f8fafc;">
-                            <div style="display: flex; align-items: center; padding: 0 5px; justify-content: center;">
+                            <div style="display: flex; align-items: center; justify-content: center;">
                                 <span style="color: #94a3b8; font-weight: bold; margin-right: 2px;">S/</span>
-                                <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" style="padding-left: 2px; width: 60px;" tabindex="-1">
+                                <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" style="padding-left: 0; padding-right: 2px;" tabindex="-1">
                             </div>
                         </td>
                         <td class="td-premium" style="background-color: #fef2f2;">
@@ -158,9 +158,9 @@
                             <td class="td-premium"><input type="text" readonly class="celda-input central text-blue text-mono val-serie input-readonly" value="{{ item.serie|default:'-' }}" tabindex="-1"></td>
                             
                             <td class="td-premium" style="background-color: #f8fafc;">
-                                <div style="display: flex; align-items: center; padding: 0 5px; justify-content: center;">
+                                <div style="display: flex; align-items: center; justify-content: center;">
                                     <span style="color: #94a3b8; font-weight: bold; margin-right: 2px;">S/</span>
-                                    <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" value="{{ item.costo|floatformat:2|default:'0.00' }}" style="padding-left: 2px; width: 60px;" tabindex="-1">
+                                    <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" value="{{ item.costo|floatformat:2|default:'0.00' }}" style="padding-left: 0; padding-right: 2px;" tabindex="-1">
                                 </div>
                             </td>
                             
@@ -221,8 +221,8 @@
        ======================================================== */
     table { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-collapse: collapse; }
     
-    .th-premium { padding: 10px 8px; border: 1px solid #334155; }
-    .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 36px; vertical-align: middle; }
+    .th-premium { padding: 8px 4px; border: 1px solid #334155; }
+    .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 34px; vertical-align: middle; }
     
     /* Efecto Cebra y Hover */
     .fila-salida:nth-child(even), .fila-buscador:nth-child(even) { background-color: #f8fafc; }
@@ -233,11 +233,11 @@
     .fila-incompleta { background-color: #fef2f2 !important; border-left: 4px solid #ef4444; }
 
     /* Inputs Fantasma (Llenan toda la celda al 100%) */
-    .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 6px 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
+    .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 6px 4px; font-family: inherit; font-size: 11px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
     .celda-input:focus:not([readonly]) { background-color: #fef9c3; box-shadow: inset 0 0 0 2px var(--color-principal, #eab308); color: #000; }
     
     /* Inputs Bloqueados (Readonly) */
-    .input-readonly { color: #94a3b8; cursor: not-allowed; }
+    .input-readonly { color: #94a3b8; cursor: not-allowed; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
     .input-readonly:focus { box-shadow: none; background-color: transparent; }
 
     /* Tipografías Específicas */
@@ -245,15 +245,15 @@
     .derecha { text-align: right; }
     .bold { font-weight: bold; }
     .text-dark { color: #0f172a; }
-    .text-mono { font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 13px; letter-spacing: -0.5px; }
+    .text-mono { font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 11px; letter-spacing: -0.5px; }
     .text-blue { color: #2563eb; }
     .text-orange { color: #ea580c; }
 
     /* EL BADGE ROJO ACTUALIZADO */
-    .input-badge-rojo { background-color: #fee2e2; color: #b91c1c; border: none; width: 100%; height: 100%; font-weight: 900; font-size: 1rem; text-align: center; display: block; box-sizing: border-box; padding: 8px; }
+    .input-badge-rojo { background-color: #fee2e2; color: #b91c1c; border: none; width: 100%; height: 100%; font-weight: 900; font-size: 0.9rem; text-align: center; display: block; box-sizing: border-box; padding: 6px 2px; }
 
     /* Selectores Custom (Combobox) */
-    .select-premium { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px top 50%; background-size: 8px auto; padding-right: 20px; }
+    .select-premium { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 5px top 50%; background-size: 8px auto; padding-right: 15px; }
 
     .btn-eliminar { background: none; border: none; color: #ef4444; cursor: pointer; padding: 6px; border-radius: 4px; transition: background 0.2s; display: block; margin: 0 auto;}
     .btn-eliminar:hover { background: #fee2e2; color: #b91c1c; }
@@ -265,7 +265,7 @@
 
 <script>
     const diccionarioSKUs = {{ skus_json|safe|default:"{}" }};
-    const diccionarioTitulos = {{ titulos_json|safe|default:"{}" }}; // <-- Se recibe el diccionario de títulos
+    const diccionarioTitulos = {{ titulos_json|safe|default:"{}" }}; 
     
     // VARIABLE GLOBAL PARA ALMACENAR LOS IDs A ELIMINAR
     let salidasAEliminar = [];
