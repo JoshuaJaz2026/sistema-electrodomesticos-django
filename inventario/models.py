@@ -279,10 +279,14 @@ class IngresoPercheron(models.Model):
     costo_unitario = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Costo Unt.")
     cantidad = models.IntegerField(default=1, verbose_name="Ing. x 1 und")
     proveedor_motivo = models.CharField(max_length=300, blank=True, null=True, verbose_name="Proveedor / Motivo")
+    
+    # --- ¡NUEVA LÍNEA! ---
+    ubicacion = models.CharField(max_length=150, blank=True, null=True, verbose_name="Ubicación")
+    
     creado_por = models.CharField(max_length=150, blank=True, null=True, verbose_name="By:")
 
     def __str__(self):
-        return f"{self.sku if self.sku else 'Sin SKU'} - {self.modelo} (Serie: {self.serie_nro if self.serie_nro else 'Sin Serie'})"
+        return f"{self.sku if self.sku else 'Sin SKU'} - {self.modelo} (Ubicación: {self.ubicacion if self.ubicacion else 'Sin Ubicación'})"
     
 
 class SalidaBCI(models.Model):

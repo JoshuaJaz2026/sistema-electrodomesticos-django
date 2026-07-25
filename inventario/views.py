@@ -2249,6 +2249,7 @@ def guardar_ingresos_masivos(request):
                     elif not sku_leido:
                         sku_leido = None
                     
+                    ubicacion_leida = str(fila.get('UBICACIÓN') or fila.get('UBICACION') or '').strip()
                     proveedor_motivo = str(fila.get('PROVEEDOR / MOTIVO') or '').strip()
                     by_usuario = str(fila.get('BY:') or '').strip()
 
@@ -2285,6 +2286,7 @@ def guardar_ingresos_masivos(request):
                         serie_nro=serie_nro,
                         costo_unitario=to_float(fila.get('COSTO UNT.') or fila.get('COSTO') or 0),
                         cantidad=cantidad_val,
+                        ubicacion=ubicacion_leida,
                         proveedor_motivo=proveedor_motivo,
                         creado_por=by_usuario
                     )
@@ -2295,13 +2297,15 @@ def guardar_ingresos_masivos(request):
                         prod = dict_productos.get(key_ingreso)
                         if prod:
                             prod.stock_actual += cantidad_val
+                            if ubicacion_leida:
+                                prod.ubicacion = ubicacion_leida
                             productos_a_actualizar.add(prod)
 
                 if objetos_a_crear:
                     IngresoPercheron.objects.bulk_create(objetos_a_crear)
 
                 for prod in productos_a_actualizar:
-                    prod.save(update_fields=['stock_actual'])
+                    prod.save(update_fields=['stock_actual', 'ubicacion'])
 
             return JsonResponse({'status': 'ok', 'message': f'Guardado correctamente. Se subieron {len(objetos_a_crear)} registros y se actualizó el stock.'})
 
@@ -2320,7 +2324,7 @@ def descargar_plantilla_ingresos(request):
     writer = csv.writer(response, delimiter=';')
     writer.writerow([
         'SKU', 'MODELO', 'TÍTULO', 'FECHA INGRESO', 'CÓDIGO EAN', 
-        'SERIE / N°', 'COSTO UNT.', 'ING. x 1 und', 'PROVEEDOR / MOTIVO', 'BY:'
+        'SERIE / N°', 'COSTO UNT.', 'ING. x 1 und', 'UBICACIÓN', 'PROVEEDOR / MOTIVO', 'BY:'
     ])
     return response
 

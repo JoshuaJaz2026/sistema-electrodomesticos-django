@@ -36,6 +36,7 @@
         </div>
     </div>
 
+    <!-- PANEL MASIVO ACTUALIZADO CON UBICACIÓN -->
     <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; padding: 8px 15px; border-radius: 6px; margin-bottom: 12px; display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
         
         <div style="flex: 2; min-width: 140px;">
@@ -56,6 +57,12 @@
         <div style="width: 90px;">
             <label class="label-mini"><i class="fas fa-dollar-sign"></i> COSTO</label>
             <input type="number" step="0.01" id="masivo-costo" placeholder="0.00" class="input-mini" style="text-align: right;">
+        </div>
+        
+        <!-- NUEVO CAMPO UBICACIÓN MASIVO -->
+        <div style="flex: 1; min-width: 100px;">
+            <label class="label-mini"><i class="fas fa-map-marker-alt"></i> UBICACIÓN</label>
+            <input type="text" id="masivo-ubicacion" placeholder="Ej. P1-A3" class="input-mini" style="text-transform: uppercase;">
         </div>
 
         <div style="flex: 2; min-width: 140px;">
@@ -100,6 +107,10 @@
                     <th class="th-premium" style="width: 160px;">SERIE / N°</th>
                     <th class="th-premium" style="width: 120px;">COSTO UNT.</th>
                     <th class="th-premium" style="width: 65px; background-color: #064e3b; text-align: center;">CANT. IN</th>
+                    
+                    <!-- NUEVA COLUMNA UBICACIÓN -->
+                    <th class="th-premium" style="width: 120px;">UBICACIÓN</th>
+                    
                     <th class="th-premium" style="width: 200px;">PROV. / MOTIVO</th>
                     <th class="th-premium" style="width: 130px; text-align: center;">BY:</th>
                     <th class="th-premium" style="width: 50px; text-align: center;"><i class="fas fa-trash-alt" style="color: #f87171;"></i></th>
@@ -135,6 +146,12 @@
                     <td class="td-premium" style="background-color: #f0fdf4;">
                         <input type="number" class="celda-input central val-ing input-badge" value="1" oninput="registrarCambioIngreso(this)">
                     </td>
+                    
+                    <!-- CELDA UBICACIÓN MOLDE -->
+                    <td class="td-premium">
+                        <input type="text" class="celda-input central bold val-ubicacion" placeholder="Ubicación..." oninput="registrarCambioIngreso(this)">
+                    </td>
+
                     <td class="td-premium">
                         <input type="text" class="celda-input central bold val-proveedor" placeholder="Proveedor..." oninput="registrarCambioIngreso(this)">
                     </td>
@@ -192,6 +209,12 @@
                         <td class="td-premium" style="background-color: #f0fdf4;">
                             <input type="number" value="{{ item.cantidad|default:'1' }}" class="celda-input central val-ing input-badge" oninput="registrarCambioIngreso(this)">
                         </td>
+
+                        <!-- CELDA UBICACIÓN DJANGO -->
+                        <td class="td-premium">
+                            <input type="text" value="{{ item.ubicacion|default:'' }}" class="celda-input central bold val-ubicacion" placeholder="Ubicación..." oninput="registrarCambioIngreso(this)">
+                        </td>
+
                         <td class="td-premium">
                             <input type="text" value="{{ item.proveedor_motivo|default:'' }}" class="celda-input central bold text-dark val-proveedor" oninput="registrarCambioIngreso(this)">
                         </td>
@@ -325,6 +348,7 @@
         const cantInput = parseInt(document.getElementById('masivo-cant').value);
         const fechaInput = document.getElementById('masivo-fecha').value;
         const costoInput = parseFloat(document.getElementById('masivo-costo').value) || 0;
+        const ubicacionInput = document.getElementById('masivo-ubicacion').value.trim().toUpperCase(); // <-- AGREGADO
         const proveedorInput = document.getElementById('masivo-proveedor').value.trim().toUpperCase();
         const byInput = document.getElementById('masivo-by').value;
 
@@ -356,6 +380,7 @@
             nuevaFila.querySelector('.val-by').value = byInput;
             nuevaFila.querySelector('.val-fecha').value = fechaFinal;
             nuevaFila.querySelector('.val-proveedor').value = proveedorInput;
+            nuevaFila.querySelector('.val-ubicacion').value = ubicacionInput; // <-- AGREGADO
             
             if(costoInput > 0) {
                 nuevaFila.querySelector('.val-costo').value = costoInput.toFixed(2);
@@ -380,6 +405,7 @@
                 'SERIE / N°': '',
                 'COSTO UNT.': costoInput,
                 'ING. x 1 und': 1,
+                'UBICACIÓN': ubicacionInput, // <-- AGREGADO
                 'PROVEEDOR / MOTIVO': proveedorInput,
                 'BY:': byInput
             };
@@ -467,6 +493,7 @@
             'SERIE / N°': fila.querySelector('.val-serie').value.trim(),
             'COSTO UNT.': parseFloat(fila.querySelector('.val-costo').value) || 0,
             'ING. x 1 und': parseFloat(fila.querySelector('.val-ing').value) || 1,
+            'UBICACIÓN': fila.querySelector('.val-ubicacion').value.trim(), // <-- AGREGADO
             'PROVEEDOR / MOTIVO': fila.querySelector('.val-proveedor').value.trim(),
             'BY:': fila.querySelector('.val-by').value.trim()
         };
@@ -573,6 +600,7 @@
                     const serieLeido = buscarColumna(item, ['SERIE', 'NRO']);
                     const costoLeido = formatNum(buscarColumna(item, ['COSTO']));
                     const ingLeido = formatNum(buscarColumna(item, ['1UND', 'CANTIDAD', 'UND'])) || 1;
+                    const ubicacionLeida = buscarColumna(item, ['UBICACION', 'UBICACIÓN']); // <-- AGREGADO
                     const proveedorLeido = buscarColumna(item, ['PROVEEDOR', 'MOTIVO']);
                     
                     const byLeido = (buscarColumna(item, ['BY', 'USUARIO']) || '').toUpperCase();
@@ -588,6 +616,7 @@
                         'SERIE / N°': serieLeido,
                         'COSTO UNT.': costoLeido,
                         'ING. x 1 und': ingLeido,
+                        'UBICACIÓN': ubicacionLeida, // <-- AGREGADO
                         'PROVEEDOR / MOTIVO': proveedorLeido,
                         'BY:': byLeido
                     };
@@ -606,6 +635,7 @@
                     nuevaFila.querySelector('.val-serie').value = serieLeido;
                     nuevaFila.querySelector('.val-costo').value = costoLeido > 0 ? costoLeido.toFixed(2) : '';
                     nuevaFila.querySelector('.val-ing').value = ingLeido;
+                    nuevaFila.querySelector('.val-ubicacion').value = ubicacionLeida; // <-- AGREGADO
                     nuevaFila.querySelector('.val-proveedor').value = proveedorLeido;
                     nuevaFila.querySelector('.val-by').value = byLeido;
 
