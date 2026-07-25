@@ -510,7 +510,7 @@ def percheron_mercadolibre(request):
     })
 
 @login_required
-@verificar_acceso_plataforma('Mercado Libre Junior')
+@verificar_acceso_plataforma('Mercado Libre - Junior')
 def percheron_mercadolibre_junior(request):
     canal = request.session.get('canal_activo', 'Mercado Libre Junior')
     from .models import SalidaMercadoLibreJunior, IngresoPercheron, Producto
