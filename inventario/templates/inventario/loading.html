@@ -9,15 +9,24 @@
         :root {
             --color-plataforma: {{ request.session.color_actual|default:"#3498DB" }};
         }
+        
+        /* ====== ANIMACIONES DE TRANSICIÓN DE PANTALLA ====== */
         body {
             margin: 0; padding: 0; height: 100vh; display: flex;
             justify-content: center; align-items: center;
             background: #2c3e50; font-family: 'Segoe UI', sans-serif;
             color: white; overflow: hidden;
+            
+            /* Inicialmente invisible para el Fade-In */
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
         }
+        
+        body.fade-in { opacity: 1; }
+        body.fade-out { opacity: 0; }
+
         .loading-container { text-align: center; width: 300px; }
         
-        /* Condicional en el CSS para pintar de blanco si es TikTok */
         .icon-box {
             font-size: 4em; 
             color: {% if canal == 'Tik tok' or canal == 'TikTok' %}white{% else %}var(--color-plataforma){% endif %};
@@ -53,7 +62,6 @@
         </div>
         <div class="status-text">INICIANDO SISTEMA</div>
         
-        <!-- Condicional aquí también para evitar texto oscuro sobre fondo oscuro -->
         <div style="font-weight: bold; color: {% if canal == 'Tik tok' or canal == 'TikTok' %}white{% else %}var(--color-plataforma){% endif %};">
             {{ canal }}
         </div>
@@ -66,23 +74,46 @@
     </div>
 
     <script>
+        // 1. Ejecutar el Fade-In al cargar la pantalla
+        document.addEventListener("DOMContentLoaded", () => {
+            document.body.classList.add("fade-in");
+        });
+
         let progress = 0;
         const bar = document.getElementById('bar');
         const percentText = document.getElementById('percent');
+        let saliendo = false; // Control para no repetir la animación de salida
 
         const interval = setInterval(() => {
-            progress += Math.floor(Math.random() * 5) + 1; // Carga con velocidad variable
+            if (saliendo) return; // Si ya está saliendo, detenemos la cuenta
+            
+            progress += Math.floor(Math.random() * 5) + 1; 
+            
             if (progress >= 100) {
                 progress = 100;
+                bar.style.width = progress + "%";
+                percentText.innerText = progress + "%";
                 clearInterval(interval);
-                // Pequeña pausa al llegar al 100% para que se vea
+                saliendo = true;
+                
+                // 2. Pausa para que el usuario vea el 100%
                 setTimeout(() => {
-                    window.location.href = "{% url 'inicio' %}";
-                }, 500);
+                    // 3. Iniciamos el Fade-Out
+                    document.body.classList.remove("fade-in");
+                    document.body.classList.add("fade-out");
+                    
+                    // 4. Esperamos a que termine de oscurecerse (400ms) para ir al panel
+                    setTimeout(() => {
+                        window.location.href = "{% url 'inicio' %}";
+                    }, 400);
+
+                }, 400); 
+                return;
             }
+            
             bar.style.width = progress + "%";
             percentText.innerText = progress + "%";
-        }, 50); // Velocidad de la carga (ajusta a tu gusto)
+        }, 50); 
     </script>
 </body>
 </html>

@@ -10,7 +10,6 @@
     
     <style>
         :root {
-            /* AQUÍ ESTÁ LA MAGIA: El color llega desde Python y cambia toda la página */
             --brand-color: {{ color_principal }};
             --bg-main: #f8fafc;
             --text-main: #0f172a;
@@ -19,15 +18,22 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         
+        /* ====== ANIMACIONES DE TRANSICIÓN DE PANTALLA ====== */
         body { 
             background-color: var(--bg-main); 
-            /* El fondo se ilumina sutilmente con el color de la plataforma */
             background-image: radial-gradient(circle at top, color-mix(in srgb, var(--brand-color) 12%, transparent) 0%, transparent 50%);
             display: flex; 
             justify-content: center; 
             align-items: center; 
             height: 100vh; 
+            
+            /* Clases para el fade-in inicial */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
         }
+        
+        body.fade-in { opacity: 1; }
+        body.fade-out { opacity: 0; }
         
         .login-container {
             background-color: white;
@@ -36,7 +42,6 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.05), 0 20px 48px rgba(0,0,0,0.05);
             width: 100%;
             max-width: 420px;
-            /* La línea de arriba cambia de color */
             border-top: 5px solid var(--brand-color); 
         }
         
@@ -47,7 +52,7 @@
             height: 64px;
             border-radius: 16px;
             background-color: color-mix(in srgb, var(--brand-color) 12%, transparent);
-            color: var(--brand-color);
+            color: {% if nombre_canal == 'Tik tok' %}#2C3E50{% else %}var(--brand-color){% endif %};
             font-size: 28px;
             display: flex;
             align-items: center;
@@ -63,7 +68,6 @@
         .form-group input { 
             width: 100%; 
             padding: 12px 16px; 
-            /* Damos un poco más de espacio a la derecha para que el texto no pise el ojito */
             padding-right: 40px; 
             border: 1px solid #cbd5e1; 
             border-radius: 8px; 
@@ -71,7 +75,6 @@
             transition: all 0.3s;
         }
         
-        /* El borde al hacer clic en escribir también cambia de color */
         .form-group input:focus { 
             border-color: var(--brand-color); 
             box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-color) 20%, transparent);
@@ -136,7 +139,8 @@
             </div>
         {% endif %}
 
-        <form method="post" action="{% url 'login' %}?canal={{ nombre_canal|urlencode }}">
+        <!-- Agregamos el onsubmit para interceptar y animar el botón de ingresar -->
+        <form method="post" action="{% url 'login' %}?canal={{ nombre_canal|urlencode }}" id="form-login" onsubmit="animarIngreso(event)">
             {% csrf_token %}
             
             <div class="form-group">
@@ -160,23 +164,52 @@
             <button type="submit" class="btn-submit">Ingresar al Sistema</button>
         </form>
 
-        <a href="{% url 'selector' %}" class="back-link">
+        <a href="{% url 'selector' %}" class="back-link nav-link">
             <i class="fas fa-arrow-left"></i> Volver a plataformas
         </a>
     </div>
 
     <script>
+        // Efecto de entrada al cargar
+        document.addEventListener("DOMContentLoaded", () => {
+            document.body.classList.add("fade-in");
+        });
+
+        // Efecto de salida al hacer clic en "Volver"
+        const navLinks = document.querySelectorAll(".nav-link");
+        navLinks.forEach(link => {
+            link.addEventListener("click", function(e) {
+                e.preventDefault();
+                const targetUrl = this.href;
+                document.body.classList.remove("fade-in");
+                document.body.classList.add("fade-out");
+                
+                setTimeout(() => {
+                    window.location.href = targetUrl;
+                }, 400); 
+            });
+        });
+
+        // Efecto de salida al enviar el formulario (Ingresar)
+        function animarIngreso(event) {
+            event.preventDefault(); 
+            document.body.classList.remove("fade-in");
+            document.body.classList.add("fade-out");
+            
+            setTimeout(() => {
+                document.getElementById('form-login').submit(); 
+            }, 400);
+        }
+
         function togglePassword() {
             const passwordInput = document.getElementById('id_password');
             const iconoOjo = document.getElementById('icono-ojo');
 
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
-                // Cambia al icono de ojo tachado////
                 iconoOjo.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
             } else {
                 passwordInput.type = 'password';
-                // Regresa al icono de ojo normal
                 iconoOjo.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
             }
         }

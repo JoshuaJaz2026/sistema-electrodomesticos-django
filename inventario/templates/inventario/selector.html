@@ -7,6 +7,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
 
+        /* ====== ANIMACIONES DE TRANSICIÓN DE PANTALLA ====== */
         body {
             margin: 0;
             padding: 0;
@@ -19,8 +20,7 @@
             background-color: #0b0f19;
             background-image: url('https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=2050&auto=format&fit=crop');
             
-            /* ====== ANIMACIÓN LENTA DEL ESPACIO ====== */
-            background-size: 130% 130%; /* Más grande para poder moverse */
+            background-size: 130% 130%; 
             background-position: 0% 0%;
             background-repeat: no-repeat;
             animation: paneoEspacio 60s ease-in-out infinite alternate;
@@ -28,7 +28,14 @@
             overflow: hidden;
             position: relative;
             color: #ffffff;
+            
+            /* Clases para el fade-in inicial */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
         }
+
+        body.fade-in { opacity: 1; }
+        body.fade-out { opacity: 0; }
 
         @keyframes paneoEspacio {
             0% { background-position: 0% 0%; }
@@ -234,8 +241,8 @@
 
     <div class="grid-plataformas">
         {% for plat in plataformas %}
-        <a href="{% url 'login' %}?canal={{ plat.nombre }}" class="tarjeta">
-            <!-- Condición para forzar que el ícono de TikTok sea blanco y brille en blanco -->
+        <!-- Cambiamos la forma de redireccionar para agregar la animación -->
+        <a href="{% url 'login' %}?canal={{ plat.nombre }}" class="tarjeta nav-link">
             <i class="{{ plat.icono }} icono-tarjeta" 
                style="color: {% if plat.nombre == 'Tik tok' %}#ffffff{% else %}{{ plat.color }}{% endif %}; 
                       text-shadow: 0 0 15px {% if plat.nombre == 'Tik tok' %}#ffffff{% else %}{{ plat.color }}{% endif %}50;">
@@ -245,5 +252,26 @@
         {% endfor %}
     </div>
 
+    <script>
+        // Efecto de entrada al cargar
+        document.addEventListener("DOMContentLoaded", () => {
+            document.body.classList.add("fade-in");
+        });
+
+        // Efecto de salida al hacer clic
+        const navLinks = document.querySelectorAll(".nav-link");
+        navLinks.forEach(link => {
+            link.addEventListener("click", function(e) {
+                e.preventDefault();
+                const targetUrl = this.href;
+                document.body.classList.remove("fade-in");
+                document.body.classList.add("fade-out");
+                
+                setTimeout(() => {
+                    window.location.href = targetUrl;
+                }, 400); // 400ms = 0.4s
+            });
+        });
+    </script>
 </body>
 </html>
