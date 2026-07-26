@@ -19,6 +19,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.contrib.auth.models import User
 from django.core.cache import cache
+from .utils import render_to_pdf
 
 # Importación corregida de SimulacionMercadoLibreJunior
 from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre, ReporteMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SalidaFalabella, SalidaCreditienda, SalidaIntercorp, SalidaTiktok, SalidaVentaLibre, ReporteCreditienda, ReporteFalabella, DirectorioProducto, ReporteIntercorp, ComisionIntercorp, SalidaBCI, SalidaWeb, HistorialEliminacion
@@ -4324,3 +4325,102 @@ def obtener_diccionario_titulos_cache():
         cache.set('memoria_titulos_globales', dict_titulos, 3600)
         
     return dict_titulos
+
+
+@login_required
+def exportar_registros_pdf(request):
+    from django.db.models import Sum
+    from django.utils import timezone
+    
+    # 1. Capturamos las fechas para que el PDF salga filtrado igual que en la pantalla
+    fecha_desde = request.GET.get('fecha_desde', '')
+    fecha_hasta = request.GET.get('fecha_hasta', '')
+    
+    ingresos_db = IngresoPercheron.objects.all().order_by('id')
+    
+    if fecha_desde: ingresos_db = ingresos_db.filter(fecha_ingreso__gte=fecha_desde)
+    if fecha_hasta: ingresos_db = ingresos_db.filter(fecha_ingreso__lte=fecha_hasta)
+        
+    productos_db = Producto.objects.all()
+    dict_productos = {p.modelo: p for p in productos_db if p.modelo}
+    
+    dict_titulos_global = obtener_diccionario_titulos_cache()
+    
+    out_ml_qs, out_ml_jr_qs, out_fbl_qs, out_cdt_qs, out_int_qs, out_tk_qs, out_vl_qs = (
+        SalidaMercadoLibre.objects.all(), SalidaMercadoLibreJunior.objects.all(),
+        SalidaFalabella.objects.all(), SalidaCreditienda.objects.all(),
+        SalidaIntercorp.objects.all(), SalidaTiktok.objects.all(),
+        SalidaVentaLibre.objects.all()
+    )
+
+    if fecha_desde:
+        out_ml_qs = out_ml_qs.filter(fecha_salida__gte=fecha_desde)
+        out_ml_jr_qs = out_ml_jr_qs.filter(fecha_salida__gte=fecha_desde)
+        out_fbl_qs = out_fbl_qs.filter(fecha_salida__gte=fecha_desde)
+        out_cdt_qs = out_cdt_qs.filter(fecha_salida__gte=fecha_desde)
+        out_int_qs = out_int_qs.filter(fecha_salida__gte=fecha_desde)
+        out_tk_qs = out_tk_qs.filter(fecha_salida__gte=fecha_desde)
+        out_vl_qs = out_vl_qs.filter(fecha_salida__gte=fecha_desde)
+
+    if fecha_hasta:
+        out_ml_qs = out_ml_qs.filter(fecha_salida__lte=fecha_hasta)
+        out_ml_jr_qs = out_ml_jr_qs.filter(fecha_salida__lte=fecha_hasta)
+        out_fbl_qs = out_fbl_qs.filter(fecha_salida__lte=fecha_hasta)
+        out_cdt_qs = out_cdt_qs.filter(fecha_salida__lte=fecha_hasta)
+        out_int_qs = out_int_qs.filter(fecha_salida__lte=fecha_hasta)
+        out_tk_qs = out_tk_qs.filter(fecha_salida__lte=fecha_hasta)
+        out_vl_qs = out_vl_qs.filter(fecha_salida__lte=fecha_hasta)
+
+    dict_out_ml = {s['sku']: s['total'] for s in out_ml_qs.values('sku').annotate(total=Sum('descuento')) if s['sku']}
+    dict_out_ml_jr = {s['sku']: s['total'] for s in out_ml_jr_qs.values('sku').annotate(total=Sum('descuento')) if s['sku']}
+    dict_out_fbl = {s['sku']: s['total'] for s in out_fbl_qs.values('sku').annotate(total=Sum('descuento')) if s['sku']}
+    dict_out_cdt = {s['sku']: s['total'] for s in out_cdt_qs.values('sku').annotate(total=Sum('descuento')) if s['sku']}
+    dict_out_int = {s['sku']: s['total'] for s in out_int_qs.values('sku').annotate(total=Sum('desc_und')) if s['sku']}
+    dict_out_tk = {s['sku']: s['total'] for s in out_tk_qs.values('sku').annotate(total=Sum('descuento')) if s['sku']}
+    dict_out_vl = {s['sku']: s['total'] for s in out_vl_qs.values('sku').annotate(total=Sum('descuento')) if s['sku']}
+    
+    registros_data = []
+    for ing in ingresos_db:
+        prod = dict_productos.get(ing.modelo)
+        marca_val = prod.marca if prod else 'SIN MARCA'
+        mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
+        titulo_val = dict_titulos_global.get(mod_limpio, ing.titulo or 'Sin título')
+        
+        out_ml = dict_out_ml.get(ing.sku, 0)
+        out_ml2 = dict_out_ml_jr.get(ing.sku, 0)
+        out_fbl = dict_out_fbl.get(ing.sku, 0)
+        out_cdt = dict_out_cdt.get(ing.sku, 0)
+        out_intcp = dict_out_int.get(ing.sku, 0)
+        out_tk = dict_out_tk.get(ing.sku, 0)
+        out_vl = dict_out_vl.get(ing.sku, 0)
+        
+        total_out = out_ml + out_fbl + out_cdt + out_vl + out_tk + out_intcp + out_ml2
+        stock_val = ing.cantidad - total_out
+        
+        registros_data.append({
+            'sku': ing.sku, 'marca': marca_val, 'fecha_ingreso': ing.fecha_ingreso,
+            'modelo': ing.modelo, 'titulo': titulo_val, 'in_cant': ing.cantidad,
+            'out_ml': out_ml, 'out_fbl': out_fbl, 'out_cdt': out_cdt, 'out_vl': out_vl,
+            'out_tk': out_tk, 'out_intcp': out_intcp, 'out_ml2': out_ml2, 'stock': stock_val
+        })
+
+    # Armamos el contexto para el PDF
+    context = {
+        'registros': registros_data,
+        'fecha_impresion': timezone.now(),
+        'usuario': request.user.username,
+        'fecha_desde': fecha_desde,
+        'fecha_hasta': fecha_hasta
+    }
+    
+    # 2. Convertimos a PDF (La plantilla la crearemos en el paso 4)
+    pdf = render_to_pdf('inventario/pdf_kardex.html', context)
+    
+    if pdf:
+        # Esto hace que el navegador descargue el archivo con un nombre bonito
+        response = HttpResponse(pdf, content_type='application/pdf')
+        filename = f"Kardex_General_{timezone.now().strftime('%d%m%Y')}.pdf"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+    
+    return HttpResponse("Error al generar el PDF.")

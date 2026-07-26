@@ -165,4 +165,7 @@ urlpatterns = [
     # REPORTES TIKTOK
     path('guardar-reportes-masivos-tiktok/', views.guardar_reportes_masivos_tiktok, name='guardar_reportes_masivos_tiktok'),
     path('borrar-todos-los-reportes-tiktok/', views.borrar_todos_los_reportes_tiktok, name='borrar_todos_los_reportes_tiktok'),
+
+
+    path('percheron/registros/exportar-pdf/', views.exportar_registros_pdf, name='exportar_registros_pdf'),
 ]

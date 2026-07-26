@@ -30,6 +30,11 @@
                 {% endif %}
             </form>
             
+            <!-- Botón PDF -->
+            <a href="{% url 'exportar_registros_pdf' %}?fecha_desde={{ fecha_desde }}&fecha_hasta={{ fecha_hasta }}" class="btn-top" style="background-color: #ef4444;">
+                <i class="fas fa-file-pdf"></i> Exportar PDF
+            </a>
+
             <a href="{% url 'exportar_registros_excel' %}" class="btn-top" style="background-color: #10b981;">
                 <i class="fas fa-file-excel"></i> Exportar Kardex
             </a>
