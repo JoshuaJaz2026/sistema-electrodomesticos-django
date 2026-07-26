@@ -970,14 +970,18 @@ def procesar_salidas_web(request):
             
             if salidas:
                 skus_entrantes = [sal.get('sku', '').strip() for sal in salidas if sal.get('sku', '').strip()]
-                skus_ya_vendidos = SalidaWeb.objects.filter(sku__in=skus_entrantes).values_list('sku', flat=True)
+                
+                # --- NUEVA VALIDACIÓN GLOBAL ANTI-CHOQUES ---
+                skus_globales_usados = obtener_todos_los_skus_usados()
+                skus_ya_vendidos = [sku for sku in skus_entrantes if sku in skus_globales_usados]
                 
                 if skus_ya_vendidos:
                     skus_repetidos = ", ".join(skus_ya_vendidos)
                     return JsonResponse({
                         'status': 'error', 
-                        'message': f'¡ALTO! Los siguientes SKUs ya fueron descontados: {skus_repetidos}. Por favor, borra esas filas y actualiza.'
+                        'message': f'¡ALTO! Los siguientes SKUs acaban de ser vendidos por otro usuario o en otra plataforma: {skus_repetidos}. Por favor, bórralos de tu lista y actualiza.'
                     })
+                # ---------------------------------------------
 
             conteo_descuentos = {}
             conteo_restauraciones = {}
@@ -1068,14 +1072,18 @@ def procesar_salidas_tiktok(request):
             # ========================================================
             if salidas:
                 skus_entrantes = [sal.get('sku', '').strip() for sal in salidas if sal.get('sku', '').strip()]
-                skus_ya_vendidos = SalidaTiktok.objects.filter(sku__in=skus_entrantes).values_list('sku', flat=True)
+                
+                # --- NUEVA VALIDACIÓN GLOBAL ANTI-CHOQUES ---
+                skus_globales_usados = obtener_todos_los_skus_usados()
+                skus_ya_vendidos = [sku for sku in skus_entrantes if sku in skus_globales_usados]
                 
                 if skus_ya_vendidos:
                     skus_repetidos = ", ".join(skus_ya_vendidos)
                     return JsonResponse({
                         'status': 'error', 
-                        'message': f'¡ALTO! Los siguientes SKUs ya fueron descontados por otro usuario: {skus_repetidos}. Por favor, borra esas filas y actualiza.'
+                        'message': f'¡ALTO! Los siguientes SKUs acaban de ser vendidos por otro usuario o en otra plataforma: {skus_repetidos}. Por favor, bórralos de tu lista y actualiza.'
                     })
+                # ---------------------------------------------
             # ========================================================
 
             conteo_descuentos = {}
@@ -2768,13 +2776,18 @@ def procesar_salidas_ml(request):
             # ========================================================
             if salidas:
                 skus_entrantes = [sal.get('sku', '').strip() for sal in salidas if sal.get('sku', '').strip()]
-                skus_ya_vendidos = SalidaMercadoLibre.objects.filter(sku__in=skus_entrantes).values_list('sku', flat=True)
+                
+                # --- NUEVA VALIDACIÓN GLOBAL ANTI-CHOQUES ---
+                skus_globales_usados = obtener_todos_los_skus_usados()
+                skus_ya_vendidos = [sku for sku in skus_entrantes if sku in skus_globales_usados]
+                
                 if skus_ya_vendidos:
                     skus_repetidos = ", ".join(skus_ya_vendidos)
                     return JsonResponse({
                         'status': 'error', 
-                        'message': f'¡ALTO! Los siguientes SKUs ya fueron descontados por otro usuario: {skus_repetidos}. Por favor, borra esas filas y actualiza la página.'
+                        'message': f'¡ALTO! Los siguientes SKUs acaban de ser vendidos por otro usuario o en otra plataforma: {skus_repetidos}. Por favor, bórralos de tu lista y actualiza.'
                     })
+                # ---------------------------------------------
             # ========================================================
 
             conteo_descuentos = {}
@@ -2984,13 +2997,18 @@ def procesar_salidas_ml_junior(request):
             # ========================================================
             if salidas:
                 skus_entrantes = [sal.get('sku', '').strip() for sal in salidas if sal.get('sku', '').strip()]
-                skus_ya_vendidos = SalidaMercadoLibreJunior.objects.filter(sku__in=skus_entrantes).values_list('sku', flat=True)
+                
+                # --- NUEVA VALIDACIÓN GLOBAL ANTI-CHOQUES ---
+                skus_globales_usados = obtener_todos_los_skus_usados()
+                skus_ya_vendidos = [sku for sku in skus_entrantes if sku in skus_globales_usados]
+                
                 if skus_ya_vendidos:
                     skus_repetidos = ", ".join(skus_ya_vendidos)
                     return JsonResponse({
                         'status': 'error', 
-                        'message': f'¡ALTO! Los siguientes SKUs ya fueron descontados por otro usuario: {skus_repetidos}. Por favor, borra esas filas y actualiza la página.'
+                        'message': f'¡ALTO! Los siguientes SKUs acaban de ser vendidos por otro usuario o en otra plataforma: {skus_repetidos}. Por favor, bórralos de tu lista y actualiza.'
                     })
+                # ---------------------------------------------
             # ========================================================
 
             conteo_descuentos = {}
@@ -3494,14 +3512,18 @@ def procesar_salidas_intercorp(request):
             # ========================================================
             if salidas:
                 skus_entrantes = [sal.get('sku', '').strip() for sal in salidas if sal.get('sku', '').strip()]
-                skus_ya_vendidos = SalidaIntercorp.objects.filter(sku__in=skus_entrantes).values_list('sku', flat=True)
+                
+                # --- NUEVA VALIDACIÓN GLOBAL ANTI-CHOQUES ---
+                skus_globales_usados = obtener_todos_los_skus_usados()
+                skus_ya_vendidos = [sku for sku in skus_entrantes if sku in skus_globales_usados]
                 
                 if skus_ya_vendidos:
                     skus_repetidos = ", ".join(skus_ya_vendidos)
                     return JsonResponse({
                         'status': 'error', 
-                        'message': f'¡ALTO! Los siguientes SKUs ya fueron descontados por otro usuario: {skus_repetidos}. Por favor, borra esas filas y actualiza.'
+                        'message': f'¡ALTO! Los siguientes SKUs acaban de ser vendidos por otro usuario o en otra plataforma: {skus_repetidos}. Por favor, bórralos de tu lista y actualiza.'
                     })
+                # ---------------------------------------------
             # ========================================================
 
             conteo_descuentos = {}
@@ -3697,14 +3719,18 @@ def procesar_salidas_ventalibre(request):
             # ========================================================
             if salidas:
                 skus_entrantes = [sal.get('sku', '').strip() for sal in salidas if sal.get('sku', '').strip()]
-                skus_ya_vendidos = SalidaVentaLibre.objects.filter(sku__in=skus_entrantes).values_list('sku', flat=True)
+                
+                # --- NUEVA VALIDACIÓN GLOBAL ANTI-CHOQUES ---
+                skus_globales_usados = obtener_todos_los_skus_usados()
+                skus_ya_vendidos = [sku for sku in skus_entrantes if sku in skus_globales_usados]
                 
                 if skus_ya_vendidos:
                     skus_repetidos = ", ".join(skus_ya_vendidos)
                     return JsonResponse({
                         'status': 'error', 
-                        'message': f'¡ALTO! Los siguientes SKUs ya fueron descontados por otro usuario: {skus_repetidos}. Por favor, borra esas filas y actualiza.'
+                        'message': f'¡ALTO! Los siguientes SKUs acaban de ser vendidos por otro usuario o en otra plataforma: {skus_repetidos}. Por favor, bórralos de tu lista y actualiza.'
                     })
+                # ---------------------------------------------
             # ========================================================
 
             conteo_descuentos = {}
@@ -3932,13 +3958,18 @@ def procesar_salidas_falabella(request):
             # ========================================================
             if salidas:
                 skus_entrantes = [sal.get('sku', '').strip() for sal in salidas if sal.get('sku', '').strip()]
-                skus_ya_vendidos = SalidaFalabella.objects.filter(sku__in=skus_entrantes).values_list('sku', flat=True)
+                
+                # --- NUEVA VALIDACIÓN GLOBAL ANTI-CHOQUES ---
+                skus_globales_usados = obtener_todos_los_skus_usados()
+                skus_ya_vendidos = [sku for sku in skus_entrantes if sku in skus_globales_usados]
+                
                 if skus_ya_vendidos:
                     skus_repetidos = ", ".join(skus_ya_vendidos)
                     return JsonResponse({
                         'status': 'error', 
-                        'message': f'¡ALTO! Los siguientes SKUs ya fueron descontados por otro usuario: {skus_repetidos}. Por favor, borra esas filas y actualiza la página.'
+                        'message': f'¡ALTO! Los siguientes SKUs acaban de ser vendidos por otro usuario o en otra plataforma: {skus_repetidos}. Por favor, bórralos de tu lista y actualiza.'
                     })
+                # ---------------------------------------------
             # ========================================================
 
             conteo_descuentos = {}
@@ -4037,14 +4068,18 @@ def procesar_salidas_creditienda(request):
             # ========================================================
             if salidas:
                 skus_entrantes = [sal.get('sku', '').strip() for sal in salidas if sal.get('sku', '').strip()]
-                skus_ya_vendidos = SalidaCreditienda.objects.filter(sku__in=skus_entrantes).values_list('sku', flat=True)
+                
+                # --- NUEVA VALIDACIÓN GLOBAL ANTI-CHOQUES ---
+                skus_globales_usados = obtener_todos_los_skus_usados()
+                skus_ya_vendidos = [sku for sku in skus_entrantes if sku in skus_globales_usados]
                 
                 if skus_ya_vendidos:
                     skus_repetidos = ", ".join(skus_ya_vendidos)
                     return JsonResponse({
                         'status': 'error', 
-                        'message': f'¡ALTO! Los siguientes SKUs ya fueron descontados por otro usuario: {skus_repetidos}. Por favor, borra esas filas y actualiza.'
+                        'message': f'¡ALTO! Los siguientes SKUs acaban de ser vendidos por otro usuario o en otra plataforma: {skus_repetidos}. Por favor, bórralos de tu lista y actualiza.'
                     })
+                # ---------------------------------------------
             # ========================================================
 
             conteo_descuentos = {}
