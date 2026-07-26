@@ -214,13 +214,11 @@
                 <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='reporte_mercadolibre' %}" data-path="{% url 'reporte_mercadolibre' %}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
                 <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='simulador_mercadolibre' %}" data-path="{% url 'simulador_mercadolibre' %}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
                 <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='referencia_comisiones' %}" data-path="{% url 'referencia_comisiones' %}" class="menu-item"><i class="fas fa-list-ul"></i> Referencia Marca y Categ</a>
-                <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='referencia_costos' %}" data-path="{% url 'referencia_costos' %}" class="menu-item"><i class="fas fa-dollar-sign"></i> Costos Referenciales</a>
             
             {% elif canal == 'Mercado Libre - Junior' %}
                 <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='reporte_mercadolibre_junior' %}" data-path="{% url 'reporte_mercadolibre_junior' %}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
                 <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='simulador_mercadolibre_junior' %}" data-path="{% url 'simulador_mercadolibre_junior' %}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
                 <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='referencia_comisiones' %}" data-path="{% url 'referencia_comisiones' %}" class="menu-item"><i class="fas fa-list-ul"></i> Referencia Marca y Categ</a>
-                <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='referencia_costos' %}" data-path="{% url 'referencia_costos' %}" class="menu-item"><i class="fas fa-dollar-sign"></i> Costos Referenciales</a>
             
             {% elif canal == 'Falabella' %}
                 <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='reporte_falabella' %}" data-path="{% url 'reporte_falabella' %}" class="menu-item"><i class="fas fa-chart-line"></i> Mis Reportes</a>
@@ -248,6 +246,29 @@
                 <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='simulador_web' %}" data-path="{% url 'simulador_web' %}" class="menu-item"><i class="fas fa-calculator"></i> Simulador de Costos</a>
             {% endif %}
 
+            <!-- ============================================== -->
+            <!-- NUEVA SECCIÓN GLOBAL: REQUERIMIENTOS           -->
+            <!-- ============================================== -->
+            <hr style="border: 0.5px solid #3e4f5f; margin: 10px 20px;">
+            
+            <div class="menu-category">Herramientas Globales</div>
+
+            <div class="dropdown">
+                <div class="menu-item" onclick="toggleMenu('req-menu', 'arrow-req')">
+                    <i class="fas fa-tasks"></i> 
+                    <span>REQUERIMIENTOS</span>
+                    <i class="fas fa-chevron-down" id="arrow-req" style="margin-left: auto; font-size: 0.7em; transition: 0.3s;"></i>
+                </div>
+                
+                <div class="submenu" id="req-menu">
+                    <!-- Recuerda actualizar los href="#" cuando crees las vistas en views.py -->
+                    <a href="#" class="submenu-item"><i class="fas fa-exclamation-circle"></i> Req. y Alertas</a>
+                    <a href="#" class="submenu-item"><i class="fas fa-laptop"></i> Página Web</a>
+                    <a href="#" class="submenu-item"><i class="fas fa-heading"></i> Títulos</a>
+                    <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='referencia_costos' %}" data-path="{% url 'referencia_costos' %}" class="submenu-item"><i class="fas fa-dollar-sign"></i> Costos Referenciales</a>
+                </div>
+            </div>
+
         </nav>
 
         <div class="sidebar-footer">
@@ -263,7 +284,6 @@
                 <span style="font-weight: bold; font-size: 0.9rem;">{{ user.username|upper }}</span>
             </div>
             
-            <!-- 3. FORMULARIO MODIFICADO CON ID Y ONSUBMIT -->
             <form id="form-logout" method="post" action="{% url 'logout' %}" style="margin: 0;" onsubmit="animarSalida(event)">
                 {% csrf_token %}
                 <button type="submit" class="btn-logout-sidebar">
@@ -294,14 +314,9 @@
             localStorage.setItem('menuColapsado', sidebar.classList.contains('collapsed'));
         }
 
-        // 4. FUNCIÓN QUE GESTIONA LA ANIMACIÓN DE SALIDA
         function animarSalida(event) {
-            // Detenemos el envío inmediato
             event.preventDefault(); 
-            // Agregamos la clase que hace el fade-out (desaparecer)
             document.body.classList.add('fade-out'); 
-            
-            // Esperamos 400ms (lo que dura la transición CSS) y enviamos la petición de cierre
             setTimeout(() => {
                 document.getElementById('form-logout').submit(); 
             }, 400);
