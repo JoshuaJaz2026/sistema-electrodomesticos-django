@@ -3,17 +3,17 @@
 {% block content %}
 <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem; width: 100%; height: 100%;">
     
-    <!-- BUSCADOR INTELIGENTE -->
-    <div class="card" style="border-top: 4px solid #3498DB; padding: 10px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); flex: 1; display: flex; flex-direction: column; min-height: 0;">
+    <div class="card" style="border-top: 4px solid #10b981; padding: 10px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); flex: 1; display: flex; flex-direction: column; min-height: 0;">
         
         <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 15px; margin-bottom: 10px; flex-shrink: 0;">
             <h3 style="margin: 0; color: #1e293b; display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-size: 1.1rem; white-space: nowrap;">
-                <i class="fas fa-search" style="color: #3498DB;"></i> Buscador Web
+                <i class="fas fa-search" style="color: #64748b;"></i> Buscador
             </h3>
             
             <div style="display: flex; gap: 10px; flex-grow: 1; align-items: flex-end;">
                 <div style="flex: 1; max-width: 200px;">
                     <label class="label-mini">MODELO</label>
+                    <!-- ELIMINAMOS EL ONINPUT ANTIGUO -->
                     <input type="text" id="bciModelo" placeholder="Ej. BVSTEM6801M..." class="input-mini" style="text-transform: uppercase;">
                 </div>
                 <div style="flex: 2;">
@@ -21,8 +21,8 @@
                     <input type="text" id="bciProducto" readonly placeholder="El título aparecerá aquí..." class="input-mini" style="background: #f8fafc; color: #475569;">
                 </div>
                 <div style="width: 90px;">
-                    <label class="label-mini" style="color: #3498DB;">STOCK REAL</label>
-                    <input type="text" id="bciStock" readonly value="0" class="input-mini" style="background: #eef7fc; text-align: center; color: #2980b9; font-size: 1rem;">
+                    <label class="label-mini" style="color: #047857;">STOCK REAL</label>
+                    <input type="text" id="bciStock" readonly value="0" class="input-mini" style="background: #ecfdf5; text-align: center; color: #047857; font-size: 1rem;">
                 </div>
             </div>
         </div>
@@ -31,7 +31,7 @@
             <table style="width: 100%; border-collapse: collapse; background: white; font-size: 0.85rem; white-space: nowrap;">
                 <thead style="position: sticky; top: 0; z-index: 2;">
                     <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.7rem; letter-spacing: 1px;">
-                        <th class="th-premium" style="text-align: center;">SKU <i class="fas fa-hand-pointer" style="color: #3498DB; font-size: 1em; margin-left: 5px;" title="Clic para copiar"></i></th>
+                        <th class="th-premium" style="text-align: center;">SKU <i class="fas fa-hand-pointer" style="color: #60a5fa; font-size: 1em; margin-left: 5px;" title="Clic para copiar"></i></th>
                         <th class="th-premium" style="text-align: center;">Marca</th>
                         <th class="th-premium" style="text-align: center;">Fecha Ing.</th>
                         <th class="th-premium" style="text-align: center;">Nro. Serie</th>
@@ -52,12 +52,11 @@
         </div>
     </div>
 
-    <!-- SALIDAS WEB -->
-    <div class="card" style="border-top: 4px solid var(--color-principal, #3498DB); padding: 10px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: flex; flex-direction: column; flex: 1; min-height: 0;">
+    <div class="card" style="border-top: 4px solid var(--color-principal, #10b981); padding: 10px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: flex; flex-direction: column; flex: 1; min-height: 0;">
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; flex-shrink: 0;">
             <h3 style="margin: 0; color: #1e293b; text-transform: uppercase; display: flex; align-items: center; gap: 8px; font-size: 1.1rem;">
-                <i class="{{ request.session.icono_actual|default:'fas fa-globe' }}" style="color: var(--color-principal, #3498DB);"></i> Salidas: {{ canal|default:'Web' }}
+                <i class="{{ request.session.icono_actual|default:'fas fa-store' }}" style="color: var(--color-principal, #10b981);"></i> Salidas: {{ canal|default:'Venta Libre' }}
                 <span style="background-color: #fff7ed; color: #9a3412; padding: 3px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; border: 1px solid #fed7aa; margin-left: 5px; display: flex; align-items: center; gap: 5px;">
                     <i class="fas fa-exclamation-triangle"></i> Restará del stock
                 </span>
@@ -66,17 +65,21 @@
                 </span>
             </h3>
             <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                <button type="button" onclick="agregarFilaSalida()" class="btn-top" style="background-color: #3498DB; color: white;">
+                <button type="button" onclick="agregarFilaSalida()" class="btn-top" style="background-color: var(--color-principal, #10b981); color: white;">
                     <i class="fas fa-plus"></i> Fila
                 </button>
-                <button type="button" onclick="procesarDescuentosWeb()" class="btn-top" style="background-color: #1e293b;">
+                <button type="button" onclick="procesarDescuentosVentaLibre()" class="btn-top" style="background-color: #1e293b;">
                     <i class="fas fa-save"></i> Procesar
                 </button>
+                <!-- NUEVO BOTÓN PDF -->
+                <a href="{% url 'exportar_salidas_pdf' %}" class="btn-top" style="background-color: #ef4444; text-decoration: none;">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
             </div>
         </div>
 
-        <div style="overflow-x: hidden; overflow-y: auto; border: 2px solid #cbd5e1; border-radius: 4px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); flex-grow: 1; min-height: 0;">
-            <table id="tablaSalidasWeb" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.8rem; white-space: nowrap; table-layout: fixed;">
+        <div style="overflow-x: hidden; overflow-y: auto; border: 2px solid #94a3b8; border-radius: 4px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); flex-grow: 1; min-height: 0;">
+            <table id="tablaSalidasVentaLibre" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.8rem; white-space: nowrap; table-layout: fixed;">
                 <thead style="position: sticky; top: 0; z-index: 10;">
                     <tr style="background-color: #0f172a; color: white; text-transform: uppercase; font-weight: 800; font-size: 0.7rem; letter-spacing: 0.5px;">
                         <th class="th-premium" style="width: 13%; text-align: center;">SKU</th>
@@ -109,7 +112,7 @@
                         </td>
                         <td class="td-premium"><input type="text" placeholder="Nro. Venta..." class="celda-input central bold text-dark val-ventas"></td>
                         <td class="td-premium">
-                            <select class="celda-input central text-blue val-by select-premium">
+                            <select class="celda-input central text-orange val-by select-premium">
                                 <option value="" disabled selected>-- BY --</option>
                                 <option value="MILAGROS">MILAGROS</option>
                                 <option value="PABLO">PABLO</option>
@@ -146,29 +149,29 @@
                             <td class="td-premium" style="background-color: #f8fafc;">
                                 <div style="display: flex; align-items: center; padding: 0 5px; justify-content: center;">
                                     <span style="color: #94a3b8; font-weight: bold; margin-right: 2px;">S/</span>
-                                    <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" value="{{ item.costo|floatformat:2|default:'0.00' }}" style="padding-left: 0; padding-right: 2px;" tabindex="-1">
+                                    <input type="number" readonly class="celda-input derecha bold val-costo input-readonly" value="{{ item.costo_unt|floatformat:2|default:'0.00' }}" style="padding-left: 0; padding-right: 2px;" tabindex="-1">
                                 </div>
                             </td>
                             
                             <td class="td-premium" style="background-color: #fef2f2;">
-                                <input type="number" readonly class="celda-input central val-desc input-badge-rojo input-readonly" value="{{ item.descuento|default:'1' }}" tabindex="-1">
+                                <input type="number" readonly class="celda-input central val-desc input-badge-rojo input-readonly" value="{{ item.desc_und|default:'1' }}" tabindex="-1">
                             </td>
                             
-                            <td class="td-premium"><input type="text" class="celda-input central bold text-dark val-ventas" value="{{ item.nro_venta|default:'' }}"></td>
+                            <td class="td-premium"><input type="text" class="celda-input central bold text-dark val-ventas" value="{{ item.nro_ventas|default:'' }}"></td>
                             <td class="td-premium">
-                                <select class="celda-input central text-blue val-by select-premium">
-                                    <option value="" disabled {% if not item.creado_por %}selected{% endif %}>-- BY --</option>
-                                    <option value="MILAGROS" {% if item.creado_por == 'MILAGROS' %}selected{% endif %}>MILAGROS</option>
-                                    <option value="PABLO" {% if item.creado_por == 'PABLO' %}selected{% endif %}>PABLO</option>
-                                    <option value="DENISE" {% if item.creado_por == 'DENISE' %}selected{% endif %}>DENISE</option>
-                                    <option value="JOSHUA" {% if item.creado_por == 'JOSHUA' %}selected{% endif %}>JOSHUA</option>
-                                    <option value="ALDO" {% if item.creado_por == 'ALDO' %}selected{% endif %}>ALDO</option>
-                                    <option value="ADAMARI" {% if item.creado_por == 'ADAMARI' %}selected{% endif %}>ADAMARI</option>
-                                    <option value="CARLOS" {% if item.creado_por == 'CARLOS' %}selected{% endif %}>CARLOS</option>
-                                    <option value="DAVID" {% if item.creado_por == 'DAVID' %}selected{% endif %}>DAVID</option>
-                                    <option value="EDUARDO" {% if item.creado_por == 'EDUARDO' %}selected{% endif %}>EDUARDO</option>
-                                    <option value="KEVIN" {% if item.creado_por == 'KEVIN' %}selected{% endif %}>KEVIN</option>
-                                    <option value="MISTER" {% if item.creado_por == 'MISTER' %}selected{% endif %}>MISTER</option>
+                                <select class="celda-input central text-orange val-by select-premium">
+                                    <option value="" disabled {% if not item.by %}selected{% endif %}>-- BY --</option>
+                                    <option value="MILAGROS" {% if item.by == 'MILAGROS' %}selected{% endif %}>MILAGROS</option>
+                                    <option value="PABLO" {% if item.by == 'PABLO' %}selected{% endif %}>PABLO</option>
+                                    <option value="DENISE" {% if item.by == 'DENISE' %}selected{% endif %}>DENISE</option>
+                                    <option value="JOSHUA" {% if item.by == 'JOSHUA' %}selected{% endif %}>JOSHUA</option>
+                                    <option value="ALDO" {% if item.by == 'ALDO' %}selected{% endif %}>ALDO</option>
+                                    <option value="ADAMARI" {% if item.by == 'ADAMARI' %}selected{% endif %}>ADAMARI</option>
+                                    <option value="CARLOS" {% if item.by == 'CARLOS' %}selected{% endif %}>CARLOS</option>
+                                    <option value="DAVID" {% if item.by == 'DAVID' %}selected{% endif %}>DAVID</option>
+                                    <option value="EDUARDO" {% if item.by == 'EDUARDO' %}selected{% endif %}>EDUARDO</option>
+                                    <option value="KEVIN" {% if item.by == 'KEVIN' %}selected{% endif %}>KEVIN</option>
+                                    <option value="MISTER" {% if item.by == 'MISTER' %}selected{% endif %}>MISTER</option>
                                 </select>
                             </td>
                             
@@ -183,10 +186,10 @@
                 </tbody>
             </table>
         </div>
-
+        
         <!-- INICIO DE PAGINACIÓN -->
         {% if page_obj and page_obj.paginator.num_pages > 1 %}
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 10px 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; border-top: 4px solid var(--color-principal, #3498DB); flex-shrink: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 10px 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; border-top: 4px solid var(--color-principal, #10b981); flex-shrink: 0;">
             <span style="color: #475569; font-weight: 600; font-size: 0.85rem;">
                 Mostrando página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
             </span>
@@ -203,43 +206,55 @@
         </div>
         {% endif %}
         <!-- FIN DE PAGINACIÓN -->
-
+        
     </div>
 </div>
 
 <style>
+    /* COMPACTACIÓN DE BOTONES SUPERIORES Y PANEL BÚSQUEDA */
     .btn-top { color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s; font-size: 0.8rem; text-decoration: none; height: 32px;}
     .btn-top:hover { filter: brightness(1.1); transform: translateY(-1px); }
     
     .label-mini { display: block; font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 3px; letter-spacing: 0.5px; }
     .input-mini { width: 100%; padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: bold; outline: none; box-sizing: border-box; height: 32px; font-size: 0.85rem; }
 
+    /* ========================================================
+       DISEÑO TIPO EXCEL (GRID MARCADOS ESTRICTOS)
+       ======================================================== */
     table { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-collapse: collapse; }
+    
     .th-premium { padding: 10px 8px; border: 1px solid #334155; }
     .td-premium { padding: 0; border: 1px solid #cbd5e1; height: 36px; vertical-align: middle; }
     
+    /* Efecto Cebra y Hover */
     .fila-salida:nth-child(even), .fila-buscador:nth-child(even) { background-color: #f8fafc; }
     .fila-salida:nth-child(odd), .fila-buscador:nth-child(odd) { background-color: #ffffff; }
     .fila-salida:hover, .fila-buscador:hover { background-color: #e2e8f0 !important; }
     
+    /* Alerta Incompleta */
     .fila-incompleta { background-color: #fef2f2 !important; border-left: 4px solid #ef4444; }
 
+    /* Inputs Fantasma (Llenan toda la celda al 100%) */
     .celda-input { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 6px 10px; font-family: inherit; font-size: 13px; color: #334155; background-color: transparent; outline: none; transition: background-color 0.2s, box-shadow 0.2s; }
-    .celda-input:focus:not([readonly]) { background-color: #fef9c3; box-shadow: inset 0 0 0 2px var(--color-principal, #3498DB); color: #000; }
+    .celda-input:focus:not([readonly]) { background-color: #fef9c3; box-shadow: inset 0 0 0 2px var(--color-principal, #10b981); color: #000; }
     
+    /* Inputs Bloqueados (Readonly) */
     .input-readonly { color: #94a3b8; cursor: not-allowed; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
     .input-readonly:focus { box-shadow: none; background-color: transparent; }
 
+    /* Tipografías Específicas */
     .central { text-align: center; }
     .derecha { text-align: right; }
     .bold { font-weight: bold; }
     .text-dark { color: #0f172a; }
     .text-mono { font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 13px; letter-spacing: -0.5px; }
-    .text-blue { color: #3498DB; }
+    .text-blue { color: #2563eb; }
     .text-orange { color: #ea580c; }
 
+    /* EL BADGE ROJO ACTUALIZADO */
     .input-badge-rojo { background-color: #fee2e2; color: #b91c1c; border: none; width: 100%; height: 100%; font-weight: 900; font-size: 1rem; text-align: center; display: block; box-sizing: border-box; padding: 8px; }
 
+    /* Selectores Custom (Combobox) */
     .select-premium { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px top 50%; background-size: 8px auto; padding-right: 20px; }
 
     .btn-eliminar { background: none; border: none; color: #ef4444; cursor: pointer; padding: 6px; border-radius: 4px; transition: background 0.2s; display: block; margin: 0 auto;}
@@ -249,7 +264,7 @@
     
     /* Estilos para Paginación */
     .btn-pag { padding: 4px 12px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; color: #334155; text-decoration: none; font-weight: bold; transition: all 0.2s; font-size: 0.8rem; }
-    .btn-pag:hover { background: var(--color-principal, #3498DB); color: white; border-color: var(--color-principal, #3498DB); }
+    .btn-pag:hover { background: var(--color-principal, #10b981); color: white; border-color: var(--color-principal, #10b981); }
 </style>
 
 <script>
@@ -284,6 +299,7 @@
         return usados;
     }
 
+    // EL BUSCADOR INTELIGENTE (100% Fuera de Línea)
     function ejecutarBusqueda() {
         const query = document.getElementById('bciModelo').value.trim().toUpperCase();
         const tbody = document.getElementById('cuerpoReferencia');
@@ -343,6 +359,7 @@
             autocompletarBUSCARV(ultimoInput); 
             
             ultimoInput.focus();
+            // Refrescar buscador para que desaparezca el recién agregado
             ejecutarBusqueda();
         });
     }
@@ -371,9 +388,11 @@
         }
 
         fila.remove();
+        // Refrescar buscador por si devolvimos un SKU
         ejecutarBusqueda();
     }
 
+    // Autocompletar inteligente con lectura directa del diccionario
     function autocompletarBUSCARV(inputSKU) {
         const fila = inputSKU.closest('tr');
         const sku = inputSKU.value.trim().toUpperCase();
@@ -396,7 +415,7 @@
         ejecutarBusqueda();
     }
 
-    function procesarDescuentosWeb() {
+    function procesarDescuentosVentaLibre() {
         const filas = document.querySelectorAll('#cuerpoSalidas tr:not(#fila-molde-salida)');
         let datos = [];
         let hayIncompletos = false;
@@ -426,8 +445,8 @@
                         'titulo': titulo,
                         'fecha_salida': fila.querySelector('.val-fecha').value,
                         'serie': fila.querySelector('.val-serie').value.trim(),
-                        'costo': fila.querySelector('.val-costo').value,
-                        'desc_1und': fila.querySelector('.val-desc').value,
+                        'costo_unt': fila.querySelector('.val-costo').value,
+                        'desc_und': fila.querySelector('.val-desc').value,
                         'nro_ventas': ventas,
                         'by': by
                     });
@@ -445,12 +464,12 @@
             return;
         }
 
-        const btn = document.querySelector('button[onclick="procesarDescuentosWeb()"]');
+        const btn = document.querySelector('button[onclick="procesarDescuentosVentaLibre()"]');
         const textoOriginal = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
         btn.disabled = true;
 
-        fetch("{% url 'procesar_salidas_web' %}", {
+        fetch("{% url 'procesar_salidas_ventalibre' %}", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
             body: JSON.stringify({ salidas: datos, eliminadas: salidasAEliminar })

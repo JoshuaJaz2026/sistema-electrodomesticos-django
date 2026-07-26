@@ -72,6 +72,10 @@
                 <button type="button" onclick="procesarDescuentosFalabella()" class="btn-top" style="background-color: #1e293b; color: white;">
                     <i class="fas fa-save"></i> Procesar
                 </button>
+                <!-- NUEVO BOTÓN PDF -->
+                <a href="{% url 'exportar_salidas_pdf' %}" class="btn-top" style="background-color: #ef4444; text-decoration: none;">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
             </div>
         </div>
 
@@ -187,7 +191,7 @@
         
         <!-- INICIO DE PAGINACIÓN -->
         {% if page_obj and page_obj.paginator.num_pages > 1 %}
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 10px 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; border-top: 4px solid var(--color-principal, #3b82f6); flex-shrink: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 10px 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; border-top: 4px solid var(--color-principal, #2ECC71); flex-shrink: 0;">
             <span style="color: #475569; font-weight: 600; font-size: 0.85rem;">
                 Mostrando página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
             </span>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Salidas - {{ canal }}</title>
+    <style>
+        @page {
+            size: a4 landscape;
+            margin: 1cm 1cm 1.5cm 1cm;
+            @frame footer {
+                -pdf-frame-content: footerContent;
+                bottom: 0cm; margin-left: 1cm; margin-right: 1cm; height: 1cm;
+            }
+        }
+        
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 8px; color: #333; }
+        h1 { text-align: center; color: #1e293b; font-size: 14px; margin-bottom: 5px; text-transform: uppercase; }
+        .info-header { text-align: center; font-size: 9px; color: #64748b; margin-bottom: 15px; }
+        
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 10px; }
+        th, td { border: 1px solid #cbd5e1; padding: 5px 3px; text-align: center; vertical-align: middle; word-wrap: break-word; }
+        
+        th { background-color: #1e293b; color: #ffffff; font-weight: bold; font-size: 8px; text-transform: uppercase; }
+        .th-alert { background-color: #7f1d1d; } /* Rojo oscuro para cantidad */
+        
+        .td-modelo { text-align: center; font-weight: bold; font-size: 8px; color: #1e293b; }
+        .td-titulo { text-align: left; color: #475569; font-size: 7px; }
+        
+        .b-desc { color: #b91c1c; font-weight: bold; font-size: 9px; }
+        .b-costo { font-weight: bold; color: #0f172a; }
+        .b-by { color: #ea580c; font-weight: bold; }
+        
+        tr:nth-child(even) { background-color: #f8fafc; }
+    </style>
+</head>
+<body>
+    
+    <h1>REPORTE DE SALIDAS: {{ canal }}</h1>
+    <div class="info-header">
+        Generado por: <b>{{ usuario }}</b> el {{ fecha_impresion|date:"d/m/Y H:i" }}<br>
+        Mostrando el historial completo de despachos.
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 14%;">SKU</th>
+                <th style="width: 12%;">MODELO</th>
+                <th style="width: 25%;">TÍTULO</th>
+                <th style="width: 8%;">F. SALIDA</th>
+                <th style="width: 9%;">SERIE/N°</th>
+                <th style="width: 7%;">COSTO</th>
+                <th class="th-alert" style="width: 5%;">CANT.</th>
+                <th style="width: 8%;">N° VENTA</th>
+                <th style="width: 6%;">TIPO</th>
+                <th style="width: 6%;">POR</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in registros %}
+            <tr>
+                <td style="font-family: monospace; color: #2563eb; font-size: 8px;">{{ item.sku }}</td>
+                <td class="td-modelo">{{ item.modelo|default:"-" }}</td>
+                <td class="td-titulo">{{ item.titulo|default:"-"|truncatechars:65 }}</td>
+                <td>{{ item.fecha_salida|date:"d/m/y"|default:"-" }}</td>
+                <td style="font-family: monospace;">{{ item.serie|default:"-" }}</td>
+                <td class="b-costo">S/ {{ item.costo|floatformat:2 }}</td>
+                <td class="b-desc">{{ item.descuento }}</td>
+                <td>{{ item.nro_venta|default:"-" }}</td>
+                <td>{{ item.tipo_venta|default:"-" }}</td>
+                <td class="b-by">{{ item.by|default:"-" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="footerContent" style="text-align: right; font-size: 8px; color: #94a3b8;">
+        Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+
+</body>
+</html>

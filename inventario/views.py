@@ -4424,3 +4424,59 @@ def exportar_registros_pdf(request):
         return response
     
     return HttpResponse("Error al generar el PDF.")
+
+
+@login_required
+def exportar_salidas_pdf(request):
+    from django.utils import timezone
+    from django.http import HttpResponse
+    from .utils import render_to_pdf
+    
+    canal = request.session.get('canal_activo', 'Mercado Libre')
+    
+    # 1. Elegimos el modelo correcto según el canal
+    if canal == 'Mercado Libre': from .models import SalidaMercadoLibre as ModeloSalida
+    elif canal == 'Mercado Libre - Junior': from .models import SalidaMercadoLibreJunior as ModeloSalida
+    elif canal == 'Falabella': from .models import SalidaFalabella as ModeloSalida
+    elif canal == 'Creditienda': from .models import SalidaCreditienda as ModeloSalida
+    elif canal == 'Intercorp': from .models import SalidaIntercorp as ModeloSalida
+    elif canal == 'Tik tok': from .models import SalidaTiktok as ModeloSalida
+    elif canal == 'Venta Libre': from .models import SalidaVentaLibre as ModeloSalida
+    elif canal == 'Web': from .models import SalidaWeb as ModeloSalida
+    else: from .models import SalidaMercadoLibre as ModeloSalida
+
+    salidas = ModeloSalida.objects.all().order_by('-id')
+    
+    # 2. Normalizamos los datos (ya que algunas tablas usan nombres de columnas diferentes)
+    registros_data = []
+    for s in salidas:
+        registros_data.append({
+            'sku': s.sku,
+            'modelo': s.modelo,
+            'titulo': s.titulo,
+            'fecha_salida': s.fecha_salida,
+            'serie': getattr(s, 'serie', '-'),
+            'costo': getattr(s, 'costo', getattr(s, 'costo_unt', 0)),
+            'descuento': getattr(s, 'descuento', getattr(s, 'desc_und', 1)),
+            'nro_venta': getattr(s, 'nro_venta', getattr(s, 'nro_ventas', '-')),
+            'tipo_venta': getattr(s, 'tipo_venta', '-'),
+            'by': getattr(s, 'creado_por', getattr(s, 'by', '-'))
+        })
+
+    context = {
+        'registros': registros_data,
+        'canal': canal,
+        'fecha_impresion': timezone.now(),
+        'usuario': request.user.username,
+    }
+    
+    pdf = render_to_pdf('inventario/pdf_salidas.html', context)
+    
+    if pdf:
+        response = HttpResponse(pdf, content_type='application/pdf')
+        nombre_limpio = canal.replace(' ', '_').replace('-', '')
+        filename = f"Salidas_{nombre_limpio}_{timezone.now().strftime('%d%m%Y')}.pdf"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+        
+    return HttpResponse("Error al generar el PDF de Salidas.")
