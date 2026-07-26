@@ -20,7 +20,7 @@ from datetime import timedelta
 from django.contrib.auth.models import User
 
 # Importación corregida de SimulacionMercadoLibreJunior
-from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre, ReporteMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SalidaFalabella, SalidaCreditienda, SalidaIntercorp, SalidaTiktok, SalidaVentaLibre, ReporteCreditienda, ReporteFalabella, DirectorioProducto, ReporteIntercorp, ComisionIntercorp, SalidaBCI, SalidaWeb
+from .models import Electrodomestico, Plataforma, Producto, MovimientoPercheron, SimulacionMercadoLibre, ReferenciaComision, ReferenciaCosto, ReporteMercadoLibre, IngresoPercheron, SalidaMercadoLibre, ReporteMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SimulacionMercadoLibreJunior, SalidaMercadoLibreJunior, SalidaFalabella, SalidaCreditienda, SalidaIntercorp, SalidaTiktok, SalidaVentaLibre, ReporteCreditienda, ReporteFalabella, DirectorioProducto, ReporteIntercorp, ComisionIntercorp, SalidaBCI, SalidaWeb, HistorialEliminacion
 
 # =========================================================
 # CONFIGURACIÓN MAESTRA DE ESTILOS Y COLORES
@@ -989,9 +989,18 @@ def procesar_salidas_web(request):
             if eliminadas:
                 registros_viejos = SalidaWeb.objects.filter(id__in=eliminadas)
                 for registro in registros_viejos:
+                    
+                    HistorialEliminacion.objects.create(
+                        sku=registro.sku,
+                        modelo=registro.modelo,
+                        plataforma_origen='Web',
+                        usuario_que_elimino=request.user.username
+                    )
+                    
                     if registro.modelo:
                         key = str(registro.modelo).upper().replace(" ", "").replace("-", "")
                         conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.descuento
+                    
                     registro.delete()
 
             if salidas:
@@ -1092,9 +1101,18 @@ def procesar_salidas_tiktok(request):
             if eliminadas:
                 registros_viejos = SalidaTiktok.objects.filter(id__in=eliminadas)
                 for registro in registros_viejos:
+                    
+                    HistorialEliminacion.objects.create(
+                        sku=registro.sku,
+                        modelo=registro.modelo,
+                        plataforma_origen='Tik tok',
+                        usuario_que_elimino=request.user.username
+                    )
+                    
                     if registro.modelo:
                         key = str(registro.modelo).upper().replace(" ", "").replace("-", "")
                         conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.descuento
+                    
                     registro.delete()
 
             if salidas:
@@ -2796,10 +2814,21 @@ def procesar_salidas_ml(request):
             if eliminadas:
                 registros_viejos = SalidaMercadoLibre.objects.filter(id__in=eliminadas)
                 for registro in registros_viejos:
+                    
+                    # --- 1. GUARDAR EVIDENCIA EN LA AUDITORÍA ---
+                    HistorialEliminacion.objects.create(
+                        sku=registro.sku,
+                        modelo=registro.modelo,
+                        plataforma_origen='Mercado Libre',
+                        usuario_que_elimino=request.user.username
+                    )
+                    
+                    # --- 2. DEVOLVER EL STOCK NORMALMENTE ---
                     if registro.modelo:
                         key = str(registro.modelo).upper().replace(" ", "").replace("-", "")
                         conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.descuento
                     
+                    # --- 3. BORRAR REGISTRO ORIGINAL ---
                     registro.delete()
 
             if salidas:
@@ -3017,9 +3046,18 @@ def procesar_salidas_ml_junior(request):
             if eliminadas:
                 registros_viejos = SalidaMercadoLibreJunior.objects.filter(id__in=eliminadas)
                 for registro in registros_viejos:
+                    
+                    HistorialEliminacion.objects.create(
+                        sku=registro.sku,
+                        modelo=registro.modelo,
+                        plataforma_origen='Mercado Libre - Junior',
+                        usuario_que_elimino=request.user.username
+                    )
+                    
                     if registro.modelo:
                         key = str(registro.modelo).upper().replace(" ", "").replace("-", "")
                         conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.descuento
+                    
                     registro.delete()
 
             if salidas:
@@ -3532,9 +3570,18 @@ def procesar_salidas_intercorp(request):
             if eliminadas:
                 registros_viejos = SalidaIntercorp.objects.filter(id__in=eliminadas)
                 for registro in registros_viejos:
+                    
+                    HistorialEliminacion.objects.create(
+                        sku=registro.sku,
+                        modelo=registro.modelo,
+                        plataforma_origen='Intercorp',
+                        usuario_que_elimino=request.user.username
+                    )
+                    
                     if registro.modelo:
                         key = str(registro.modelo).upper().replace(" ", "").replace("-", "")
                         conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.descuento
+                    
                     registro.delete()
 
             if salidas:
@@ -3739,9 +3786,18 @@ def procesar_salidas_ventalibre(request):
             if eliminadas:
                 registros_viejos = SalidaVentaLibre.objects.filter(id__in=eliminadas)
                 for registro in registros_viejos:
+                    
+                    HistorialEliminacion.objects.create(
+                        sku=registro.sku,
+                        modelo=registro.modelo,
+                        plataforma_origen='Venta Libre',
+                        usuario_que_elimino=request.user.username
+                    )
+                    
                     if registro.modelo:
                         key = str(registro.modelo).upper().replace(" ", "").replace("-", "")
                         conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.descuento
+                    
                     registro.delete()
 
             if salidas:
@@ -3978,9 +4034,18 @@ def procesar_salidas_falabella(request):
             if eliminadas:
                 registros_viejos = SalidaFalabella.objects.filter(id__in=eliminadas)
                 for registro in registros_viejos:
+                    
+                    HistorialEliminacion.objects.create(
+                        sku=registro.sku,
+                        modelo=registro.modelo,
+                        plataforma_origen='Falabella',
+                        usuario_que_elimino=request.user.username
+                    )
+                    
                     if registro.modelo:
                         key = str(registro.modelo).upper().replace(" ", "").replace("-", "")
                         conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.descuento
+                    
                     registro.delete()
 
             if salidas:
@@ -4088,9 +4153,18 @@ def procesar_salidas_creditienda(request):
             if eliminadas:
                 registros_viejos = SalidaCreditienda.objects.filter(id__in=eliminadas)
                 for registro in registros_viejos:
+                    
+                    HistorialEliminacion.objects.create(
+                        sku=registro.sku,
+                        modelo=registro.modelo,
+                        plataforma_origen='Creditienda',
+                        usuario_que_elimino=request.user.username
+                    )
+                    
                     if registro.modelo:
                         key = str(registro.modelo).upper().replace(" ", "").replace("-", "")
                         conteo_restauraciones[key] = conteo_restauraciones.get(key, 0) + registro.descuento
+                    
                     registro.delete()
 
             if salidas:

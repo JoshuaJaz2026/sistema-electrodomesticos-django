@@ -733,3 +733,13 @@ class SalidaWeb(models.Model):
 
     def __str__(self):
         return f"{self.sku} - {self.modelo} (Web)"
+
+class HistorialEliminacion(models.Model):
+    sku = models.CharField(max_length=100, null=True, blank=True)
+    modelo = models.CharField(max_length=100, null=True, blank=True)
+    plataforma_origen = models.CharField(max_length=50, null=True, blank=True)
+    usuario_que_elimino = models.CharField(max_length=100, null=True, blank=True)
+    fecha_eliminacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.sku} eliminado por {self.usuario_que_elimino} en {self.plataforma_origen}"
