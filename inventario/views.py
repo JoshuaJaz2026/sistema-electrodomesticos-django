@@ -4480,3 +4480,15 @@ def exportar_salidas_pdf(request):
         return response
         
     return HttpResponse("Error al generar el PDF de Salidas.")
+
+
+@login_required
+def requerimientos_alertas_view(request):
+    from .models import RequerimientoAlerta
+    requerimientos = RequerimientoAlerta.objects.all()
+    
+    context = {
+        'requerimientos': requerimientos,
+        'canal': request.session.get('canal_activo', 'Mercado Libre'),
+    }
+    return render(request, 'inventario/req_alertas.html', context)

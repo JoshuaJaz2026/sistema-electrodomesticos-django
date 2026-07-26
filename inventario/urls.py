@@ -169,4 +169,5 @@ urlpatterns = [
 
     path('percheron/registros/exportar-pdf/', views.exportar_registros_pdf, name='exportar_registros_pdf'),
     path('percheron/salidas/exportar-pdf/', views.exportar_salidas_pdf, name='exportar_salidas_pdf'),
+    path('requerimientos/alertas/', views.requerimientos_alertas_view, name='req_alertas'),
 ]
