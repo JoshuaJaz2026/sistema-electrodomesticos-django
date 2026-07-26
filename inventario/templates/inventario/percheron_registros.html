@@ -8,7 +8,28 @@
             <i class="fas fa-clipboard-list" style="color: #3b82f6;"></i> Registro Maestro de Movimientos
         </h2>
         
-        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+            
+            <!-- NUEVO BUSCADOR POR FECHAS -->
+            <form method="GET" action="" style="display: flex; gap: 8px; align-items: center; margin: 0;">
+                <div style="display: flex; align-items: center; gap: 5px; background: #f8fafc; padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1;">
+                    <label for="fecha_desde" style="font-size: 0.75rem; font-weight: bold; color: #475569;">Desde:</label>
+                    <input type="date" name="fecha_desde" id="fecha_desde" value="{{ fecha_desde }}" style="border: none; background: transparent; font-size: 0.8rem; outline: none; color: #334155; cursor: pointer;">
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px; background: #f8fafc; padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1;">
+                    <label for="fecha_hasta" style="font-size: 0.75rem; font-weight: bold; color: #475569;">Hasta:</label>
+                    <input type="date" name="fecha_hasta" id="fecha_hasta" value="{{ fecha_hasta }}" style="border: none; background: transparent; font-size: 0.8rem; outline: none; color: #334155; cursor: pointer;">
+                </div>
+                <button type="submit" class="btn-top" style="background-color: #3b82f6;">
+                    <i class="fas fa-filter"></i> Filtrar
+                </button>
+                {% if fecha_desde or fecha_hasta %}
+                <a href="{% url 'percheron_registros' %}" class="btn-top" style="background-color: #ef4444; text-decoration: none;">
+                    <i class="fas fa-times"></i> Limpiar
+                </a>
+                {% endif %}
+            </form>
+            
             <a href="{% url 'exportar_registros_excel' %}" class="btn-top" style="background-color: #10b981;">
                 <i class="fas fa-file-excel"></i> Exportar Kardex
             </a>
@@ -100,7 +121,7 @@
                 <tr>
                     <td colspan="18" style="text-align: center; padding: 40px; color: #94a3b8; font-size: 1.1rem; border: 1px solid #cbd5e1;">
                         <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 15px; color: #cbd5e1; display: block;"></i>
-                        No hay registros de ingresos disponibles. Importa tu kardex para comenzar.
+                        No hay registros disponibles para el criterio seleccionado.
                     </td>
                 </tr>
                 {% endfor %}
@@ -115,12 +136,12 @@
         </span>
         <div style="display: flex; gap: 8px;">
             {% if page_obj.has_previous %}
-                <a href="?page=1" class="btn-pag">« Primera</a>
-                <a href="?page={{ page_obj.previous_page_number }}" class="btn-pag">Anterior</a>
+                <a href="?page=1&fecha_desde={{ fecha_desde }}&fecha_hasta={{ fecha_hasta }}" class="btn-pag">« Primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}&fecha_desde={{ fecha_desde }}&fecha_hasta={{ fecha_hasta }}" class="btn-pag">Anterior</a>
             {% endif %}
             {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="btn-pag">Siguiente</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn-pag">Última »</a>
+                <a href="?page={{ page_obj.next_page_number }}&fecha_desde={{ fecha_desde }}&fecha_hasta={{ fecha_hasta }}" class="btn-pag">Siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}&fecha_desde={{ fecha_desde }}&fecha_hasta={{ fecha_hasta }}" class="btn-pag">Última »</a>
             {% endif %}
         </div>
     </div>

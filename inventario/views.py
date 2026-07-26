@@ -323,12 +323,25 @@ def percheron_ingresos(request):
 @login_required
 def percheron_registros(request):
     canal = request.session.get('canal_activo', 'Percheron')
+    from django.db.models import Sum
+    from django.core.paginator import Paginator
+    
+    # 1. Capturamos las fechas desde la interfaz web (Buscador)
+    fecha_desde = request.GET.get('fecha_desde', '')
+    fecha_hasta = request.GET.get('fecha_hasta', '')
     
     ingresos_db = IngresoPercheron.objects.all().order_by('id')
+    
+    # 2. Aplicamos el filtro de fecha a los ingresos
+    if fecha_desde:
+        ingresos_db = ingresos_db.filter(fecha_ingreso__gte=fecha_desde)
+    if fecha_hasta:
+        ingresos_db = ingresos_db.filter(fecha_ingreso__lte=fecha_hasta)
+        
     productos_db = Producto.objects.all()
     dict_productos = {p.modelo: p for p in productos_db if p.modelo}
     
-    # --- 1. DICCIONARIO INTELIGENTE EN CASCADA ---
+    # --- DICCIONARIO INTELIGENTE EN CASCADA ---
     dict_titulos_global = {}
     for ing in ingresos_db:
         if ing.modelo and ing.titulo and ing.titulo != 'Modelo nuevo / Sin título':
@@ -338,36 +351,65 @@ def percheron_registros(request):
             dict_titulos_global[str(prod.modelo).strip().upper()] = prod.titulo
     # ---------------------------------------------
     
-    out_ml_qs = SalidaMercadoLibre.objects.values('sku').annotate(total=Sum('descuento'))
+    # 3. Preparamos los registros base de salidas
+    out_ml_qs = SalidaMercadoLibre.objects.all()
+    out_ml_jr_qs = SalidaMercadoLibreJunior.objects.all()
+    out_fbl_qs = SalidaFalabella.objects.all()
+    out_cdt_qs = SalidaCreditienda.objects.all()
+    out_int_qs = SalidaIntercorp.objects.all()
+    out_tk_qs = SalidaTiktok.objects.all()
+    out_vl_qs = SalidaVentaLibre.objects.all()
+
+    # 4. Aplicamos EXACTAMENTE el mismo filtro a las salidas (OUT)
+    if fecha_desde:
+        out_ml_qs = out_ml_qs.filter(fecha_salida__gte=fecha_desde)
+        out_ml_jr_qs = out_ml_jr_qs.filter(fecha_salida__gte=fecha_desde)
+        out_fbl_qs = out_fbl_qs.filter(fecha_salida__gte=fecha_desde)
+        out_cdt_qs = out_cdt_qs.filter(fecha_salida__gte=fecha_desde)
+        out_int_qs = out_int_qs.filter(fecha_salida__gte=fecha_desde)
+        out_tk_qs = out_tk_qs.filter(fecha_salida__gte=fecha_desde)
+        out_vl_qs = out_vl_qs.filter(fecha_salida__gte=fecha_desde)
+
+    if fecha_hasta:
+        out_ml_qs = out_ml_qs.filter(fecha_salida__lte=fecha_hasta)
+        out_ml_jr_qs = out_ml_jr_qs.filter(fecha_salida__lte=fecha_hasta)
+        out_fbl_qs = out_fbl_qs.filter(fecha_salida__lte=fecha_hasta)
+        out_cdt_qs = out_cdt_qs.filter(fecha_salida__lte=fecha_hasta)
+        out_int_qs = out_int_qs.filter(fecha_salida__lte=fecha_hasta)
+        out_tk_qs = out_tk_qs.filter(fecha_salida__lte=fecha_hasta)
+        out_vl_qs = out_vl_qs.filter(fecha_salida__lte=fecha_hasta)
+
+    # 5. Ejecutamos las sumatorias filtradas
+    out_ml_qs = out_ml_qs.values('sku').annotate(total=Sum('descuento'))
     dict_out_ml = {s['sku']: s['total'] for s in out_ml_qs if s['sku']}
     
-    out_ml_jr_qs = SalidaMercadoLibreJunior.objects.values('sku').annotate(total=Sum('descuento'))
+    out_ml_jr_qs = out_ml_jr_qs.values('sku').annotate(total=Sum('descuento'))
     dict_out_ml_jr = {s['sku']: s['total'] for s in out_ml_jr_qs if s['sku']}
 
-    out_fbl_qs = SalidaFalabella.objects.values('sku').annotate(total=Sum('descuento'))
+    out_fbl_qs = out_fbl_qs.values('sku').annotate(total=Sum('descuento'))
     dict_out_fbl = {s['sku']: s['total'] for s in out_fbl_qs if s['sku']}
 
-    out_cdt_qs = SalidaCreditienda.objects.values('sku').annotate(total=Sum('descuento'))
+    out_cdt_qs = out_cdt_qs.values('sku').annotate(total=Sum('descuento'))
     dict_out_cdt = {s['sku']: s['total'] for s in out_cdt_qs if s['sku']}
 
-    out_int_qs = SalidaIntercorp.objects.values('sku').annotate(total=Sum('desc_und'))
+    out_int_qs = out_int_qs.values('sku').annotate(total=Sum('desc_und')) # Intercorp usa desc_und
     dict_out_int = {s['sku']: s['total'] for s in out_int_qs if s['sku']}
 
-    out_tk_qs = SalidaTiktok.objects.values('sku').annotate(total=Sum('descuento'))
+    out_tk_qs = out_tk_qs.values('sku').annotate(total=Sum('descuento'))
     dict_out_tk = {s['sku']: s['total'] for s in out_tk_qs if s['sku']}
 
-    out_vl_qs = SalidaVentaLibre.objects.values('sku').annotate(total=Sum('descuento'))
+    out_vl_qs = out_vl_qs.values('sku').annotate(total=Sum('descuento'))
     dict_out_vl = {s['sku']: s['total'] for s in out_vl_qs if s['sku']}
     
     registros_data = []
     
+    # 6. Ensamblaje final de la tabla
     for ing in ingresos_db:
         prod = dict_productos.get(ing.modelo)
         
         marca_val = prod.marca if prod else 'SIN MARCA'
         ubicacion_val = prod.ubicacion if prod else 'SIN UBICACIÓN'
         
-        # --- 2. JALAR TÍTULO CON PRIORIDAD DESDE INGRESOS ---
         mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
         titulo_val = dict_titulos_global.get(mod_limpio, ing.titulo or 'Modelo nuevo / Sin título')
         
@@ -393,7 +435,7 @@ def percheron_registros(request):
             'ubicacion': ubicacion_val,
             'registrado_por': ing.creado_por,
             'modelo': ing.modelo,
-            'titulo': titulo_val, # Título Corregido
+            'titulo': titulo_val,
             'in_cant': ing.cantidad,
             'out_ml': out_ml,
             'out_fbl': out_fbl,
@@ -411,7 +453,10 @@ def percheron_registros(request):
 
     return render(request, 'inventario/percheron_registros.html', {
         'canal': canal,
-        'page_obj': page_obj
+        'page_obj': page_obj,
+        # Enviamos las fechas al HTML para que el calendario no se borre
+        'fecha_desde': fecha_desde,
+        'fecha_hasta': fecha_hasta
     })
 
 @login_required
