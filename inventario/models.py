@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 # =========================================================
 # 1. MODELOS DE PRODUCTOS (Tus modelos originales)
@@ -743,3 +744,36 @@ class HistorialEliminacion(models.Model):
 
     def __str__(self):
         return f"{self.sku} eliminado por {self.usuario_que_elimino} en {self.plataforma_origen}"
+    
+
+class RequerimientoAlerta(models.Model):
+    # --- DATOS DEL SOLICITANTE ---
+    ano_mes = models.CharField(max_length=7, blank=True, null=True, verbose_name="AÑO - MES")
+    fecha_solicitud = models.DateField(default=timezone.now, verbose_name="FECHA DE SOLICITUD")
+    solicitado_por = models.CharField(max_length=50, blank=True, null=True, verbose_name="SOLICITADO POR")
+    cantidad = models.IntegerField(default=1, verbose_name="CANT.")
+    producto_solicitado = models.TextField(blank=True, null=True, verbose_name="NOMBRE Y MODELO DEL PRODUCTO")
+    observaciones = models.TextField(blank=True, null=True, verbose_name="OBSERVACIONES")
+    plataforma_concepto = models.CharField(max_length=100, blank=True, null=True, verbose_name="PLATAFORMA / CONCEPTO")
+    fecha_entrega = models.DateField(blank=True, null=True, verbose_name="FECHA DE ENTREGA")
+    
+    # --- RESPUESTA DE COMPRAS ---
+    comentarios_compras = models.TextField(blank=True, null=True, verbose_name="COMENTARIOS DEL ÁREA DE COMPRAS")
+    compra_realizada = models.BooleanField(default=False, verbose_name="COMPRA REALIZADA (✓)")
+    agotado = models.BooleanField(default=False, verbose_name="AGOTADO (✓)")
+    
+    # Metadatos
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'requerimientos_alertas'
+        ordering = ['-id']
+
+    def save(self, *args, **kwargs):
+        # Autogenerar el "AÑO - MES" (ej. 2026-07) antes de guardar
+        if self.fecha_solicitud and not self.ano_mes:
+            self.ano_mes = self.fecha_solicitud.strftime('%Y-%m')
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.ano_mes} - {self.solicitado_por} - {self.producto_solicitado[:20]}"
