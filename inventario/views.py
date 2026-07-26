@@ -1031,7 +1031,13 @@ def procesar_salidas_web(request):
                         if cambio:
                             prod.save(update_fields=['stock_actual'])
 
-        return JsonResponse({'status': 'ok', 'message': f'Descontados: {modelos_afectados}. Devueltos: {modelos_restaurados}.'})
+        total_descontado = sum(conteo_descuentos.values()) if conteo_descuentos else 0
+        total_devuelto = sum(conteo_restauraciones.values()) if conteo_restauraciones else 0
+        
+        return JsonResponse({
+            'status': 'ok', 
+            'message': f'Unidades descontadas: {total_descontado}. Unidades devueltas: {total_devuelto}.'
+        })
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
@@ -1124,7 +1130,13 @@ def procesar_salidas_tiktok(request):
                         if cambio:
                             prod.save(update_fields=['stock_actual'])
 
-        return JsonResponse({'status': 'ok', 'message': f'Descontados: {modelos_afectados}. Devueltos: {modelos_restaurados}.'})
+        total_descontado = sum(conteo_descuentos.values()) if conteo_descuentos else 0
+        total_devuelto = sum(conteo_restauraciones.values()) if conteo_restauraciones else 0
+        
+        return JsonResponse({
+            'status': 'ok', 
+            'message': f'Unidades descontadas: {total_descontado}. Unidades devueltas: {total_devuelto}.'
+        })
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
@@ -2830,7 +2842,13 @@ def procesar_salidas_ml(request):
                             prod.save(update_fields=['stock_actual'])
 
         mensaje_final = f'Proceso completado. Salidas nuevas guardadas: {modelos_afectados}. Stock devuelto (filas borradas): {modelos_restaurados}.'
-        return JsonResponse({'status': 'ok', 'message': mensaje_final})
+        total_descontado = sum(conteo_descuentos.values()) if conteo_descuentos else 0
+        total_devuelto = sum(conteo_restauraciones.values()) if conteo_restauraciones else 0
+        
+        return JsonResponse({
+            'status': 'ok', 
+            'message': f'Unidades descontadas: {total_descontado}. Unidades devueltas: {total_devuelto}.'
+        })
 
     except Exception as e:
         import traceback
@@ -3031,7 +3049,13 @@ def procesar_salidas_ml_junior(request):
                         if cambio:
                             prod.save(update_fields=['stock_actual'])
 
-        return JsonResponse({'status': 'ok', 'message': f'Proceso completado. Salidas Junior guardadas: {modelos_afectados}. Stock devuelto: {modelos_restaurados}.'})
+        total_descontado = sum(conteo_descuentos.values()) if conteo_descuentos else 0
+        total_devuelto = sum(conteo_restauraciones.values()) if conteo_restauraciones else 0
+        
+        return JsonResponse({
+            'status': 'ok', 
+            'message': f'Unidades descontadas: {total_descontado}. Unidades devueltas: {total_devuelto}.'
+        })
 
     except Exception as e:
         import traceback
@@ -3532,7 +3556,13 @@ def procesar_salidas_intercorp(request):
                         if cambio:
                             prod.save(update_fields=['stock_actual'])
 
-        return JsonResponse({'status': 'ok', 'message': f'Descontados: {modelos_afectados}. Devueltos: {modelos_restaurados}.'})
+        total_descontado = sum(conteo_descuentos.values()) if conteo_descuentos else 0
+        total_devuelto = sum(conteo_restauraciones.values()) if conteo_restauraciones else 0
+        
+        return JsonResponse({
+            'status': 'ok', 
+            'message': f'Unidades descontadas: {total_descontado}. Unidades devueltas: {total_devuelto}.'
+        })
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
@@ -3729,7 +3759,13 @@ def procesar_salidas_ventalibre(request):
                         if cambio:
                             prod.save(update_fields=['stock_actual'])
 
-        return JsonResponse({'status': 'ok', 'message': f'Descontados: {modelos_afectados}. Devueltos: {modelos_restaurados}.'})
+        total_descontado = sum(conteo_descuentos.values()) if conteo_descuentos else 0
+        total_devuelto = sum(conteo_restauraciones.values()) if conteo_restauraciones else 0
+        
+        return JsonResponse({
+            'status': 'ok', 
+            'message': f'Unidades descontadas: {total_descontado}. Unidades devueltas: {total_devuelto}.'
+        })
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
@@ -3961,7 +3997,13 @@ def procesar_salidas_falabella(request):
                         if cambio:
                             prod.save(update_fields=['stock_actual'])
 
-        return JsonResponse({'status': 'ok', 'message': f'Proceso completado. Salidas Falabella guardadas: {modelos_afectados}. Stock devuelto: {modelos_restaurados}.'})
+        total_descontado = sum(conteo_descuentos.values()) if conteo_descuentos else 0
+        total_devuelto = sum(conteo_restauraciones.values()) if conteo_restauraciones else 0
+        
+        return JsonResponse({
+            'status': 'ok', 
+            'message': f'Unidades descontadas: {total_descontado}. Unidades devueltas: {total_devuelto}.'
+        })
 
     except Exception as e:
         import traceback
@@ -4058,7 +4100,13 @@ def procesar_salidas_creditienda(request):
                         if cambio:
                             prod.save(update_fields=['stock_actual'])
 
-        return JsonResponse({'status': 'ok', 'message': f'Descontados: {modelos_afectados}. Devueltos: {modelos_restaurados}.'})
+        total_descontado = sum(conteo_descuentos.values()) if conteo_descuentos else 0
+        total_devuelto = sum(conteo_restauraciones.values()) if conteo_restauraciones else 0
+        
+        return JsonResponse({
+            'status': 'ok', 
+            'message': f'Unidades descontadas: {total_descontado}. Unidades devueltas: {total_devuelto}.'
+        })
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
