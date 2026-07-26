@@ -198,8 +198,10 @@
                     {% endif %}
 
                     {% if user.is_superuser %}
-                        <hr style="border: 0.5px solid #3e4f5f; margin: 10px 20px;">
-                        <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='percheron_bci' %}" data-path="{% url 'percheron_bci' %}" class="submenu-item" style="color: #f59e0b;"><i class="fas fa-user-shield"></i> BCI Personal Autoriz.</a>
+                        {% if request.session.canal_activo == 'Mercado Libre' %}
+                            <hr style="border: 0.5px solid #3e4f5f; margin: 10px 20px;">
+                            <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='percheron_bci' %}" data-path="{% url 'percheron_bci' %}" class="submenu-item" style="color: #f59e0b;"><i class="fas fa-user-shield"></i> BCI Personal Autoriz.</a>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
