@@ -506,33 +506,37 @@ def exportar_registros_excel(request):
 # 4. SECCIÓN PERCHERÓN: PLATAFORMAS ESPECÍFICAS PROTEGIDAS
 # =========================================================
 
+# ==========================================
+# 1. PLATAFORMA MERCADO LIBRE
+# ==========================================
 @login_required
 @verificar_acceso_plataforma('Mercado Libre')
 def percheron_mercadolibre(request):
     canal = request.session.get('canal_activo', 'Mercado Libre')
     from .models import SalidaMercadoLibre, IngresoPercheron, Producto
+    from django.core.paginator import Paginator
     import json
+    
+    # --- PAGINACIÓN DE 50 EN 50 ---
+    salidas_list = SalidaMercadoLibre.objects.all().order_by('-id')
+    paginator = Paginator(salidas_list, 50) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    # ---------------------------------
     
     skus_usados_global = obtener_todos_los_skus_usados()
     ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
-    
     productos_db = Producto.objects.all()
     dict_prods = {str(p.modelo).strip().upper(): p for p in productos_db if p.modelo}
     
-    dict_titulos_global = {}
-    for ing in IngresoPercheron.objects.all():
-        if ing.modelo and ing.titulo and ing.titulo != 'Modelo nuevo / Sin título':
-            dict_titulos_global[str(ing.modelo).strip().upper()] = ing.titulo
-    for prod in productos_db:
-        if prod.modelo and prod.titulo and prod.titulo != 'Modelo nuevo / Sin título':
-            dict_titulos_global[str(prod.modelo).strip().upper()] = prod.titulo
-            
+    dict_titulos_global = obtener_diccionario_titulos_cache()
+
     dict_skus = {}
     for ing in ingresos_db:
         mod_limpio = str(ing.modelo).strip().upper() if ing.modelo else ''
         prod = dict_prods.get(mod_limpio)
         marca_val = prod.marca if prod else 'S/N MARCA'
-        stock_val = prod.stock_actual if prod else 0
+        stock_val = prod.stock_actual if prod else 0 
         
         fecha_str = '-'
         if ing.fecha_ingreso:
@@ -547,12 +551,12 @@ def percheron_mercadolibre(request):
             'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
             'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
         }
-        
-    page_obj = SalidaMercadoLibre.objects.all().order_by('-id')
 
     return render(request, 'inventario/percheron_mercadolibre.html', {
-        'canal': canal, 'skus_json': json.dumps(dict_skus),
-        'titulos_json': json.dumps(dict_titulos_global), 'page_obj': page_obj 
+        'canal': canal,
+        'page_obj': page_obj,
+        'skus_json': json.dumps(dict_skus),
+        'titulos_json': json.dumps(dict_titulos_global)
     })
 
 # ==========================================
@@ -563,9 +567,15 @@ def percheron_mercadolibre(request):
 def percheron_mercadolibre_junior(request):
     canal = request.session.get('canal_activo', 'Mercado Libre - Junior')
     from .models import SalidaMercadoLibreJunior, IngresoPercheron, Producto
+    from django.core.paginator import Paginator
     import json
     
-    page_obj = SalidaMercadoLibreJunior.objects.all().order_by('-id')
+    # --- PAGINACIÓN DE 50 EN 50 ---
+    salidas_list = SalidaMercadoLibreJunior.objects.all().order_by('-id')
+    paginator = Paginator(salidas_list, 50) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    # ---------------------------------
     
     skus_usados_global = obtener_todos_los_skus_usados()
     ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
@@ -610,9 +620,15 @@ def percheron_mercadolibre_junior(request):
 def percheron_falabella(request):
     canal = request.session.get('canal_activo', 'Falabella')
     from .models import SalidaFalabella, IngresoPercheron, Producto
+    from django.core.paginator import Paginator
     import json
     
-    page_obj = SalidaFalabella.objects.all().order_by('-id')
+    # --- PAGINACIÓN DE 50 EN 50 ---
+    salidas_list = SalidaFalabella.objects.all().order_by('-id')
+    paginator = Paginator(salidas_list, 50) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    # ---------------------------------
     
     skus_usados_global = obtener_todos_los_skus_usados()
     ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
@@ -700,9 +716,15 @@ def buscar_modelo_falabella(request):
 def percheron_creditienda(request):
     canal = request.session.get('canal_activo', 'Creditienda')
     from .models import SalidaCreditienda, IngresoPercheron, Producto
+    from django.core.paginator import Paginator
     import json
     
-    page_obj = SalidaCreditienda.objects.all().order_by('-id')
+    # --- PAGINACIÓN DE 50 EN 50 ---
+    salidas_list = SalidaCreditienda.objects.all().order_by('-id')
+    paginator = Paginator(salidas_list, 50) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    # ---------------------------------
     
     skus_usados_global = obtener_todos_los_skus_usados()
     ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
@@ -731,13 +753,6 @@ def percheron_creditienda(request):
             'fecha_ingreso': fecha_str, 'proveedor': ing.proveedor_motivo or '-',
             'registrado_por': ing.creado_por or '', 'marca': marca_val, 'stock_real': stock_val
         }
-
-    return render(request, 'inventario/percheron_creditienda.html', {
-        'canal': canal,
-        'page_obj': page_obj,
-        'skus_json': json.dumps(dict_skus),
-        'titulos_json': json.dumps(dict_titulos_global)
-    })
 
     return render(request, 'inventario/percheron_creditienda.html', {
         'canal': canal,
@@ -796,9 +811,15 @@ def buscar_modelo_creditienda(request):
 def percheron_intercorp(request):
     canal = request.session.get('canal_activo', 'Intercorp')
     from .models import SalidaIntercorp, IngresoPercheron, Producto
+    from django.core.paginator import Paginator
     import json
     
-    page_obj = SalidaIntercorp.objects.all().order_by('-id')
+    # --- PAGINACIÓN DE 50 EN 50 ---
+    salidas_list = SalidaIntercorp.objects.all().order_by('-id')
+    paginator = Paginator(salidas_list, 50) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    # ---------------------------------
     
     skus_usados_global = obtener_todos_los_skus_usados()
     ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
@@ -843,9 +864,15 @@ def percheron_intercorp(request):
 def percheron_tiktok(request):
     canal = request.session.get('canal_activo', 'Tik tok')
     from .models import SalidaTiktok, IngresoPercheron, Producto
+    from django.core.paginator import Paginator
     import json
     
-    page_obj = SalidaTiktok.objects.all().order_by('-id')
+    # --- PAGINACIÓN DE 50 EN 50 ---
+    salidas_list = SalidaTiktok.objects.all().order_by('-id')
+    paginator = Paginator(salidas_list, 50) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    # ---------------------------------
     
     skus_usados_global = obtener_todos_los_skus_usados()
     ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
@@ -933,9 +960,15 @@ def buscar_modelo_tiktok(request):
 def percheron_web(request):
     canal = request.session.get('canal_activo', 'Web')
     from .models import SalidaWeb, IngresoPercheron, Producto
+    from django.core.paginator import Paginator
     import json
     
-    page_obj = SalidaWeb.objects.all().order_by('-id')
+    # --- PAGINACIÓN DE 50 EN 50 ---
+    salidas_list = SalidaWeb.objects.all().order_by('-id')
+    paginator = Paginator(salidas_list, 50) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    # ---------------------------------
     
     skus_usados_global = obtener_todos_los_skus_usados()
     ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
@@ -3663,9 +3696,6 @@ def procesar_salidas_intercorp(request):
     
 
 # ==========================================
-# PLATAFORMA VENTA LIBRE
-# ==========================================
-# ==========================================
 # 7. PLATAFORMA VENTA LIBRE
 # ==========================================
 @login_required
@@ -3673,9 +3703,15 @@ def procesar_salidas_intercorp(request):
 def percheron_ventalibre(request):
     canal = request.session.get('canal_activo', 'Venta Libre')
     from .models import SalidaVentaLibre, IngresoPercheron, Producto
+    from django.core.paginator import Paginator
     import json
     
-    page_obj = SalidaVentaLibre.objects.all().order_by('-id')
+    # --- PAGINACIÓN DE 50 EN 50 ---
+    salidas_list = SalidaVentaLibre.objects.all().order_by('-id')
+    paginator = Paginator(salidas_list, 50) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    # ---------------------------------
     
     skus_usados_global = obtener_todos_los_skus_usados()
     ingresos_db = IngresoPercheron.objects.exclude(sku__isnull=True).exclude(sku__exact='').exclude(sku__in=skus_usados_global)
