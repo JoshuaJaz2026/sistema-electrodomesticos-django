@@ -1,11 +1,11 @@
 {% extends 'inventario/dashboard_global.html' %}
 
 {% block content %}
-<div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem; width: 100%; height: 100%;">
+<div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem; width: 100%;">
     
-    <div class="card" style="border-top: 4px solid #3b82f6; padding: 10px 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: flex; flex-direction: column; flex: 1; min-height: 0;">
+    <div class="card" style="border-top: 4px solid #3b82f6; padding: 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
         
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; flex-shrink: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
             <h3 style="margin: 0; color: #1e293b; text-transform: uppercase; display: flex; align-items: center; gap: 8px; font-size: 1.1rem;">
                 <i class="fas fa-exclamation-circle" style="color: #3b82f6;"></i> Requerimientos y Alertas
             </h3>
@@ -19,11 +19,11 @@
             </div>
         </div>
 
-        <div style="overflow-x: auto; overflow-y: auto; border: 2px solid #cbd5e1; border-radius: 4px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); flex-grow: 1; min-height: 0;">
+        <div style="overflow-x: auto; border: 2px solid #cbd5e1; border-radius: 4px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
             <table id="tablaRequerimientos" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.75rem; white-space: nowrap; table-layout: fixed;">
                 <thead style="position: sticky; top: 0; z-index: 10;">
                     <!-- PRIMERA FILA: AGRUPACIONES -->
-                    <tr style="font-weight: 900; font-size: 0.85rem; text-align: center; text-transform: uppercase; letter-spacing: 1px;">
+                    <tr style="font-weight: 900; font-size: 0.8rem; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">
                         <th colspan="8" style="background-color: #f8fafc; color: #1e293b; padding: 8px; border: 1px solid #cbd5e1; font-style: italic;">
                             DATOS QUE DEBE COMPLETAR EL <span style="color: #2563eb;">SOLICITANTE</span>
                         </th>
@@ -31,25 +31,25 @@
                             RESPUESTA DEL ÁREA DE <span style="color: #dc2626;">COMPRAS</span>
                         </th>
                     </tr>
-                    <!-- SEGUNDA FILA: COLUMNAS INDIVIDUALES -->
+                    <!-- SEGUNDA FILA: COLUMNAS INDIVIDUALES CON ANCHOS FIJOS -->
                     <tr style="background-color: #f1f5f9; color: #334155; font-weight: 800; text-align: center; font-size: 0.65rem;">
-                        <th class="th-req" style="width: 6%;">AÑO - MES</th>
-                        <th class="th-req" style="width: 8%;">FECHA DE SOLICITUD</th>
-                        <th class="th-req" style="width: 10%;">SOLICITADO POR:</th>
-                        <th class="th-req" style="width: 5%;">CANT.</th>
-                        <th class="th-req" style="width: 20%; white-space: normal;">NOMBRE Y MODELO DEL PRODUCTO SOLICITADO <span style="color: #dc2626;">(ESPECIFICACIONES COMPLETAS)</span></th>
-                        <th class="th-req" style="width: 20%; white-space: normal;">OBSERVACIONES <span style="color: #2563eb;">(PROVEEDOR, PRECIO</span> <span style="color: #dc2626;">(MEJOR PRECIO)</span><span style="color: #2563eb;">, DETALLES ADICIONALES DE ENTREGA)</span></th>
-                        <th class="th-req" style="width: 12%;">PLATAFORMA / CONCEPTO</th>
-                        <th class="th-req" style="width: 8%;">FECHA DE ENTREGA</th>
+                        <th class="th-req" style="width: 7%;">AÑO - MES</th>
+                        <th class="th-req" style="width: 8%;">FECHA SOLICITUD</th>
+                        <th class="th-req" style="width: 9%;">SOLICITADO POR</th>
+                        <th class="th-req" style="width: 4%;">CANT</th>
+                        <th class="th-req" style="width: 18%; white-space: normal;">PRODUCTO SOLICITADO</th>
+                        <th class="th-req" style="width: 20%; white-space: normal;">OBSERVACIONES / PRECIO</th>
+                        <th class="th-req" style="width: 10%;">PLATAFORMA</th>
+                        <th class="th-req" style="width: 8%;">ENTREGA</th>
                         
-                        <th class="th-compras" style="width: 20%; background-color: #fefce8;">COMENTARIOS DEL ÁREA DE COMPRAS</th>
-                        <th class="th-compras" style="width: 6%; background-color: #fefce8;">COMPRA REALIZADA (✓)</th>
-                        <th class="th-compras" style="width: 5%; background-color: #fefce8;">AGOTADO (✓)</th>
+                        <th class="th-compras" style="width: 12%; background-color: #fefce8; white-space: normal;">COMENTARIOS COMPRAS</th>
+                        <th class="th-compras" style="width: 4%; background-color: #fefce8; white-space: normal;">COMPRADO</th>
+                        <th class="th-compras" style="width: 4%; background-color: #fefce8; white-space: normal;">AGOTADO</th>
                     </tr>
                 </thead>
                 <tbody id="cuerpoRequerimientos">
                     
-                    <!-- Fila de ejemplo (Diseño base) -->
+                    <!-- Fila de ejemplo con diseño ajustado -->
                     <tr class="fila-req">
                         <td class="td-req"><input type="text" readonly class="input-req central" value="2026-07" style="color: #2563eb; font-weight: bold; font-family: monospace;"></td>
                         <td class="td-req"><input type="date" class="input-req central val-fecha" value="2026-07-02"></td>
@@ -61,8 +61,8 @@
                             </select>
                         </td>
                         <td class="td-req"><input type="number" class="input-req central val-cant" value="1" style="color: #2563eb; font-weight: bold;"></td>
-                        <td class="td-req"><input type="text" class="input-req val-producto" value="Ventilador Industrial DAJU 30 2 en 1..." style="font-style: italic; color: #0369a1;"></td>
-                        <td class="td-req"><input type="text" class="input-req val-observaciones" value="TREVELY S/350.00 - A SOLICITADO HACER EL PAGO EN EFECTIVO" style="font-style: italic; color: #0369a1;"></td>
+                        <td class="td-req"><input type="text" class="input-req val-producto" value="Ventilador Industrial DAJU 30..." style="font-style: italic; color: #0369a1;"></td>
+                        <td class="td-req"><input type="text" class="input-req val-observaciones" value="TREVELY S/350.00 - PAGO EFECTIVO" style="font-style: italic; color: #0369a1;"></td>
                         <td class="td-req">
                             <select class="input-req central val-plataforma" style="font-weight: bold; color: #065f46; background-color: #d1fae5;">
                                 <option value="FALABELLA" selected>FALABELLA</option>
@@ -74,7 +74,7 @@
                         <td class="td-req"><input type="date" class="input-req central val-fecha-entrega" value="2026-07-02"></td>
                         
                         <!-- SECCIÓN COMPRAS -->
-                        <td class="td-req" style="background-color: #fefce8;"><input type="text" class="input-req val-comentarios" value="Se compró a Trevely a S/350, nos indica que es el último." style="font-style: italic; color: #0369a1;"></td>
+                        <td class="td-req" style="background-color: #fefce8;"><input type="text" class="input-req val-comentarios" value="Se compró a Trevely a S/350." style="font-style: italic; color: #0369a1;"></td>
                         <td class="td-req central" style="background-color: #fefce8;"><input type="checkbox" class="check-req val-comprado" checked></td>
                         <td class="td-req central" style="background-color: #fefce8;"><input type="checkbox" class="check-req val-agotado"></td>
                     </tr>
@@ -91,33 +91,28 @@
 
     table { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-collapse: collapse; }
     
-    .th-req { padding: 4px; border: 1px solid #cbd5e1; vertical-align: middle; }
-    .th-compras { padding: 4px; border: 1px solid #fde047; vertical-align: middle; border-bottom: 1px solid #cbd5e1; }
+    .th-req { padding: 6px 4px; border: 1px solid #cbd5e1; vertical-align: middle; }
+    .th-compras { padding: 6px 4px; border: 1px solid #fde047; vertical-align: middle; border-bottom: 1px solid #cbd5e1; }
     
     .td-req { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; }
     
-    /* Colores alternados tipo Excel para la sección del solicitante (celeste claro y blanco) */
     .fila-req:nth-child(even) { background-color: #e0f2fe; }
     .fila-req:nth-child(odd) { background-color: #ffffff; }
     .fila-req:hover { filter: brightness(0.95); }
 
-    /* Inputs invisibles que llenan la celda */
     .input-req { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 6px 4px; font-family: inherit; font-size: 11px; background-color: transparent; outline: none; }
     .input-req:focus { background-color: #fef9c3; box-shadow: inset 0 0 0 2px #3b82f6; color: #000; }
     
     .central { text-align: center; }
-    
-    /* Checkboxes personalizados para hacerlos más grandes */
-    .check-req { width: 18px; height: 18px; cursor: pointer; accent-color: #3b82f6; }
+    .check-req { width: 16px; height: 16px; cursor: pointer; accent-color: #3b82f6; }
 </style>
 
 <script>
-    // Aquí pondremos la lógica de agregar fila y guardar en el siguiente paso
     function agregarFilaRequerimiento() {
-        alert("¡Botón funcionando! Próximamente agregará una fila en blanco.");
+        alert("¡Botón funcionando!");
     }
     function procesarRequerimientos() {
-        alert("¡Botón funcionando! Próximamente guardará los datos.");
+        alert("¡Guardando cambios!");
     }
 </script>
 {% endblock %}
