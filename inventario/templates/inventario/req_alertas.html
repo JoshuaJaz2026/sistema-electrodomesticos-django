@@ -33,18 +33,18 @@
                     </tr>
                     <!-- SEGUNDA FILA: COLUMNAS INDIVIDUALES CON ANCHOS FIJOS -->
                     <tr style="background-color: #f1f5f9; color: #334155; font-weight: 800; text-align: center; font-size: 0.65rem;">
-                        <th class="th-req" style="width: 7%;">AÑO - MES</th>
-                        <th class="th-req" style="width: 8%;">FECHA SOLICITUD</th>
-                        <th class="th-req" style="width: 9%;">SOLICITADO POR</th>
-                        <th class="th-req" style="width: 4%;">CANT</th>
-                        <th class="th-req" style="width: 18%; white-space: normal;">PRODUCTO SOLICITADO</th>
-                        <th class="th-req" style="width: 20%; white-space: normal;">OBSERVACIONES / PRECIO</th>
-                        <th class="th-req" style="width: 10%;">PLATAFORMA</th>
-                        <th class="th-req" style="width: 8%;">ENTREGA</th>
+                        <th class="th-req" style="width: 6%;">AÑO - MES</th>
+                        <th class="th-req" style="width: 7%;">FECHA DE SOLICITUD</th>
+                        <th class="th-req" style="width: 8%;">SOLICITADO POR:</th>
+                        <th class="th-req" style="width: 3%;">CANT.</th>
+                        <th class="th-req" style="width: 24%; white-space: normal;">NOMBRE Y MODELO DEL PRODUCTO SOLICITADO <br><span style="color: #dc2626;">(ESPECIFICACIONES COMPLETAS)</span></th>
+                        <th class="th-req" style="width: 21%; white-space: normal;">OBSERVACIONES <span style="color: #2563eb;">(PROVEEDOR, PRECIO</span> <span style="color: #dc2626;">(MEJOR PRECIO)</span><span style="color: #2563eb;">, DETALLES ADICIONALES DE ENTREGA)</span></th>
+                        <th class="th-req" style="width: 8%;">PLATAFORMA / CONCEPTO</th>
+                        <th class="th-req" style="width: 6%;">FECHA DE ENTREGA</th>
                         
-                        <th class="th-compras" style="width: 12%; background-color: #fefce8; white-space: normal;">COMENTARIOS COMPRAS</th>
-                        <th class="th-compras" style="width: 4%; background-color: #fefce8; white-space: normal;">COMPRADO</th>
-                        <th class="th-compras" style="width: 4%; background-color: #fefce8; white-space: normal;">AGOTADO</th>
+                        <th class="th-compras" style="width: 13%; background-color: #fefce8; white-space: normal;">COMENTARIOS DEL ÁREA DE COMPRAS</th>
+                        <th class="th-compras" style="width: 2%; background-color: #fefce8; white-space: normal; color: #0369a1;">COMPRA REALIZADA (✓)</th>
+                        <th class="th-compras" style="width: 2%; background-color: #fefce8; white-space: normal; color: #dc2626;">AGOTADO (✓)</th>
                     </tr>
                 </thead>
                 <tbody id="cuerpoRequerimientos">
@@ -77,8 +77,6 @@
                                 <option value="XIOMARA">XIOMARA</option>
                                 <option value="ADAMARI">ADAMARI</option>
                                 <option value="PABLO">PABLO</option>
-                                
-
                             </select>
                         </td>
                         
@@ -140,7 +138,7 @@
                         
                         <!-- CHECK: AGOTADO -->
                         <td class="td-req central" style="background-color: #fefce8;">
-                            <input type="checkbox" class="check-req val-agotado">
+                            <input type="checkbox" class="check-req check-red val-agotado">
                         </td>
                     </tr>
 
@@ -169,7 +167,9 @@
     .input-req:focus { background-color: #fef9c3; box-shadow: inset 0 0 0 2px #3b82f6; color: #000; }
     
     .central { text-align: center; }
-    .check-req { width: 16px; height: 16px; cursor: pointer; accent-color: #3b82f6; }
+    
+    .check-req { width: 16px; height: 16px; cursor: pointer; accent-color: #3b82f6; margin: 0 auto; display: block; }
+    .check-red { accent-color: #dc2626; }
 
     /* Estilo para los combos box bonitos */
     .select-bonito { 
