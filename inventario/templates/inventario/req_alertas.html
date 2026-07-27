@@ -49,34 +49,92 @@
                 </thead>
                 <tbody id="cuerpoRequerimientos">
                     
-                    <!-- Fila de ejemplo con diseño ajustado -->
+                    <!-- Fila de ejemplo 1 (Molde) -->
                     <tr class="fila-req">
-                        <td class="td-req"><input type="text" readonly class="input-req central" value="2026-07" style="color: #2563eb; font-weight: bold; font-family: monospace;"></td>
-                        <td class="td-req"><input type="date" class="input-req central val-fecha" value="2026-07-02"></td>
+                        <!-- AÑO-MES (Bloqueado) -->
                         <td class="td-req">
-                            <select class="input-req central val-solicitante" style="font-weight: bold; color: #b45309; background-color: #fef3c7;">
-                                <option value="ALDO" selected>ALDO</option>
+                            <input type="text" readonly class="input-req central val-anomes" tabindex="-1" placeholder="YYYY-MM" style="color: #2563eb; font-weight: bold; font-family: monospace; cursor: not-allowed;">
+                        </td>
+                        
+                        <!-- FECHA SOLICITUD (Con disparador JS) -->
+                        <td class="td-req">
+                            <input type="date" class="input-req central val-fecha" onchange="actualizarAnoMes(this)">
+                        </td>
+                        
+                        <!-- SOLICITADO POR -->
+                        <td class="td-req">
+                            <select class="input-req central val-solicitante select-bonito" style="font-weight: bold; color: #b45309; background-color: transparent;">
+                                <option value="" disabled selected>-- SELECCIONA --</option>
+                                <option value="ALDO">ALDO</option>
                                 <option value="ADAMARI">ADAMARI</option>
                                 <option value="DENISE">DENISE</option>
+                                <option value="JOSHUA">JOSHUA</option>
+                                <option value="PABLO">PABLO</option>
+                                <option value="CARLOS">CARLOS</option>
+                                <option value="MILAGROS">MILAGROS</option>
                             </select>
                         </td>
-                        <td class="td-req"><input type="number" class="input-req central val-cant" value="1" style="color: #2563eb; font-weight: bold;"></td>
-                        <td class="td-req"><input type="text" class="input-req val-producto" value="Ventilador Industrial DAJU 30..." style="font-style: italic; color: #0369a1;"></td>
-                        <td class="td-req"><input type="text" class="input-req val-observaciones" value="TREVELY S/350.00 - PAGO EFECTIVO" style="font-style: italic; color: #0369a1;"></td>
-                        <td class="td-req">
-                            <select class="input-req central val-plataforma" style="font-weight: bold; color: #065f46; background-color: #d1fae5;">
-                                <option value="FALABELLA" selected>FALABELLA</option>
-                                <option value="VENTA LIBRE">VENTA LIBRE</option>
-                                <option value="URBANO">URBANO</option>
-                                <option value="OPORTUNIDAD">OPORTUNIDAD</option>
-                            </select>
-                        </td>
-                        <td class="td-req"><input type="date" class="input-req central val-fecha-entrega" value="2026-07-02"></td>
                         
-                        <!-- SECCIÓN COMPRAS -->
-                        <td class="td-req" style="background-color: #fefce8;"><input type="text" class="input-req val-comentarios" value="Se compró a Trevely a S/350." style="font-style: italic; color: #0369a1;"></td>
-                        <td class="td-req central" style="background-color: #fefce8;"><input type="checkbox" class="check-req val-comprado" checked></td>
-                        <td class="td-req central" style="background-color: #fefce8;"><input type="checkbox" class="check-req val-agotado"></td>
+                        <!-- CANTIDAD -->
+                        <td class="td-req">
+                            <input type="number" class="input-req central val-cant" value="1" min="1" style="color: #2563eb; font-weight: bold;">
+                        </td>
+                        
+                        <!-- PRODUCTO SOLICITADO -->
+                        <td class="td-req">
+                            <input type="text" class="input-req val-producto" placeholder="Escribe el producto..." style="color: #0f172a; font-weight: 600;">
+                        </td>
+                        
+                        <!-- OBSERVACIONES -->
+                        <td class="td-req">
+                            <input type="text" class="input-req val-observaciones" placeholder="Proveedor, mejor precio..." style="color: #475569;">
+                        </td>
+                        
+                        <!-- PLATAFORMA / CONCEPTO -->
+                        <td class="td-req">
+                            <select class="input-req central val-plataforma select-bonito" style="font-weight: bold; color: #065f46; background-color: transparent;">
+                                <option value="" disabled selected>-- SELECCIONA --</option>
+                                <option value="MERCADO LIBRE (ACUERDO)">MERCADO LIBRE (ACUERDO)</option>
+                                <option value="FALABELLA">FALABELLA</option>
+                                <option value="VENTA LIBRE">VENTA LIBRE</option>
+                                <option value="SE DESPACHÓ EL ÚLTIMO">SE DESPACHÓ EL ÚLTIMO</option>
+                                <option value="QUEDA 1">QUEDA 1</option>
+                                <option value="TIK TOK">TIK TOK</option>
+                                <option value="CREDITIENDA">CREDITIENDA</option>
+                                <option value="INTERCORP">INTERCORP</option>
+                                <option value="POCAS UNIDADES">POCAS UNIDADES</option>
+                                <option value="URBANO">URBANO</option>
+                                <option value="FLEX">FLEX</option>
+                                <option value="PARA DESPACHAR EN ALMACÉN SJL">PARA DESPACHAR EN ALMACÉN SJL</option>
+                                <option value="PARA DESPACHAR EN AGENCIA">PARA DESPACHAR EN AGENCIA</option>
+                                <option value="CONTRA ENTREGA">CONTRA ENTREGA</option>
+                                <option value="LLEGO A INCHE">LLEGO A INCHE</option>
+                                <option value="AGOTADO">AGOTADO</option>
+                                <option value="OPORTUNIDAD">OPORTUNIDAD</option>
+                                <option value="FALTA EXHIBICIÓN">FALTA EXHIBICIÓN</option>
+                                <option value="SIN STOCK EN PERCHERON">SIN STOCK EN PERCHERON</option>
+                            </select>
+                        </td>
+                        
+                        <!-- FECHA DE ENTREGA -->
+                        <td class="td-req">
+                            <input type="date" class="input-req central val-fecha-entrega">
+                        </td>
+                        
+                        <!-- COMENTARIOS ÁREA DE COMPRAS -->
+                        <td class="td-req" style="background-color: #fefce8;">
+                            <input type="text" class="input-req val-comentarios" placeholder="Comentarios de compra..." style="color: #9a3412;">
+                        </td>
+                        
+                        <!-- CHECK: COMPRADO -->
+                        <td class="td-req central" style="background-color: #fefce8;">
+                            <input type="checkbox" class="check-req val-comprado">
+                        </td>
+                        
+                        <!-- CHECK: AGOTADO -->
+                        <td class="td-req central" style="background-color: #fefce8;">
+                            <input type="checkbox" class="check-req val-agotado">
+                        </td>
                     </tr>
 
                 </tbody>
@@ -96,7 +154,7 @@
     
     .td-req { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; }
     
-    .fila-req:nth-child(even) { background-color: #e0f2fe; }
+    .fila-req:nth-child(even) { background-color: #f8fafc; }
     .fila-req:nth-child(odd) { background-color: #ffffff; }
     .fila-req:hover { filter: brightness(0.95); }
 
@@ -105,12 +163,39 @@
     
     .central { text-align: center; }
     .check-req { width: 16px; height: 16px; cursor: pointer; accent-color: #3b82f6; }
+
+    /* Estilo para los combos box bonitos */
+    .select-bonito { 
+        cursor: pointer; 
+        appearance: none; 
+        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); 
+        background-repeat: no-repeat; 
+        background-position: right 5px top 50%; 
+        background-size: 8px auto; 
+        padding-right: 15px; 
+    }
 </style>
 
 <script>
-    function agregarFilaRequerimiento() {
-        alert("¡Botón funcionando!");
+    // FÓRMULA AUTOMÁTICA =TEXTO("YYYY-MM")
+    function actualizarAnoMes(inputFecha) {
+        const fila = inputFecha.closest('tr');
+        const inputAnoMes = fila.querySelector('.val-anomes');
+        const fechaElegida = inputFecha.value; 
+        
+        if (fechaElegida) {
+            // Extrae solo el año y el mes de la fecha (Ej: 2026-07)
+            const partes = fechaElegida.split('-');
+            inputAnoMes.value = `${partes[0]}-${partes[1]}`;
+        } else {
+            inputAnoMes.value = '';
+        }
     }
+
+    function agregarFilaRequerimiento() {
+        alert("¡Botón funcionando! Próximamente agregará una fila en blanco.");
+    }
+    
     function procesarRequerimientos() {
         alert("¡Guardando cambios!");
     }
