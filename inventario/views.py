@@ -4524,3 +4524,32 @@ def referencia_costos_web_view(request):
         'canal': request.session.get('canal_activo', 'Mercado Libre'),
     }
     return render(request, 'inventario/referencia_costos.html', context)
+
+@login_required
+def guardar_requerimientos_alertas(request):
+    from .models import RequerimientoAlerta
+    if request.method == 'POST':
+        try:
+            datos = json.loads(request.body)
+            
+            # Como funciona igual que Excel, borramos el historial anterior 
+            # y guardamos exactamente lo que el usuario tiene en pantalla
+            RequerimientoAlerta.objects.all().delete()
+            
+            for fila in datos:
+                RequerimientoAlerta.objects.create(
+                    fecha_solicitud=fila.get('fecha_solicitud') or None,
+                    solicitado_por=fila.get('solicitado_por'),
+                    cantidad=fila.get('cantidad') or 1,
+                    producto_solicitado=fila.get('producto_solicitado'),
+                    observaciones=fila.get('observaciones'),
+                    plataforma_concepto=fila.get('plataforma_concepto'),
+                    fecha_entrega=fila.get('fecha_entrega') or None,
+                    comentarios_compras=fila.get('comentarios_compras'),
+                    compra_realizada=fila.get('compra_realizada', False),
+                    agotado=fila.get('agotado', False)
+                )
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Método no válido'})

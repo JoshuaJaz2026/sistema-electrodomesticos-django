@@ -172,4 +172,5 @@ urlpatterns = [
     path('requerimientos/alertas/', views.requerimientos_alertas_view, name='req_alertas'),
     path('requerimientos/observaciones-web/', views.req_observaciones_web_view, name='req_observaciones_web'),
     path('requerimientos/pagina-web/', views.req_pagina_web_view, name='req_pagina_web'),
+    path('requerimientos/alertas/guardar/', views.guardar_requerimientos_alertas, name='guardar_requerimientos_alertas'),
 ]
