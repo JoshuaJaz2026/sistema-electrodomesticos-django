@@ -4553,3 +4553,28 @@ def guardar_requerimientos_alertas(request):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'error', 'message': 'Método no válido'})
+
+@login_required
+def guardar_observaciones_web(request):
+    from .models import ObservacionWeb
+    if request.method == 'POST':
+        try:
+            datos = json.loads(request.body)
+            
+            # Borra lo anterior y sobrescribe (para que funcione igual que un Excel)
+            ObservacionWeb.objects.all().delete()
+            
+            for fila in datos:
+                ObservacionWeb.objects.create(
+                    fecha_reporte=fila.get('fecha_reporte') or None,
+                    asesor=fila.get('asesor'),
+                    tipo_observacion=fila.get('tipo_observacion'),
+                    comentarios=fila.get('comentarios'),
+                    modelo=fila.get('modelo'),
+                    link=fila.get('link'),
+                    corregido=fila.get('corregido', False)
+                )
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Método no válido'})
