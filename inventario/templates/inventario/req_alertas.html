@@ -22,23 +22,21 @@
         <div style="overflow-x: auto; border: 2px solid #cbd5e1; border-radius: 4px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
             <table id="tablaRequerimientos" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.75rem; table-layout: fixed;">
                 
-                <!-- FORZANDO LOS ANCHOS MILIMÉTRICAMENTE -->
                 <colgroup>
-                    <col style="width: 5%;">  <!-- AÑO MES -->
-                    <col style="width: 6%;">  <!-- FECHA SOL -->
-                    <col style="width: 7%;">  <!-- SOLICITADO POR -->
-                    <col style="width: 3%;">  <!-- CANT -->
-                    <col style="width: 25%;"> <!-- PRODUCTO -->
-                    <col style="width: 21%;"> <!-- OBSERVACIONES -->
-                    <col style="width: 10%;"> <!-- PLATAFORMA -->
-                    <col style="width: 6%;">  <!-- FECHA ENT -->
-                    <col style="width: 11%;"> <!-- COMENTARIOS COMPRAS -->
-                    <col style="width: 3%;">  <!-- COMPRA REALIZADA -->
-                    <col style="width: 3%;">  <!-- AGOTADO -->
+                    <col style="width: 5%;">  
+                    <col style="width: 6%;">  
+                    <col style="width: 7%;">  
+                    <col style="width: 3%;">  
+                    <col style="width: 25%;"> 
+                    <col style="width: 21%;"> 
+                    <col style="width: 10%;"> 
+                    <col style="width: 6%;">  
+                    <col style="width: 11%;"> 
+                    <col style="width: 3%;">  
+                    <col style="width: 3%;">  
                 </colgroup>
 
                 <thead style="position: sticky; top: 0; z-index: 10;">
-                    <!-- PRIMERA FILA: AGRUPACIONES -->
                     <tr style="font-weight: 900; font-size: 0.8rem; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">
                         <th colspan="8" style="background-color: #f8fafc; color: #1e293b; padding: 8px; border: 1px solid #cbd5e1; font-style: italic;">
                             DATOS QUE DEBE COMPLETAR EL <span style="color: #2563eb;">SOLICITANTE</span>
@@ -47,7 +45,6 @@
                             RESPUESTA DEL ÁREA DE <span style="color: #dc2626;">COMPRAS</span>
                         </th>
                     </tr>
-                    <!-- SEGUNDA FILA: COLUMNAS -->
                     <tr style="background-color: #f1f5f9; color: #334155; font-weight: 800; text-align: center; font-size: 0.65rem;">
                         <th class="th-req">AÑO - MES</th>
                         <th class="th-req">FECHA DE SOLICITUD</th>
@@ -65,21 +62,17 @@
                 </thead>
                 <tbody id="cuerpoRequerimientos">
                     
-                    <!-- Fila de ejemplo 1 (Molde) -->
-                    <tr class="fila-req">
-                        <!-- AÑO-MES (Bloqueado) -->
+                    {% for req in requerimientos %}
+                    <!-- FILAS CARGADAS DESDE LA BASE DE DATOS -->
+                    <tr class="fila-req {% if req.compra_realizada %}fila-comprada{% elif req.agotado %}fila-agotada{% endif %}">
                         <td class="td-req">
-                            <input type="text" readonly class="input-req central val-anomes" tabindex="-1" placeholder="YYYY-MM" style="color: #2563eb; font-weight: bold; font-family: monospace; cursor: not-allowed;">
+                            <input type="text" readonly class="input-req central val-anomes" tabindex="-1" value="{{ req.fecha_solicitud|date:'Y-m' }}" placeholder="YYYY-MM" style="color: #2563eb; font-weight: bold; font-family: monospace; cursor: not-allowed;">
                         </td>
-                        
-                        <!-- FECHA SOLICITUD -->
                         <td class="td-req">
-                            <input type="date" class="input-req central val-fecha" onchange="actualizarAnoMes(this)">
+                            <input type="date" class="input-req central val-fecha" value="{{ req.fecha_solicitud|date:'Y-m-d' }}" onchange="actualizarAnoMes(this)" style="padding: 2px;">
                         </td>
-                        
-                        <!-- SOLICITADO POR -->
                         <td class="td-req">
-                            <select class="input-req central val-solicitante select-bonito" style="font-weight: bold; color: #b45309; background-color: transparent;">
+                            <select class="input-req central val-solicitante select-bonito" data-selected="{{ req.solicitado_por|default_if_none:'' }}" style="font-weight: bold; color: #b45309; background-color: transparent;">
                                 <option value="" disabled selected>-- SELECCIONA --</option>
                                 <option value="DAVID">DAVID</option>
                                 <option value="LUIS">LUIS</option>
@@ -95,25 +88,17 @@
                                 <option value="PABLO">PABLO</option>
                             </select>
                         </td>
-                        
-                        <!-- CANTIDAD -->
                         <td class="td-req">
-                            <input type="number" class="input-req central val-cant" value="1" min="1" style="color: #2563eb; font-weight: bold;">
+                            <input type="number" class="input-req central val-cant" value="{{ req.cantidad }}" min="1" style="color: #2563eb; font-weight: bold;">
                         </td>
-                        
-                        <!-- PRODUCTO SOLICITADO -->
                         <td class="td-req">
-                            <input type="text" class="input-req val-producto" placeholder="Escribe el producto..." style="color: #0f172a; font-weight: 600;">
+                            <input type="text" class="input-req val-producto" value="{{ req.producto_solicitado|default_if_none:'' }}" placeholder="Escribe el producto..." style="color: #0f172a; font-weight: 600;">
                         </td>
-                        
-                        <!-- OBSERVACIONES -->
                         <td class="td-req">
-                            <input type="text" class="input-req val-observaciones" placeholder="Proveedor, mejor precio..." style="color: #475569;">
+                            <input type="text" class="input-req val-observaciones" value="{{ req.observaciones|default_if_none:'' }}" placeholder="Proveedor, mejor precio..." style="color: #475569;">
                         </td>
-                        
-                        <!-- PLATAFORMA / CONCEPTO -->
                         <td class="td-req">
-                            <select class="input-req central val-plataforma select-bonito" style="font-weight: bold; color: #065f46; background-color: transparent;">
+                            <select class="input-req central val-plataforma select-bonito" data-selected="{{ req.plataforma_concepto|default_if_none:'' }}" style="font-weight: bold; color: #065f46; background-color: transparent;">
                                 <option value="" disabled selected>-- SELECCIONA --</option>
                                 <option value="MERCADO LIBRE (ACUERDO)">MERCADO LIBRE (ACUERDO)</option>
                                 <option value="FALABELLA">FALABELLA</option>
@@ -136,27 +121,74 @@
                                 <option value="SIN STOCK EN PERCHERON">SIN STOCK EN PERCHERON</option>
                             </select>
                         </td>
-                        
-                        <!-- FECHA DE ENTREGA -->
                         <td class="td-req">
-                            <input type="date" class="input-req central val-fecha-entrega">
+                            <input type="date" class="input-req central val-fecha-entrega" value="{{ req.fecha_entrega|date:'Y-m-d' }}" style="padding: 2px;">
                         </td>
-                        
-                        <!-- COMENTARIOS ÁREA DE COMPRAS -->
                         <td class="td-req" style="background-color: #fefce8;">
-                            <input type="text" class="input-req val-comentarios" placeholder="Comentarios de compra..." style="color: #9a3412;">
+                            <input type="text" class="input-req val-comentarios" value="{{ req.comentarios_compras|default_if_none:'' }}" placeholder="Comentarios de compra..." style="color: #9a3412;">
                         </td>
-                        
-                        <!-- CHECK: COMPRADO -->
                         <td class="td-req central" style="background-color: #fefce8;">
-                            <input type="checkbox" class="check-req val-comprado" onchange="verificarChecks(this)">
+                            <input type="checkbox" class="check-req val-comprado" {% if req.compra_realizada %}checked{% endif %} onchange="verificarChecks(this)">
                         </td>
-                        
-                        <!-- CHECK: AGOTADO -->
                         <td class="td-req central" style="background-color: #fefce8;">
-                            <input type="checkbox" class="check-req check-red val-agotado" onchange="verificarChecks(this)">
+                            <input type="checkbox" class="check-req check-red val-agotado" {% if req.agotado %}checked{% endif %} onchange="verificarChecks(this)">
                         </td>
                     </tr>
+                    {% empty %}
+                    
+                    <!-- FILA MOLDE POR DEFECTO (Si la base de datos está vacía) -->
+                    <tr class="fila-req">
+                        <td class="td-req"><input type="text" readonly class="input-req central val-anomes" tabindex="-1" placeholder="YYYY-MM" style="color: #2563eb; font-weight: bold; font-family: monospace; cursor: not-allowed;"></td>
+                        <td class="td-req"><input type="date" class="input-req central val-fecha" onchange="actualizarAnoMes(this)" style="padding: 2px;"></td>
+                        <td class="td-req">
+                            <select class="input-req central val-solicitante select-bonito" style="font-weight: bold; color: #b45309; background-color: transparent;">
+                                <option value="" disabled selected>-- SELECCIONA --</option>
+                                <option value="DAVID">DAVID</option>
+                                <option value="LUIS">LUIS</option>
+                                <option value="JNK*2">JNK*2</option>
+                                <option value="BELÉN">BELÉN</option>
+                                <option value="MILAGROS">MILAGROS</option>
+                                <option value="ALDO">ALDO</option>
+                                <option value="DENISE">DENISE</option>
+                                <option value="JOSHUA">JOSHUA</option>
+                                <option value="ALEX">ALEX</option>
+                                <option value="XIOMARA">XIOMARA</option>
+                                <option value="ADAMARI">ADAMARI</option>
+                                <option value="PABLO">PABLO</option>
+                            </select>
+                        </td>
+                        <td class="td-req"><input type="number" class="input-req central val-cant" value="1" min="1" style="color: #2563eb; font-weight: bold;"></td>
+                        <td class="td-req"><input type="text" class="input-req val-producto" placeholder="Escribe el producto..." style="color: #0f172a; font-weight: 600;"></td>
+                        <td class="td-req"><input type="text" class="input-req val-observaciones" placeholder="Proveedor, mejor precio..." style="color: #475569;"></td>
+                        <td class="td-req">
+                            <select class="input-req central val-plataforma select-bonito" style="font-weight: bold; color: #065f46; background-color: transparent;">
+                                <option value="" disabled selected>-- SELECCIONA --</option>
+                                <option value="MERCADO LIBRE (ACUERDO)">MERCADO LIBRE (ACUERDO)</option>
+                                <option value="FALABELLA">FALABELLA</option>
+                                <option value="VENTA LIBRE">VENTA LIBRE</option>
+                                <option value="SE DESPACHÓ EL ÚLTIMO">SE DESPACHÓ EL ÚLTIMO</option>
+                                <option value="QUEDA 1">QUEDA 1</option>
+                                <option value="TIK TOK">TIK TOK</option>
+                                <option value="CREDITIENDA">CREDITIENDA</option>
+                                <option value="INTERCORP">INTERCORP</option>
+                                <option value="POCAS UNIDADES">POCAS UNIDADES</option>
+                                <option value="URBANO">URBANO</option>
+                                <option value="FLEX">FLEX</option>
+                                <option value="PARA DESPACHAR EN ALMACÉN SJL">PARA DESPACHAR EN AGENCIA</option>
+                                <option value="CONTRA ENTREGA">CONTRA ENTREGA</option>
+                                <option value="LLEGO A INCHE">LLEGO A INCHE</option>
+                                <option value="AGOTADO">AGOTADO</option>
+                                <option value="OPORTUNIDAD">OPORTUNIDAD</option>
+                                <option value="FALTA EXHIBICIÓN">FALTA EXHIBICIÓN</option>
+                                <option value="SIN STOCK EN PERCHERON">SIN STOCK EN PERCHERON</option>
+                            </select>
+                        </td>
+                        <td class="td-req"><input type="date" class="input-req central val-fecha-entrega" style="padding: 2px;"></td>
+                        <td class="td-req" style="background-color: #fefce8;"><input type="text" class="input-req val-comentarios" placeholder="Comentarios de compra..." style="color: #9a3412;"></td>
+                        <td class="td-req central" style="background-color: #fefce8;"><input type="checkbox" class="check-req val-comprado" onchange="verificarChecks(this)"></td>
+                        <td class="td-req central" style="background-color: #fefce8;"><input type="checkbox" class="check-req check-red val-agotado" onchange="verificarChecks(this)"></td>
+                    </tr>
+                    {% endfor %}
 
                 </tbody>
             </table>
@@ -187,7 +219,7 @@
 
     .input-req { 
         width: 100%; 
-        min-width: 0; /* OBLIGA A LOS INPUTS A NO ESTIRAR LA TABLA */
+        min-width: 0; 
         height: 100%; 
         box-sizing: border-box; 
         border: none; 
@@ -220,7 +252,6 @@
         padding-right: 12px; 
     }
     
-    /* Ocultar flechas en los inputs number para ahorrar más espacio */
     .input-req[type=number]::-webkit-inner-spin-button, 
     .input-req[type=number]::-webkit-outer-spin-button { 
         -webkit-appearance: none; 
@@ -230,6 +261,16 @@
 </style>
 
 <script>
+    // Se ejecuta al cargar la página para asignar los valores de los select guardados en la BD
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('select[data-selected]').forEach(select => {
+            const val = select.getAttribute('data-selected');
+            if (val) {
+                select.value = val;
+            }
+        });
+    });
+
     function actualizarAnoMes(inputFecha) {
         const fila = inputFecha.closest('tr');
         const inputAnoMes = fila.querySelector('.val-anomes');
@@ -276,7 +317,11 @@
             nuevaFila.querySelectorAll('input:not([type="checkbox"])').forEach(input => input.value = '');
             nuevaFila.querySelectorAll('input[type="checkbox"]').forEach(check => check.checked = false);
             nuevaFila.classList.remove('fila-comprada', 'fila-agotada');
-            nuevaFila.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+            
+            nuevaFila.querySelectorAll('select').forEach(select => {
+                select.removeAttribute('data-selected');
+                select.selectedIndex = 0;
+            });
             
             const inputCant = nuevaFila.querySelector('.val-cant');
             if (inputCant) inputCant.value = 1;
