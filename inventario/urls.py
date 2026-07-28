@@ -80,8 +80,8 @@ urlpatterns = [
     path('descargar-plantilla-comisiones/', views.descargar_plantilla_comisiones, name='descargar_plantilla_comisiones'),
     path('eliminar-comisiones-masivas/', views.eliminar_comisiones_masivas, name='eliminar_comisiones_masivas'),
 
-    # Rutas para Referencia de Costos
-    path('referencia-costos/', views.referencia_costos, name='referencia_costos'),
+    # Rutas para Referencia de Costos (ACTUALIZADAS PARA WEB)
+    path('referencia-costos/', views.referencia_costos_web_view, name='referencia_costos_web'),
     path('descargar-plantilla-costos/', views.descargar_plantilla_costos, name='descargar_plantilla_costos'),
     path('guardar-costos-masivos/', views.guardar_costos_masivos, name='guardar_costos_masivos'), 
     path('eliminar-costos-masivos/', views.eliminar_costos_masivos, name='eliminar_costos_masivos'),
@@ -113,7 +113,7 @@ urlpatterns = [
     path('api/procesar-salidas-intercorp/', views.procesar_salidas_intercorp, name='procesar_salidas_intercorp'),
     path('api/procesar-salidas-ventalibre/', views.procesar_salidas_ventalibre, name='procesar_salidas_ventalibre'),
     path('api/procesar-salidas-tiktok/', views.procesar_salidas_tiktok, name='procesar_salidas_tiktok'),
-    path('percheron/bci/procesar/', views.procesar_salidas_bci, name='procesar_salidas_bci'), # <--- LA NUEVA RUTA BCI
+    path('percheron/bci/procesar/', views.procesar_salidas_bci, name='procesar_salidas_bci'), 
     path('api/procesar-salidas-web/', views.procesar_salidas_web, name='procesar_salidas_web'),
     
     # Rutas de borrado masivo

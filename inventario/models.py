@@ -818,3 +818,19 @@ class EvaluacionPrecioWeb(models.Model):
 
     def __str__(self):
         return f"{self.modelo} - {self.producto[:20]}"
+
+
+class CostoReferencial(models.Model):
+    modelo = models.CharField(max_length=100, blank=True, null=True, verbose_name="MODELO")
+    producto = models.TextField(blank=True, null=True, verbose_name="PRODUCTO")
+    costo_cero_soles = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="COSTO CERO (S/.)")
+    costo_u_dolares = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="COSTO U. ($)")
+    costo_u_convertido = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="COSTO U. ($ ▶ S/.)")
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'costos_referenciales'
+        ordering = ['-id']
+
+    def __str__(self):
+        return f"{self.modelo} - {self.producto[:20]}"

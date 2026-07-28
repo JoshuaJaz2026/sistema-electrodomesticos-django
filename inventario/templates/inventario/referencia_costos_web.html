@@ -1,0 +1,62 @@
+{% extends 'inventario/dashboard_global.html' %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem; width: 100%;">
+    
+    <div class="card" style="border-top: 4px solid #0284c7; padding: 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+            <h3 style="margin: 0; color: #0f172a; text-transform: uppercase; display: flex; align-items: center; gap: 8px; font-size: 1.1rem;">
+                <i class="fas fa-dollar-sign" style="color: #0284c7;"></i> Costos Referenciales
+            </h3>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button type="button" class="btn-top" style="background-color: #0284c7; color: white;">
+                    <i class="fas fa-plus"></i> Nuevo Costo
+                </button>
+                <button type="button" class="btn-top" style="background-color: #0f172a; color: white;">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+
+        <div style="overflow-x: auto; border: 2px solid #cbd5e1; border-radius: 4px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+            <table style="width: 100%; border-collapse: collapse; background: white; font-size: 0.75rem; white-space: nowrap; table-layout: fixed;">
+                <thead style="position: sticky; top: 0; z-index: 10;">
+                    <tr style="text-align: center; font-size: 0.75rem; font-weight: 800; background-color: #dbeafe; color: #000;">
+                        <th class="th-costo" style="width: 15%;">MODELO</th>
+                        <th class="th-costo" style="width: 40%;">PRODUCTO</th>
+                        <th class="th-costo" style="width: 15%;">COSTO CERO (S/.)</th>
+                        <th class="th-costo" style="width: 15%;">COSTO U. ($)</th>
+                        <th class="th-costo" style="width: 15%;">COSTO U. ($ ▶ S/.)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- FILA MOLDE -->
+                    <tr class="fila-costo">
+                        <td class="td-costo"><input type="text" class="input-costo central" placeholder="Modelo..."></td>
+                        <td class="td-costo"><input type="text" class="input-costo" placeholder="Descripción del producto..."></td>
+                        <td class="td-costo"><input type="number" class="input-costo derecha" placeholder="0.00" style="font-weight: bold;"></td>
+                        <td class="td-costo"><input type="number" class="input-costo derecha" placeholder="0.00" style="font-weight: bold; color: #059669;"></td>
+                        <td class="td-costo"><input type="number" class="input-costo derecha" placeholder="0.00" style="font-weight: bold; color: #2563eb;"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-top { color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s; font-size: 0.8rem;}
+    .btn-top:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .th-costo { padding: 12px 6px; border: 1px solid #93c5fd; vertical-align: middle; }
+    .td-costo { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; }
+    .fila-costo:nth-child(even) { background-color: #f8fafc; }
+    .fila-costo:nth-child(odd) { background-color: #ffffff; }
+    .input-costo { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 6px 8px; font-family: inherit; font-size: 12px; background-color: transparent; outline: none; }
+    .input-costo:focus { background-color: #eff6ff; box-shadow: inset 0 0 0 2px #3b82f6; color: #000; }
+    .central { text-align: center; }
+    .derecha { text-align: right; }
+    .input-costo::-webkit-outer-spin-button, .input-costo::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .input-costo[type=number] { -moz-appearance: textfield; }
+</style>
+{% endblock %}

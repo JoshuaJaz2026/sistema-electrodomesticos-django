@@ -4514,3 +4514,13 @@ def req_pagina_web_view(request):
         'canal': request.session.get('canal_activo', 'Mercado Libre'),
     }
     return render(request, 'inventario/req_pagina_web.html', context)
+
+@login_required
+def referencia_costos_view(request):
+    from .models import CostoReferencial
+    costos = CostoReferencial.objects.all()
+    context = {
+        'costos': costos,
+        'canal': request.session.get('canal_activo', 'Mercado Libre'),
+    }
+    return render(request, 'inventario/referencia_costos.html', context)
