@@ -56,7 +56,7 @@
                             <input type="text" readonly class="input-req central val-anomes" tabindex="-1" placeholder="YYYY-MM" style="color: #2563eb; font-weight: bold; font-family: monospace; cursor: not-allowed;">
                         </td>
                         
-                        <!-- FECHA SOLICITUD (Con disparador JS) -->
+                        <!-- FECHA SOLICITUD -->
                         <td class="td-req">
                             <input type="date" class="input-req central val-fecha" onchange="actualizarAnoMes(this)">
                         </td>
@@ -131,14 +131,14 @@
                             <input type="text" class="input-req val-comentarios" placeholder="Comentarios de compra..." style="color: #9a3412;">
                         </td>
                         
-                        <!-- CHECK: COMPRADO -->
+                        <!-- CHECK: COMPRADO (CON EVENTO ONCHANGE) -->
                         <td class="td-req central" style="background-color: #fefce8;">
-                            <input type="checkbox" class="check-req val-comprado">
+                            <input type="checkbox" class="check-req val-comprado" onchange="verificarChecks(this)">
                         </td>
                         
-                        <!-- CHECK: AGOTADO -->
+                        <!-- CHECK: AGOTADO (CON EVENTO ONCHANGE) -->
                         <td class="td-req central" style="background-color: #fefce8;">
-                            <input type="checkbox" class="check-req check-red val-agotado">
+                            <input type="checkbox" class="check-req check-red val-agotado" onchange="verificarChecks(this)">
                         </td>
                     </tr>
 
@@ -159,6 +159,7 @@
     
     .td-req { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; }
     
+    /* Colores por defecto de las filas */
     .fila-req:nth-child(even) { background-color: #f8fafc; }
     .fila-req:nth-child(odd) { background-color: #ffffff; }
     .fila-req:hover { filter: brightness(0.95); }
@@ -170,6 +171,14 @@
     
     .check-req { width: 16px; height: 16px; cursor: pointer; accent-color: #3b82f6; margin: 0 auto; display: block; }
     .check-red { accent-color: #dc2626; }
+
+    /* ESTILOS DINÁMICOS PARA FILAS MARCADAS COMO COMPRADAS */
+    .fila-comprada td { background-color: #bae6fd !important; } /* Fondo Celeste Claro */
+    .fila-comprada .input-req { color: #0369a1 !important; font-weight: bold; } /* Letras Azul Oscuro */
+    
+    /* ESTILOS DINÁMICOS PARA FILAS MARCADAS COMO AGOTADAS */
+    .fila-agotada td { background-color: #fecaca !important; } /* Fondo Rojo Claro */
+    .fila-agotada .input-req { color: #991b1b !important; font-weight: bold; } /* Letras Rojo Oscuro */
 
     /* Estilo para los combos box bonitos */
     .select-bonito { 
@@ -184,14 +193,13 @@
 </style>
 
 <script>
-    // FÓRMULA AUTOMÁTICA =TEXTO("YYYY-MM")
+    // 1. Extrae el Año-Mes automáticamente
     function actualizarAnoMes(inputFecha) {
         const fila = inputFecha.closest('tr');
         const inputAnoMes = fila.querySelector('.val-anomes');
         const fechaElegida = inputFecha.value; 
         
         if (fechaElegida) {
-            // Extrae solo el año y el mes de la fecha (Ej: 2026-07)
             const partes = fechaElegida.split('-');
             inputAnoMes.value = `${partes[0]}-${partes[1]}`;
         } else {
@@ -199,12 +207,115 @@
         }
     }
 
+    // 2. Lógica para manejar el color de las filas y validar 1 solo Check
+    function verificarChecks(checkboxActivo) {
+        const fila = checkboxActivo.closest('tr');
+        const checkComprado = fila.querySelector('.val-comprado');
+        const checkAgotado = fila.querySelector('.val-agotado');
+
+        // Validamos si el usuario intenta marcar ambos
+        if (checkComprado.checked && checkAgotado.checked) {
+            alert("Solo puedes marcar una opción (Compra Realizada o Agotado).");
+            // Desmarcamos el check que el usuario acaba de presionar
+            checkboxActivo.checked = false; 
+            return; // Salimos de la función sin aplicar colores
+        }
+
+        // Aplicamos las clases CSS dependiendo de cuál check está activo
+        if (checkComprado.checked) {
+            fila.classList.add('fila-comprada');
+            fila.classList.remove('fila-agotada');
+        } else if (checkAgotado.checked) {
+            fila.classList.add('fila-agotada');
+            fila.classList.remove('fila-comprada');
+        } else {
+            // Si el usuario desmarca ambos checks, la fila vuelve a su color normal
+            fila.classList.remove('fila-comprada');
+            fila.classList.remove('fila-agotada');
+        }
+    }
+
+    // 3. Lógica para Agregar una Nueva Fila en blanco
     function agregarFilaRequerimiento() {
-        alert("¡Botón funcionando! Próximamente agregará una fila en blanco.");
+        const tbody = document.getElementById('cuerpoRequerimientos');
+        const primeraFila = tbody.querySelector('.fila-req');
+        
+        if (primeraFila) {
+            const nuevaFila = primeraFila.cloneNode(true);
+            
+            // Limpiamos los inputs
+            nuevaFila.querySelectorAll('input:not([type="checkbox"])').forEach(input => input.value = '');
+            
+            // Desmarcamos los checkboxes
+            nuevaFila.querySelectorAll('input[type="checkbox"]').forEach(check => check.checked = false);
+            
+            // Quitamos cualquier color de fondo que se haya clonado (Celeste o Rojo)
+            nuevaFila.classList.remove('fila-comprada', 'fila-agotada');
+            
+            // Reseteamos selects
+            nuevaFila.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+            
+            // Cantidad en 1
+            const inputCant = nuevaFila.querySelector('.val-cant');
+            if (inputCant) inputCant.value = 1;
+            
+            tbody.appendChild(nuevaFila);
+        } else {
+            alert("No hay una fila base para clonar. Por favor recarga la página.");
+        }
     }
     
+    // 4. Lógica para Recopilar los datos y Guardarlos
     function procesarRequerimientos() {
-        alert("¡Guardando cambios!");
+        const filas = document.querySelectorAll('.fila-req');
+        const datos = [];
+
+        filas.forEach(fila => {
+            const fecha = fila.querySelector('.val-fecha').value;
+            const producto = fila.querySelector('.val-producto').value;
+            
+            if (fecha || producto) {
+                datos.push({
+                    fecha_solicitud: fecha,
+                    solicitado_por: fila.querySelector('.val-solicitante').value,
+                    cantidad: fila.querySelector('.val-cant').value || 1,
+                    producto_solicitado: producto,
+                    observaciones: fila.querySelector('.val-observaciones').value,
+                    plataforma_concepto: fila.querySelector('.val-plataforma').value,
+                    fecha_entrega: fila.querySelector('.val-fecha-entrega').value,
+                    comentarios_compras: fila.querySelector('.val-comentarios').value,
+                    compra_realizada: fila.querySelector('.val-comprado').checked,
+                    agotado: fila.querySelector('.val-agotado').checked
+                });
+            }
+        });
+
+        if (datos.length === 0) {
+            alert("No hay datos llenos para guardar.");
+            return;
+        }
+
+        fetch("{% url 'guardar_requerimientos_alertas' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(datos)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert("¡Requerimientos guardados con éxito!");
+                location.reload(); 
+            } else {
+                alert("Error al guardar: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Hubo un error de conexión con el servidor.");
+        });
     }
 </script>
 {% endblock %}
