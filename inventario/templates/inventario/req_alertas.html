@@ -20,7 +20,7 @@
         </div>
 
         <div style="overflow-x: auto; border: 2px solid #cbd5e1; border-radius: 4px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-            <table id="tablaRequerimientos" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.75rem; white-space: nowrap; table-layout: fixed;">
+            <table id="tablaRequerimientos" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.75rem; table-layout: fixed;">
                 <thead style="position: sticky; top: 0; z-index: 10;">
                     <!-- PRIMERA FILA: AGRUPACIONES -->
                     <tr style="font-weight: 900; font-size: 0.8rem; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">
@@ -31,20 +31,20 @@
                             RESPUESTA DEL ÁREA DE <span style="color: #dc2626;">COMPRAS</span>
                         </th>
                     </tr>
-                    <!-- SEGUNDA FILA: COLUMNAS INDIVIDUALES CON NUEVOS ANCHOS -->
+                    <!-- SEGUNDA FILA: COLUMNAS INDIVIDUALES CON NUEVOS ANCHOS EXTREMOS -->
                     <tr style="background-color: #f1f5f9; color: #334155; font-weight: 800; text-align: center; font-size: 0.65rem;">
-                        <th class="th-req" style="width: 5%;">AÑO - MES</th>
-                        <th class="th-req" style="width: 6%;">FECHA DE SOLICITUD</th>
-                        <th class="th-req" style="width: 6%;">SOLICITADO POR:</th>
-                        <th class="th-req" style="width: 2.5%;">CANT.</th>
-                        <th class="th-req" style="width: 27%; white-space: normal;">NOMBRE Y MODELO DEL PRODUCTO SOLICITADO <br><span style="color: #dc2626;">(ESPECIFICACIONES COMPLETAS)</span></th>
-                        <th class="th-req" style="width: 24%; white-space: normal;">OBSERVACIONES <span style="color: #2563eb;">(PROVEEDOR, PRECIO</span> <span style="color: #dc2626;">(MEJOR PRECIO)</span><span style="color: #2563eb;">, DETALLES ADICIONALES DE ENTREGA)</span></th>
-                        <th class="th-req" style="width: 10.5%;">PLATAFORMA / CONCEPTO</th>
-                        <th class="th-req" style="width: 6%;">FECHA DE ENTREGA</th>
+                        <th class="th-req" style="width: 4%;">AÑO - MES</th>
+                        <th class="th-req" style="width: 5%;">FECHA DE SOLICITUD</th>
+                        <th class="th-req" style="width: 5%;">SOLICITADO POR:</th>
+                        <th class="th-req" style="width: 2%;">CANT.</th>
+                        <th class="th-req" style="width: 28%;">NOMBRE Y MODELO DEL PRODUCTO SOLICITADO <br><span style="color: #dc2626;">(ESPECIFICACIONES COMPLETAS)</span></th>
+                        <th class="th-req" style="width: 23%;">OBSERVACIONES <span style="color: #2563eb;">(PROVEEDOR, PRECIO</span> <span style="color: #dc2626;">(MEJOR PRECIO)</span><span style="color: #2563eb;">, DETALLES ADICIONALES DE ENTREGA)</span></th>
+                        <th class="th-req" style="width: 12%;">PLATAFORMA / CONCEPTO</th>
+                        <th class="th-req" style="width: 5%;">FECHA DE ENTREGA</th>
                         
-                        <th class="th-compras" style="width: 9%; background-color: #fefce8; white-space: normal;">COMENTARIOS DEL ÁREA DE COMPRAS</th>
-                        <th class="th-compras" style="width: 2%; background-color: #fefce8; white-space: normal; color: #0369a1;">COMPRA REALIZADA (✓)</th>
-                        <th class="th-compras" style="width: 2%; background-color: #fefce8; white-space: normal; color: #dc2626;">AGOTADO (✓)</th>
+                        <th class="th-compras" style="width: 12%; background-color: #fefce8;">COMENTARIOS DEL ÁREA DE COMPRAS</th>
+                        <th class="th-compras" style="width: 2%; background-color: #fefce8; color: #0369a1;">COMPRA REALIZADA (✓)</th>
+                        <th class="th-compras" style="width: 2%; background-color: #fefce8; color: #dc2626;">AGOTADO (✓)</th>
                     </tr>
                 </thead>
                 <tbody id="cuerpoRequerimientos">
@@ -58,7 +58,7 @@
                         
                         <!-- FECHA SOLICITUD -->
                         <td class="td-req">
-                            <input type="date" class="input-req central val-fecha" onchange="actualizarAnoMes(this)">
+                            <input type="date" class="input-req central val-fecha" onchange="actualizarAnoMes(this)" style="padding: 2px;">
                         </td>
                         
                         <!-- SOLICITADO POR -->
@@ -123,7 +123,7 @@
                         
                         <!-- FECHA DE ENTREGA -->
                         <td class="td-req">
-                            <input type="date" class="input-req central val-fecha-entrega">
+                            <input type="date" class="input-req central val-fecha-entrega" style="padding: 2px;">
                         </td>
                         
                         <!-- COMENTARIOS ÁREA DE COMPRAS -->
@@ -131,12 +131,12 @@
                             <input type="text" class="input-req val-comentarios" placeholder="Comentarios de compra..." style="color: #9a3412;">
                         </td>
                         
-                        <!-- CHECK: COMPRADO -->
+                        <!-- CHECK: COMPRADO (CON EVENTO ONCHANGE) -->
                         <td class="td-req central" style="background-color: #fefce8;">
                             <input type="checkbox" class="check-req val-comprado" onchange="verificarChecks(this)">
                         </td>
                         
-                        <!-- CHECK: AGOTADO -->
+                        <!-- CHECK: AGOTADO (CON EVENTO ONCHANGE) -->
                         <td class="td-req central" style="background-color: #fefce8;">
                             <input type="checkbox" class="check-req check-red val-agotado" onchange="verificarChecks(this)">
                         </td>
@@ -154,8 +154,15 @@
 
     table { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-collapse: collapse; }
     
-    .th-req { padding: 6px 4px; border: 1px solid #cbd5e1; vertical-align: middle; }
-    .th-compras { padding: 6px 4px; border: 1px solid #fde047; vertical-align: middle; border-bottom: 1px solid #cbd5e1; }
+    /* AQUI ESTA EL CAMBIO CLAVE PARA QUE RESPETE LOS ANCHOS: white-space: normal y word-wrap */
+    .th-req, .th-compras { 
+        padding: 6px 4px; 
+        vertical-align: middle; 
+        white-space: normal; 
+        word-wrap: break-word;
+    }
+    .th-req { border: 1px solid #cbd5e1; }
+    .th-compras { border: 1px solid #fde047; border-bottom: 1px solid #cbd5e1; }
     
     .td-req { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; }
     
@@ -171,9 +178,11 @@
     .check-req { width: 16px; height: 16px; cursor: pointer; accent-color: #3b82f6; margin: 0 auto; display: block; }
     .check-red { accent-color: #dc2626; }
 
+    /* ESTILOS DINÁMICOS PARA FILAS MARCADAS COMO COMPRADAS */
     .fila-comprada td { background-color: #bae6fd !important; }
     .fila-comprada .input-req { color: #0369a1 !important; font-weight: bold; }
     
+    /* ESTILOS DINÁMICOS PARA FILAS MARCADAS COMO AGOTADAS */
     .fila-agotada td { background-color: #fecaca !important; }
     .fila-agotada .input-req { color: #991b1b !important; font-weight: bold; }
 
@@ -185,6 +194,16 @@
         background-position: right 5px top 50%; 
         background-size: 8px auto; 
         padding-right: 15px; 
+    }
+    
+    /* Ocultar flechas en los inputs number para ahorrar más espacio */
+    .input-req[type=number]::-webkit-inner-spin-button, 
+    .input-req[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
+    }
+    .input-req[type=number] {
+        -moz-appearance: textfield;
     }
 </style>
 
