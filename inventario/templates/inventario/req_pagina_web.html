@@ -1,0 +1,188 @@
+{% extends 'inventario/dashboard_global.html' %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem; width: 100%;">
+    
+    <div class="card" style="border-top: 4px solid #8b5cf6; padding: 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+            <h3 style="margin: 0; color: #1e293b; text-transform: uppercase; display: flex; align-items: center; gap: 8px; font-size: 1.1rem;">
+                <i class="fas fa-laptop" style="color: #8b5cf6;"></i> Página Web - Reportes y Precios
+            </h3>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button type="button" onclick="agregarFilaWeb()" class="btn-top" style="background-color: #8b5cf6; color: white;">
+                    <i class="fas fa-plus"></i> Nuevo Reporte
+                </button>
+                <button type="button" onclick="procesarReportesWeb()" class="btn-top" style="background-color: #1e293b; color: white;">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+
+        <div style="overflow-x: auto; border: 2px solid #cbd5e1; border-radius: 4px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+            <table id="tablaWeb" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.75rem; white-space: nowrap; table-layout: fixed;">
+                <thead style="position: sticky; top: 0; z-index: 10;">
+                    <!-- PRIMERA FILA: AGRUPACIONES GRANDES -->
+                    <tr style="font-weight: 900; font-size: 0.8rem; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <th colspan="5" style="background-color: #e2e8f0; color: #1e3a8a; padding: 10px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                            REPORTES DE OBSERVACIONES EN LA PÁGINA WEB
+                        </th>
+                        <th colspan="11" style="background-color: #9333ea; color: white; padding: 10px; border: 1px solid #7e22ce; font-size: 0.9rem;">
+                            HERRAMIENTA PARA CORRECCIÓN O EVALUACIÓN DE PRECIOS WEB Y PRECIOS CYBER JARED
+                        </th>
+                    </tr>
+                    <!-- SEGUNDA FILA: COLUMNAS INDIVIDUALES -->
+                    <tr style="text-align: center; font-size: 0.65rem; font-weight: 800;">
+                        <!-- SECCIÓN REPORTES -->
+                        <th class="th-web" style="width: 6%; color: #1e3a8a; background-color: #f8fafc;">FECHA DE REPORTE</th>
+                        <th class="th-web" style="width: 7%; color: #1e3a8a; background-color: #f8fafc;">ASESOR QUE REPORTA OBS.</th>
+                        <th class="th-web" style="width: 12%; color: #1e3a8a; background-color: #f8fafc;">TIPO DE OBSERVACIONES</th>
+                        <th class="th-web" style="width: 15%; color: #1e3a8a; background-color: #f8fafc;">COMENTARIOS ADICIONALES</th>
+                        <th class="th-web" style="width: 5%; background-color: #000000; color: #06b6d4; white-space: normal;">CORREGIDO POR EL RESPONSABLE DE LA P. WEB</th>
+                        
+                        <!-- SECCIÓN PRECIOS -->
+                        <th class="th-web" style="width: 6%; background-color: #9333ea; color: white;">MARCA</th>
+                        <th class="th-web" style="width: 7%; background-color: #9333ea; color: white;">CATEGORÍA</th>
+                        <th class="th-web" style="width: 8%; background-color: #9333ea; color: white;">MODELO</th>
+                        <th class="th-web" style="width: 12%; background-color: #9333ea; color: white;">PRODUCTO</th>
+                        <th class="th-web" style="width: 5%; background-color: #9333ea; color: white;">P. TACHADO</th>
+                        <th class="th-web" style="width: 5%; background-color: #9333ea; color: white;">P. WEB (+ 7%)</th>
+                        <th class="th-web" style="width: 5%; background-color: #fef08a; color: black; font-style: italic;">PRECIO CYBER Jared</th>
+                        <th class="th-web" style="width: 5%; background-color: #dc2626; color: white;">COSTO DEL PRODUCTO</th>
+                        <th class="th-web" style="width: 5%; background-color: #fef08a; color: black; font-style: italic;">GANANCIA CYBER Jared</th>
+                        <th class="th-web" style="width: 5%; background-color: #9333ea; color: white;">GANANCIA P. WEB</th>
+                        <th class="th-web" style="width: 4%; background-color: #9333ea; color: white;">RENTABILIDAD (%)</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoWeb">
+                    
+                    <!-- FILA MOLDE -->
+                    <tr class="fila-web">
+                        <!-- REPORTES -->
+                        <td class="td-web"><input type="date" class="input-web central val-fecha"></td>
+                        <td class="td-web">
+                            <select class="input-web central select-bonito" style="font-weight: bold; color: #1e3a8a;">
+                                <option value="" disabled selected>-- SELECCIONA --</option>
+                                <option value="DAVID">DAVID</option>
+                                <option value="LUIS">LUIS</option>
+                                <option value="MILAGROS">MILAGROS</option>
+                                <option value="ALDO">ALDO</option>
+                                <option value="DENISE">DENISE</option>
+                                <option value="JOSHUA">JOSHUA</option>
+                                <option value="ADAMARI">ADAMARI</option>
+                                <option value="PABLO">PABLO</option>
+                            </select>
+                        </td>
+                        <td class="td-web"><input type="text" class="input-web central" placeholder="Tipo..."></td>
+                        <td class="td-web"><input type="text" class="input-web" placeholder="Comentarios..."></td>
+                        <td class="td-web central" style="background-color: #000000;">
+                            <input type="checkbox" class="check-cyan">
+                        </td>
+                        
+                        <!-- PRECIOS -->
+                        <td class="td-web"><input type="text" class="input-web central val-marca" placeholder="Marca..."></td>
+                        <td class="td-web"><input type="text" class="input-web central val-cat" placeholder="Categoría..."></td>
+                        <td class="td-web"><input type="text" class="input-web central val-modelo" placeholder="Modelo..."></td>
+                        <td class="td-web"><input type="text" class="input-web val-prod" placeholder="Producto..."></td>
+                        
+                        <td class="td-web"><input type="number" class="input-web derecha val-ptachado" placeholder="0.00"></td>
+                        <td class="td-web"><input type="number" class="input-web derecha val-pweb" placeholder="0.00" oninput="calcularGanancias(this)"></td>
+                        <td class="td-web" style="background-color: #fefce8;"><input type="number" class="input-web derecha val-pcyber" placeholder="0.00" style="color: #9a3412; font-weight: bold;" oninput="calcularGanancias(this)"></td>
+                        <td class="td-web" style="background-color: #fef2f2;"><input type="number" class="input-web derecha val-costo" placeholder="0.00" style="color: #dc2626; font-weight: bold;" oninput="calcularGanancias(this)"></td>
+                        
+                        <!-- AUTO CALCULADOS -->
+                        <td class="td-web" style="background-color: #fefce8;"><input type="text" readonly class="input-web derecha val-gcyber" tabindex="-1" style="color: #9a3412; font-weight: bold; background: transparent;"></td>
+                        <td class="td-web"><input type="text" readonly class="input-web derecha val-gweb" tabindex="-1" style="color: #7e22ce; font-weight: bold; background: transparent;"></td>
+                        <td class="td-web"><input type="text" readonly class="input-web central val-renta" tabindex="-1" style="color: #7e22ce; font-weight: bold; background: transparent;"></td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-top { color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s; font-size: 0.8rem; text-decoration: none; height: 32px;}
+    .btn-top:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    table { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-collapse: collapse; }
+    
+    .th-web { padding: 8px 4px; border: 1px solid #cbd5e1; vertical-align: middle; }
+    
+    .td-web { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; }
+    
+    .fila-web:nth-child(even) { background-color: #f8fafc; }
+    .fila-web:nth-child(odd) { background-color: #ffffff; }
+    .fila-web:hover { filter: brightness(0.95); }
+
+    .input-web { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 6px 4px; font-family: inherit; font-size: 11px; background-color: transparent; outline: none; }
+    .input-web:focus { background-color: #f3e8ff; box-shadow: inset 0 0 0 2px #9333ea; color: #000; }
+    
+    .central { text-align: center; }
+    .derecha { text-align: right; }
+    
+    .check-cyan { width: 16px; height: 16px; cursor: pointer; accent-color: #06b6d4; margin: 0 auto; display: block; }
+
+    .select-bonito { 
+        cursor: pointer; 
+        appearance: none; 
+        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); 
+        background-repeat: no-repeat; 
+        background-position: right 5px top 50%; 
+        background-size: 8px auto; 
+        padding-right: 15px; 
+    }
+    
+    /* Quitar flechitas de los inputs numéricos */
+    .input-web::-webkit-outer-spin-button, .input-web::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .input-web[type=number] { -moz-appearance: textfield; }
+</style>
+
+<script>
+    // Cálculos Automáticos de Ganancia y Rentabilidad
+    function calcularGanancias(inputElement) {
+        const fila = inputElement.closest('tr');
+        
+        const pWeb = parseFloat(fila.querySelector('.val-pweb').value) || 0;
+        const pCyber = parseFloat(fila.querySelector('.val-pcyber').value) || 0;
+        const costo = parseFloat(fila.querySelector('.val-costo').value) || 0;
+        
+        const inGCyber = fila.querySelector('.val-gcyber');
+        const inGWeb = fila.querySelector('.val-gweb');
+        const inRenta = fila.querySelector('.val-renta');
+
+        // Calcular Ganancia Cyber (Precio Cyber - Costo)
+        if (pCyber > 0 && costo > 0) {
+            inGCyber.value = (pCyber - costo).toFixed(2);
+        } else {
+            inGCyber.value = '';
+        }
+
+        // Calcular Ganancia Web (Precio Web - Costo)
+        let gananciaWebVal = 0;
+        if (pWeb > 0 && costo > 0) {
+            gananciaWebVal = pWeb - costo;
+            inGWeb.value = gananciaWebVal.toFixed(2);
+        } else {
+            inGWeb.value = '';
+        }
+
+        // Calcular Rentabilidad (Ganancia Web / Costo * 100)
+        if (gananciaWebVal > 0 && costo > 0) {
+            const rentabilidad = (gananciaWebVal / costo) * 100;
+            inRenta.value = rentabilidad.toFixed(2) + '%';
+        } else {
+            inRenta.value = '';
+        }
+    }
+
+    function agregarFilaWeb() {
+        alert("¡Nueva fila próximamente!");
+    }
+    
+    function procesarReportesWeb() {
+        alert("¡Guardando en la base de datos!");
+    }
+</script>
+{% endblock %}

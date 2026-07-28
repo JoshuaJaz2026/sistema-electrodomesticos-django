@@ -4492,3 +4492,16 @@ def requerimientos_alertas_view(request):
         'canal': request.session.get('canal_activo', 'Mercado Libre'),
     }
     return render(request, 'inventario/req_alertas.html', context)
+
+
+
+@login_required
+def req_pagina_web_view(request):
+    from .models import ReportePaginaWeb
+    reportes = ReportePaginaWeb.objects.all()
+    
+    context = {
+        'reportes': reportes,
+        'canal': request.session.get('canal_activo', 'Mercado Libre'),
+    }
+    return render(request, 'inventario/req_pagina_web.html', context)

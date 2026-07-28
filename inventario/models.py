@@ -777,3 +777,35 @@ class RequerimientoAlerta(models.Model):
 
     def __str__(self):
         return f"{self.ano_mes} - {self.solicitado_por} - {self.producto_solicitado[:20]}"
+
+class ReportePaginaWeb(models.Model):
+    # --- REPORTES DE OBSERVACIONES ---
+    fecha_reporte = models.DateField(default=timezone.now, verbose_name="FECHA DE REPORTE")
+    asesor = models.CharField(max_length=50, blank=True, null=True, verbose_name="ASESOR QUE REPORTA OBS.")
+    tipo_observacion = models.CharField(max_length=100, blank=True, null=True, verbose_name="TIPO DE OBSERVACIONES")
+    comentarios = models.TextField(blank=True, null=True, verbose_name="COMENTARIOS ADICIONALES")
+    corregido = models.BooleanField(default=False, verbose_name="CORREGIDO POR EL RESPONSABLE")
+
+    # --- HERRAMIENTA DE EVALUACIÓN DE PRECIOS ---
+    marca = models.CharField(max_length=50, blank=True, null=True, verbose_name="MARCA")
+    categoria = models.CharField(max_length=50, blank=True, null=True, verbose_name="CATEGORÍA")
+    modelo = models.CharField(max_length=100, blank=True, null=True, verbose_name="MODELO")
+    producto = models.TextField(blank=True, null=True, verbose_name="PRODUCTO")
+    
+    precio_tachado = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="P. TACHADO")
+    precio_web = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="P. WEB (+ 7%)")
+    precio_cyber = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="PRECIO CYBER Jared")
+    costo_producto = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="COSTO DEL PRODUCTO")
+    
+    ganancia_cyber = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="GANANCIA CYBER Jared")
+    ganancia_web = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="GANANCIA P. WEB")
+    rentabilidad = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, verbose_name="RENTABILIDAD (%)")
+
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'reportes_pagina_web'
+        ordering = ['-id']
+
+    def __str__(self):
+        return f"{self.fecha_reporte} - {self.asesor} - {self.modelo}"

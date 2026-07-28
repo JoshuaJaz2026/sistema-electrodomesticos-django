@@ -263,7 +263,7 @@
                 <div class="submenu" id="req-menu">
                     <!-- Recuerda actualizar los href="#" cuando crees las vistas en views.py -->
                     <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='req_alertas' %}" data-path="{% url 'req_alertas' %}" class="submenu-item"><i class="fas fa-exclamation-circle"></i> Req. y Alertas</a>
-                    <a href="#" class="submenu-item"><i class="fas fa-laptop"></i> Página Web</a>
+                    <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='req_pagina_web' %}" data-path="{% url 'req_pagina_web' %}" class="submenu-item"><i class="fas fa-laptop"></i> Página Web</a>
                     <a href="#" class="submenu-item"><i class="fas fa-heading"></i> Títulos</a>
                     <a href="{% url 'navegar_menu' plataforma=canal ruta_destino='referencia_costos' %}" data-path="{% url 'referencia_costos' %}" class="submenu-item"><i class="fas fa-dollar-sign"></i> Costos Referenciales</a>
                 </div>
