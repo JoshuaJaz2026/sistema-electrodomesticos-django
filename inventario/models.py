@@ -781,9 +781,10 @@ class RequerimientoAlerta(models.Model):
 class ObservacionWeb(models.Model):
     fecha_reporte = models.DateField(default=timezone.now, verbose_name="FECHA DE REPORTE")
     asesor = models.CharField(max_length=50, blank=True, null=True, verbose_name="ASESOR QUE REPORTA OBS.")
+    modelo = models.CharField(max_length=100, blank=True, null=True, verbose_name="MODELO")  # <-- NUEVA COLUMNA AGREGADA
     tipo_observacion = models.CharField(max_length=100, blank=True, null=True, verbose_name="TIPO DE OBSERVACIONES")
     comentarios = models.TextField(blank=True, null=True, verbose_name="COMENTARIOS ADICIONALES")
-    link = models.URLField(max_length=500, blank=True, null=True, verbose_name="LINK")  # <-- NUEVA COLUMNA
+    link = models.URLField(max_length=500, blank=True, null=True, verbose_name="LINK")
     corregido = models.BooleanField(default=False, verbose_name="CORREGIDO POR EL RESPONSABLE")
     creado_en = models.DateTimeField(auto_now_add=True)
 
@@ -792,7 +793,7 @@ class ObservacionWeb(models.Model):
         ordering = ['-id']
 
     def __str__(self):
-        return f"{self.fecha_reporte} - {self.asesor}"
+        return f"{self.fecha_reporte} - {self.asesor} - {self.modelo}"
 
 
 class EvaluacionPrecioWeb(models.Model):
