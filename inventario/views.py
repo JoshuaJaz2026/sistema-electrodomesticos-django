@@ -4496,12 +4496,21 @@ def requerimientos_alertas_view(request):
 
 
 @login_required
-def req_pagina_web_view(request):
-    from .models import ReportePaginaWeb
-    reportes = ReportePaginaWeb.objects.all()
-    
+def req_observaciones_web_view(request):
+    from .models import ObservacionWeb
+    observaciones = ObservacionWeb.objects.all()
     context = {
-        'reportes': reportes,
+        'observaciones': observaciones,
+        'canal': request.session.get('canal_activo', 'Mercado Libre'),
+    }
+    return render(request, 'inventario/req_observaciones_web.html', context)
+
+@login_required
+def req_pagina_web_view(request):
+    from .models import EvaluacionPrecioWeb
+    evaluaciones = EvaluacionPrecioWeb.objects.all()
+    context = {
+        'evaluaciones': evaluaciones,
         'canal': request.session.get('canal_activo', 'Mercado Libre'),
     }
     return render(request, 'inventario/req_pagina_web.html', context)

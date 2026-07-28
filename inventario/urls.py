@@ -170,5 +170,6 @@ urlpatterns = [
     path('percheron/registros/exportar-pdf/', views.exportar_registros_pdf, name='exportar_registros_pdf'),
     path('percheron/salidas/exportar-pdf/', views.exportar_salidas_pdf, name='exportar_salidas_pdf'),
     path('requerimientos/alertas/', views.requerimientos_alertas_view, name='req_alertas'),
+    path('requerimientos/observaciones-web/', views.req_observaciones_web_view, name='req_observaciones_web'),
     path('requerimientos/pagina-web/', views.req_pagina_web_view, name='req_pagina_web'),
 ]
