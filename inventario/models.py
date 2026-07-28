@@ -783,6 +783,7 @@ class ObservacionWeb(models.Model):
     asesor = models.CharField(max_length=50, blank=True, null=True, verbose_name="ASESOR QUE REPORTA OBS.")
     tipo_observacion = models.CharField(max_length=100, blank=True, null=True, verbose_name="TIPO DE OBSERVACIONES")
     comentarios = models.TextField(blank=True, null=True, verbose_name="COMENTARIOS ADICIONALES")
+    link = models.URLField(max_length=500, blank=True, null=True, verbose_name="LINK")  # <-- NUEVA COLUMNA
     corregido = models.BooleanField(default=False, verbose_name="CORREGIDO POR EL RESPONSABLE")
     creado_en = models.DateTimeField(auto_now_add=True)
 

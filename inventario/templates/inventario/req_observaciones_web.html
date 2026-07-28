@@ -23,15 +23,17 @@
             <table style="width: 100%; border-collapse: collapse; background: white; font-size: 0.75rem; white-space: nowrap; table-layout: fixed;">
                 <thead style="position: sticky; top: 0; z-index: 10;">
                     <tr style="font-weight: 900; font-size: 0.85rem; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">
-                        <th colspan="5" style="background-color: #e2e8f0; color: #1e3a8a; padding: 10px; border: 1px solid #cbd5e1;">
+                        <!-- COLSPAN PASA DE 5 A 6 POR LA NUEVA COLUMNA -->
+                        <th colspan="6" style="background-color: #e2e8f0; color: #1e3a8a; padding: 10px; border: 1px solid #cbd5e1;">
                             REPORTES DE OBSERVACIONES EN LA PÁGINA WEB
                         </th>
                     </tr>
                     <tr style="text-align: center; font-size: 0.65rem; font-weight: 800;">
-                        <th class="th-obs" style="width: 12%; color: #1e3a8a; background-color: #f8fafc;">FECHA DE REPORTE</th>
-                        <th class="th-obs" style="width: 18%; color: #1e3a8a; background-color: #f8fafc;">ASESOR QUE REPORTA OBS.</th>
-                        <th class="th-obs" style="width: 25%; color: #1e3a8a; background-color: #f8fafc;">TIPO DE OBSERVACIONES</th>
-                        <th class="th-obs" style="width: 35%; color: #1e3a8a; background-color: #f8fafc;">COMENTARIOS ADICIONALES</th>
+                        <th class="th-obs" style="width: 10%; color: #1e3a8a; background-color: #f8fafc;">FECHA DE REPORTE</th>
+                        <th class="th-obs" style="width: 15%; color: #1e3a8a; background-color: #f8fafc;">ASESOR QUE REPORTA OBS.</th>
+                        <th class="th-obs" style="width: 20%; color: #1e3a8a; background-color: #f8fafc;">TIPO DE OBSERVACIONES</th>
+                        <th class="th-obs" style="width: 25%; color: #1e3a8a; background-color: #f8fafc;">COMENTARIOS ADICIONALES</th>
+                        <th class="th-obs" style="width: 20%; color: #1e3a8a; background-color: #f8fafc;">LINK</th>
                         <th class="th-obs" style="width: 10%; background-color: #000000; color: #06b6d4; white-space: normal;">CORREGIDO POR EL RESPONSABLE DE LA P. WEB</th>
                     </tr>
                 </thead>
@@ -53,6 +55,10 @@
                         </td>
                         <td class="td-obs"><input type="text" class="input-obs central" placeholder="Escribe tipo..."></td>
                         <td class="td-obs"><input type="text" class="input-obs" placeholder="Escribe comentario..."></td>
+                        
+                        <!-- NUEVO CAMPO LINK -->
+                        <td class="td-obs"><input type="url" class="input-obs" placeholder="Pega el link aquí..." style="color: #2563eb; text-decoration: underline;"></td>
+                        
                         <td class="td-obs central" style="background-color: #000000;">
                             <input type="checkbox" class="check-cyan">
                         </td>
