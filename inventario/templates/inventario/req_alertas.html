@@ -31,18 +31,18 @@
                             RESPUESTA DEL ÁREA DE <span style="color: #dc2626;">COMPRAS</span>
                         </th>
                     </tr>
-                    <!-- SEGUNDA FILA: COLUMNAS INDIVIDUALES CON ANCHOS FIJOS -->
+                    <!-- SEGUNDA FILA: COLUMNAS INDIVIDUALES CON NUEVOS ANCHOS -->
                     <tr style="background-color: #f1f5f9; color: #334155; font-weight: 800; text-align: center; font-size: 0.65rem;">
-                        <th class="th-req" style="width: 6%;">AÑO - MES</th>
-                        <th class="th-req" style="width: 7%;">FECHA DE SOLICITUD</th>
-                        <th class="th-req" style="width: 8%;">SOLICITADO POR:</th>
-                        <th class="th-req" style="width: 3%;">CANT.</th>
-                        <th class="th-req" style="width: 24%; white-space: normal;">NOMBRE Y MODELO DEL PRODUCTO SOLICITADO <br><span style="color: #dc2626;">(ESPECIFICACIONES COMPLETAS)</span></th>
-                        <th class="th-req" style="width: 21%; white-space: normal;">OBSERVACIONES <span style="color: #2563eb;">(PROVEEDOR, PRECIO</span> <span style="color: #dc2626;">(MEJOR PRECIO)</span><span style="color: #2563eb;">, DETALLES ADICIONALES DE ENTREGA)</span></th>
-                        <th class="th-req" style="width: 8%;">PLATAFORMA / CONCEPTO</th>
+                        <th class="th-req" style="width: 5%;">AÑO - MES</th>
+                        <th class="th-req" style="width: 6%;">FECHA DE SOLICITUD</th>
+                        <th class="th-req" style="width: 6%;">SOLICITADO POR:</th>
+                        <th class="th-req" style="width: 2.5%;">CANT.</th>
+                        <th class="th-req" style="width: 27%; white-space: normal;">NOMBRE Y MODELO DEL PRODUCTO SOLICITADO <br><span style="color: #dc2626;">(ESPECIFICACIONES COMPLETAS)</span></th>
+                        <th class="th-req" style="width: 24%; white-space: normal;">OBSERVACIONES <span style="color: #2563eb;">(PROVEEDOR, PRECIO</span> <span style="color: #dc2626;">(MEJOR PRECIO)</span><span style="color: #2563eb;">, DETALLES ADICIONALES DE ENTREGA)</span></th>
+                        <th class="th-req" style="width: 10.5%;">PLATAFORMA / CONCEPTO</th>
                         <th class="th-req" style="width: 6%;">FECHA DE ENTREGA</th>
                         
-                        <th class="th-compras" style="width: 13%; background-color: #fefce8; white-space: normal;">COMENTARIOS DEL ÁREA DE COMPRAS</th>
+                        <th class="th-compras" style="width: 9%; background-color: #fefce8; white-space: normal;">COMENTARIOS DEL ÁREA DE COMPRAS</th>
                         <th class="th-compras" style="width: 2%; background-color: #fefce8; white-space: normal; color: #0369a1;">COMPRA REALIZADA (✓)</th>
                         <th class="th-compras" style="width: 2%; background-color: #fefce8; white-space: normal; color: #dc2626;">AGOTADO (✓)</th>
                     </tr>
@@ -131,12 +131,12 @@
                             <input type="text" class="input-req val-comentarios" placeholder="Comentarios de compra..." style="color: #9a3412;">
                         </td>
                         
-                        <!-- CHECK: COMPRADO (CON EVENTO ONCHANGE) -->
+                        <!-- CHECK: COMPRADO -->
                         <td class="td-req central" style="background-color: #fefce8;">
                             <input type="checkbox" class="check-req val-comprado" onchange="verificarChecks(this)">
                         </td>
                         
-                        <!-- CHECK: AGOTADO (CON EVENTO ONCHANGE) -->
+                        <!-- CHECK: AGOTADO -->
                         <td class="td-req central" style="background-color: #fefce8;">
                             <input type="checkbox" class="check-req check-red val-agotado" onchange="verificarChecks(this)">
                         </td>
@@ -159,7 +159,6 @@
     
     .td-req { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; }
     
-    /* Colores por defecto de las filas */
     .fila-req:nth-child(even) { background-color: #f8fafc; }
     .fila-req:nth-child(odd) { background-color: #ffffff; }
     .fila-req:hover { filter: brightness(0.95); }
@@ -172,15 +171,12 @@
     .check-req { width: 16px; height: 16px; cursor: pointer; accent-color: #3b82f6; margin: 0 auto; display: block; }
     .check-red { accent-color: #dc2626; }
 
-    /* ESTILOS DINÁMICOS PARA FILAS MARCADAS COMO COMPRADAS */
-    .fila-comprada td { background-color: #bae6fd !important; } /* Fondo Celeste Claro */
-    .fila-comprada .input-req { color: #0369a1 !important; font-weight: bold; } /* Letras Azul Oscuro */
+    .fila-comprada td { background-color: #bae6fd !important; }
+    .fila-comprada .input-req { color: #0369a1 !important; font-weight: bold; }
     
-    /* ESTILOS DINÁMICOS PARA FILAS MARCADAS COMO AGOTADAS */
-    .fila-agotada td { background-color: #fecaca !important; } /* Fondo Rojo Claro */
-    .fila-agotada .input-req { color: #991b1b !important; font-weight: bold; } /* Letras Rojo Oscuro */
+    .fila-agotada td { background-color: #fecaca !important; }
+    .fila-agotada .input-req { color: #991b1b !important; font-weight: bold; }
 
-    /* Estilo para los combos box bonitos */
     .select-bonito { 
         cursor: pointer; 
         appearance: none; 
@@ -193,7 +189,6 @@
 </style>
 
 <script>
-    // 1. Extrae el Año-Mes automáticamente
     function actualizarAnoMes(inputFecha) {
         const fila = inputFecha.closest('tr');
         const inputAnoMes = fila.querySelector('.val-anomes');
@@ -207,21 +202,17 @@
         }
     }
 
-    // 2. Lógica para manejar el color de las filas y validar 1 solo Check
     function verificarChecks(checkboxActivo) {
         const fila = checkboxActivo.closest('tr');
         const checkComprado = fila.querySelector('.val-comprado');
         const checkAgotado = fila.querySelector('.val-agotado');
 
-        // Validamos si el usuario intenta marcar ambos
         if (checkComprado.checked && checkAgotado.checked) {
             alert("Solo puedes marcar una opción (Compra Realizada o Agotado).");
-            // Desmarcamos el check que el usuario acaba de presionar
             checkboxActivo.checked = false; 
-            return; // Salimos de la función sin aplicar colores
+            return;
         }
 
-        // Aplicamos las clases CSS dependiendo de cuál check está activo
         if (checkComprado.checked) {
             fila.classList.add('fila-comprada');
             fila.classList.remove('fila-agotada');
@@ -229,13 +220,11 @@
             fila.classList.add('fila-agotada');
             fila.classList.remove('fila-comprada');
         } else {
-            // Si el usuario desmarca ambos checks, la fila vuelve a su color normal
             fila.classList.remove('fila-comprada');
             fila.classList.remove('fila-agotada');
         }
     }
 
-    // 3. Lógica para Agregar una Nueva Fila en blanco
     function agregarFilaRequerimiento() {
         const tbody = document.getElementById('cuerpoRequerimientos');
         const primeraFila = tbody.querySelector('.fila-req');
@@ -243,19 +232,11 @@
         if (primeraFila) {
             const nuevaFila = primeraFila.cloneNode(true);
             
-            // Limpiamos los inputs
             nuevaFila.querySelectorAll('input:not([type="checkbox"])').forEach(input => input.value = '');
-            
-            // Desmarcamos los checkboxes
             nuevaFila.querySelectorAll('input[type="checkbox"]').forEach(check => check.checked = false);
-            
-            // Quitamos cualquier color de fondo que se haya clonado (Celeste o Rojo)
             nuevaFila.classList.remove('fila-comprada', 'fila-agotada');
-            
-            // Reseteamos selects
             nuevaFila.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
             
-            // Cantidad en 1
             const inputCant = nuevaFila.querySelector('.val-cant');
             if (inputCant) inputCant.value = 1;
             
@@ -265,7 +246,6 @@
         }
     }
     
-    // 4. Lógica para Recopilar los datos y Guardarlos
     function procesarRequerimientos() {
         const filas = document.querySelectorAll('.fila-req');
         const datos = [];
