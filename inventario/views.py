@@ -4516,7 +4516,7 @@ def req_pagina_web_view(request):
     return render(request, 'inventario/req_pagina_web.html', context)
 
 @login_required
-def referencia_costos_view(request):
+def referencia_costos_web_view(request):
     from .models import CostoReferencial
     costos = CostoReferencial.objects.all()
     context = {
