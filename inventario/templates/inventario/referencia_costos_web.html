@@ -50,15 +50,15 @@
                     
                     {% for costo in costos %}
                     <tr class="fila-costo">
-                        <td class="td-costo"><input type="text" class="input-costo central val-modelo" value="{{ costo.modelo|default:costo.codigo|default_if_none:'' }}" placeholder="Modelo..." onchange="buscarProductoPorModelo(this)"></td>
+                        <td class="td-costo"><input type="text" class="input-costo central val-modelo" value="{{ costo.modelo|default_if_none:'' }}" placeholder="Modelo..." onchange="buscarProductoPorModelo(this)"></td>
                         
                         <td class="td-costo"><input type="text" class="input-costo val-producto" value="{{ costo.producto|default_if_none:'' }}" placeholder="Descripción del producto..."></td>
                         
-                        <td class="td-costo"><input type="number" step="0.01" class="input-costo derecha val-costo-cero" value="{{ costo.costo_cero_soles|default:costo.costo_cero|default_if_none:'' }}" placeholder="0.00" style="font-weight: bold;"></td>
+                        <td class="td-costo"><input type="number" step="0.01" class="input-costo derecha val-costo-cero" value="{{ costo.costo_cero_soles|default_if_none:'' }}" placeholder="0.00" style="font-weight: bold;"></td>
                         
-                        <td class="td-costo"><input type="number" step="0.01" class="input-costo derecha val-costo-dolar" value="{{ costo.costo_u_dolares|default:costo.costo_u|default_if_none:'' }}" placeholder="0.00" style="font-weight: bold; color: #059669;" oninput="calcularDolarFila(this)"></td>
+                        <td class="td-costo"><input type="number" step="0.01" class="input-costo derecha val-costo-dolar" value="{{ costo.costo_u_dolares|default_if_none:'' }}" placeholder="0.00" style="font-weight: bold; color: #059669;" oninput="calcularDolarFila(this)"></td>
                         
-                        <td class="td-costo" style="background-color: #f8fafc;"><input type="text" readonly tabindex="-1" class="input-costo derecha val-convertido" value="{% if costo.costo_u_convertido %}S/ {{ costo.costo_u_convertido }}{% elif costo.costo_convertido %}S/ {{ costo.costo_convertido }}{% endif %}" style="font-weight: bold; color: #2563eb; cursor: not-allowed;"></td>
+                        <td class="td-costo" style="background-color: #f8fafc;"><input type="text" readonly tabindex="-1" class="input-costo derecha val-convertido" value="{% if costo.costo_u_convertido %}S/ {{ costo.costo_u_convertido }}{% endif %}" style="font-weight: bold; color: #2563eb; cursor: not-allowed;"></td>
                     </tr>
                     {% empty %}
                     
@@ -93,7 +93,6 @@
 </style>
 
 <script>
-    // PREVIENE QUE EL INPUT DE DÓLAR SE QUEDE VACÍO
     document.addEventListener("DOMContentLoaded", function() {
         const inputDolarTop = document.getElementById('input_dolar');
         if (!inputDolarTop.value || inputDolarTop.value === 'None' || inputDolarTop.value === '') {
@@ -101,7 +100,6 @@
         }
     });
 
-    // AUTOCOMPLETADO
     function buscarProductoPorModelo(inputModelo) {
         const modelo = inputModelo.value.trim();
         const fila = inputModelo.closest('tr');
@@ -121,7 +119,6 @@
         }
     }
 
-    // MULTIPLICAR DÓLARES POR T.C.
     function calcularDolarFila(inputElement) {
         const fila = inputElement.closest('tr');
         const valorDolarIngresado = parseFloat(fila.querySelector('.val-costo-dolar').value) || 0;
@@ -170,7 +167,6 @@
                 datos.push({
                     modelo: modelo,
                     producto: producto,
-                    // Aseguramos capturar los inputs correctos:
                     costo_cero_soles: parseFloat(fila.querySelector('.val-costo-cero').value) || 0,
                     costo_u_dolares: parseFloat(fila.querySelector('.val-costo-dolar').value) || 0,
                     costo_u_convertido: parseSoles(fila.querySelector('.val-convertido').value)
@@ -183,7 +179,6 @@
             return; 
         }
 
-        // Empaquetamos todo junto para enviarlo a views.py
         const payload = {
             tc_dolar: tcDolar,
             datos: datos
