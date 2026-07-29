@@ -11,11 +11,12 @@
             </h3>
             
             <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                
                 <!-- CAMPO PARA EL TIPO DE CAMBIO DÓLAR -->
                 <div style="display: flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
                     <label style="font-weight: 800; color: #334155; font-size: 0.8rem;">T.C. DÓLAR:</label>
                     <span style="font-weight: bold; color: #0284c7;">S/</span>
-                    <input type="number" id="input_dolar" value="3.80" step="0.01" style="width: 60px; border: none; background: transparent; font-weight: 900; color: #0284c7; outline: none; font-size: 0.9rem;" oninput="recalcularTodosLosDolares()">
+                    <input type="number" id="input_dolar" step="0.01" style="width: 60px; border: none; background: transparent; font-weight: 900; color: #0284c7; outline: none; font-size: 0.9rem;" oninput="recalcularTodosLosDolares()" title="Cambia el valor y presiona Guardar Cambios">
                 </div>
 
                 <button type="button" onclick="agregarFilaCostos()" class="btn-top" style="background-color: #0284c7; color: white;">
@@ -46,23 +47,27 @@
                     </tr>
                 </thead>
                 <tbody id="cuerpoCostosRef">
+                    
                     {% for costo in costos %}
                     <tr class="fila-costo">
-                        <td class="td-costo"><input type="text" class="input-costo central val-modelo" value="{{ costo.modelo|default_if_none:'' }}" placeholder="Modelo..."></td>
+                        <td class="td-costo"><input type="text" class="input-costo central val-modelo" value="{{ costo.modelo|default_if_none:'' }}" placeholder="Modelo..." onchange="buscarProductoPorModelo(this)"></td>
                         <td class="td-costo"><input type="text" class="input-costo val-producto" value="{{ costo.producto|default_if_none:'' }}" placeholder="Descripción del producto..."></td>
                         <td class="td-costo"><input type="number" step="0.01" class="input-costo derecha val-costo-cero" value="{{ costo.costo_cero_soles|default_if_none:'' }}" placeholder="0.00" style="font-weight: bold;"></td>
                         <td class="td-costo"><input type="number" step="0.01" class="input-costo derecha val-costo-dolar" value="{{ costo.costo_u_dolares|default_if_none:'' }}" placeholder="0.00" style="font-weight: bold; color: #059669;" oninput="calcularDolarFila(this)"></td>
                         <td class="td-costo" style="background-color: #f8fafc;"><input type="text" readonly tabindex="-1" class="input-costo derecha val-convertido" value="{% if costo.costo_u_convertido %}S/ {{ costo.costo_u_convertido }}{% endif %}" style="font-weight: bold; color: #2563eb; cursor: not-allowed;"></td>
                     </tr>
                     {% empty %}
+                    
+                    <!-- Fila Molde -->
                     <tr class="fila-costo">
-                        <td class="td-costo"><input type="text" class="input-costo central val-modelo" placeholder="Modelo..."></td>
+                        <td class="td-costo"><input type="text" class="input-costo central val-modelo" placeholder="Modelo..." onchange="buscarProductoPorModelo(this)"></td>
                         <td class="td-costo"><input type="text" class="input-costo val-producto" placeholder="Descripción del producto..."></td>
                         <td class="td-costo"><input type="number" step="0.01" class="input-costo derecha val-costo-cero" placeholder="0.00" style="font-weight: bold;"></td>
                         <td class="td-costo"><input type="number" step="0.01" class="input-costo derecha val-costo-dolar" placeholder="0.00" style="font-weight: bold; color: #059669;" oninput="calcularDolarFila(this)"></td>
                         <td class="td-costo" style="background-color: #f8fafc;"><input type="text" readonly tabindex="-1" class="input-costo derecha val-convertido" style="font-weight: bold; color: #2563eb; cursor: not-allowed;"></td>
                     </tr>
                     {% endfor %}
+                    
                 </tbody>
             </table>
         </div>
@@ -85,10 +90,55 @@
 </style>
 
 <script>
-    // CALCULA LA MULTIPLICACIÓN EN UNA SOLA FILA
+    // 1. DEDUCIR EL TIPO DE CAMBIO AL CARGAR LA PÁGINA
+    document.addEventListener("DOMContentLoaded", function() {
+        const filas = document.querySelectorAll('.fila-costo');
+        let tcEncontrado = 3.80; // Dólar por defecto si la base de datos está vacía
+        
+        for (let fila of filas) {
+            const inputDolar = fila.querySelector('.val-costo-dolar');
+            const inputSoles = fila.querySelector('.val-convertido');
+            
+            if (inputDolar && inputSoles && inputDolar.value) {
+                const dolares = parseFloat(inputDolar.value);
+                const solesStr = inputSoles.value.replace('S/ ', '');
+                const soles = parseFloat(solesStr);
+                
+                if (dolares > 0 && soles > 0) {
+                    tcEncontrado = (soles / dolares).toFixed(2);
+                    break; // Al encontrar la primera fila válida, calculamos y salimos
+                }
+            }
+        }
+        document.getElementById('input_dolar').value = tcEncontrado;
+    });
+
+    // 2. AUTOCOMPLETAR EL PRODUCTO DESDE LA API
+    function buscarProductoPorModelo(inputModelo) {
+        const modelo = inputModelo.value.trim();
+        const fila = inputModelo.closest('tr');
+        const inputProducto = fila.querySelector('.val-producto');
+
+        if (modelo !== '') {
+            fetch(`{% url 'api_buscar_producto' %}?modelo=${encodeURIComponent(modelo)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Dependiendo de tu API, ajustamos para que lea el nombre correcto
+                        inputProducto.value = data.producto || data.descripcion || data.nombre || data.producto_nombre || "";
+                        // Destello visual verde para confirmar que se llenó solo
+                        inputProducto.style.backgroundColor = "#dcfce3";
+                        setTimeout(() => inputProducto.style.backgroundColor = "transparent", 800);
+                    }
+                })
+                .catch(error => console.error("Error conectando al directorio:", error));
+        }
+    }
+
+    // 3. CALCULO MATEMÁTICO INDIVIDUAL
     function calcularDolarFila(inputElement) {
         const fila = inputElement.closest('tr');
-        const valorDolarIngresado = parseFloat(inputElement.value) || 0;
+        const valorDolarIngresado = parseFloat(fila.querySelector('.val-costo-dolar').value) || 0;
         const tipoCambio = parseFloat(document.getElementById('input_dolar').value) || 0;
         const inputConvertido = fila.querySelector('.val-convertido');
 
@@ -99,16 +149,15 @@
         }
     }
 
-    // SI EL USUARIO CAMBIA EL TIPO DE CAMBIO ARRIBA, RECALCULA TODA LA TABLA
+    // 4. RECALCULO MASIVO AL CAMBIAR EL INPUT DE ARRIBA
     function recalcularTodosLosDolares() {
         const inputsDolares = document.querySelectorAll('.val-costo-dolar');
         inputsDolares.forEach(input => {
-            if(input.value) {
-                calcularDolarFila(input);
-            }
+            calcularDolarFila(input);
         });
     }
 
+    // 5. AGREGAR FILA NUEVA
     function agregarFilaCostos() {
         const tbody = document.getElementById('cuerpoCostosRef');
         const primeraFila = tbody.querySelector('.fila-costo');
@@ -121,7 +170,13 @@
         }
     }
 
+    // 6. FLUJO DE GUARDADO Y AUTO-EVALUACIÓN MASIVA
     function guardarCostosReferenciales() {
+        
+        // ¡Magia! Primero obligamos a recalcular todas las filas con el dólar ingresado 
+        // antes de empaquetar los datos para la base de datos.
+        recalcularTodosLosDolares();
+
         const filas = document.querySelectorAll('.fila-costo');
         const datos = [];
 
@@ -129,6 +184,7 @@
             const modelo = fila.querySelector('.val-modelo').value;
             const producto = fila.querySelector('.val-producto').value;
             
+            // Función auxiliar para quitar el "S/ "
             const parseSoles = (val) => parseFloat(val.replace('S/ ', '')) || 0;
 
             if (modelo || producto) {
@@ -142,7 +198,10 @@
             }
         });
 
-        if (datos.length === 0) { alert("No hay datos llenos para guardar."); return; }
+        if (datos.length === 0) { 
+            alert("No hay datos llenos para guardar."); 
+            return; 
+        }
 
         fetch("{% url 'guardar_referencia_costos_web' %}", {
             method: 'POST',
@@ -152,11 +211,16 @@
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                alert("¡Costos guardados con éxito!");
+                alert("¡Nuevos cálculos guardados con éxito!");
                 location.reload(); 
-            } else { alert("Error al guardar: " + data.message); }
+            } else { 
+                alert("Error al guardar: " + data.message); 
+            }
         })
-        .catch(error => { console.error('Error:', error); alert("Error de conexión."); });
+        .catch(error => { 
+            console.error('Error:', error); 
+            alert("Error de conexión."); 
+        });
     }
 </script>
 {% endblock %}
