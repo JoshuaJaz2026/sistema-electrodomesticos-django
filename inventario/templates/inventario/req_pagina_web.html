@@ -1,4 +1,5 @@
 {% extends 'inventario/dashboard_global.html' %}
+{% load l10n %}
 
 {% block content %}
 <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem; width: 100%;">
@@ -22,18 +23,19 @@
         <div style="overflow-x: auto; border: 2px solid #cbd5e1; border-radius: 4px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
             <table id="tablaPreciosWeb" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.75rem; table-layout: fixed;">
                 
+                <!-- SE MODIFICARON LOS PORCENTAJES PARA DARLE MÁS ESPACIO A PRODUCTO -->
                 <colgroup>
-                    <col style="width: 10%;"> 
-                    <col style="width: 12%;"> 
-                    <col style="width: 10%;"> 
-                    <col style="width: 20%;"> 
-                    <col style="width: 8%;">  
-                    <col style="width: 8%;">  
-                    <col style="width: 8%;">  
-                    <col style="width: 8%;">  
-                    <col style="width: 8%;">  
-                    <col style="width: 8%;">  
-                    <col style="width: 6%;">  
+                    <col style="width: 9%;">  <!-- MARCA -->
+                    <col style="width: 10%;"> <!-- CATEGORÍA -->
+                    <col style="width: 7%;">  <!-- MODELO -->
+                    <col style="width: 30%;"> <!-- PRODUCTO -->
+                    <col style="width: 6.5%;"> <!-- P. TACHADO -->
+                    <col style="width: 6.5%;"> <!-- P. WEB -->
+                    <col style="width: 6.5%;"> <!-- PRECIO CYBER -->
+                    <col style="width: 6.5%;"> <!-- COSTO -->
+                    <col style="width: 6.5%;"> <!-- GANANCIA CYBER -->
+                    <col style="width: 6.5%;"> <!-- GANANCIA WEB -->
+                    <col style="width: 5%;">  <!-- RENTA -->
                 </colgroup>
 
                 <thead style="position: sticky; top: 0; z-index: 10;">
@@ -223,34 +225,33 @@
                         
                         <td class="td-web"><input type="text" class="input-web val-prod" value="{{ eval.producto|default_if_none:'' }}" placeholder="Producto..."></td>
                         
+                        <!-- SE AGREGA LA CLASE texto-grande A LOS PRECIOS Y CÁLCULOS -->
                         <td class="td-web" style="background-color: #f3f4f6;">
-                            <input type="text" readonly tabindex="-1" class="input-web derecha val-ptachado" value="{% if eval.precio_tachado %}S/ {{ eval.precio_tachado }}{% endif %}" style="color: #4b5563; font-weight: bold; cursor: not-allowed;">
+                            <input type="text" readonly tabindex="-1" class="input-web derecha texto-grande val-ptachado" value="{% if eval.precio_tachado %}S/ {{ eval.precio_tachado|unlocalize }}{% endif %}" style="color: #4b5563; font-weight: bold; cursor: not-allowed;">
                         </td>
                         
                         <td class="td-web" style="background-color: #f3f4f6;">
-                            <input type="text" readonly tabindex="-1" class="input-web derecha val-pweb" value="{% if eval.precio_web %}S/ {{ eval.precio_web }}{% endif %}" style="color: #4b5563; font-weight: bold; cursor: not-allowed;">
+                            <input type="text" readonly tabindex="-1" class="input-web derecha texto-grande val-pweb" value="{% if eval.precio_web %}S/ {{ eval.precio_web|unlocalize }}{% endif %}" style="color: #4b5563; font-weight: bold; cursor: not-allowed;">
                         </td>
                         
-                        <!-- SE CAMBIA type="number" a type="text" inputmode="decimal" PARA EVITAR EL ERROR DE LA COMA -->
                         <td class="td-web" style="background-color: #fefce8;">
-                            <input type="text" inputmode="decimal" class="input-web derecha val-pcyber" value="{{ eval.precio_cyber|default_if_none:'' }}" placeholder="0.00" style="color: #9a3412; font-weight: bold;" oninput="calcularGanancias(this)">
+                            <input type="text" inputmode="decimal" class="input-web derecha texto-grande val-pcyber" value="{{ eval.precio_cyber|unlocalize|default_if_none:'' }}" placeholder="0.00" style="color: #9a3412; font-weight: bold;" oninput="calcularGanancias(this)">
                         </td>
                         
-                        <!-- SE CAMBIA type="number" a type="text" inputmode="decimal" PARA EVITAR EL ERROR DE LA COMA -->
                         <td class="td-web td-costo-container" style="background-color: #dc2626; transition: background-color 0.3s;">
-                            <input type="text" inputmode="decimal" class="input-web derecha val-costo" value="{{ eval.costo_producto|default_if_none:'' }}" placeholder="0.00" style="color: white; font-weight: bold;" oninput="marcarCostoManual(this); calcularGanancias(this);">
+                            <input type="text" inputmode="decimal" class="input-web derecha texto-grande val-costo" value="{{ eval.costo_producto|unlocalize|default_if_none:'' }}" placeholder="0.00" style="color: white; font-weight: bold;" oninput="marcarCostoManual(this); calcularGanancias(this);">
                         </td>
                         
                         <td class="td-web" style="background-color: #fefce8;">
-                            <input type="text" readonly tabindex="-1" class="input-web derecha val-gcyber" value="{% if eval.ganancia_cyber %}S/ {{ eval.ganancia_cyber }}{% endif %}" style="color: #9a3412; font-weight: bold; cursor: not-allowed;">
+                            <input type="text" readonly tabindex="-1" class="input-web derecha texto-grande val-gcyber" value="{% if eval.ganancia_cyber %}S/ {{ eval.ganancia_cyber|unlocalize }}{% endif %}" style="color: #9a3412; font-weight: bold; cursor: not-allowed;">
                         </td>
                         
                         <td class="td-web" style="background-color: #f3e8ff;">
-                            <input type="text" readonly tabindex="-1" class="input-web derecha val-gweb" value="{% if eval.ganancia_web %}S/ {{ eval.ganancia_web }}{% endif %}" style="color: #7e22ce; font-weight: bold; cursor: not-allowed;">
+                            <input type="text" readonly tabindex="-1" class="input-web derecha texto-grande val-gweb" value="{% if eval.ganancia_web %}S/ {{ eval.ganancia_web|unlocalize }}{% endif %}" style="color: #7e22ce; font-weight: bold; cursor: not-allowed;">
                         </td>
                         
                         <td class="td-web" style="background-color: #f3e8ff;">
-                            <input type="text" readonly tabindex="-1" class="input-web central val-renta" value="{% if eval.rentabilidad %}{{ eval.rentabilidad }}%{% endif %}" style="color: #7e22ce; font-weight: bold; cursor: not-allowed;">
+                            <input type="text" readonly tabindex="-1" class="input-web central texto-grande val-renta" value="{% if eval.rentabilidad %}{{ eval.rentabilidad|unlocalize }}%{% endif %}" style="color: #7e22ce; font-weight: bold; cursor: not-allowed;">
                         </td>
                     </tr>
                     {% empty %}
@@ -421,31 +422,31 @@
                         <td class="td-web"><input type="text" class="input-web val-prod" placeholder="Producto..."></td>
                         
                         <td class="td-web" style="background-color: #f3f4f6;">
-                            <input type="text" readonly tabindex="-1" class="input-web derecha val-ptachado" style="color: #4b5563; font-weight: bold; cursor: not-allowed;">
+                            <input type="text" readonly tabindex="-1" class="input-web derecha texto-grande val-ptachado" style="color: #4b5563; font-weight: bold; cursor: not-allowed;">
                         </td>
                         
                         <td class="td-web" style="background-color: #f3f4f6;">
-                            <input type="text" readonly tabindex="-1" class="input-web derecha val-pweb" style="color: #4b5563; font-weight: bold; cursor: not-allowed;">
+                            <input type="text" readonly tabindex="-1" class="input-web derecha texto-grande val-pweb" style="color: #4b5563; font-weight: bold; cursor: not-allowed;">
                         </td>
                         
                         <td class="td-web" style="background-color: #fefce8;">
-                            <input type="text" inputmode="decimal" class="input-web derecha val-pcyber" placeholder="0.00" style="color: #9a3412; font-weight: bold;" oninput="calcularGanancias(this)">
+                            <input type="text" inputmode="decimal" class="input-web derecha texto-grande val-pcyber" placeholder="0.00" style="color: #9a3412; font-weight: bold;" oninput="calcularGanancias(this)">
                         </td>
                         
                         <td class="td-web td-costo-container" style="background-color: #dc2626; transition: background-color 0.3s;">
-                            <input type="text" inputmode="decimal" class="input-web derecha val-costo" placeholder="0.00" style="color: white; font-weight: bold;" oninput="marcarCostoManual(this); calcularGanancias(this);">
+                            <input type="text" inputmode="decimal" class="input-web derecha texto-grande val-costo" placeholder="0.00" style="color: white; font-weight: bold;" oninput="marcarCostoManual(this); calcularGanancias(this);">
                         </td>
                         
                         <td class="td-web" style="background-color: #fefce8;">
-                            <input type="text" readonly tabindex="-1" class="input-web derecha val-gcyber" style="color: #9a3412; font-weight: bold; cursor: not-allowed;">
+                            <input type="text" readonly tabindex="-1" class="input-web derecha texto-grande val-gcyber" style="color: #9a3412; font-weight: bold; cursor: not-allowed;">
                         </td>
                         
                         <td class="td-web" style="background-color: #f3e8ff;">
-                            <input type="text" readonly tabindex="-1" class="input-web derecha val-gweb" style="color: #7e22ce; font-weight: bold; cursor: not-allowed;">
+                            <input type="text" readonly tabindex="-1" class="input-web derecha texto-grande val-gweb" style="color: #7e22ce; font-weight: bold; cursor: not-allowed;">
                         </td>
                         
                         <td class="td-web" style="background-color: #f3e8ff;">
-                            <input type="text" readonly tabindex="-1" class="input-web central val-renta" style="color: #7e22ce; font-weight: bold; cursor: not-allowed;">
+                            <input type="text" readonly tabindex="-1" class="input-web central texto-grande val-renta" style="color: #7e22ce; font-weight: bold; cursor: not-allowed;">
                         </td>
                     </tr>
                     {% endfor %}
@@ -459,7 +460,8 @@
     .btn-top { color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s; font-size: 0.8rem;}
     .btn-top:hover { filter: brightness(1.1); transform: translateY(-1px); }
     
-    .th-web { padding: 8px 4px; border: 1px solid #cbd5e1; vertical-align: middle; white-space: normal; word-wrap: break-word; }
+    /* SE AGREGÓ LINE-HEIGHT PARA QUE LOS TÍTULOS ENCABAJEN BIEN EN COLUMNAS ANGOSTAS */
+    .th-web { padding: 8px 4px; border: 1px solid #cbd5e1; vertical-align: middle; white-space: normal; word-wrap: break-word; line-height: 1.1; }
     .td-web { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; overflow: hidden; }
     
     .fila-web:nth-child(even) { background-color: #f8fafc; }
@@ -467,6 +469,10 @@
     .fila-web:hover { filter: brightness(0.95); }
 
     .input-web { width: 100%; min-width: 0; height: 100%; box-sizing: border-box; border: none; padding: 6px 4px; font-family: inherit; font-size: 11px; background-color: transparent; outline: none; }
+    
+    /* CLASE NUEVA PARA AGRANDAR LOS NÚMEROS */
+    .texto-grande { font-size: 12.5px !important; }
+    
     .val-costo::placeholder { color: rgba(255, 255, 255, 0.7); }
     .input-web:focus:not([readonly]) { background-color: #f3e8ff; box-shadow: inset 0 0 0 2px #9333ea; color: #000 !important; }
     
@@ -533,7 +539,6 @@
     function calcularGanancias(inputElement) {
         const fila = inputElement.closest('tr');
         
-        // Reemplazamos coma por punto antes de hacer matemáticas
         const pCyberStr = fila.querySelector('.val-pcyber').value.replace(/,/g, '.');
         const pCyber = parseFloat(pCyberStr) || 0;
         
@@ -612,7 +617,6 @@
             const modelo = fila.querySelector('.val-modelo').value;
             const producto = fila.querySelector('.val-prod').value;
             
-            // Reemplazo robusto para cualquier coma residual que quede en el sistema
             const parseSoles = (val) => parseFloat(val.replace('S/ ', '').replace(/,/g, '')) || 0;
             const parsePorc = (val) => parseFloat(val.replace('%', '').replace(/,/g, '')) || 0;
 
