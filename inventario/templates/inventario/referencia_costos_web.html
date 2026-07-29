@@ -9,36 +9,60 @@
             <h3 style="margin: 0; color: #0f172a; text-transform: uppercase; display: flex; align-items: center; gap: 8px; font-size: 1.1rem;">
                 <i class="fas fa-dollar-sign" style="color: #0284c7;"></i> Costos Referenciales
             </h3>
-            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                <button type="button" class="btn-top" style="background-color: #0284c7; color: white;">
-                    <i class="fas fa-plus"></i> Nuevo Costo
+            
+            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                <!-- CAMPO PARA EL TIPO DE CAMBIO DÓLAR -->
+                <div style="display: flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                    <label style="font-weight: 800; color: #334155; font-size: 0.8rem;">T.C. DÓLAR:</label>
+                    <span style="font-weight: bold; color: #0284c7;">S/</span>
+                    <input type="number" id="input_dolar" value="3.80" step="0.01" style="width: 60px; border: none; background: transparent; font-weight: 900; color: #0284c7; outline: none; font-size: 0.9rem;" oninput="recalcularTodosLosDolares()">
+                </div>
+
+                <button type="button" onclick="agregarFilaCostos()" class="btn-top" style="background-color: #0284c7; color: white;">
+                    <i class="fas fa-plus"></i> Nueva Fila
                 </button>
-                <button type="button" class="btn-top" style="background-color: #0f172a; color: white;">
+                <button type="button" onclick="guardarCostosReferenciales()" class="btn-top" style="background-color: #0f172a; color: white;">
                     <i class="fas fa-save"></i> Guardar Cambios
                 </button>
             </div>
         </div>
 
         <div style="overflow-x: auto; border: 2px solid #cbd5e1; border-radius: 4px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-            <table style="width: 100%; border-collapse: collapse; background: white; font-size: 0.75rem; white-space: nowrap; table-layout: fixed;">
+            <table id="tablaCostosRef" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.75rem; table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 15%;">
+                    <col style="width: 40%;">
+                    <col style="width: 15%;">
+                    <col style="width: 15%;">
+                    <col style="width: 15%;">
+                </colgroup>
                 <thead style="position: sticky; top: 0; z-index: 10;">
                     <tr style="text-align: center; font-size: 0.75rem; font-weight: 800; background-color: #dbeafe; color: #000;">
-                        <th class="th-costo" style="width: 15%;">MODELO</th>
-                        <th class="th-costo" style="width: 40%;">PRODUCTO</th>
-                        <th class="th-costo" style="width: 15%;">COSTO CERO (S/.)</th>
-                        <th class="th-costo" style="width: 15%;">COSTO U. ($)</th>
-                        <th class="th-costo" style="width: 15%;">COSTO U. ($ ▶ S/.)</th>
+                        <th class="th-costo">MODELO</th>
+                        <th class="th-costo">PRODUCTO</th>
+                        <th class="th-costo">COSTO CERO (S/.)</th>
+                        <th class="th-costo">COSTO U. ($)</th>
+                        <th class="th-costo">COSTO U. ($ ▶ S/.)</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- FILA MOLDE -->
+                <tbody id="cuerpoCostosRef">
+                    {% for costo in costos %}
                     <tr class="fila-costo">
-                        <td class="td-costo"><input type="text" class="input-costo central" placeholder="Modelo..."></td>
-                        <td class="td-costo"><input type="text" class="input-costo" placeholder="Descripción del producto..."></td>
-                        <td class="td-costo"><input type="number" class="input-costo derecha" placeholder="0.00" style="font-weight: bold;"></td>
-                        <td class="td-costo"><input type="number" class="input-costo derecha" placeholder="0.00" style="font-weight: bold; color: #059669;"></td>
-                        <td class="td-costo"><input type="number" class="input-costo derecha" placeholder="0.00" style="font-weight: bold; color: #2563eb;"></td>
+                        <td class="td-costo"><input type="text" class="input-costo central val-modelo" value="{{ costo.modelo|default_if_none:'' }}" placeholder="Modelo..."></td>
+                        <td class="td-costo"><input type="text" class="input-costo val-producto" value="{{ costo.producto|default_if_none:'' }}" placeholder="Descripción del producto..."></td>
+                        <td class="td-costo"><input type="number" step="0.01" class="input-costo derecha val-costo-cero" value="{{ costo.costo_cero_soles|default_if_none:'' }}" placeholder="0.00" style="font-weight: bold;"></td>
+                        <td class="td-costo"><input type="number" step="0.01" class="input-costo derecha val-costo-dolar" value="{{ costo.costo_u_dolares|default_if_none:'' }}" placeholder="0.00" style="font-weight: bold; color: #059669;" oninput="calcularDolarFila(this)"></td>
+                        <td class="td-costo" style="background-color: #f8fafc;"><input type="text" readonly tabindex="-1" class="input-costo derecha val-convertido" value="{% if costo.costo_u_convertido %}S/ {{ costo.costo_u_convertido }}{% endif %}" style="font-weight: bold; color: #2563eb; cursor: not-allowed;"></td>
                     </tr>
+                    {% empty %}
+                    <tr class="fila-costo">
+                        <td class="td-costo"><input type="text" class="input-costo central val-modelo" placeholder="Modelo..."></td>
+                        <td class="td-costo"><input type="text" class="input-costo val-producto" placeholder="Descripción del producto..."></td>
+                        <td class="td-costo"><input type="number" step="0.01" class="input-costo derecha val-costo-cero" placeholder="0.00" style="font-weight: bold;"></td>
+                        <td class="td-costo"><input type="number" step="0.01" class="input-costo derecha val-costo-dolar" placeholder="0.00" style="font-weight: bold; color: #059669;" oninput="calcularDolarFila(this)"></td>
+                        <td class="td-costo" style="background-color: #f8fafc;"><input type="text" readonly tabindex="-1" class="input-costo derecha val-convertido" style="font-weight: bold; color: #2563eb; cursor: not-allowed;"></td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -53,10 +77,86 @@
     .fila-costo:nth-child(even) { background-color: #f8fafc; }
     .fila-costo:nth-child(odd) { background-color: #ffffff; }
     .input-costo { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 6px 8px; font-family: inherit; font-size: 12px; background-color: transparent; outline: none; }
-    .input-costo:focus { background-color: #eff6ff; box-shadow: inset 0 0 0 2px #3b82f6; color: #000; }
+    .input-costo:focus:not([readonly]) { background-color: #eff6ff; box-shadow: inset 0 0 0 2px #3b82f6; color: #000; }
     .central { text-align: center; }
     .derecha { text-align: right; }
     .input-costo::-webkit-outer-spin-button, .input-costo::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .input-costo[type=number] { -moz-appearance: textfield; }
 </style>
+
+<script>
+    // CALCULA LA MULTIPLICACIÓN EN UNA SOLA FILA
+    function calcularDolarFila(inputElement) {
+        const fila = inputElement.closest('tr');
+        const valorDolarIngresado = parseFloat(inputElement.value) || 0;
+        const tipoCambio = parseFloat(document.getElementById('input_dolar').value) || 0;
+        const inputConvertido = fila.querySelector('.val-convertido');
+
+        if (valorDolarIngresado > 0 && tipoCambio > 0) {
+            inputConvertido.value = "S/ " + (valorDolarIngresado * tipoCambio).toFixed(2);
+        } else {
+            inputConvertido.value = "";
+        }
+    }
+
+    // SI EL USUARIO CAMBIA EL TIPO DE CAMBIO ARRIBA, RECALCULA TODA LA TABLA
+    function recalcularTodosLosDolares() {
+        const inputsDolares = document.querySelectorAll('.val-costo-dolar');
+        inputsDolares.forEach(input => {
+            if(input.value) {
+                calcularDolarFila(input);
+            }
+        });
+    }
+
+    function agregarFilaCostos() {
+        const tbody = document.getElementById('cuerpoCostosRef');
+        const primeraFila = tbody.querySelector('.fila-costo');
+        if (primeraFila) {
+            const nuevaFila = primeraFila.cloneNode(true);
+            nuevaFila.querySelectorAll('input').forEach(input => input.value = '');
+            tbody.appendChild(nuevaFila);
+        } else {
+            alert("Error al clonar la fila.");
+        }
+    }
+
+    function guardarCostosReferenciales() {
+        const filas = document.querySelectorAll('.fila-costo');
+        const datos = [];
+
+        filas.forEach(fila => {
+            const modelo = fila.querySelector('.val-modelo').value;
+            const producto = fila.querySelector('.val-producto').value;
+            
+            const parseSoles = (val) => parseFloat(val.replace('S/ ', '')) || 0;
+
+            if (modelo || producto) {
+                datos.push({
+                    modelo: modelo,
+                    producto: producto,
+                    costo_cero_soles: parseFloat(fila.querySelector('.val-costo-cero').value) || 0,
+                    costo_u_dolares: parseFloat(fila.querySelector('.val-costo-dolar').value) || 0,
+                    costo_u_convertido: parseSoles(fila.querySelector('.val-convertido').value)
+                });
+            }
+        });
+
+        if (datos.length === 0) { alert("No hay datos llenos para guardar."); return; }
+
+        fetch("{% url 'guardar_referencia_costos_web' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+            body: JSON.stringify(datos)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert("¡Costos guardados con éxito!");
+                location.reload(); 
+            } else { alert("Error al guardar: " + data.message); }
+        })
+        .catch(error => { console.error('Error:', error); alert("Error de conexión."); });
+    }
+</script>
 {% endblock %}

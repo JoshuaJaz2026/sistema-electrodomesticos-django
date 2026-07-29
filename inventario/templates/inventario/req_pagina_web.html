@@ -219,7 +219,7 @@
                             </select>
                         </td>
                         
-                        <td class="td-web"><input type="text" class="input-web central val-modelo" value="{{ eval.modelo|default_if_none:'' }}" placeholder="Modelo..."></td>
+                        <td class="td-web"><input type="text" class="input-web central val-modelo" value="{{ eval.modelo|default_if_none:'' }}" placeholder="Modelo..." onchange="buscarProductoPorModelo(this)"></td>
                         <td class="td-web"><input type="text" class="input-web val-prod" value="{{ eval.producto|default_if_none:'' }}" placeholder="Producto..."></td>
                         
                         <td class="td-web" style="background-color: #f3f4f6;">
@@ -413,7 +413,7 @@
                             </select>
                         </td>
                         
-                        <td class="td-web"><input type="text" class="input-web central val-modelo" placeholder="Modelo..."></td>
+                        <td class="td-web"><input type="text" class="input-web central val-modelo" placeholder="Modelo..." onchange="buscarProductoPorModelo(this)"></td>
                         <td class="td-web"><input type="text" class="input-web val-prod" placeholder="Producto..."></td>
                         
                         <td class="td-web" style="background-color: #f3f4f6;">
@@ -487,6 +487,29 @@
             if (val) { select.value = val; }
         });
     });
+
+    // AUTOCOMPLETADO DE PRODUCTO SEGÚN EL MODELO INGRESADO
+    function buscarProductoPorModelo(inputModelo) {
+        const modelo = inputModelo.value.trim();
+        const fila = inputModelo.closest('tr');
+        const inputProducto = fila.querySelector('.val-prod');
+
+        if (modelo !== '') {
+            // Llama a la API de búsqueda
+            fetch(`{% url 'api_buscar_producto' %}?modelo=${encodeURIComponent(modelo)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        inputProducto.value = data.producto || data.descripcion || data.nombre || data.producto_nombre || "";
+                        inputProducto.style.backgroundColor = "#dcfce3";
+                        setTimeout(() => inputProducto.style.backgroundColor = "transparent", 800);
+                    }
+                })
+                .catch(error => {
+                    console.error("No se pudo conectar con el directorio de productos:", error);
+                });
+        }
+    }
 
     function calcularGanancias(inputElement) {
         const fila = inputElement.closest('tr');

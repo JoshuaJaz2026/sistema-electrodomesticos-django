@@ -4608,3 +4608,25 @@ def guardar_evaluaciones_web(request):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'error', 'message': 'Método no válido'})
+
+@login_required
+def guardar_referencia_costos_web(request):
+    from .models import CostoReferencial
+    import json
+    if request.method == 'POST':
+        try:
+            datos = json.loads(request.body)
+            CostoReferencial.objects.all().delete()
+            
+            for fila in datos:
+                CostoReferencial.objects.create(
+                    modelo=fila.get('modelo'),
+                    producto=fila.get('producto'),
+                    costo_cero_soles=fila.get('costo_cero_soles', 0),
+                    costo_u_dolares=fila.get('costo_u_dolares', 0),
+                    costo_u_convertido=fila.get('costo_u_convertido', 0)
+                )
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Método no válido'})
