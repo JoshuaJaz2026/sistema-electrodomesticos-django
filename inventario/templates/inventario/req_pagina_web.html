@@ -10,17 +10,32 @@
                 <i class="fas fa-laptop" style="color: #9333ea;"></i> Página Web - Evaluación de Precios
             </h3>
             <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                <button type="button" class="btn-top" style="background-color: #9333ea; color: white;">
+                <button type="button" onclick="agregarFilaWeb()" class="btn-top" style="background-color: #9333ea; color: white;">
                     <i class="fas fa-plus"></i> Nueva Fila
                 </button>
-                <button type="button" class="btn-top" style="background-color: #1e293b; color: white;">
+                <button type="button" onclick="procesarEvaluaciones()" class="btn-top" style="background-color: #1e293b; color: white;">
                     <i class="fas fa-save"></i> Guardar Cambios
                 </button>
             </div>
         </div>
 
         <div style="overflow-x: auto; border: 2px solid #cbd5e1; border-radius: 4px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-            <table style="width: 100%; border-collapse: collapse; background: white; font-size: 0.75rem; white-space: nowrap; table-layout: fixed;">
+            <table id="tablaPreciosWeb" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.75rem; table-layout: fixed;">
+                
+                <colgroup>
+                    <col style="width: 10%;"> <!-- MARCA -->
+                    <col style="width: 12%;"> <!-- CATEGORIA -->
+                    <col style="width: 10%;"> <!-- MODELO -->
+                    <col style="width: 20%;"> <!-- PRODUCTO -->
+                    <col style="width: 8%;">  <!-- P TACHADO -->
+                    <col style="width: 8%;">  <!-- P WEB -->
+                    <col style="width: 8%;">  <!-- PRECIO CYBER -->
+                    <col style="width: 8%;">  <!-- COSTO -->
+                    <col style="width: 8%;">  <!-- GANANCIA CYBER -->
+                    <col style="width: 8%;">  <!-- GANANCIA WEB -->
+                    <col style="width: 6%;">  <!-- RENTABILIDAD -->
+                </colgroup>
+
                 <thead style="position: sticky; top: 0; z-index: 10;">
                     <tr style="font-weight: 900; font-size: 0.85rem; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">
                         <th colspan="11" style="background-color: #9333ea; color: white; padding: 10px; border: 1px solid #7e22ce;">
@@ -28,35 +43,227 @@
                         </th>
                     </tr>
                     <tr style="text-align: center; font-size: 0.65rem; font-weight: 800;">
-                        <th class="th-web" style="width: 8%; background-color: #a855f7; color: white;">MARCA</th>
-                        <th class="th-web" style="width: 10%; background-color: #a855f7; color: white;">CATEGORÍA</th>
-                        <th class="th-web" style="width: 12%; background-color: #a855f7; color: white;">MODELO</th>
-                        <th class="th-web" style="width: 22%; background-color: #a855f7; color: white;">PRODUCTO</th>
-                        <th class="th-web" style="width: 6%; background-color: #a855f7; color: white;">P. TACHADO</th>
-                        <th class="th-web" style="width: 6%; background-color: #a855f7; color: white;">P. WEB (+ 7%)</th>
-                        <th class="th-web" style="width: 7%; background-color: #fef08a; color: black; font-style: italic;">PRECIO CYBER Jared</th>
-                        <th class="th-web" style="width: 7%; background-color: #dc2626; color: white;">COSTO DEL PRODUCTO</th>
-                        <th class="th-web" style="width: 7%; background-color: #fef08a; color: black; font-style: italic;">GANANCIA CYBER Jared</th>
-                        <th class="th-web" style="width: 7%; background-color: #a855f7; color: white;">GANANCIA P. WEB</th>
-                        <th class="th-web" style="width: 8%; background-color: #a855f7; color: white;">RENTABILIDAD (%)</th>
+                        <th class="th-web" style="background-color: #a855f7; color: white;">MARCA</th>
+                        <th class="th-web" style="background-color: #a855f7; color: white;">CATEGORÍA</th>
+                        <th class="th-web" style="background-color: #a855f7; color: white;">MODELO</th>
+                        <th class="th-web" style="background-color: #a855f7; color: white;">PRODUCTO</th>
+                        <th class="th-web" style="background-color: #a855f7; color: white;">P. TACHADO</th>
+                        <th class="th-web" style="background-color: #a855f7; color: white;">P. WEB (+ 7%)</th>
+                        <th class="th-web" style="background-color: #fef08a; color: black; font-style: italic;">PRECIO CYBER Jared</th>
+                        <th class="th-web" style="background-color: #dc2626; color: white;">COSTO DEL PRODUCTO</th>
+                        <th class="th-web" style="background-color: #fef08a; color: black; font-style: italic;">GANANCIA CYBER Jared</th>
+                        <th class="th-web" style="background-color: #a855f7; color: white;">GANANCIA P. WEB</th>
+                        <th class="th-web" style="background-color: #a855f7; color: white;">RENTABILIDAD (%)</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="cuerpoPreciosWeb">
+                    
+                    {% for eval in evaluaciones %}
+                    <!-- FILAS CARGADAS DESDE LA BD AQUÍ (Si decides conectar esto más adelante) -->
+                    {% empty %}
+                    
+                    <!-- FILA MOLDE -->
                     <tr class="fila-web">
-                        <td class="td-web"><input type="text" class="input-web central" placeholder="Marca..."></td>
-                        <td class="td-web"><input type="text" class="input-web central" placeholder="Categoría..."></td>
-                        <td class="td-web"><input type="text" class="input-web central" placeholder="Modelo..."></td>
-                        <td class="td-web"><input type="text" class="input-web" placeholder="Producto..."></td>
+                        <!-- COMBO MARCA -->
+                        <td class="td-web">
+                            <select class="input-web central select-bonito val-marca">
+                                <option value="" disabled selected>Marca...</option>
+                                <option value="ELECTROLUX">ELECTROLUX</option>
+                                <option value="BEHRINGER">BEHRINGER</option>
+                                <option value="BGH">BGH</option>
+                                <option value="BOSSKO">BOSSKO</option>
+                                <option value="FINEZZA">FINEZZA</option>
+                                <option value="FUJITEC">FUJITEC</option>
+                                <option value="GAMA">GAMA</option>
+                                <option value="IMACO">IMACO</option>
+                                <option value="INDURAMA">INDURAMA</option>
+                                <option value="LG">LG</option>
+                                <option value="MORLEY">MORLEY</option>
+                                <option value="OSTER">OSTER</option>
+                                <option value="PANASONIC">PANASONIC</option>
+                                <option value="PHILIPS">PHILIPS</option>
+                                <option value="RECORD">RECORD</option>
+                                <option value="SAMSUNG">SAMSUNG</option>
+                                <option value="SKULLCANDY">SKULLCANDY</option>
+                                <option value="SONY">SONY</option>
+                                <option value="TAURUS">TAURUS</option>
+                                <option value="TREVELY">TREVELY</option>
+                                <option value="VANHOFF">VANHOFF</option>
+                                <option value="WAYRA">WAYRA</option>
+                                <option value="EVOLUTION">EVOLUTION</option>
+                                <option value="JVC">JVC</option>
+                                <option value="TCL">TCL</option>
+                                <option value="HISENSE">HISENSE</option>
+                                <option value="BLACKLINE">BLACKLINE</option>
+                                <option value="YANBAL">YANBAL</option>
+                                <option value="WHAL">WHAL</option>
+                                <option value="VISIONNER">VISIONNER</option>
+                                <option value="BLACK + DECKER">BLACK + DECKER</option>
+                                <option value="BORD">BORD</option>
+                                <option value="DAJU">DAJU</option>
+                                <option value="DSP">DSP</option>
+                                <option value="GA.MA">GA.MA</option>
+                                <option value="ILUMIA">ILUMIA</option>
+                                <option value="IMPERIAL">IMPERIAL</option>
+                                <option value="LUISSANT">LUISSANT</option>
+                                <option value="PREMIER">PREMIER</option>
+                                <option value="PREMIUM">PREMIUM</option>
+                                <option value="REMINGTON">REMINGTON</option>
+                                <option value="RUBBERMAID">RUBBERMAID</option>
+                                <option value="S/N MARCA">S/N MARCA</option>
+                                <option value="SILVER CREST">SILVER CREST</option>
+                                <option value="SOLE">SOLE</option>
+                                <option value="WAHL">WAHL</option>
+                                <option value="MOTOROLA">MOTOROLA</option>
+                                <option value="HYUNDAI">HYUNDAI</option>
+                            </select>
+                        </td>
                         
-                        <td class="td-web"><input type="number" class="input-web derecha" placeholder="0.00"></td>
-                        <td class="td-web"><input type="number" class="input-web derecha val-pweb" placeholder="0.00" oninput="calcularGanancias(this)"></td>
-                        <td class="td-web" style="background-color: #fefce8;"><input type="number" class="input-web derecha val-pcyber" placeholder="0.00" style="color: #9a3412; font-weight: bold;" oninput="calcularGanancias(this)"></td>
-                        <td class="td-web" style="background-color: #fef2f2;"><input type="number" class="input-web derecha val-costo" placeholder="0.00" style="color: #dc2626; font-weight: bold;" oninput="calcularGanancias(this)"></td>
+                        <!-- COMBO CATEGORÍA -->
+                        <td class="td-web">
+                            <select class="input-web central select-bonito val-cat">
+                                <option value="" disabled selected>Categoría...</option>
+                                <option value="CERVECERA">CERVECERA</option>
+                                <option value="AFEITADOR">AFEITADOR</option>
+                                <option value="ALISADOR">ALISADOR</option>
+                                <option value="ARROCERA">ARROCERA</option>
+                                <option value="AUDÍFONOS">AUDÍFONOS</option>
+                                <option value="BATIDORA DE INMERCION">BATIDORA DE INMERCION</option>
+                                <option value="BATIDORA DE MANO">BATIDORA DE MANO</option>
+                                <option value="BATIDORA DE TAZÓN">BATIDORA DE TAZÓN</option>
+                                <option value="BATIDORA PLANETARIA">BATIDORA PLANETARIA</option>
+                                <option value="CACEROLA">CACEROLA</option>
+                                <option value="CAFETERA">CAFETERA</option>
+                                <option value="CALENTADOR">CALENTADOR</option>
+                                <option value="CEPILLO">CEPILLO</option>
+                                <option value="COCINA DE INDUCCION">COCINA DE INDUCCION</option>
+                                <option value="COCINA DE PIE">COCINA DE PIE</option>
+                                <option value="COCINA ELÉCTRICA">COCINA ELÉCTRICA</option>
+                                <option value="COLADOR">COLADOR</option>
+                                <option value="COMBO BLACK">COMBO BLACK</option>
+                                <option value="COMBO BLACK SILVER">COMBO BLACK SILVER</option>
+                                <option value="COMBO CHERRY">COMBO CHERRY</option>
+                                <option value="COMBO CUMBIA">COMBO CUMBIA</option>
+                                <option value="COMBO OSTER">COMBO OSTER</option>
+                                <option value="COMBOBLACKOSTER2">COMBOBLACKOSTER2</option>
+                                <option value="COMBOEXTRACTOR">COMBOEXTRACTOR</option>
+                                <option value="COMBOOSTER">COMBOOSTER</option>
+                                <option value="COMBORED">COMBORED</option>
+                                <option value="CONTROL TV">CONTROL TV</option>
+                                <option value="CREPERA">CREPERA</option>
+                                <option value="CUCHILLA">CUCHILLA</option>
+                                <option value="DEPILADOR">DEPILADOR</option>
+                                <option value="DESHUMEDECEDOR">DESHUMEDECEDOR</option>
+                                <option value="DISPENSADOR ELÉCTRICO">DISPENSADOR ELÉCTRICO</option>
+                                <option value="ESPAGUETERA">ESPAGUETERA</option>
+                                <option value="ESTUFA">ESTUFA</option>
+                                <option value="EXTRACTOR DE JUGOS">EXTRACTOR DE JUGOS</option>
+                                <option value="FREIDORA DE AIRE">FREIDORA DE AIRE</option>
+                                <option value="FRIGOBAR">FRIGOBAR</option>
+                                <option value="HERVIDOR">HERVIDOR</option>
+                                <option value="HORNO CON FREIDORA">HORNO CON FREIDORA</option>
+                                <option value="HORNO ELÉCTRICO">HORNO ELÉCTRICO</option>
+                                <option value="JARRA">JARRA</option>
+                                <option value="JUEGO DE OLLAS">JUEGO DE OLLAS</option>
+                                <option value="KITOSTER1">KITOSTER1</option>
+                                <option value="KITOSTER2">KITOSTER2</option>
+                                <option value="LAVADORA">LAVADORA</option>
+                                <option value="LAVASECA">LAVASECA</option>
+                                <option value="LICUADORA">LICUADORA</option>
+                                <option value="MICROONDAS">MICROONDAS</option>
+                                <option value="MINICOMPONENTE">MINICOMPONENTE</option>
+                                <option value="MOLDES">MOLDES</option>
+                                <option value="MOLEDOR DE CARNE">MOLEDOR DE CARNE</option>
+                                <option value="MULTI OLLA">MULTI OLLA</option>
+                                <option value="OLLA">OLLA</option>
+                                <option value="OLLA A PRESIÓN">OLLA A PRESIÓN</option>
+                                <option value="PANIFICADORA">PANIFICADORA</option>
+                                <option value="PARLANTE">PARLANTE</option>
+                                <option value="PARRILLA CARBÓN">PARRILLA CARBÓN</option>
+                                <option value="PICADOR">PICADOR</option>
+                                <option value="PLANCHA A VAPOR">PLANCHA A VAPOR</option>
+                                <option value="PLANCHA ALISADOR">PLANCHA ALISADOR</option>
+                                <option value="PLANCHA GRILL">PLANCHA GRILL</option>
+                                <option value="PLANCHA Y PARRILLA">PLANCHA Y PARRILLA</option>
+                                <option value="PROCESADOR DE ALIMENTOS">PROCESADOR DE ALIMENTOS</option>
+                                <option value="REFRIGERADORA">REFRIGERADORA</option>
+                                <option value="SANDWICHERA">SANDWICHERA</option>
+                                <option value="SARTEN">SARTEN</option>
+                                <option value="SARTÉN ELÉCTRICA">SARTÉN ELÉCTRICA</option>
+                                <option value="SECADORA DE CABELLO">SECADORA DE CABELLO</option>
+                                <option value="SET DE BOWLS">SET DE BOWLS</option>
+                                <option value="SET DE CUBIERTOS">SET DE CUBIERTOS</option>
+                                <option value="SOUNDBAR">SOUNDBAR</option>
+                                <option value="TABLET">TABLET</option>
+                                <option value="TAZAS">TAZAS</option>
+                                <option value="TERMO BOMBA">TERMO BOMBA</option>
+                                <option value="TERMO HERVIDOR">TERMO HERVIDOR</option>
+                                <option value="TERMO VENTILADOR">TERMO VENTILADOR</option>
+                                <option value="TERMORADIADOR">TERMORADIADOR</option>
+                                <option value="TETERA">TETERA</option>
+                                <option value="TOSTADORA">TOSTADORA</option>
+                                <option value="TRICOMBO AVOCADO">TRICOMBO AVOCADO</option>
+                                <option value="TRIPACK SARTÉN">TRIPACK SARTÉN</option>
+                                <option value="TV">TV</option>
+                                <option value="VAPORIZADOR DE TELAS">VAPORIZADOR DE TELAS</option>
+                                <option value="VASO DE VIDRIO">VASO DE VIDRIO</option>
+                                <option value="VENTILADOR 3 EN 1">VENTILADOR 3 EN 1</option>
+                                <option value="WAFLERA">WAFLERA</option>
+                                <option value="VENTILADOR DE PARED">VENTILADOR DE PARED</option>
+                                <option value="VENTILADOR 2 EN 1">VENTILADOR 2 EN 1</option>
+                                <option value="VENTILADOR DE PEDESTAL">VENTILADOR DE PEDESTAL</option>
+                                <option value="COCINA A GAS">COCINA A GAS</option>
+                                <option value="HERVIDOR CAFETERA">HERVIDOR CAFETERA</option>
+                                <option value="EXPRIMIDOR DE CÍTRICOS">EXPRIMIDOR DE CÍTRICOS</option>
+                                <option value="CONGELADORA">CONGELADORA</option>
+                                <option value="CUIDADO PERSONAL">CUIDADO PERSONAL</option>
+                                <option value="DISPENSADOR DE AGUA">DISPENSADOR DE AGUA</option>
+                                <option value="VENTILADOR DE TORRE">VENTILADOR DE TORRE</option>
+                                <option value="VENTILADOR DE PISO">VENTILADOR DE PISO</option>
+                                <option value="VENTILADOR DE TECHO">VENTILADOR DE TECHO</option>
+                                <option value="ASPIRADORA ROBOT">ASPIRADORA ROBOT</option>
+                            </select>
+                        </td>
                         
-                        <td class="td-web" style="background-color: #fefce8;"><input type="text" readonly class="input-web derecha val-gcyber" tabindex="-1" style="color: #9a3412; font-weight: bold; background: transparent;"></td>
-                        <td class="td-web"><input type="text" readonly class="input-web derecha val-gweb" tabindex="-1" style="color: #7e22ce; font-weight: bold; background: transparent;"></td>
-                        <td class="td-web"><input type="text" readonly class="input-web central val-renta" tabindex="-1" style="color: #7e22ce; font-weight: bold; background: transparent;"></td>
+                        <td class="td-web"><input type="text" class="input-web central val-modelo" placeholder="Modelo..."></td>
+                        <td class="td-web"><input type="text" class="input-web val-prod" placeholder="Producto..."></td>
+                        
+                        <!-- P. TACHADO (AUTOMÁTICO BLOQUEADO) -->
+                        <td class="td-web" style="background-color: #f3f4f6;">
+                            <input type="text" readonly tabindex="-1" class="input-web derecha val-ptachado" style="color: #4b5563; font-weight: bold; cursor: not-allowed;">
+                        </td>
+                        
+                        <!-- P. WEB +7% (AUTOMÁTICO BLOQUEADO) -->
+                        <td class="td-web" style="background-color: #f3f4f6;">
+                            <input type="text" readonly tabindex="-1" class="input-web derecha val-pweb" style="color: #4b5563; font-weight: bold; cursor: not-allowed;">
+                        </td>
+                        
+                        <!-- PRECIO CYBER (EDITABLE) -->
+                        <td class="td-web" style="background-color: #fefce8;">
+                            <input type="number" step="0.01" class="input-web derecha val-pcyber" placeholder="0.00" style="color: #9a3412; font-weight: bold;" oninput="calcularGanancias(this)">
+                        </td>
+                        
+                        <!-- COSTO (EDITABLE) -->
+                        <td class="td-web" style="background-color: #dc2626;">
+                            <input type="number" step="0.01" class="input-web derecha val-costo" placeholder="0.00" style="color: white; font-weight: bold;" oninput="calcularGanancias(this)">
+                        </td>
+                        
+                        <!-- GANANCIA CYBER (AUTOMÁTICO BLOQUEADO) -->
+                        <td class="td-web" style="background-color: #fefce8;">
+                            <input type="text" readonly tabindex="-1" class="input-web derecha val-gcyber" style="color: #9a3412; font-weight: bold; cursor: not-allowed;">
+                        </td>
+                        
+                        <!-- GANANCIA WEB (AUTOMÁTICO BLOQUEADO) -->
+                        <td class="td-web" style="background-color: #f3e8ff;">
+                            <input type="text" readonly tabindex="-1" class="input-web derecha val-gweb" style="color: #7e22ce; font-weight: bold; cursor: not-allowed;">
+                        </td>
+                        
+                        <!-- RENTABILIDAD (AUTOMÁTICO BLOQUEADO) -->
+                        <td class="td-web" style="background-color: #f3e8ff;">
+                            <input type="text" readonly tabindex="-1" class="input-web central val-renta" style="color: #7e22ce; font-weight: bold; cursor: not-allowed;">
+                        </td>
                     </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -66,41 +273,128 @@
 <style>
     .btn-top { color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s; font-size: 0.8rem;}
     .btn-top:hover { filter: brightness(1.1); transform: translateY(-1px); }
-    .th-web { padding: 8px 4px; border: 1px solid #cbd5e1; vertical-align: middle; }
-    .td-web { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; }
+    
+    .th-web { padding: 8px 4px; border: 1px solid #cbd5e1; vertical-align: middle; white-space: normal; word-wrap: break-word; }
+    .td-web { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; overflow: hidden; }
+    
     .fila-web:nth-child(even) { background-color: #f8fafc; }
     .fila-web:nth-child(odd) { background-color: #ffffff; }
-    .input-web { width: 100%; height: 100%; box-sizing: border-box; border: none; padding: 6px 4px; font-family: inherit; font-size: 11px; background-color: transparent; outline: none; }
-    .input-web:focus { background-color: #f3e8ff; box-shadow: inset 0 0 0 2px #9333ea; color: #000; }
+    .fila-web:hover { filter: brightness(0.95); }
+
+    .input-web { width: 100%; min-width: 0; height: 100%; box-sizing: border-box; border: none; padding: 6px 4px; font-family: inherit; font-size: 11px; background-color: transparent; outline: none; }
+    
+    /* Cambiar el placeholder para que se vea blanco en la caja roja de costo */
+    .val-costo::placeholder { color: rgba(255, 255, 255, 0.7); }
+    
+    /* Efecto foco en inputs */
+    .input-web:focus:not([readonly]) { background-color: #f3e8ff; box-shadow: inset 0 0 0 2px #9333ea; color: #000 !important; }
+    
     .central { text-align: center; }
     .derecha { text-align: right; }
-    .input-web::-webkit-outer-spin-button, .input-web::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    
+    .input-web[type=number]::-webkit-inner-spin-button, 
+    .input-web[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     .input-web[type=number] { -moz-appearance: textfield; }
+
+    .select-bonito { 
+        cursor: pointer; 
+        appearance: none; 
+        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); 
+        background-repeat: no-repeat; 
+        background-position: right 2px top 50%; 
+        background-size: 8px auto; 
+        padding-right: 12px; 
+        font-weight: bold; 
+        color: #1e3a8a;
+    }
 </style>
 
 <script>
+    // FORMULAS TRASLADADAS DIRECTAMENTE DESDE EXCEL
     function calcularGanancias(inputElement) {
         const fila = inputElement.closest('tr');
-        const pWeb = parseFloat(fila.querySelector('.val-pweb').value) || 0;
+        
+        // M5 = Precio Cyber
         const pCyber = parseFloat(fila.querySelector('.val-pcyber').value) || 0;
+        // N5 = Costo
         const costo = parseFloat(fila.querySelector('.val-costo').value) || 0;
         
+        const inPTachado = fila.querySelector('.val-ptachado');
+        const inPWeb = fila.querySelector('.val-pweb');
         const inGCyber = fila.querySelector('.val-gcyber');
         const inGWeb = fila.querySelector('.val-gweb');
         const inRenta = fila.querySelector('.val-renta');
 
-        if (pCyber > 0 && costo > 0) { inGCyber.value = (pCyber - costo).toFixed(2); } else { inGCyber.value = ''; }
+        const formatoSoles = (val) => "S/ " + val.toFixed(2);
 
-        let gananciaWebVal = 0;
-        if (pWeb > 0 && costo > 0) {
-            gananciaWebVal = pWeb - costo;
-            inGWeb.value = gananciaWebVal.toFixed(2);
-        } else { inGWeb.value = ''; }
+        // 1. CALCULO P. TACHADO Y P. WEB (Basados en M5: Precio Cyber)
+        if (pCyber > 0) {
+            
+            // Fórmula Excel P. Tachado: =SI(M5<=150; REDONDEAR(M5*1,7+MAX(60;M5*0,1);-1)-1; REDONDEAR(M5*1,7;-1)-1)
+            let pTachadoVal = 0;
+            if (pCyber <= 150) {
+                pTachadoVal = Math.round((pCyber * 1.7 + Math.max(60, pCyber * 0.1)) / 10) * 10 - 1;
+            } else {
+                pTachadoVal = Math.round((pCyber * 1.7) / 10) * 10 - 1;
+            }
+            inPTachado.value = formatoSoles(pTachadoVal);
 
-        if (gananciaWebVal > 0 && costo > 0) {
-            const rentabilidad = (gananciaWebVal / costo) * 100;
-            inRenta.value = rentabilidad.toFixed(2) + '%';
-        } else { inRenta.value = ''; }
+            // Fórmula Excel P. Web: =REDONDEAR.MAS(M5*1,07;-1)+9-RESIDUO(REDONDEAR.MAS(M5*1,07;-1);10)
+            let pWebBase = Math.ceil((pCyber * 1.07) / 10) * 10;
+            let pWebVal = pWebBase + 9 - (Math.round(pWebBase) % 10);
+            inPWeb.value = formatoSoles(pWebVal);
+            
+        } else {
+            inPTachado.value = '';
+            inPWeb.value = '';
+        }
+
+        // Recuperamos el valor numérico del P. Web calculado
+        let pWebCalculado = 0;
+        if (inPWeb.value) {
+            pWebCalculado = parseFloat(inPWeb.value.replace('S/ ', ''));
+        }
+
+        // 2. CÁLCULO GANANCIAS Y RENTABILIDAD
+        if (pCyber > 0 && costo > 0) {
+            // Ganancia Cyber: =M5-N5
+            const gananciaCyberVal = pCyber - costo;
+            inGCyber.value = formatoSoles(gananciaCyberVal);
+            
+            // Rentabilidad: =O5/N5 (Ganancia Cyber / Costo)
+            const rentabilidadVal = (gananciaCyberVal / costo) * 100;
+            inRenta.value = rentabilidadVal.toFixed(2) + '%';
+        } else {
+            inGCyber.value = '';
+            inRenta.value = '';
+        }
+
+        if (pWebCalculado > 0 && costo > 0) {
+            // Ganancia Web: =L5-N5 (P. Web - Costo)
+            inGWeb.value = formatoSoles(pWebCalculado - costo);
+        } else {
+            inGWeb.value = '';
+        }
+    }
+
+    function agregarFilaWeb() {
+        const tbody = document.getElementById('cuerpoPreciosWeb');
+        const primeraFila = tbody.querySelector('.fila-web');
+        
+        if (primeraFila) {
+            const nuevaFila = primeraFila.cloneNode(true);
+            
+            nuevaFila.querySelectorAll('input').forEach(input => input.value = '');
+            nuevaFila.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+            
+            tbody.appendChild(nuevaFila);
+        } else {
+            alert("No hay una fila base para clonar. Por favor recarga la página.");
+        }
+    }
+    
+    function procesarEvaluaciones() {
+        alert("Función de guardado lista para ser conectada a Python cuando desees.");
     }
 </script>
 {% endblock %}
