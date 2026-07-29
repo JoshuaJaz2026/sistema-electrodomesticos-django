@@ -4,6 +4,160 @@
 {% block content %}
 <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem; width: 100%;">
     
+    <!-- DATALISTS GLOBALES PARA AUTOCOMPLETADO (Ahorra cientos de líneas de código) -->
+    <datalist id="lista-marcas">
+        <option value="ELECTROLUX">
+        <option value="BEHRINGER">
+        <option value="BGH">
+        <option value="BOSSKO">
+        <option value="FINEZZA">
+        <option value="FUJITEC">
+        <option value="GAMA">
+        <option value="IMACO">
+        <option value="INDURAMA">
+        <option value="LG">
+        <option value="MORLEY">
+        <option value="OSTER">
+        <option value="PANASONIC">
+        <option value="PHILIPS">
+        <option value="RECORD">
+        <option value="SAMSUNG">
+        <option value="SKULLCANDY">
+        <option value="SONY">
+        <option value="TAURUS">
+        <option value="TREVELY">
+        <option value="VANHOFF">
+        <option value="WAYRA">
+        <option value="EVOLUTION">
+        <option value="JVC">
+        <option value="TCL">
+        <option value="HISENSE">
+        <option value="BLACKLINE">
+        <option value="YANBAL">
+        <option value="WHAL">
+        <option value="VISIONNER">
+        <option value="BLACK + DECKER">
+        <option value="BORD">
+        <option value="DAJU">
+        <option value="DSP">
+        <option value="GA.MA">
+        <option value="ILUMIA">
+        <option value="IMPERIAL">
+        <option value="LUISSANT">
+        <option value="PREMIER">
+        <option value="PREMIUM">
+        <option value="REMINGTON">
+        <option value="RUBBERMAID">
+        <option value="S/N MARCA">
+        <option value="SILVER CREST">
+        <option value="SOLE">
+        <option value="WAHL">
+        <option value="MOTOROLA">
+        <option value="HYUNDAI">
+    </datalist>
+
+    <datalist id="lista-categorias">
+        <option value="CERVECERA">
+        <option value="AFEITADOR">
+        <option value="ALISADOR">
+        <option value="ARROCERA">
+        <option value="AUDÍFONOS">
+        <option value="BATIDORA DE INMERCION">
+        <option value="BATIDORA DE MANO">
+        <option value="BATIDORA DE TAZÓN">
+        <option value="BATIDORA PLANETARIA">
+        <option value="CACEROLA">
+        <option value="CAFETERA">
+        <option value="CALENTADOR">
+        <option value="CEPILLO">
+        <option value="COCINA DE INDUCCION">
+        <option value="COCINA DE PIE">
+        <option value="COCINA ELÉCTRICA">
+        <option value="COLADOR">
+        <option value="COMBO BLACK">
+        <option value="COMBO BLACK SILVER">
+        <option value="COMBO CHERRY">
+        <option value="COMBO CUMBIA">
+        <option value="COMBO OSTER">
+        <option value="COMBOBLACKOSTER2">
+        <option value="COMBOEXTRACTOR">
+        <option value="COMBOOSTER">
+        <option value="COMBORED">
+        <option value="CONTROL TV">
+        <option value="CREPERA">
+        <option value="CUCHILLA">
+        <option value="DEPILADOR">
+        <option value="DESHUMEDECEDOR">
+        <option value="DISPENSADOR ELÉCTRICO">
+        <option value="ESPAGUETERA">
+        <option value="ESTUFA">
+        <option value="EXTRACTOR DE JUGOS">
+        <option value="FREIDORA DE AIRE">
+        <option value="FRIGOBAR">
+        <option value="HERVIDOR">
+        <option value="HORNO CON FREIDORA">
+        <option value="HORNO ELÉCTRICO">
+        <option value="JARRA">
+        <option value="JUEGO DE OLLAS">
+        <option value="KITOSTER1">
+        <option value="KITOSTER2">
+        <option value="LAVADORA">
+        <option value="LAVASECA">
+        <option value="LICUADORA">
+        <option value="MICROONDAS">
+        <option value="MINICOMPONENTE">
+        <option value="MOLDES">
+        <option value="MOLEDOR DE CARNE">
+        <option value="MULTI OLLA">
+        <option value="OLLA">
+        <option value="OLLA A PRESIÓN">
+        <option value="PANIFICADORA">
+        <option value="PARLANTE">
+        <option value="PARRILLA CARBÓN">
+        <option value="PICADOR">
+        <option value="PLANCHA A VAPOR">
+        <option value="PLANCHA ALISADOR">
+        <option value="PLANCHA GRILL">
+        <option value="PLANCHA Y PARRILLA">
+        <option value="PROCESADOR DE ALIMENTOS">
+        <option value="REFRIGERADORA">
+        <option value="SANDWICHERA">
+        <option value="SARTEN">
+        <option value="SARTÉN ELÉCTRICA">
+        <option value="SECADORA DE CABELLO">
+        <option value="SET DE BOWLS">
+        <option value="SET DE CUBIERTOS">
+        <option value="SOUNDBAR">
+        <option value="TABLET">
+        <option value="TAZAS">
+        <option value="TERMO BOMBA">
+        <option value="TERMO HERVIDOR">
+        <option value="TERMO VENTILADOR">
+        <option value="TERMORADIADOR">
+        <option value="TETERA">
+        <option value="TOSTADORA">
+        <option value="TRICOMBO AVOCADO">
+        <option value="TRIPACK SARTÉN">
+        <option value="TV">
+        <option value="VAPORIZADOR DE TELAS">
+        <option value="VASO DE VIDRIO">
+        <option value="VENTILADOR 3 EN 1">
+        <option value="WAFLERA">
+        <option value="VENTILADOR DE PARED">
+        <option value="VENTILADOR 2 EN 1">
+        <option value="VENTILADOR DE PEDESTAL">
+        <option value="COCINA A GAS">
+        <option value="HERVIDOR CAFETERA">
+        <option value="EXPRIMIDOR DE CÍTRICOS">
+        <option value="CONGELADORA">
+        <option value="CUIDADO PERSONAL">
+        <option value="DISPENSADOR DE AGUA">
+        <option value="VENTILADOR DE TORRE">
+        <option value="VENTILADOR DE PISO">
+        <option value="VENTILADOR DE TECHO">
+        <option value="ASPIRADORA ROBOT">
+    </datalist>
+
     <div class="card" style="border-top: 4px solid #9333ea; padding: 15px; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
@@ -61,163 +215,13 @@
                     
                     {% for eval in evaluaciones %}
                     <tr class="fila-web">
+                        <!-- CAJAS DE TEXTO CON AUTOCOMPLETADO (Reemplazan a los select) -->
                         <td class="td-web">
-                            <select class="input-web central select-bonito val-marca" data-selected="{{ eval.marca|default_if_none:'' }}">
-                                <option value="" disabled selected>Marca...</option>
-                                <option value="ELECTROLUX">ELECTROLUX</option>
-                                <option value="BEHRINGER">BEHRINGER</option>
-                                <option value="BGH">BGH</option>
-                                <option value="BOSSKO">BOSSKO</option>
-                                <option value="FINEZZA">FINEZZA</option>
-                                <option value="FUJITEC">FUJITEC</option>
-                                <option value="GAMA">GAMA</option>
-                                <option value="IMACO">IMACO</option>
-                                <option value="INDURAMA">INDURAMA</option>
-                                <option value="LG">LG</option>
-                                <option value="MORLEY">MORLEY</option>
-                                <option value="OSTER">OSTER</option>
-                                <option value="PANASONIC">PANASONIC</option>
-                                <option value="PHILIPS">PHILIPS</option>
-                                <option value="RECORD">RECORD</option>
-                                <option value="SAMSUNG">SAMSUNG</option>
-                                <option value="SKULLCANDY">SKULLCANDY</option>
-                                <option value="SONY">SONY</option>
-                                <option value="TAURUS">TAURUS</option>
-                                <option value="TREVELY">TREVELY</option>
-                                <option value="VANHOFF">VANHOFF</option>
-                                <option value="WAYRA">WAYRA</option>
-                                <option value="EVOLUTION">EVOLUTION</option>
-                                <option value="JVC">JVC</option>
-                                <option value="TCL">TCL</option>
-                                <option value="HISENSE">HISENSE</option>
-                                <option value="BLACKLINE">BLACKLINE</option>
-                                <option value="YANBAL">YANBAL</option>
-                                <option value="WHAL">WHAL</option>
-                                <option value="VISIONNER">VISIONNER</option>
-                                <option value="BLACK + DECKER">BLACK + DECKER</option>
-                                <option value="BORD">BORD</option>
-                                <option value="DAJU">DAJU</option>
-                                <option value="DSP">DSP</option>
-                                <option value="GA.MA">GA.MA</option>
-                                <option value="ILUMIA">ILUMIA</option>
-                                <option value="IMPERIAL">IMPERIAL</option>
-                                <option value="LUISSANT">LUISSANT</option>
-                                <option value="PREMIER">PREMIER</option>
-                                <option value="PREMIUM">PREMIUM</option>
-                                <option value="REMINGTON">REMINGTON</option>
-                                <option value="RUBBERMAID">RUBBERMAID</option>
-                                <option value="S/N MARCA">S/N MARCA</option>
-                                <option value="SILVER CREST">SILVER CREST</option>
-                                <option value="SOLE">SOLE</option>
-                                <option value="WAHL">WAHL</option>
-                                <option value="MOTOROLA">MOTOROLA</option>
-                                <option value="HYUNDAI">HYUNDAI</option>
-                            </select>
+                            <input type="text" list="lista-marcas" class="input-web central select-bonito val-marca" value="{{ eval.marca|default_if_none:'' }}" placeholder="Marca...">
                         </td>
                         
                         <td class="td-web">
-                            <select class="input-web central select-bonito val-cat" data-selected="{{ eval.categoria|default_if_none:'' }}">
-                                <option value="" disabled selected>Categoría...</option>
-                                <option value="CERVECERA">CERVECERA</option>
-                                <option value="AFEITADOR">AFEITADOR</option>
-                                <option value="ALISADOR">ALISADOR</option>
-                                <option value="ARROCERA">ARROCERA</option>
-                                <option value="AUDÍFONOS">AUDÍFONOS</option>
-                                <option value="BATIDORA DE INMERCION">BATIDORA DE INMERCION</option>
-                                <option value="BATIDORA DE MANO">BATIDORA DE MANO</option>
-                                <option value="BATIDORA DE TAZÓN">BATIDORA DE TAZÓN</option>
-                                <option value="BATIDORA PLANETARIA">BATIDORA PLANETARIA</option>
-                                <option value="CACEROLA">CACEROLA</option>
-                                <option value="CAFETERA">CAFETERA</option>
-                                <option value="CALENTADOR">CALENTADOR</option>
-                                <option value="CEPILLO">CEPILLO</option>
-                                <option value="COCINA DE INDUCCION">COCINA DE INDUCCION</option>
-                                <option value="COCINA DE PIE">COCINA DE PIE</option>
-                                <option value="COCINA ELÉCTRICA">COCINA ELÉCTRICA</option>
-                                <option value="COLADOR">COLADOR</option>
-                                <option value="COMBO BLACK">COMBO BLACK</option>
-                                <option value="COMBO BLACK SILVER">COMBO BLACK SILVER</option>
-                                <option value="COMBO CHERRY">COMBO CHERRY</option>
-                                <option value="COMBO CUMBIA">COMBO CUMBIA</option>
-                                <option value="COMBO OSTER">COMBO OSTER</option>
-                                <option value="COMBOBLACKOSTER2">COMBOBLACKOSTER2</option>
-                                <option value="COMBOEXTRACTOR">COMBOEXTRACTOR</option>
-                                <option value="COMBOOSTER">COMBOOSTER</option>
-                                <option value="COMBORED">COMBORED</option>
-                                <option value="CONTROL TV">CONTROL TV</option>
-                                <option value="CREPERA">CREPERA</option>
-                                <option value="CUCHILLA">CUCHILLA</option>
-                                <option value="DEPILADOR">DEPILADOR</option>
-                                <option value="DESHUMEDECEDOR">DESHUMEDECEDOR</option>
-                                <option value="DISPENSADOR ELÉCTRICO">DISPENSADOR ELÉCTRICO</option>
-                                <option value="ESPAGUETERA">ESPAGUETERA</option>
-                                <option value="ESTUFA">ESTUFA</option>
-                                <option value="EXTRACTOR DE JUGOS">EXTRACTOR DE JUGOS</option>
-                                <option value="FREIDORA DE AIRE">FREIDORA DE AIRE</option>
-                                <option value="FRIGOBAR">FRIGOBAR</option>
-                                <option value="HERVIDOR">HERVIDOR</option>
-                                <option value="HORNO CON FREIDORA">HORNO CON FREIDORA</option>
-                                <option value="HORNO ELÉCTRICO">HORNO ELÉCTRICO</option>
-                                <option value="JARRA">JARRA</option>
-                                <option value="JUEGO DE OLLAS">JUEGO DE OLLAS</option>
-                                <option value="KITOSTER1">KITOSTER1</option>
-                                <option value="KITOSTER2">KITOSTER2</option>
-                                <option value="LAVADORA">LAVADORA</option>
-                                <option value="LAVASECA">LAVASECA</option>
-                                <option value="LICUADORA">LICUADORA</option>
-                                <option value="MICROONDAS">MICROONDAS</option>
-                                <option value="MINICOMPONENTE">MINICOMPONENTE</option>
-                                <option value="MOLDES">MOLDES</option>
-                                <option value="MOLEDOR DE CARNE">MOLEDOR DE CARNE</option>
-                                <option value="MULTI OLLA">MULTI OLLA</option>
-                                <option value="OLLA">OLLA</option>
-                                <option value="OLLA A PRESIÓN">OLLA A PRESIÓN</option>
-                                <option value="PANIFICADORA">PANIFICADORA</option>
-                                <option value="PARLANTE">PARLANTE</option>
-                                <option value="PARRILLA CARBÓN">PARRILLA CARBÓN</option>
-                                <option value="PICADOR">PICADOR</option>
-                                <option value="PLANCHA A VAPOR">PLANCHA A VAPOR</option>
-                                <option value="PLANCHA ALISADOR">PLANCHA ALISADOR</option>
-                                <option value="PLANCHA GRILL">PLANCHA GRILL</option>
-                                <option value="PLANCHA Y PARRILLA">PLANCHA Y PARRILLA</option>
-                                <option value="PROCESADOR DE ALIMENTOS">PROCESADOR DE ALIMENTOS</option>
-                                <option value="REFRIGERADORA">REFRIGERADORA</option>
-                                <option value="SANDWICHERA">SANDWICHERA</option>
-                                <option value="SARTEN">SARTEN</option>
-                                <option value="SARTÉN ELÉCTRICA">SARTÉN ELÉCTRICA</option>
-                                <option value="SECADORA DE CABELLO">SECADORA DE CABELLO</option>
-                                <option value="SET DE BOWLS">SET DE BOWLS</option>
-                                <option value="SET DE CUBIERTOS">SET DE CUBIERTOS</option>
-                                <option value="SOUNDBAR">SOUNDBAR</option>
-                                <option value="TABLET">TABLET</option>
-                                <option value="TAZAS">TAZAS</option>
-                                <option value="TERMO BOMBA">TERMO BOMBA</option>
-                                <option value="TERMO HERVIDOR">TERMO HERVIDOR</option>
-                                <option value="TERMO VENTILADOR">TERMO VENTILADOR</option>
-                                <option value="TERMORADIADOR">TERMORADIADOR</option>
-                                <option value="TETERA">TETERA</option>
-                                <option value="TOSTADORA">TOSTADORA</option>
-                                <option value="TRICOMBO AVOCADO">TRICOMBO AVOCADO</option>
-                                <option value="TRIPACK SARTÉN">TRIPACK SARTÉN</option>
-                                <option value="TV">TV</option>
-                                <option value="VAPORIZADOR DE TELAS">VAPORIZADOR DE TELAS</option>
-                                <option value="VASO DE VIDRIO">VASO DE VIDRIO</option>
-                                <option value="VENTILADOR 3 EN 1">VENTILADOR 3 EN 1</option>
-                                <option value="WAFLERA">WAFLERA</option>
-                                <option value="VENTILADOR DE PARED">VENTILADOR DE PARED</option>
-                                <option value="VENTILADOR 2 EN 1">VENTILADOR 2 EN 1</option>
-                                <option value="VENTILADOR DE PEDESTAL">VENTILADOR DE PEDESTAL</option>
-                                <option value="COCINA A GAS">COCINA A GAS</option>
-                                <option value="HERVIDOR CAFETERA">HERVIDOR CAFETERA</option>
-                                <option value="EXPRIMIDOR DE CÍTRICOS">EXPRIMIDOR DE CÍTRICOS</option>
-                                <option value="CONGELADORA">CONGELADORA</option>
-                                <option value="CUIDADO PERSONAL">CUIDADO PERSONAL</option>
-                                <option value="DISPENSADOR DE AGUA">DISPENSADOR DE AGUA</option>
-                                <option value="VENTILADOR DE TORRE">VENTILADOR DE TORRE</option>
-                                <option value="VENTILADOR DE PISO">VENTILADOR DE PISO</option>
-                                <option value="VENTILADOR DE TECHO">VENTILADOR DE TECHO</option>
-                                <option value="ASPIRADORA ROBOT">ASPIRADORA ROBOT</option>
-                            </select>
+                            <input type="text" list="lista-categorias" class="input-web central select-bonito val-cat" value="{{ eval.categoria|default_if_none:'' }}" placeholder="Categoría...">
                         </td>
                         
                         <td class="td-web"><input type="text" class="input-web central val-modelo" value="{{ eval.modelo|default_if_none:'' }}" placeholder="Modelo..." oninput="buscarProductoPorModelo(this)"></td>
@@ -232,12 +236,20 @@
                             <input type="text" readonly tabindex="-1" class="input-web derecha texto-grande val-pweb" value="{% if eval.precio_web %}S/ {{ eval.precio_web|unlocalize }}{% endif %}" style="color: #4b5563; font-weight: bold; cursor: not-allowed;">
                         </td>
                         
+                        <!-- CONTENEDOR FLEX PARA EL FORMATO S/ EN PRECIO CYBER -->
                         <td class="td-web" style="background-color: #fefce8;">
-                            <input type="text" inputmode="decimal" class="input-web derecha texto-grande val-pcyber" value="{{ eval.precio_cyber|unlocalize|default_if_none:'' }}" placeholder="0.00" style="color: #9a3412; font-weight: bold;" oninput="calcularGanancias(this)">
+                            <div style="display: flex; align-items: center; width: 100%; height: 100%;">
+                                <span style="color: #9a3412; font-weight: bold; padding-left: 6px; font-size: 12.5px;">S/</span>
+                                <input type="text" inputmode="decimal" class="input-web derecha texto-grande val-pcyber" value="{{ eval.precio_cyber|unlocalize|default_if_none:'' }}" placeholder="0.00" style="color: #9a3412; font-weight: bold; flex: 1;" oninput="calcularGanancias(this)">
+                            </div>
                         </td>
                         
+                        <!-- CONTENEDOR FLEX PARA EL FORMATO S/ EN COSTO PRODUCTO -->
                         <td class="td-web td-costo-container" style="background-color: #dc2626; transition: background-color 0.3s;">
-                            <input type="text" inputmode="decimal" class="input-web derecha texto-grande val-costo" value="{{ eval.costo_producto|unlocalize|default_if_none:'' }}" placeholder="0.00" style="color: white; font-weight: bold;" oninput="marcarCostoManual(this); calcularGanancias(this);">
+                            <div style="display: flex; align-items: center; width: 100%; height: 100%;">
+                                <span style="color: white; font-weight: bold; padding-left: 6px; font-size: 12.5px;">S/</span>
+                                <input type="text" inputmode="decimal" class="input-web derecha texto-grande val-costo" value="{{ eval.costo_producto|unlocalize|default_if_none:'' }}" placeholder="0.00" style="color: white; font-weight: bold; flex: 1;" oninput="marcarCostoManual(this); calcularGanancias(this);">
+                            </div>
                         </td>
                         
                         <td class="td-web" style="background-color: #fefce8;">
@@ -254,164 +266,14 @@
                     </tr>
                     {% empty %}
                     
+                    <!-- FILA MOLDE POR DEFECTO -->
                     <tr class="fila-web">
                         <td class="td-web">
-                            <select class="input-web central select-bonito val-marca">
-                                <option value="" disabled selected>Marca...</option>
-                                <option value="ELECTROLUX">ELECTROLUX</option>
-                                <option value="BEHRINGER">BEHRINGER</option>
-                                <option value="BGH">BGH</option>
-                                <option value="BOSSKO">BOSSKO</option>
-                                <option value="FINEZZA">FINEZZA</option>
-                                <option value="FUJITEC">FUJITEC</option>
-                                <option value="GAMA">GAMA</option>
-                                <option value="IMACO">IMACO</option>
-                                <option value="INDURAMA">INDURAMA</option>
-                                <option value="LG">LG</option>
-                                <option value="MORLEY">MORLEY</option>
-                                <option value="OSTER">OSTER</option>
-                                <option value="PANASONIC">PANASONIC</option>
-                                <option value="PHILIPS">PHILIPS</option>
-                                <option value="RECORD">RECORD</option>
-                                <option value="SAMSUNG">SAMSUNG</option>
-                                <option value="SKULLCANDY">SKULLCANDY</option>
-                                <option value="SONY">SONY</option>
-                                <option value="TAURUS">TAURUS</option>
-                                <option value="TREVELY">TREVELY</option>
-                                <option value="VANHOFF">VANHOFF</option>
-                                <option value="WAYRA">WAYRA</option>
-                                <option value="EVOLUTION">EVOLUTION</option>
-                                <option value="JVC">JVC</option>
-                                <option value="TCL">TCL</option>
-                                <option value="HISENSE">HISENSE</option>
-                                <option value="BLACKLINE">BLACKLINE</option>
-                                <option value="YANBAL">YANBAL</option>
-                                <option value="WHAL">WHAL</option>
-                                <option value="VISIONNER">VISIONNER</option>
-                                <option value="BLACK + DECKER">BLACK + DECKER</option>
-                                <option value="BORD">BORD</option>
-                                <option value="DAJU">DAJU</option>
-                                <option value="DSP">DSP</option>
-                                <option value="GA.MA">GA.MA</option>
-                                <option value="ILUMIA">ILUMIA</option>
-                                <option value="IMPERIAL">IMPERIAL</option>
-                                <option value="LUISSANT">LUISSANT</option>
-                                <option value="PREMIER">PREMIER</option>
-                                <option value="PREMIUM">PREMIUM</option>
-                                <option value="REMINGTON">REMINGTON</option>
-                                <option value="RUBBERMAID">RUBBERMAID</option>
-                                <option value="S/N MARCA">S/N MARCA</option>
-                                <option value="SILVER CREST">SILVER CREST</option>
-                                <option value="SOLE">SOLE</option>
-                                <option value="WAHL">WAHL</option>
-                                <option value="MOTOROLA">MOTOROLA</option>
-                                <option value="HYUNDAI">HYUNDAI</option>
-                            </select>
+                            <input type="text" list="lista-marcas" class="input-web central select-bonito val-marca" placeholder="Marca...">
                         </td>
                         
                         <td class="td-web">
-                            <select class="input-web central select-bonito val-cat">
-                                <option value="" disabled selected>Categoría...</option>
-                                <option value="CERVECERA">CERVECERA</option>
-                                <option value="AFEITADOR">AFEITADOR</option>
-                                <option value="ALISADOR">ALISADOR</option>
-                                <option value="ARROCERA">ARROCERA</option>
-                                <option value="AUDÍFONOS">AUDÍFONOS</option>
-                                <option value="BATIDORA DE INMERCION">BATIDORA DE INMERCION</option>
-                                <option value="BATIDORA DE MANO">BATIDORA DE MANO</option>
-                                <option value="BATIDORA DE TAZÓN">BATIDORA DE TAZÓN</option>
-                                <option value="BATIDORA PLANETARIA">BATIDORA PLANETARIA</option>
-                                <option value="CACEROLA">CACEROLA</option>
-                                <option value="CAFETERA">CAFETERA</option>
-                                <option value="CALENTADOR">CALENTADOR</option>
-                                <option value="CEPILLO">CEPILLO</option>
-                                <option value="COCINA DE INDUCCION">COCINA DE INDUCCION</option>
-                                <option value="COCINA DE PIE">COCINA DE PIE</option>
-                                <option value="COCINA ELÉCTRICA">COCINA ELÉCTRICA</option>
-                                <option value="COLADOR">COLADOR</option>
-                                <option value="COMBO BLACK">COMBO BLACK</option>
-                                <option value="COMBO BLACK SILVER">COMBO BLACK SILVER</option>
-                                <option value="COMBO CHERRY">COMBO CHERRY</option>
-                                <option value="COMBO CUMBIA">COMBO CUMBIA</option>
-                                <option value="COMBO OSTER">COMBO OSTER</option>
-                                <option value="COMBOBLACKOSTER2">COMBOBLACKOSTER2</option>
-                                <option value="COMBOEXTRACTOR">COMBOEXTRACTOR</option>
-                                <option value="COMBOOSTER">COMBOOSTER</option>
-                                <option value="COMBORED">COMBORED</option>
-                                <option value="CONTROL TV">CONTROL TV</option>
-                                <option value="CREPERA">CREPERA</option>
-                                <option value="CUCHILLA">CUCHILLA</option>
-                                <option value="DEPILADOR">DEPILADOR</option>
-                                <option value="DESHUMEDECEDOR">DESHUMEDECEDOR</option>
-                                <option value="DISPENSADOR ELÉCTRICO">DISPENSADOR ELÉCTRICO</option>
-                                <option value="ESPAGUETERA">ESPAGUETERA</option>
-                                <option value="ESTUFA">ESTUFA</option>
-                                <option value="EXTRACTOR DE JUGOS">EXTRACTOR DE JUGOS</option>
-                                <option value="FREIDORA DE AIRE">FREIDORA DE AIRE</option>
-                                <option value="FRIGOBAR">FRIGOBAR</option>
-                                <option value="HERVIDOR">HERVIDOR</option>
-                                <option value="HORNO CON FREIDORA">HORNO CON FREIDORA</option>
-                                <option value="HORNO ELÉCTRICO">HORNO ELÉCTRICO</option>
-                                <option value="JARRA">JARRA</option>
-                                <option value="JUEGO DE OLLAS">JUEGO DE OLLAS</option>
-                                <option value="KITOSTER1">KITOSTER1</option>
-                                <option value="KITOSTER2">KITOSTER2</option>
-                                <option value="LAVADORA">LAVADORA</option>
-                                <option value="LAVASECA">LAVASECA</option>
-                                <option value="LICUADORA">LICUADORA</option>
-                                <option value="MICROONDAS">MICROONDAS</option>
-                                <option value="MINICOMPONENTE">MINICOMPONENTE</option>
-                                <option value="MOLDES">MOLDES</option>
-                                <option value="MOLEDOR DE CARNE">MOLEDOR DE CARNE</option>
-                                <option value="MULTI OLLA">MULTI OLLA</option>
-                                <option value="OLLA">OLLA</option>
-                                <option value="OLLA A PRESIÓN">OLLA A PRESIÓN</option>
-                                <option value="PANIFICADORA">PANIFICADORA</option>
-                                <option value="PARLANTE">PARLANTE</option>
-                                <option value="PARRILLA CARBÓN">PARRILLA CARBÓN</option>
-                                <option value="PICADOR">PICADOR</option>
-                                <option value="PLANCHA A VAPOR">PLANCHA A VAPOR</option>
-                                <option value="PLANCHA ALISADOR">PLANCHA ALISADOR</option>
-                                <option value="PLANCHA GRILL">PLANCHA GRILL</option>
-                                <option value="PLANCHA Y PARRILLA">PLANCHA Y PARRILLA</option>
-                                <option value="PROCESADOR DE ALIMENTOS">PROCESADOR DE ALIMENTOS</option>
-                                <option value="REFRIGERADORA">REFRIGERADORA</option>
-                                <option value="SANDWICHERA">SANDWICHERA</option>
-                                <option value="SARTEN">SARTEN</option>
-                                <option value="SARTÉN ELÉCTRICA">SARTÉN ELÉCTRICA</option>
-                                <option value="SECADORA DE CABELLO">SECADORA DE CABELLO</option>
-                                <option value="SET DE BOWLS">SET DE BOWLS</option>
-                                <option value="SET DE CUBIERTOS">SET DE CUBIERTOS</option>
-                                <option value="SOUNDBAR">SOUNDBAR</option>
-                                <option value="TABLET">TABLET</option>
-                                <option value="TAZAS">TAZAS</option>
-                                <option value="TERMO BOMBA">TERMO BOMBA</option>
-                                <option value="TERMO HERVIDOR">TERMO HERVIDOR</option>
-                                <option value="TERMO VENTILADOR">TERMO VENTILADOR</option>
-                                <option value="TERMORADIADOR">TERMORADIADOR</option>
-                                <option value="TETERA">TETERA</option>
-                                <option value="TOSTADORA">TOSTADORA</option>
-                                <option value="TRICOMBO AVOCADO">TRICOMBO AVOCADO</option>
-                                <option value="TRIPACK SARTÉN">TRIPACK SARTÉN</option>
-                                <option value="TV">TV</option>
-                                <option value="VAPORIZADOR DE TELAS">VAPORIZADOR DE TELAS</option>
-                                <option value="VASO DE VIDRIO">VASO DE VIDRIO</option>
-                                <option value="VENTILADOR 3 EN 1">VENTILADOR 3 EN 1</option>
-                                <option value="WAFLERA">WAFLERA</option>
-                                <option value="VENTILADOR DE PARED">VENTILADOR DE PARED</option>
-                                <option value="VENTILADOR 2 EN 1">VENTILADOR 2 EN 1</option>
-                                <option value="VENTILADOR DE PEDESTAL">VENTILADOR DE PEDESTAL</option>
-                                <option value="COCINA A GAS">COCINA A GAS</option>
-                                <option value="HERVIDOR CAFETERA">HERVIDOR CAFETERA</option>
-                                <option value="EXPRIMIDOR DE CÍTRICOS">EXPRIMIDOR DE CÍTRICOS</option>
-                                <option value="CONGELADORA">CONGELADORA</option>
-                                <option value="CUIDADO PERSONAL">CUIDADO PERSONAL</option>
-                                <option value="DISPENSADOR DE AGUA">DISPENSADOR DE AGUA</option>
-                                <option value="VENTILADOR DE TORRE">VENTILADOR DE TORRE</option>
-                                <option value="VENTILADOR DE PISO">VENTILADOR DE PISO</option>
-                                <option value="VENTILADOR DE TECHO">VENTILADOR DE TECHO</option>
-                                <option value="ASPIRADORA ROBOT">ASPIRADORA ROBOT</option>
-                            </select>
+                            <input type="text" list="lista-categorias" class="input-web central select-bonito val-cat" placeholder="Categoría...">
                         </td>
                         
                         <td class="td-web"><input type="text" class="input-web central val-modelo" placeholder="Modelo..." oninput="buscarProductoPorModelo(this)"></td>
@@ -426,12 +288,20 @@
                             <input type="text" readonly tabindex="-1" class="input-web derecha texto-grande val-pweb" style="color: #4b5563; font-weight: bold; cursor: not-allowed;">
                         </td>
                         
+                        <!-- CONTENEDOR FLEX PARA EL FORMATO S/ EN PRECIO CYBER -->
                         <td class="td-web" style="background-color: #fefce8;">
-                            <input type="text" inputmode="decimal" class="input-web derecha texto-grande val-pcyber" placeholder="0.00" style="color: #9a3412; font-weight: bold;" oninput="calcularGanancias(this)">
+                            <div style="display: flex; align-items: center; width: 100%; height: 100%;">
+                                <span style="color: #9a3412; font-weight: bold; padding-left: 6px; font-size: 12.5px;">S/</span>
+                                <input type="text" inputmode="decimal" class="input-web derecha texto-grande val-pcyber" placeholder="0.00" style="color: #9a3412; font-weight: bold; flex: 1;" oninput="calcularGanancias(this)">
+                            </div>
                         </td>
                         
+                        <!-- CONTENEDOR FLEX PARA EL FORMATO S/ EN COSTO PRODUCTO -->
                         <td class="td-web td-costo-container" style="background-color: #dc2626; transition: background-color 0.3s;">
-                            <input type="text" inputmode="decimal" class="input-web derecha texto-grande val-costo" placeholder="0.00" style="color: white; font-weight: bold;" oninput="marcarCostoManual(this); calcularGanancias(this);">
+                            <div style="display: flex; align-items: center; width: 100%; height: 100%;">
+                                <span style="color: white; font-weight: bold; padding-left: 6px; font-size: 12.5px;">S/</span>
+                                <input type="text" inputmode="decimal" class="input-web derecha texto-grande val-costo" placeholder="0.00" style="color: white; font-weight: bold; flex: 1;" oninput="marcarCostoManual(this); calcularGanancias(this);">
+                            </div>
                         </td>
                         
                         <td class="td-web" style="background-color: #fefce8;">
@@ -474,8 +344,9 @@
     .central { text-align: center; }
     .derecha { text-align: right; }
 
+    /* ESTILO PARA QUE LA CAJA DE TEXTO AUTOCOMPLETABLE SE VEA COMO UN DESPLEGABLE */
     .select-bonito { 
-        cursor: pointer; appearance: none; 
+        appearance: none; 
         background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); 
         background-repeat: no-repeat; background-position: right 2px top 50%; background-size: 8px auto; padding-right: 12px; font-weight: bold; color: #1e3a8a;
     }
@@ -483,13 +354,7 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // 1. Restaurar selects
-        document.querySelectorAll('select[data-selected]').forEach(select => {
-            const val = select.getAttribute('data-selected');
-            if (val) { select.value = val; }
-        });
-
-        // 2. IA para verificar los colores de la celda de COSTO al recargar la página
+        // IA para verificar los colores de la celda de COSTO al recargar la página
         document.querySelectorAll('.fila-web').forEach(fila => {
             const modelo = fila.querySelector('.val-modelo').value.trim();
             const inCosto = fila.querySelector('.val-costo');
@@ -498,28 +363,22 @@
             const costoStr = inCosto.value.replace(/,/g, '.');
             const costoActual = parseFloat(costoStr);
 
-            // Si hay un modelo y un costo ingresado, validamos con la BD
             if (modelo !== '' && !isNaN(costoActual) && costoActual > 0) {
                 fetch(`/api/buscar-costo-referencial/?modelo=${encodeURIComponent(modelo)}`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.status === 'success' && data.costo_cero !== undefined && data.costo_cero !== null) {
-                            // Math.abs soluciona pequeños errores de decimales al comparar (ej. 69.00 vs 69.000001)
                             if (Math.abs(costoActual - parseFloat(data.costo_cero)) > 0.01) {
-                                // El número que tienes guardado es DIFERENTE al original. ¡Es manual!
                                 tdCosto.style.backgroundColor = "#0ea5e9"; 
                             } else {
-                                // El número es exactamente IGUAL al de la BD.
                                 tdCosto.style.backgroundColor = "#dc2626"; 
                             }
                         } else {
-                            // No existe el modelo en la BD, así que el costo fue inventado (manual)
                             tdCosto.style.backgroundColor = "#0ea5e9"; 
                         }
                     })
                     .catch(err => console.error("Error al verificar color de costo:", err));
             } else if (!isNaN(costoActual) && costoActual > 0) {
-                // Hay un costo pero no escribiste modelo (fue completamente manual)
                 tdCosto.style.backgroundColor = "#0ea5e9";
             }
         });
@@ -623,10 +482,6 @@
         if (primeraFila) {
             const nuevaFila = primeraFila.cloneNode(true);
             nuevaFila.querySelectorAll('input').forEach(input => input.value = '');
-            nuevaFila.querySelectorAll('select').forEach(select => {
-                select.removeAttribute('data-selected');
-                select.selectedIndex = 0;
-            });
             
             const tdCosto = nuevaFila.querySelector('.td-costo-container');
             if (tdCosto) { 
