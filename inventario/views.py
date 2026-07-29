@@ -4515,15 +4515,6 @@ def req_pagina_web_view(request):
     }
     return render(request, 'inventario/req_pagina_web.html', context)
 
-@login_required
-def referencia_costos_web_view(request):
-    from .models import CostoReferencial
-    costos = CostoReferencial.objects.all()
-    context = {
-        'costos': costos,
-        'canal': request.session.get('canal_activo', 'Mercado Libre'),
-    }
-    return render(request, 'inventario/referencia_costos.html', context)
 
 @login_required
 def guardar_requerimientos_alertas(request):
@@ -4615,7 +4606,14 @@ def guardar_referencia_costos_web(request):
     import json
     if request.method == 'POST':
         try:
-            datos = json.loads(request.body)
+            payload = json.loads(request.body)
+            # Ahora Python recibe dos cosas: el Dólar y los Datos
+            tc_dolar = payload.get('tc_dolar', 3.80)
+            datos = payload.get('datos', [])
+
+            # Guardamos el dólar en la sesión del usuario para que lo recuerde al recargar
+            request.session['tc_dolar_referencial'] = str(tc_dolar)
+            
             CostoReferencial.objects.all().delete()
             
             for fila in datos:
@@ -4635,9 +4633,13 @@ def guardar_referencia_costos_web(request):
 def referencia_costos_web_view(request):
     from .models import CostoReferencial
     costos = CostoReferencial.objects.all()
+    
+    # Leemos el dólar guardado en la memoria de la sesión (por defecto 3.80)
+    tc_dolar = request.session.get('tc_dolar_referencial', '3.80')
+    
     context = {
         'costos': costos,
+        'tc_dolar': tc_dolar,
         'canal': request.session.get('canal_activo', 'Mercado Libre'),
     }
-    # AQUÍ ESTÁ LA CLAVE: DEBE DECIR referencia_costos_web.html
     return render(request, 'inventario/referencia_costos_web.html', context)

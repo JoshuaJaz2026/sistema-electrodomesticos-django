@@ -12,11 +12,12 @@
             
             <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                 
-                <!-- CAMPO PARA EL TIPO DE CAMBIO DÓLAR -->
+                <!-- CAMPO PARA EL TIPO DE CAMBIO DÓLAR LIGADO A PYTHON -->
                 <div style="display: flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
                     <label style="font-weight: 800; color: #334155; font-size: 0.8rem;">T.C. DÓLAR:</label>
                     <span style="font-weight: bold; color: #0284c7;">S/</span>
-                    <input type="number" id="input_dolar" step="0.01" style="width: 60px; border: none; background: transparent; font-weight: 900; color: #0284c7; outline: none; font-size: 0.9rem;" oninput="recalcularTodosLosDolares()" title="Cambia el valor y presiona Guardar Cambios">
+                    <!-- El value ahora es {{ tc_dolar }} para que recuerde lo guardado -->
+                    <input type="number" id="input_dolar" value="{{ tc_dolar }}" step="0.01" style="width: 60px; border: none; background: transparent; font-weight: 900; color: #0284c7; outline: none; font-size: 0.9rem;" oninput="recalcularTodosLosDolares()" title="Cambia el valor y presiona Guardar Cambios">
                 </div>
 
                 <button type="button" onclick="agregarFilaCostos()" class="btn-top" style="background-color: #0284c7; color: white;">
@@ -58,7 +59,6 @@
                     </tr>
                     {% empty %}
                     
-                    <!-- Fila Molde -->
                     <tr class="fila-costo">
                         <td class="td-costo"><input type="text" class="input-costo central val-modelo" placeholder="Modelo..." onchange="buscarProductoPorModelo(this)"></td>
                         <td class="td-costo"><input type="text" class="input-costo val-producto" placeholder="Descripción del producto..."></td>
@@ -90,30 +90,7 @@
 </style>
 
 <script>
-    // 1. DEDUCIR EL TIPO DE CAMBIO AL CARGAR LA PÁGINA
-    document.addEventListener("DOMContentLoaded", function() {
-        const filas = document.querySelectorAll('.fila-costo');
-        let tcEncontrado = 3.80; // Dólar por defecto si la base de datos está vacía
-        
-        for (let fila of filas) {
-            const inputDolar = fila.querySelector('.val-costo-dolar');
-            const inputSoles = fila.querySelector('.val-convertido');
-            
-            if (inputDolar && inputSoles && inputDolar.value) {
-                const dolares = parseFloat(inputDolar.value);
-                const solesStr = inputSoles.value.replace('S/ ', '');
-                const soles = parseFloat(solesStr);
-                
-                if (dolares > 0 && soles > 0) {
-                    tcEncontrado = (soles / dolares).toFixed(2);
-                    break; // Al encontrar la primera fila válida, calculamos y salimos
-                }
-            }
-        }
-        document.getElementById('input_dolar').value = tcEncontrado;
-    });
-
-    // 2. AUTOCOMPLETAR EL PRODUCTO DESDE LA API
+    // AUTOCOMPLETAR EL PRODUCTO DESDE LA API
     function buscarProductoPorModelo(inputModelo) {
         const modelo = inputModelo.value.trim();
         const fila = inputModelo.closest('tr');
@@ -124,9 +101,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        // Dependiendo de tu API, ajustamos para que lea el nombre correcto
                         inputProducto.value = data.producto || data.descripcion || data.nombre || data.producto_nombre || "";
-                        // Destello visual verde para confirmar que se llenó solo
                         inputProducto.style.backgroundColor = "#dcfce3";
                         setTimeout(() => inputProducto.style.backgroundColor = "transparent", 800);
                     }
@@ -135,7 +110,6 @@
         }
     }
 
-    // 3. CALCULO MATEMÁTICO INDIVIDUAL
     function calcularDolarFila(inputElement) {
         const fila = inputElement.closest('tr');
         const valorDolarIngresado = parseFloat(fila.querySelector('.val-costo-dolar').value) || 0;
@@ -149,7 +123,6 @@
         }
     }
 
-    // 4. RECALCULO MASIVO AL CAMBIAR EL INPUT DE ARRIBA
     function recalcularTodosLosDolares() {
         const inputsDolares = document.querySelectorAll('.val-costo-dolar');
         inputsDolares.forEach(input => {
@@ -157,7 +130,6 @@
         });
     }
 
-    // 5. AGREGAR FILA NUEVA
     function agregarFilaCostos() {
         const tbody = document.getElementById('cuerpoCostosRef');
         const primeraFila = tbody.querySelector('.fila-costo');
@@ -170,21 +142,18 @@
         }
     }
 
-    // 6. FLUJO DE GUARDADO Y AUTO-EVALUACIÓN MASIVA
     function guardarCostosReferenciales() {
         
-        // ¡Magia! Primero obligamos a recalcular todas las filas con el dólar ingresado 
-        // antes de empaquetar los datos para la base de datos.
         recalcularTodosLosDolares();
 
         const filas = document.querySelectorAll('.fila-costo');
         const datos = [];
+        // EXTRAEMOS EL DÓLAR DE LA PANTALLA
+        const tcDolar = parseFloat(document.getElementById('input_dolar').value) || 3.80;
 
         filas.forEach(fila => {
             const modelo = fila.querySelector('.val-modelo').value;
             const producto = fila.querySelector('.val-producto').value;
-            
-            // Función auxiliar para quitar el "S/ "
             const parseSoles = (val) => parseFloat(val.replace('S/ ', '')) || 0;
 
             if (modelo || producto) {
@@ -203,10 +172,16 @@
             return; 
         }
 
+        // EMPAQUETAMOS EL DÓLAR Y LOS DATOS JUNTOS
+        const payload = {
+            tc_dolar: tcDolar,
+            datos: datos
+        };
+
         fetch("{% url 'guardar_referencia_costos_web' %}", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
-            body: JSON.stringify(datos)
+            body: JSON.stringify(payload) // ENVIAMOS EL PAQUETE COMPLETO A PYTHON
         })
         .then(response => response.json())
         .then(data => {
