@@ -183,6 +183,8 @@
             datos: datos
         };
 
+        console.log("🚀 ENVIANDO A PYTHON:", JSON.stringify(payload, null, 2));
+
         fetch("{% url 'guardar_referencia_costos_web' %}", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },

@@ -4608,6 +4608,8 @@ def guardar_referencia_costos_web(request):
     if request.method == 'POST':
         try:
             payload = json.loads(request.body)
+
+            print("🚀 RECIBIDO EN PYTHON:", payload)
             tc_dolar = payload.get('tc_dolar', 3.80)
             datos = payload.get('datos', [])
 
