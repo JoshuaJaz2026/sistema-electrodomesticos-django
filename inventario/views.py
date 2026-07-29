@@ -4607,23 +4607,42 @@ def guardar_referencia_costos_web(request):
     if request.method == 'POST':
         try:
             payload = json.loads(request.body)
-            # Ahora Python recibe dos cosas: el Dólar y los Datos
             tc_dolar = payload.get('tc_dolar', 3.80)
             datos = payload.get('datos', [])
 
-            # Guardamos el dólar en la sesión del usuario para que lo recuerde al recargar
+            # 1. Forzamos a Django a recordar el dólar al recargar la página
             request.session['tc_dolar_referencial'] = str(tc_dolar)
+            request.session.modified = True 
             
             CostoReferencial.objects.all().delete()
             
             for fila in datos:
-                CostoReferencial.objects.create(
-                    modelo=fila.get('modelo'),
-                    producto=fila.get('producto'),
-                    costo_cero_soles=fila.get('costo_cero_soles', 0),
-                    costo_u_dolares=fila.get('costo_u_dolares', 0),
-                    costo_u_convertido=fila.get('costo_u_convertido', 0)
-                )
+                nueva_fila = CostoReferencial()
+                
+                # 2. Asignación inteligente: Busca la columna correcta aunque tenga otro nombre
+                if hasattr(nueva_fila, 'modelo'): nueva_fila.modelo = fila.get('modelo')
+                if hasattr(nueva_fila, 'producto'): nueva_fila.producto = fila.get('producto')
+                
+                # Guarda Costo Cero (S/.)
+                if hasattr(nueva_fila, 'costo_cero_soles'): 
+                    nueva_fila.costo_cero_soles = fila.get('costo_cero_soles', 0)
+                elif hasattr(nueva_fila, 'costo_cero'): 
+                    nueva_fila.costo_cero = fila.get('costo_cero_soles', 0)
+                
+                # Guarda Costo U. ($)
+                if hasattr(nueva_fila, 'costo_u_dolares'): 
+                    nueva_fila.costo_u_dolares = fila.get('costo_u_dolares', 0)
+                elif hasattr(nueva_fila, 'costo_u'): 
+                    nueva_fila.costo_u = fila.get('costo_u_dolares', 0)
+                
+                # Guarda Costo Convertido
+                if hasattr(nueva_fila, 'costo_u_convertido'): 
+                    nueva_fila.costo_u_convertido = fila.get('costo_u_convertido', 0)
+                elif hasattr(nueva_fila, 'costo_convertido'): 
+                    nueva_fila.costo_convertido = fila.get('costo_u_convertido', 0)
+                
+                nueva_fila.save()
+                
             return JsonResponse({'status': 'success'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
