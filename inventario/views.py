@@ -4665,3 +4665,22 @@ def referencia_costos_web_view(request):
         'canal': request.session.get('canal_activo', 'Mercado Libre'),
     }
     return render(request, 'inventario/referencia_costos_web.html', context)
+
+
+from django.http import JsonResponse
+
+@login_required
+def api_buscar_costo_referencial(request):
+    from .models import CostoReferencial
+    
+    modelo = request.GET.get('modelo', '').strip()
+    if modelo:
+        # Busca el modelo exacto (ignorando mayúsculas/minúsculas)
+        costo_ref = CostoReferencial.objects.filter(modelo__iexact=modelo).first()
+        if costo_ref:
+            return JsonResponse({
+                'status': 'success',
+                'producto': costo_ref.producto,
+                'costo_cero': float(costo_ref.costo_cero_soles)
+            })
+    return JsonResponse({'status': 'error', 'message': 'Modelo no encontrado'})

@@ -234,8 +234,8 @@
                             <input type="number" step="0.01" class="input-web derecha val-pcyber" value="{{ eval.precio_cyber|default_if_none:'' }}" placeholder="0.00" style="color: #9a3412; font-weight: bold;" oninput="calcularGanancias(this)">
                         </td>
                         
-                        <td class="td-web" style="background-color: #dc2626;">
-                            <input type="number" step="0.01" class="input-web derecha val-costo" value="{{ eval.costo_producto|default_if_none:'' }}" placeholder="0.00" style="color: white; font-weight: bold;" oninput="calcularGanancias(this)">
+                        <td class="td-web td-costo-container" style="background-color: #dc2626; transition: background-color 0.3s;">
+                            <input type="number" step="0.01" class="input-web derecha val-costo" value="{{ eval.costo_producto|default_if_none:'' }}" placeholder="0.00" style="color: white; font-weight: bold;" oninput="calcularGanancias(this); marcarCostoManual(this);">
                         </td>
                         
                         <td class="td-web" style="background-color: #fefce8;">
@@ -428,8 +428,8 @@
                             <input type="number" step="0.01" class="input-web derecha val-pcyber" placeholder="0.00" style="color: #9a3412; font-weight: bold;" oninput="calcularGanancias(this)">
                         </td>
                         
-                        <td class="td-web" style="background-color: #dc2626;">
-                            <input type="number" step="0.01" class="input-web derecha val-costo" placeholder="0.00" style="color: white; font-weight: bold;" oninput="calcularGanancias(this)">
+                        <td class="td-web td-costo-container" style="background-color: #dc2626; transition: background-color 0.3s;">
+                            <input type="number" step="0.01" class="input-web derecha val-costo" placeholder="0.00" style="color: white; font-weight: bold;" oninput="calcularGanancias(this); marcarCostoManual(this);">
                         </td>
                         
                         <td class="td-web" style="background-color: #fefce8;">
@@ -488,27 +488,48 @@
         });
     });
 
-    // AUTOCOMPLETADO DE PRODUCTO SEGÚN EL MODELO INGRESADO
+    // 1. AUTOCOMPLETADO DESDE LA NUEVA API DE COSTOS REFERENCIALES
     function buscarProductoPorModelo(inputModelo) {
         const modelo = inputModelo.value.trim();
         const fila = inputModelo.closest('tr');
         const inputProducto = fila.querySelector('.val-prod');
+        const inputCosto = fila.querySelector('.val-costo');
+        const tdCosto = fila.querySelector('.td-costo-container');
 
         if (modelo !== '') {
-            // Llama a la API de búsqueda
-            fetch(`{% url 'api_buscar_producto' %}?modelo=${encodeURIComponent(modelo)}`)
+            // Llama a la nueva API de Costos Referenciales
+            fetch(`{% url 'api_buscar_costo_referencial' %}?modelo=${encodeURIComponent(modelo)}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        inputProducto.value = data.producto || data.descripcion || data.nombre || data.producto_nombre || "";
+                        // A. Autocompletar el nombre del producto
+                        inputProducto.value = data.producto || "";
                         inputProducto.style.backgroundColor = "#dcfce3";
                         setTimeout(() => inputProducto.style.backgroundColor = "transparent", 800);
+                        
+                        // B. Autocompletar el Costo Cero
+                        if(data.costo_cero !== undefined && data.costo_cero !== null) {
+                            inputCosto.value = data.costo_cero;
+                            // Color Rojo Automático (Jalado de BD)
+                            tdCosto.style.backgroundColor = "#dc2626"; 
+                            inputCosto.style.color = "white";
+                            // Forzamos el recalculo matemático
+                            calcularGanancias(inputCosto);
+                        }
                     }
                 })
                 .catch(error => {
-                    console.error("No se pudo conectar con el directorio de productos:", error);
+                    console.error("No se pudo conectar con Costos Referenciales:", error);
                 });
         }
+    }
+
+    // 2. FUNCIÓN PARA MARCAR EN CELESTE CUANDO ES MANUAL
+    function marcarCostoManual(inputCosto) {
+        const tdCosto = inputCosto.closest('.td-costo-container');
+        // Celeste para denotar un ingreso manual (fuera de BD)
+        tdCosto.style.backgroundColor = "#0ea5e9"; 
+        inputCosto.style.color = "white";
     }
 
     function calcularGanancias(inputElement) {
@@ -567,6 +588,10 @@
                 select.removeAttribute('data-selected');
                 select.selectedIndex = 0;
             });
+            // Resetear el color de la celda de costo a Rojo por defecto
+            const tdCosto = nuevaFila.querySelector('.td-costo-container');
+            if (tdCosto) { tdCosto.style.backgroundColor = "#dc2626"; }
+            
             tbody.appendChild(nuevaFila);
         } else {
             alert("No hay una fila base para clonar. Por favor recarga la página.");

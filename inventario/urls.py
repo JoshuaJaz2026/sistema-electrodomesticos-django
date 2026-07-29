@@ -176,4 +176,5 @@ urlpatterns = [
     path('requerimientos/observaciones-web/guardar/', views.guardar_observaciones_web, name='guardar_observaciones_web'),
     path('requerimientos/pagina-web/guardar/', views.guardar_evaluaciones_web, name='guardar_evaluaciones_web'),
     path('referencia-costos-web/guardar/', views.guardar_referencia_costos_web, name='guardar_referencia_costos_web'),
+    path('api/buscar-costo-referencial/', views.api_buscar_costo_referencial, name='api_buscar_costo_referencial'),
 ]
