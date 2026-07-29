@@ -23,19 +23,18 @@
         <div style="overflow-x: auto; border: 2px solid #cbd5e1; border-radius: 4px; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
             <table id="tablaPreciosWeb" style="width: 100%; border-collapse: collapse; background: white; font-size: 0.75rem; table-layout: fixed;">
                 
-                <!-- SE MODIFICARON LOS PORCENTAJES PARA DARLE MÁS ESPACIO A PRODUCTO -->
                 <colgroup>
-                    <col style="width: 9%;">  <!-- MARCA -->
-                    <col style="width: 10%;"> <!-- CATEGORÍA -->
-                    <col style="width: 7%;">  <!-- MODELO -->
-                    <col style="width: 30%;"> <!-- PRODUCTO -->
-                    <col style="width: 6.5%;"> <!-- P. TACHADO -->
-                    <col style="width: 6.5%;"> <!-- P. WEB -->
-                    <col style="width: 6.5%;"> <!-- PRECIO CYBER -->
-                    <col style="width: 6.5%;"> <!-- COSTO -->
-                    <col style="width: 6.5%;"> <!-- GANANCIA CYBER -->
-                    <col style="width: 6.5%;"> <!-- GANANCIA WEB -->
-                    <col style="width: 5%;">  <!-- RENTA -->
+                    <col style="width: 9%;">  
+                    <col style="width: 10%;"> 
+                    <col style="width: 7%;">  
+                    <col style="width: 30%;"> 
+                    <col style="width: 6.5%;"> 
+                    <col style="width: 6.5%;"> 
+                    <col style="width: 6.5%;"> 
+                    <col style="width: 6.5%;"> 
+                    <col style="width: 6.5%;"> 
+                    <col style="width: 6.5%;"> 
+                    <col style="width: 5%;">  
                 </colgroup>
 
                 <thead style="position: sticky; top: 0; z-index: 10;">
@@ -225,7 +224,6 @@
                         
                         <td class="td-web"><input type="text" class="input-web val-prod" value="{{ eval.producto|default_if_none:'' }}" placeholder="Producto..."></td>
                         
-                        <!-- SE AGREGA LA CLASE texto-grande A LOS PRECIOS Y CÁLCULOS -->
                         <td class="td-web" style="background-color: #f3f4f6;">
                             <input type="text" readonly tabindex="-1" class="input-web derecha texto-grande val-ptachado" value="{% if eval.precio_tachado %}S/ {{ eval.precio_tachado|unlocalize }}{% endif %}" style="color: #4b5563; font-weight: bold; cursor: not-allowed;">
                         </td>
@@ -256,7 +254,6 @@
                     </tr>
                     {% empty %}
                     
-                    <!-- FILA MOLDE POR DEFECTO -->
                     <tr class="fila-web">
                         <td class="td-web">
                             <select class="input-web central select-bonito val-marca">
@@ -460,7 +457,6 @@
     .btn-top { color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s; font-size: 0.8rem;}
     .btn-top:hover { filter: brightness(1.1); transform: translateY(-1px); }
     
-    /* SE AGREGÓ LINE-HEIGHT PARA QUE LOS TÍTULOS ENCABAJEN BIEN EN COLUMNAS ANGOSTAS */
     .th-web { padding: 8px 4px; border: 1px solid #cbd5e1; vertical-align: middle; white-space: normal; word-wrap: break-word; line-height: 1.1; }
     .td-web { padding: 0; border: 1px solid #cbd5e1; height: 38px; vertical-align: middle; overflow: hidden; }
     
@@ -470,7 +466,6 @@
 
     .input-web { width: 100%; min-width: 0; height: 100%; box-sizing: border-box; border: none; padding: 6px 4px; font-family: inherit; font-size: 11px; background-color: transparent; outline: none; }
     
-    /* CLASE NUEVA PARA AGRANDAR LOS NÚMEROS */
     .texto-grande { font-size: 12.5px !important; }
     
     .val-costo::placeholder { color: rgba(255, 255, 255, 0.7); }
@@ -488,9 +483,45 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        // 1. Restaurar selects
         document.querySelectorAll('select[data-selected]').forEach(select => {
             const val = select.getAttribute('data-selected');
             if (val) { select.value = val; }
+        });
+
+        // 2. IA para verificar los colores de la celda de COSTO al recargar la página
+        document.querySelectorAll('.fila-web').forEach(fila => {
+            const modelo = fila.querySelector('.val-modelo').value.trim();
+            const inCosto = fila.querySelector('.val-costo');
+            const tdCosto = fila.querySelector('.td-costo-container');
+            
+            const costoStr = inCosto.value.replace(/,/g, '.');
+            const costoActual = parseFloat(costoStr);
+
+            // Si hay un modelo y un costo ingresado, validamos con la BD
+            if (modelo !== '' && !isNaN(costoActual) && costoActual > 0) {
+                fetch(`/api/buscar-costo-referencial/?modelo=${encodeURIComponent(modelo)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success' && data.costo_cero !== undefined && data.costo_cero !== null) {
+                            // Math.abs soluciona pequeños errores de decimales al comparar (ej. 69.00 vs 69.000001)
+                            if (Math.abs(costoActual - parseFloat(data.costo_cero)) > 0.01) {
+                                // El número que tienes guardado es DIFERENTE al original. ¡Es manual!
+                                tdCosto.style.backgroundColor = "#0ea5e9"; 
+                            } else {
+                                // El número es exactamente IGUAL al de la BD.
+                                tdCosto.style.backgroundColor = "#dc2626"; 
+                            }
+                        } else {
+                            // No existe el modelo en la BD, así que el costo fue inventado (manual)
+                            tdCosto.style.backgroundColor = "#0ea5e9"; 
+                        }
+                    })
+                    .catch(err => console.error("Error al verificar color de costo:", err));
+            } else if (!isNaN(costoActual) && costoActual > 0) {
+                // Hay un costo pero no escribiste modelo (fue completamente manual)
+                tdCosto.style.backgroundColor = "#0ea5e9";
+            }
         });
     });
 
