@@ -4604,49 +4604,52 @@ def guardar_evaluaciones_web(request):
 def guardar_referencia_costos_web(request):
     from .models import CostoReferencial
     import json
+    
     if request.method == 'POST':
         try:
             payload = json.loads(request.body)
             tc_dolar = payload.get('tc_dolar', 3.80)
             datos = payload.get('datos', [])
 
-            # 1. Forzamos a Django a recordar el dólar al recargar la página
+            # 1. Guardar el Dólar en sesión y obligar a Django a recordarlo
             request.session['tc_dolar_referencial'] = str(tc_dolar)
             request.session.modified = True 
             
+            # 2. Borrar datos antiguos (Efecto Excel)
             CostoReferencial.objects.all().delete()
             
+            # 3. Guardar las nuevas filas con los nombres EXACTOS de tu models.py
             for fila in datos:
-                nueva_fila = CostoReferencial()
-                
-                # 2. Asignación inteligente: Busca la columna correcta aunque tenga otro nombre
-                if hasattr(nueva_fila, 'modelo'): nueva_fila.modelo = fila.get('modelo')
-                if hasattr(nueva_fila, 'producto'): nueva_fila.producto = fila.get('producto')
-                
-                # Guarda Costo Cero (S/.)
-                if hasattr(nueva_fila, 'costo_cero_soles'): 
-                    nueva_fila.costo_cero_soles = fila.get('costo_cero_soles', 0)
-                elif hasattr(nueva_fila, 'costo_cero'): 
-                    nueva_fila.costo_cero = fila.get('costo_cero_soles', 0)
-                
-                # Guarda Costo U. ($)
-                if hasattr(nueva_fila, 'costo_u_dolares'): 
-                    nueva_fila.costo_u_dolares = fila.get('costo_u_dolares', 0)
-                elif hasattr(nueva_fila, 'costo_u'): 
-                    nueva_fila.costo_u = fila.get('costo_u_dolares', 0)
-                
-                # Guarda Costo Convertido
-                if hasattr(nueva_fila, 'costo_u_convertido'): 
-                    nueva_fila.costo_u_convertido = fila.get('costo_u_convertido', 0)
-                elif hasattr(nueva_fila, 'costo_convertido'): 
-                    nueva_fila.costo_convertido = fila.get('costo_u_convertido', 0)
-                
-                nueva_fila.save()
+                CostoReferencial.objects.create(
+                    modelo=fila.get('modelo', ''),
+                    producto=fila.get('producto', ''),
+                    costo_cero_soles=fila.get('costo_cero_soles', 0),
+                    costo_u_dolares=fila.get('costo_u_dolares', 0),
+                    costo_u_convertido=fila.get('costo_u_convertido', 0)
+                )
                 
             return JsonResponse({'status': 'success'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'error', 'message': 'Método no válido'})
+
+
+@login_required
+def referencia_costos_web_view(request):
+    from .models import CostoReferencial
+    
+    # 1. Traemos la información guardada en la base de datos
+    costos = CostoReferencial.objects.all()
+    
+    # 2. Leemos el dólar guardado en la memoria de la sesión (o 3.80 por defecto)
+    tc_dolar = request.session.get('tc_dolar_referencial', '3.80')
+    
+    context = {
+        'costos': costos,
+        'tc_dolar': tc_dolar,
+        'canal': request.session.get('canal_activo', 'Mercado Libre'),
+    }
+    return render(request, 'inventario/referencia_costos_web.html', context)
 
 @login_required
 def referencia_costos_web_view(request):
