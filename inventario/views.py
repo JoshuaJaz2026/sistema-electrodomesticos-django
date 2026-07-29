@@ -4578,3 +4578,33 @@ def guardar_observaciones_web(request):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'error', 'message': 'Método no válido'})
+
+@login_required
+def guardar_evaluaciones_web(request):
+    from .models import EvaluacionPrecioWeb
+    import json
+    if request.method == 'POST':
+        try:
+            datos = json.loads(request.body)
+            
+            # Borra lo anterior y sobrescribe (modo Excel)
+            EvaluacionPrecioWeb.objects.all().delete()
+            
+            for fila in datos:
+                EvaluacionPrecioWeb.objects.create(
+                    marca=fila.get('marca'),
+                    categoria=fila.get('categoria'),
+                    modelo=fila.get('modelo'),
+                    producto=fila.get('producto'),
+                    precio_tachado=fila.get('precio_tachado', 0),
+                    precio_web=fila.get('precio_web', 0),
+                    precio_cyber=fila.get('precio_cyber', 0),
+                    costo_producto=fila.get('costo_producto', 0),
+                    ganancia_cyber=fila.get('ganancia_cyber', 0),
+                    ganancia_web=fila.get('ganancia_web', 0),
+                    rentabilidad=fila.get('rentabilidad', 0)
+                )
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Método no válido'})
