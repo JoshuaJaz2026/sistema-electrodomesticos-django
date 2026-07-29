@@ -49,10 +49,15 @@
                     
                     {% for costo in costos %}
                     <tr class="fila-costo">
-                        <td class="td-costo"><input type="text" class="input-costo central val-modelo" value="{{ costo.modelo|default:costo.codigo|default_if_none:'' }}" placeholder="Modelo..." onchange="buscarProductoPorModelo(this)"></td>
+                        <!-- Nombres limpios, sin condicionales -->
+                        <td class="td-costo"><input type="text" class="input-costo central val-modelo" value="{{ costo.modelo|default_if_none:'' }}" placeholder="Modelo..." onchange="buscarProductoPorModelo(this)"></td>
+                        
                         <td class="td-costo"><input type="text" class="input-costo val-producto" value="{{ costo.producto|default_if_none:'' }}" placeholder="Descripción del producto..."></td>
+                        
                         <td class="td-costo"><input type="number" step="0.01" class="input-costo derecha val-costo-cero" value="{{ costo.costo_cero_soles|default_if_none:'' }}" placeholder="0.00" style="font-weight: bold;"></td>
+                        
                         <td class="td-costo"><input type="number" step="0.01" class="input-costo derecha val-costo-dolar" value="{{ costo.costo_u_dolares|default_if_none:'' }}" placeholder="0.00" style="font-weight: bold; color: #059669;" oninput="calcularDolarFila(this)"></td>
+                        
                         <td class="td-costo" style="background-color: #f8fafc;"><input type="text" readonly tabindex="-1" class="input-costo derecha val-convertido" value="{% if costo.costo_u_convertido %}S/ {{ costo.costo_u_convertido }}{% endif %}" style="font-weight: bold; color: #2563eb; cursor: not-allowed;"></td>
                     </tr>
                     {% empty %}
@@ -161,7 +166,6 @@
                 datos.push({
                     modelo: modelo,
                     producto: producto,
-                    // EXTRAEMOS LOS TEXTOS PUROS (Si está vacío, mandamos "0")
                     costo_cero_soles: fila.querySelector('.val-costo-cero').value || "0",
                     costo_u_dolares: fila.querySelector('.val-costo-dolar').value || "0",
                     costo_u_convertido: fila.querySelector('.val-convertido').value || "0"
