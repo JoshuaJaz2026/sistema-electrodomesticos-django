@@ -4633,7 +4633,6 @@ def guardar_referencia_costos_web(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'error', 'message': 'Método no válido'})
 
-
 @login_required
 def referencia_costos_web_view(request):
     from .models import CostoReferencial
@@ -4642,21 +4641,6 @@ def referencia_costos_web_view(request):
     costos = CostoReferencial.objects.all()
     
     # 2. Leemos el dólar guardado en la memoria de la sesión (o 3.80 por defecto)
-    tc_dolar = request.session.get('tc_dolar_referencial', '3.80')
-    
-    context = {
-        'costos': costos,
-        'tc_dolar': tc_dolar,
-        'canal': request.session.get('canal_activo', 'Mercado Libre'),
-    }
-    return render(request, 'inventario/referencia_costos_web.html', context)
-
-@login_required
-def referencia_costos_web_view(request):
-    from .models import CostoReferencial
-    costos = CostoReferencial.objects.all()
-    
-    # Leemos el dólar guardado en la memoria de la sesión (por defecto 3.80)
     tc_dolar = request.session.get('tc_dolar_referencial', '3.80')
     
     context = {
