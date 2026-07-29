@@ -4611,21 +4611,35 @@ def guardar_referencia_costos_web(request):
             tc_dolar = payload.get('tc_dolar', 3.80)
             datos = payload.get('datos', [])
 
-            # 1. Guardar el Dólar en sesión y obligar a Django a recordarlo
+            # Forzar el guardado del Dólar en sesión
             request.session['tc_dolar_referencial'] = str(tc_dolar)
             request.session.modified = True 
             
-            # 2. Borrar datos antiguos (Efecto Excel)
             CostoReferencial.objects.all().delete()
             
-            # 3. Guardar las nuevas filas con los nombres EXACTOS de tu models.py
             for fila in datos:
+                # EXTRACCIÓN POR FUERZA BRUTA: Convertimos todo a texto, limpiamos símbolos y forzamos a decimal (float)
+                try:
+                    c_cero = float(str(fila.get('costo_cero_soles', '0')).replace('S/', '').replace(',', '').strip() or 0)
+                except:
+                    c_cero = 0.0
+
+                try:
+                    c_dolar = float(str(fila.get('costo_u_dolares', '0')).replace('$', '').replace(',', '').strip() or 0)
+                except:
+                    c_dolar = 0.0
+
+                try:
+                    c_conv = float(str(fila.get('costo_u_convertido', '0')).replace('S/', '').replace(',', '').strip() or 0)
+                except:
+                    c_conv = 0.0
+
                 CostoReferencial.objects.create(
                     modelo=fila.get('modelo', ''),
                     producto=fila.get('producto', ''),
-                    costo_cero_soles=fila.get('costo_cero_soles', 0),
-                    costo_u_dolares=fila.get('costo_u_dolares', 0),
-                    costo_u_convertido=fila.get('costo_u_convertido', 0)
+                    costo_cero_soles=c_cero,
+                    costo_u_dolares=c_dolar,
+                    costo_u_convertido=c_conv
                 )
                 
             return JsonResponse({'status': 'success'})
