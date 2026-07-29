@@ -4630,3 +4630,14 @@ def guardar_referencia_costos_web(request):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'error', 'message': 'Método no válido'})
+
+@login_required
+def referencia_costos_web_view(request):
+    from .models import CostoReferencial
+    costos = CostoReferencial.objects.all()
+    context = {
+        'costos': costos,
+        'canal': request.session.get('canal_activo', 'Mercado Libre'),
+    }
+    # AQUÍ ESTÁ LA CLAVE: DEBE DECIR referencia_costos_web.html
+    return render(request, 'inventario/referencia_costos_web.html', context)
