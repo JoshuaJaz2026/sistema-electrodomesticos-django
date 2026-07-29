@@ -219,7 +219,9 @@
                             </select>
                         </td>
                         
-                        <td class="td-web"><input type="text" class="input-web central val-modelo" value="{{ eval.modelo|default_if_none:'' }}" placeholder="Modelo..." onchange="buscarProductoPorModelo(this)"></td>
+                        <!-- AQUI ESTA EL oninput PARA BUSCAR EN TIEMPO REAL -->
+                        <td class="td-web"><input type="text" class="input-web central val-modelo" value="{{ eval.modelo|default_if_none:'' }}" placeholder="Modelo..." oninput="buscarProductoPorModelo(this)"></td>
+                        
                         <td class="td-web"><input type="text" class="input-web val-prod" value="{{ eval.producto|default_if_none:'' }}" placeholder="Producto..."></td>
                         
                         <td class="td-web" style="background-color: #f3f4f6;">
@@ -234,8 +236,9 @@
                             <input type="number" step="0.01" class="input-web derecha val-pcyber" value="{{ eval.precio_cyber|default_if_none:'' }}" placeholder="0.00" style="color: #9a3412; font-weight: bold;" oninput="calcularGanancias(this)">
                         </td>
                         
+                        <!-- AQUI ESTA EL td-costo-container CON EL CAMBIO DE COLOR CELESTE SI ES MANUAL -->
                         <td class="td-web td-costo-container" style="background-color: #dc2626; transition: background-color 0.3s;">
-                            <input type="number" step="0.01" class="input-web derecha val-costo" value="{{ eval.costo_producto|default_if_none:'' }}" placeholder="0.00" style="color: white; font-weight: bold;" oninput="calcularGanancias(this); marcarCostoManual(this);">
+                            <input type="number" step="0.01" class="input-web derecha val-costo" value="{{ eval.costo_producto|default_if_none:'' }}" placeholder="0.00" style="color: white; font-weight: bold;" oninput="marcarCostoManual(this); calcularGanancias(this);">
                         </td>
                         
                         <td class="td-web" style="background-color: #fefce8;">
@@ -413,7 +416,8 @@
                             </select>
                         </td>
                         
-                        <td class="td-web"><input type="text" class="input-web central val-modelo" placeholder="Modelo..." onchange="buscarProductoPorModelo(this)"></td>
+                        <td class="td-web"><input type="text" class="input-web central val-modelo" placeholder="Modelo..." oninput="buscarProductoPorModelo(this)"></td>
+                        
                         <td class="td-web"><input type="text" class="input-web val-prod" placeholder="Producto..."></td>
                         
                         <td class="td-web" style="background-color: #f3f4f6;">
@@ -429,7 +433,7 @@
                         </td>
                         
                         <td class="td-web td-costo-container" style="background-color: #dc2626; transition: background-color 0.3s;">
-                            <input type="number" step="0.01" class="input-web derecha val-costo" placeholder="0.00" style="color: white; font-weight: bold;" oninput="calcularGanancias(this); marcarCostoManual(this);">
+                            <input type="number" step="0.01" class="input-web derecha val-costo" placeholder="0.00" style="color: white; font-weight: bold;" oninput="marcarCostoManual(this); calcularGanancias(this);">
                         </td>
                         
                         <td class="td-web" style="background-color: #fefce8;">
@@ -488,47 +492,51 @@
         });
     });
 
-    // 1. AUTOCOMPLETADO DESDE LA NUEVA API DE COSTOS REFERENCIALES
-    function buscarProductoPorModelo(inputModelo) {
-        const modelo = inputModelo.value.trim();
-        const fila = inputModelo.closest('tr');
-        const inputProducto = fila.querySelector('.val-prod');
-        const inputCosto = fila.querySelector('.val-costo');
-        const tdCosto = fila.querySelector('.td-costo-container');
+    let timeoutBusqueda;
 
-        if (modelo !== '') {
-            // Llama a la nueva API de Costos Referenciales
-            fetch(`{% url 'api_buscar_costo_referencial' %}?modelo=${encodeURIComponent(modelo)}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        // A. Autocompletar el nombre del producto
-                        inputProducto.value = data.producto || "";
-                        inputProducto.style.backgroundColor = "#dcfce3";
-                        setTimeout(() => inputProducto.style.backgroundColor = "transparent", 800);
-                        
-                        // B. Autocompletar el Costo Cero
-                        if(data.costo_cero !== undefined && data.costo_cero !== null) {
-                            inputCosto.value = data.costo_cero;
-                            // Color Rojo Automático (Jalado de BD)
-                            tdCosto.style.backgroundColor = "#dc2626"; 
-                            inputCosto.style.color = "white";
-                            // Forzamos el recalculo matemático
-                            calcularGanancias(inputCosto);
+    function buscarProductoPorModelo(inputModelo) {
+        clearTimeout(timeoutBusqueda); // Limpia el temporizador anterior
+        
+        // Esperamos 300ms después de que dejas de teclear para buscar en la BD
+        timeoutBusqueda = setTimeout(() => {
+            const modelo = inputModelo.value.trim();
+            const fila = inputModelo.closest('tr');
+            const inputProducto = fila.querySelector('.val-prod');
+            const inputCosto = fila.querySelector('.val-costo');
+            const tdCosto = fila.querySelector('.td-costo-container');
+
+            if (modelo !== '') {
+                // LLAMA A LA API (Asegúrate de haber creado esta ruta en urls.py)
+                fetch(`/api/buscar-costo-referencial/?modelo=${encodeURIComponent(modelo)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            
+                            // 1. Completa el producto y le da un destello verde
+                            inputProducto.value = data.producto || "";
+                            inputProducto.style.backgroundColor = "#dcfce3";
+                            setTimeout(() => inputProducto.style.backgroundColor = "transparent", 800);
+                            
+                            // 2. Completa el costo cero, lo pinta rojo y lanza los cálculos
+                            if(data.costo_cero !== undefined && data.costo_cero !== null) {
+                                inputCosto.value = data.costo_cero;
+                                tdCosto.style.backgroundColor = "#dc2626"; // ROJO: Vino de la Base de Datos
+                                inputCosto.style.color = "white";
+                                calcularGanancias(inputCosto);
+                            }
                         }
-                    }
-                })
-                .catch(error => {
-                    console.error("No se pudo conectar con Costos Referenciales:", error);
-                });
-        }
+                    })
+                    .catch(error => {
+                        console.error("Error al buscar en Costos Referenciales:", error);
+                    });
+            }
+        }, 300);
     }
 
-    // 2. FUNCIÓN PARA MARCAR EN CELESTE CUANDO ES MANUAL
+    // PINTA DE CELESTE LA CELDA CUANDO ESCRIBES ALGO MANUALMENTE
     function marcarCostoManual(inputCosto) {
         const tdCosto = inputCosto.closest('.td-costo-container');
-        // Celeste para denotar un ingreso manual (fuera de BD)
-        tdCosto.style.backgroundColor = "#0ea5e9"; 
+        tdCosto.style.backgroundColor = "#0ea5e9"; // CELESTE: Modificado por ti
         inputCosto.style.color = "white";
     }
 
@@ -588,9 +596,12 @@
                 select.removeAttribute('data-selected');
                 select.selectedIndex = 0;
             });
-            // Resetear el color de la celda de costo a Rojo por defecto
+            
+            // Restablece el color de la celda de costo a Rojo por defecto en la nueva fila
             const tdCosto = nuevaFila.querySelector('.td-costo-container');
-            if (tdCosto) { tdCosto.style.backgroundColor = "#dc2626"; }
+            if (tdCosto) { 
+                tdCosto.style.backgroundColor = "#dc2626"; 
+            }
             
             tbody.appendChild(nuevaFila);
         } else {
@@ -607,7 +618,6 @@
             const modelo = fila.querySelector('.val-modelo').value;
             const producto = fila.querySelector('.val-prod').value;
             
-            // Función auxiliar para quitar la "S/" y los "%" y que Python reciba puros números
             const parseSoles = (val) => parseFloat(val.replace('S/ ', '')) || 0;
             const parsePorc = (val) => parseFloat(val.replace('%', '')) || 0;
 
